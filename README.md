@@ -1,4 +1,15 @@
-# Project Micro
+# Project Laundry Management System
+Description: Laundry Management System is a system that helps to manage the laundry process.
+Technology: .NET 9, Entity Framework Core, Docker, Clean Architecture
+1. Setup the project for windows
+   - Download [msys2](https://www.msys2.org/)
+   - Install the following packages:
+     - `pacman -S --needed make`
+   - Add msys2 Path to the environment variable `PATH` in the `C:\msys64\usr\bin`
+2. How to run the project
+   - Open the terminal in the root of the project
+   - Run `make dev`
+   - Run `make run-migration`
 
 ## Overview
 
