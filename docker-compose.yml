@@ -26,7 +26,7 @@ services:
       - "5001:80"
     environment:
       - ENVIRONMENT=${ENVIRONMENT}
-      - ConnectionStrings__DefaultConnection=${AuthDb}
+      - ConnectionStrings__DefaultConnection=${AUTHDB_CONNECTION}
       - Jwt__Key=${Key}
       - Jwt__Issuer=${Issuer}
       - Jwt__Audience=${Audience}
@@ -44,7 +44,7 @@ services:
       - "5002:80"
     environment:
       - ENVIRONMENT=${ENVIRONMENT}
-      - ConnectionStrings__DefaultConnection=${ProductDb}
+      - ConnectionStrings__DefaultConnection=${PRODUCTDB_CONNECTION}
       - Jwt__Key=${Key}
       - Jwt__Issuer=${Issuer}
       - Jwt__Audience=${Audience}
