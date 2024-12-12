@@ -1,0 +1,91 @@
+# .NET build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+/micro-frontend
+
+# Visual Studio files
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.suo
+*.cache
+*.csproj.user
+*.dbmdl
+*.jfm
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*._*
+.DS_Store
+
+# NuGet packages
+*.nupkg
+packages/
+*.nuget.props
+*.nuget.targets
+
+# MSTest test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Visual Studio code coverage results
+*.coverage
+*.coveragexml
+
+# Local development settings
+appsettings.Development.json
+*.Development.json
+
+# Rider
+.idea/
+*.sln.iml
+
+# User-specific files
+*.rsuser
+*.dtbcache.v2
+
+# Redis dump file
+dump.rdb
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
+
+# Build results
+[Dd]ebugPublic/
+[Rr]eleasePublic/
+[Pp]ublish/
+.azure
