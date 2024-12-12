@@ -3,15 +3,17 @@ name: Gemini AI Code Reviewer
 on:
   issue_comment:
     types: [created]
+  push:
+    branches: ["dev"]
+  pull_request:
+    branches: ["dev"]
 
 permissions: write-all
 
 jobs:
   gemini-code-review:
     runs-on: ubuntu-latest
-    if: |
-      github.event.issue.pull_request &&
-      contains(github.event.comment.body, '/gemini-review')
+    if: github.event_name == 'pull_request' || (github.event_name == 'issue_comment' && github.event.issue.pull_request)
     steps:
       - name: PR Info
         run: |
@@ -27,15 +29,20 @@ jobs:
       - name: Get PR Details
         id: pr
         run: |
-          PR_JSON=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.issue.number }})
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+          else
+            PR_NUMBER="${{ github.event.issue.number }}"
+          fi
+          PR_JSON=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER)
           echo "head_sha=$(echo $PR_JSON | jq -r .head.sha)" >> $GITHUB_OUTPUT
           echo "base_sha=$(echo $PR_JSON | jq -r .base.sha)" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: truongnh1992/gemini-ai-code-reviewer@latest
+      - uses: truongnh1992/gemini-ai-code-reviewer@v6.2.0
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: gemini-1.5-pro-002 # Optional, default is `gemini-1.5-flash-002`
+          GEMINI_MODEL: gemini-1.5-flash-002 # Optional, default is `gemini-1.5-flash-002`
           INPUT_EXCLUDE: "*.md,*.txt,package-lock.json,*.yml,*.yaml"
