@@ -39,7 +39,7 @@ public class GetMeQueryHandler : IRequestHandler<GetMeQuery, ApiResponse<GetMeRe
                 Message = "User not found"
             };
         }
-
+        var role = await _userManager.GetRolesAsync(user);
         return new ApiResponse<GetMeResponse>
         {
             Success = true,
@@ -48,7 +48,7 @@ public class GetMeQueryHandler : IRequestHandler<GetMeQuery, ApiResponse<GetMeRe
                 UserId = user.Id,
                 Email = user.Email ?? string.Empty,
                 DisplayName = user.DisplayName ?? string.Empty,
-                Role = userAccess.Role,
+                Role = role.ToArray(),
                 PhoneNumber = user.PhoneNumber ?? string.Empty,
             }
         };

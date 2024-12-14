@@ -7,7 +7,7 @@ else
     echo ".env file not found"
     exit 1
 fi
-
+db=$1
 # Thay thế sqlserver thành localhost trong chuỗi kết nối
 AUTHDB_CONNECTION="${AUTHDB_CONNECTION//sqlserver/localhost}"
 PRODUCTDB_CONNECTION="${PRODUCTDB_CONNECTION//sqlserver/localhost}"
@@ -29,11 +29,15 @@ run_update() {
     fi
 }
 
-# Chạy update cho cả AuthDb và ProductDb
-echo "Updating AuthDb..."
-run_update "AuthDb" "$AUTHDB_CONNECTION" "src/AuthService/AuthService.Infrastructure" "src/AuthService/AuthService.API"
-
-echo "Updating ProductDb..."
-run_update "ProductDb" "$PRODUCTDB_CONNECTION" "src/ProductService/ProductService.Infrastructure" "src/ProductService/ProductService.API"
-
+# Kiểm tra và chạy migration theo tham số
+if [ "$db" == "AuthDb" ]; then
+    echo "Updating AuthDb..."
+    run_update "AuthDb" "$AUTHDB_CONNECTION" "src/AuthService/AuthService.Infrastructure" "src/AuthService/AuthService.API"
+elif [ "$db" == "ProductDb" ]; then
+    echo "Updating ProductDb..."
+    run_update "ProductDb" "$PRODUCTDB_CONNECTION" "src/ProductService/ProductService.Infrastructure" "src/ProductService/ProductService.API"
+else
+    echo "Unknown database: $db"
+    exit 1
+fi
 echo "All updates completed successfully!"

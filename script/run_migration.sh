@@ -1,14 +1,13 @@
 #!/bin/bash
 
-
 # Kiểm tra tham số truyền vào
 if [ -z "$1" ]; then
-    echo "Usage: $0 <AuthDb|ProductDb>"
+    echo "Usage: $0 <AuthDb|ProductDb|\"AuthDb, ProductDb\">"
     exit 1
 fi
 
-db=$1
-
+# The input is expected as separate arguments, so no need to split by commas
+echo "Input databases: $@"
 
 # Lấy ngày tháng năm giờ phút giây hiện tại
 current_datetime=$(date +"%Y%m%d%H%M%S")
@@ -29,12 +28,16 @@ run_migration() {
     fi
 }
 
-# Kiểm tra và chạy migration theo tham số
-if [ "$db" == "AuthDb" ]; then
-    run_migration "AuthDb" "src/AuthService/AuthService.Infrastructure" "src/AuthService/AuthService.API"
-elif [ "$db" == "ProductDb" ]; then
-    run_migration "ProductDb" "src/ProductService/ProductService.Infrastructure" "src/ProductService/ProductService.API"
-else
-    echo "Unknown database: $db"
-    exit 1
-fi
+# Loop through each database and run migration
+for db in "$@"; do
+    db=$(echo "$db" | xargs)  # Trim any leading/trailing spaces
+
+    if [ "$db" == "AuthDb" ]; then
+        run_migration "AuthDb" "src/AuthService/AuthService.Infrastructure" "src/AuthService/AuthService.API"
+    elif [ "$db" == "ProductDb" ]; then
+        run_migration "ProductDb" "src/ProductService/ProductService.Infrastructure" "src/ProductService/ProductService.API"
+    else
+        echo "Unknown database: $db"
+        exit 1
+    fi
+done

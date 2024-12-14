@@ -18,8 +18,8 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, IQuerya
 
     public async Task<IQueryable<Product>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
     {
-        var products = _repository.GetQueryableAsync(cancellationToken);
-        return products;
+        var products = _repository.GetAllAsync(cancellationToken);
+        return products.Result;
     }
 
 

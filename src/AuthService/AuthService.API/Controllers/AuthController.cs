@@ -43,7 +43,7 @@ public class AuthController : ControllerBase
     {
         var result = await _mediator.Send(command);
         if (result.Success)
-            return Ok(result.Value);
+            return Ok(result);
         return BadRequest(result.Message);
     }
 
@@ -52,8 +52,8 @@ public class AuthController : ControllerBase
     {
         var result = await _mediator.Send(command);
         if (result.Success)
-            return Ok(result.Value);
-        return BadRequest(result.Message);
+            return Ok(result);
+        return BadRequest(result);
     }
 
     [HttpGet("me")]
@@ -62,8 +62,8 @@ public class AuthController : ControllerBase
     {
         var result = await _mediator.Send(new GetMeQuery());
         if (result.Success)
-            return Ok(result.Value);
-        return BadRequest(result.Message);
+            return Ok(result);
+        return BadRequest(result);
     }
 
     [HttpPost("refresh-token")]
@@ -72,7 +72,7 @@ public class AuthController : ControllerBase
     {
         var result = await _mediator.Send(query);
         if (result.Success)
-            return Ok(result.Value);
-        return BadRequest(result.Message);
+            return Ok(result);
+        return BadRequest(result);
     }
 }

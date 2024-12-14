@@ -24,8 +24,8 @@ public class ProductsCommandController : ControllerBase
 
         var result = await _mediator.Send(command);
         if (result.Success)
-            return Ok(result.Value);
-        return BadRequest(result.Message);
+            return Ok(result);
+        return BadRequest(result);
     }
 
 }

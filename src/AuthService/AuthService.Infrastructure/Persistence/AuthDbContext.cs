@@ -8,6 +8,7 @@ namespace AuthService.Infrastructure.Persistence;
 
 public class AuthDbContext : IdentityDbContext<User, Role, string>
 {
+    public DbSet<UserActivity> UserActivities { get; set; }
     public AuthDbContext(DbContextOptions<AuthDbContext> options) : base(options) { }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

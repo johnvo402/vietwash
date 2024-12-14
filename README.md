@@ -9,7 +9,7 @@ Technology: .NET 9, Entity Framework Core, Docker, Clean Architecture
 2. How to run the project
    - Open the terminal in the root of the project
    - Run `make dev`
-   - Run `make run-migration`
+   - Run `make update NAME="AuthDb ProductDb`
 
 ## Overview
 

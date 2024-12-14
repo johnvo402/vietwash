@@ -15,10 +15,11 @@ public static class HttpContextExtensions
         {
             UserId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty,
             UserName = context.User.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty,
-            Email = context.User.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty,
-            Role = context.User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty
+            Email = context.User.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty
         };
-
+        var roles = context.User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value)
+            .ToList();
+        userAccess.Role = roles;
         // Get all permission claims
         var permissions = context.User.Claims
             .Where(c => c.Type == "permission")

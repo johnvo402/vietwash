@@ -15,7 +15,7 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
 
     public async Task<ApiResponse<bool>> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
-        var product = await _repository.GetByIdAsync(request.Request.Id, cancellationToken);
+        var product = await _repository.GetByIDAsync(request.Request.Id, cancellationToken);
         if (product == null)
         {
             return new ApiResponse<bool>

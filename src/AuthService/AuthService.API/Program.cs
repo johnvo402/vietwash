@@ -67,7 +67,7 @@ builder.Services.AddCors(options =>
             .WithOrigins(
                 "http://localhost:3000",
                 "https://d3c2-2001-ee0-5305-c4c0-4c04-8d23-43ae-b514.ngrok-free.app"
-                ,"http://localhost:5001", "http://auth-service:5001"
+                , "http://localhost:5001", "http://auth-service:5001"
             ) // Add your ngrok URL
             .AllowAnyMethod()
             .AllowAnyHeader()
@@ -77,7 +77,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 app.UseCors("AllowFrontend");
-
 // Ensure the keys directory exists
 Directory.CreateDirectory(Path.Combine(app.Environment.ContentRootPath, "keys"));
 

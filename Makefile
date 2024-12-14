@@ -3,13 +3,13 @@ SHELL := /bin/bash
 
 # Mục chính để chạy migration
 migration:
-	@echo "Running migration for database: $(NAME)"
-	./script/run_migration.sh $(NAME)
+	@echo "Running migration for database(s): $(NAME)"
+	./script/run_migration.sh $(foreach db,$(NAME),$(db))
 
 # Mục để cập nhật migration (tùy chọn)
 update:
-	@echo "Updating migration..."
-	./script/update-db.sh
+	@echo "Updating migration... $(NAME)"
+	./script/update-db.sh $(NAME)
 
 # Mục để kiểm tra migration status
 status:
