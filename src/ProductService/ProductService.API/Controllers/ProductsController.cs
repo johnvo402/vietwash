@@ -22,7 +22,7 @@ public class ProductsController : ODataController
 
     [HttpGet]
     [EnableQuery]
-    [Authorize]
+    // [Authorize]
     public async Task<IActionResult> GetProducts()
     {
         try

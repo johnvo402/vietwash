@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using ITokenService = AuthService.Application.Interfaces.ITokenService;
 using Micro.Shared.Model;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace AuthService.Application.Commands
@@ -27,7 +28,9 @@ namespace AuthService.Application.Commands
         public async Task<ApiResponse<LoginUserResponse>> Handle(LoginUserCommand request, CancellationToken cancellationToken)
         {
             // Validate user exists
-            var user = await _userManager.FindByEmailAsync(request.Email);
+            var user = await _userManager.Users
+                .Include(u => u.UserActivities)
+                .FirstOrDefaultAsync(u => u.Email == request.Email);
             if (user == null)
             {
                 return new ApiResponse<LoginUserResponse> { Success = false, Message = "Invalid Email" };
@@ -40,7 +43,6 @@ namespace AuthService.Application.Commands
                 return new ApiResponse<LoginUserResponse> { Success = false, Message = "Invalid Password" };
             }
 
-            user.LastLogin = DateTime.UtcNow;
             await _userManager.UpdateAsync(user);
 
             var (accessToken, expiresAt) = _tokenService.GenerateAccessToken(user, roles.ToArray());

@@ -34,7 +34,7 @@ builder.Services.AddControllers()
                                 // Bỏ qua các trường có giá trị null
                                 options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
                             });
-
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSharedSwagger("Product Service API");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

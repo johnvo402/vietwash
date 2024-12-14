@@ -1,21 +1,21 @@
 using System.ComponentModel.DataAnnotations;
+using Micro.Shared.Common;
 
 namespace ProductService.Domain.Entities;
 
-public class Product
+public class Product : BaseAuditableEntity<Guid>
 {
-    [Key]
-    public Guid Id { get; private set; }
     public string Name { get; set; }
     public decimal Price { get; set; }
     public int StockQuantity { get; set; }
-
-    public Product(string name, decimal price, int stockQuantity)
+    public Product() { }
+    public Product(string name, decimal price, int stockQuantity, string createdBy)
     {
         Id = Guid.NewGuid();
         Name = name;
         Price = price;
         StockQuantity = stockQuantity;
+        CreatedBy = createdBy;
     }
 
     public void UpdateStock(int quantity)

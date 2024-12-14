@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using Micro.Shared.Queries;
 
 namespace Micro.Shared.Model;
 

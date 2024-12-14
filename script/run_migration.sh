@@ -1,28 +1,43 @@
 #!/bin/bash
 
-# Gán giá trị chuỗi kết nối cho các biến môi trường
-AuthDb="Server=localhost,1433;Database=AuthDb;User Id=sa;Password=Admin@1234;TrustServerCertificate=True;"
-ProductDb="Server=localhost,1433;Database=ProductDb;User Id=sa;Password=Admin@1234;TrustServerCertificate=True;"
-
-
-# Chạy migration cho AuthDb
-echo "Running migration for AuthDb"
-dotnet ef database update --project src/AuthService/AuthService.Infrastructure --startup-project src/AuthService/AuthService.API --connection "$AuthDb"
-# Kiểm tra kết quả
-if [ $? -eq 0 ]; then
-    echo "Migration for AuthDb completed successfully."
-else
-    echo "Migration for AuthDb failed."
+# Kiểm tra tham số truyền vào
+if [ -z "$1" ]; then
+    echo "Usage: $0 <AuthDb|ProductDb|\"AuthDb, ProductDb\">"
     exit 1
 fi
 
-# Chạy migration cho ProductDb
-echo "Running migration for ProductDb"
-dotnet ef database update --project src/ProductService/ProductService.Infrastructure --startup-project src/ProductService/ProductService.API --connection "$ProductDb"
-# Kiểm tra kết quả
-if [ $? -eq 0 ]; then
-    echo "Migration for ProductDb completed successfully."
-else
-    echo "Migration for ProductDb failed."
-    exit 1
-fi
+# The input is expected as separate arguments, so no need to split by commas
+echo "Input databases: $@"
+
+# Lấy ngày tháng năm giờ phút giây hiện tại
+current_datetime=$(date +"%Y%m%d%H%M%S")
+
+# Hàm chạy migration
+run_migration() {
+    local db_name=$1
+    local project_path=$2
+    local api_path=$3
+
+    echo "Running migration for $db_name"
+    dotnet ef migrations add "${current_datetime}_${db_name}_Migration" --project "$project_path" --startup-project "$api_path"
+    if [ $? -eq 0 ]; then
+        echo "Migration for $db_name completed successfully."
+    else
+        echo "Migration for $db_name failed."
+        exit 1
+    fi
+}
+
+# Loop through each database and run migration
+for db in "$@"; do
+    db=$(echo "$db" | xargs)  # Trim any leading/trailing spaces
+
+    if [ "$db" == "AuthDb" ]; then
+        run_migration "AuthDb" "src/AuthService/AuthService.Infrastructure" "src/AuthService/AuthService.API"
+    elif [ "$db" == "ProductDb" ]; then
+        run_migration "ProductDb" "src/ProductService/ProductService.Infrastructure" "src/ProductService/ProductService.API"
+    else
+        echo "Unknown database: $db"
+        exit 1
+    fi
+done

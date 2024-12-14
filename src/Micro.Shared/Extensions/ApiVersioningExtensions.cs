@@ -11,14 +11,13 @@ public static class ApiVersioningExtensions
     {
         services.AddApiVersioning(options =>
         {
-            // Đặt mặc định version cho API
+            // version default
             options.AssumeDefaultVersionWhenUnspecified = true;
             options.DefaultApiVersion = ApiVersion.Parse("1.0");
 
-            // Cho phép hỗ trợ truy cập qua nhiều version
+            // check version from client
             options.ApiVersionReader = new HeaderApiVersionReader("X-API-Version");
 
-            // Dễ dàng kiểm tra phiên bản trong lỗi
             options.ReportApiVersions = true;
         });
 
