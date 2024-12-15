@@ -2,6 +2,7 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.DependencyInjection;
+using ProductService.API.Extensions;
 using StackExchange.Redis;
 using Yarp.ReverseProxy.Transforms;
 
@@ -30,15 +31,13 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins(
                 "http://localhost:3000",
-                "https://d3c2-2001-ee0-5305-c4c0-4c04-8d23-43ae-b514.ngrok-free.app",
                 "http://localhost:5000", "http://gateway-api:5000"
             ) // Add your ngrok URL
             .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
+            .AllowAnyHeader();
     });
 });
-
+builder.Services.AddDataProtectionConfig(builder.Configuration);
 var app = builder.Build();
 app.UseCors("AllowFrontend");
 

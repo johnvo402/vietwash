@@ -1,0 +1,35 @@
+# yaml refs
+x-refs:
+  common_config: &common_config
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+
+services:
+  auth-service:
+    <<: *common_config
+    image: auth-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+    build:
+      context: .
+      dockerfile: ./src/AuthService/Dockerfile
+  product-service:
+    <<: *common_config
+    image: product-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+    build:
+      context: .
+      dockerfile: ./src/ProductService/Dockerfile
+  gateway:
+    <<: *common_config
+    image: gateway
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+    build:
+      context: .
+      dockerfile: ./src/ApiGateway/Dockerfile
+
+  

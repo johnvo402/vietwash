@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  sqlserver:
+    ports:
+      - "1433:1433"
+    volumes:
+      - ./.pgdump:/backup:ro
+  redis:
+    ports:
+      - "6379:6379"
+
+  auth-service:
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    volumes:
+      - ./src/AuthService:/app/AuthService
+      - ./src/Micro.Shared:/app/Micro.Shared
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    working_dir: /app/AuthService/AuthService.API
+    command: ["dotnet", "watch", "run", "--urls", "http://0.0.0.0:8080"]
+    restart: always
+
+  product-service:
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    volumes:
+      - ./src/ProductService:/app/ProductService
+      - ./src/Micro.Shared:/app/Micro.Shared
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    working_dir: /app/ProductService/ProductService.API
+    command: ["dotnet", "watch", "run", "--urls", "http://0.0.0.0:8080"]
+    restart: always
+
+  gateway:
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    volumes:
+      - ./src/ApiGateway:/app/ApiGateway
+      - ./src/Micro.Shared:/app/Micro.Shared
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    working_dir: /app/ApiGateway
+    command: ["dotnet", "watch", "run", "--urls", "http://0.0.0.0:8080"]
+    restart: always
+
+  # dotnet ef database update --project src/AuthService/AuthService.Infrastructure --startup-project src/AuthService/AuthService.API
+  # dotnet ef database update --project src/ProductService/ProductService.Infrastructure --startup-project src/ProductService/ProductService.API

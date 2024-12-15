@@ -3,24 +3,14 @@ using AuthService.Application.Interfaces;
 using AuthService.Domain.Entities;
 using AuthService.Infrastructure.Persistence;
 using AuthService.Infrastructure.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Micro.Shared.Extensions;
 using ProductService.API.Extensions;
-using Microsoft.AspNetCore.DataProtection;
-using System.IO;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add data protection configuration
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "keys")))
-    .SetApplicationName("AuthService");
 
 // Add services to the container.
 // builder.Services.AddOpenApi();
@@ -59,29 +49,11 @@ builder.Services.AddScoped<ITokenService, TokenService>(sp =>
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddApiVersioningConfig();
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend", policy =>
-    {
-        policy
-            .WithOrigins(
-                "http://localhost:3000",
-                "https://d3c2-2001-ee0-5305-c4c0-4c04-8d23-43ae-b514.ngrok-free.app"
-                , "http://localhost:5001", "http://auth-service:5001"
-            ) // Add your ngrok URL
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
-    });
-});
-
+builder.Services.AddDataProtectionConfig(builder.Configuration);
 var app = builder.Build();
-app.UseCors("AllowFrontend");
-// Ensure the keys directory exists
-Directory.CreateDirectory(Path.Combine(app.Environment.ContentRootPath, "keys"));
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Staging"))
 {
     app.UseSharedSwagger();
 }

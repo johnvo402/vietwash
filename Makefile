@@ -1,15 +1,28 @@
 # Định nghĩa các biến môi trường từ tệp .env (nếu có)
 SHELL := /bin/bash
+# .EXPORT_ALL_VARIABLES:
 
+# # REGISTRY ?= johnvo402
+# # PROJECT ?= $(shell basename $(PWD))
+# VERSION ?= $(shell date +"%Y%m%d")
+# TAG ?= $(shell ./scripts/get-version.sh)
+# GIT_COMMIT ?= $(shell git rev-parse HEAD)
+# GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
+# ENV_FILE ?= .env
+# args=$(filter-out $@,$(MAKECMDGOALS))
+
+# # export .env file
+# -include $(ENV_FILE)
+# export
 # Mục chính để chạy migration
 migration:
 	@echo "Running migration for database(s): $(NAME)"
-	./script/run_migration.sh $(foreach db,$(NAME),$(db))
+	./scripts/run_migration.sh $(foreach db,$(NAME),$(db))
 
 # Mục để cập nhật migration (tùy chọn)
 update:
 	@echo "Updating migration... $(NAME)"
-	./script/update-db.sh $(NAME)
+	./scripts/update-db.sh $(foreach db,$(NAME),$(db))
 
 # Mục để kiểm tra migration status
 status:
@@ -18,9 +31,13 @@ status:
 
 # Mục để chạy Docker container cho môi trường phát triển
 dev:
-	@echo "Starting Docker containers..."
-	docker-compose up -d
+	docker-compose -f docker-compose.yaml -f docker-compose.sql.yaml -f docker-compose.dev.yaml up -d ${SERVICE}
 
+dev-build:
+	docker-compose -f docker-compose.yaml -f docker-compose.sql.yaml -f docker-compose.dev.yaml up -d --build ${SERVICE}
+
+staging:
+	docker-compose -f docker-compose.yaml -f docker-compose.sql.yaml -f docker-compose.staging.yaml up -d --build ${SERVICE}
 # Mục để tắt Docker container và xóa volume
 clean:
 	@echo "Stopping Docker containers and removing volumes..."
@@ -29,7 +46,7 @@ clean:
 # Mục để chỉ tắt Docker container mà không xóa volume
 down:
 	@echo "Stopping Docker containers..."
-	docker-compose down
+	docker-compose -f docker-compose.yaml -f docker-compose.sql.yaml -f docker-compose.dev.yaml down
 
 # Mục mục tiêu mặc định
 all: help
