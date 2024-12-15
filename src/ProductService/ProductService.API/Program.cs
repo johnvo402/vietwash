@@ -43,21 +43,11 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddApiVersioningConfig();
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowSpecificOrigins", policy =>
-    {
-        policy.WithOrigins("http://localhost:5002", "http://product-service:5002") // Cho phép các domain cụ thể
-              .AllowAnyMethod() // Cho phép tất cả các phương thức (GET, POST, PUT, DELETE...)
-              .AllowAnyHeader() // Cho phép tất cả các headers
-              .AllowCredentials(); // Cho phép gửi cookies (nếu cần)
-    });
-});
+builder.Services.AddDataProtectionConfig(builder.Configuration);
 var app = builder.Build();
-app.UseCors("AllowSpecificOrigins");
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Staging"))
 {
     app.UseSharedSwagger();
 }

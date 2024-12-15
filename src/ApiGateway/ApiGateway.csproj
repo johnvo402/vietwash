@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-   
+    <ProjectReference Include="..\Micro.Shared\Micro.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

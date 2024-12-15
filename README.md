@@ -8,8 +8,13 @@ Technology: .NET 9, Entity Framework Core, Docker, Clean Architecture
    - Add msys2 Path to the environment variable `PATH` in the `C:\msys64\usr\bin`
 2. How to run the project
    - Open the terminal in the root of the project
-   - Run `make dev`
+   - Run `make dev SERVICE="sqlserver"`
    - Run `make update NAME="AuthDb ProductDb`
+   - Run `make dev SERVICE="auth-service product-service gateway redis"`
+   - Run with staging environment
+   - Run `make staging SERVICE="auth-service product-service gateway redis sqlserver"`
+   - Run `make update NAME="AuthDb ProductDb`
+
 
 ## Overview
 
