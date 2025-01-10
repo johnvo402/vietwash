@@ -23,8 +23,6 @@ public class DapperQueryBuilder : IDapperQueryBuilder
         var tableName = ToSnakeCase(type.Name);
         PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
         var simpleProperties = properties.Where(p => !typeof(System.Collections.IEnumerable).IsAssignableFrom(p.PropertyType)
-                                                        && p.PropertyType != typeof(string)
-                                                        && p.PropertyType.IsPrimitive
                                                         || p.PropertyType == typeof(string)
                                                         || p.PropertyType == typeof(Guid));
         var fields = defaultFields == "*"
