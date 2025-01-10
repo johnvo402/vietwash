@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Dapper;
@@ -18,10 +19,16 @@ public class DapperQueryBuilder : IDapperQueryBuilder
     out DynamicParameters dapperParameters,
     string defaultFields = "*", string customQuery = "")
     {
-        var tableName = ToSnakeCase(typeof(T).Name);
-
+        Type type = typeof(T);
+        var tableName = ToSnakeCase(type.Name);
+        PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        var simpleProperties = properties.Where(p => !typeof(System.Collections.IEnumerable).IsAssignableFrom(p.PropertyType)
+                                                        && p.PropertyType != typeof(string)
+                                                        && p.PropertyType.IsPrimitive
+                                                        || p.PropertyType == typeof(string)
+                                                        || p.PropertyType == typeof(Guid));
         var fields = defaultFields == "*"
-            ? "*"
+            ? string.Join(", ", simpleProperties.Select(p => $"[{ToSnakeCase(p.Name)}]"))
             : string.Join(", ", defaultFields.Split(',').Select(f => ToSnakeCase(f.Trim())));
 
         var queryBuilder = new StringBuilder($"SELECT {fields} FROM [{tableName}]");
