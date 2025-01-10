@@ -50,7 +50,18 @@ down:
 stop:
 	@echo "Stopping Docker containers..."
 	docker-compose -f docker-compose.yaml -f docker-compose.sql.yaml -f docker-compose.dev.yaml stop
+.PHONY: backup
 
+backup: 
+	@echo "Backup database..."
+	./scripts/backup.sh backup
+.PHONY: restore
+restore: 
+	./scripts/backup.sh restore
+
+.PHONY: sql
+sql:
+	./scripts/backup.sh sql
 # Mục mục tiêu mặc định
 all: help
 

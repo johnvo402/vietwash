@@ -71,6 +71,8 @@ appsettings.Development.json
 # Redis dump file
 dump.rdb
 
+backup/
+
 # Environment files
 .env
 .env.local
