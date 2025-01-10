@@ -1,37 +1,71 @@
-using AuthService.Domain.Entities;
-using Micro.Shared.Data;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+
+using System.Text;
+using AuthService.Domain.Permissions;
+using AuthService.Domain.RolePermissions;
+using AuthService.Domain.Roles;
+using AuthService.Domain.UserActivities;
+using AuthService.Domain.UserRoles;
+using AuthService.Domain.Users.Entity;
+using Micro.Shared.Infrastructure.Policies;
+using Micro.Shared.QueryServices;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthService.Infrastructure.Persistence;
 
-public class AuthDbContext : IdentityDbContext<User, Role, string>
+public class AuthDbContext : DbContext
 {
-    public DbSet<UserActivity> UserActivities { get; set; }
-    public AuthDbContext(DbContextOptions<AuthDbContext> options) : base(options) { }
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public DbSet<UserActivity> UserActivities => Set<UserActivity>();
+
+    public DbSet<User> User => Set<User>();
+    public DbSet<Role> Role => Set<Role>();
+    public DbSet<UserRole> UserRole => Set<UserRole>();
+    public DbSet<Permission> Permission => Set<Permission>();
+    public DbSet<RolePermission> RolePermission => Set<RolePermission>();
+
+
+    public AuthDbContext(DbContextOptions<AuthDbContext> options)
+        : base(options)
     {
-        base.OnModelCreating(modelBuilder);
-
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-        {
-            var tableName = entityType.GetTableName();
-            if (tableName.StartsWith("AspNet"))
-            {
-                entityType.SetTableName(tableName.Substring(6));
-            }
-        }
-        // var rolenames = typeof(RoleName).GetFields().ToList();
-        // foreach (var r in rolenames)
-        // {
-        //     if (r.Name == "DefaultRole") continue;
-        //     var rolename = (string)r.GetRawConstantValue();
-
-        //     IdentityRole role = new IdentityRole(rolename);
-        //     modelBuilder.Entity<IdentityRole>().HasData(role);
-        // }
 
     }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AuthDbContext).Assembly);
+
+        base.OnModelCreating(modelBuilder);
+        foreach (var entity in modelBuilder.Model.GetEntityTypes())
+        {
+            var tableName = entity.GetTableName();
+            if (tableName is not null)
+            {
+                entity.SetTableName(DapperQueryBuilder.ToSnakeCase(tableName));
+            }
+
+            foreach (var property in entity.GetProperties())
+            {
+                property.SetColumnName(DapperQueryBuilder.ToSnakeCase(property.Name));
+            }
+
+            foreach (var key in entity.GetKeys())
+            {
+                var keyName = key.GetName();
+                if (keyName is not null)
+                {
+                    key.SetName(DapperQueryBuilder.ToSnakeCase(keyName));
+                }
+            }
+
+            foreach (var index in entity.GetIndexes())
+            {
+                if (index.Name is not null)
+                {
+                    index.SetDatabaseName(DapperQueryBuilder.ToSnakeCase(index.Name));
+                }
+            }
+        }
+
+    }
+
 
 }

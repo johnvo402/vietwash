@@ -1,13 +1,9 @@
-version: "3.8"
-
 services:
   auth-service:
     container_name: auth-service
     image: auth-service
     ports:
-      - "5001:8080"
-    volumes:
-      - ./src/AuthService/AuthService.API/keys:/app/AuthService/AuthService.API/keys
+      - "8080"
     environment:
       - Jwt__Key=${JWT_KEY}
       - Jwt__Issuer=${JWT_ISSUER}
@@ -18,7 +14,7 @@ services:
     container_name: product-service
     image: product-service
     ports:
-      - "5002:8080"
+      - "8080"
     environment:
       - Jwt__Key=${JWT_KEY}
       - Jwt__Issuer=${JWT_ISSUER}
@@ -29,7 +25,7 @@ services:
     container_name: gateway
     image: gateway
     ports:
-      - "5000:8080"
+      - "8080"
     restart: always
 volumes:
   db_data:

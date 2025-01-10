@@ -41,12 +41,15 @@ staging:
 # Mục để tắt Docker container và xóa volume
 clean:
 	@echo "Stopping Docker containers and removing volumes..."
-	docker-compose down -v
+	docker-compose -f docker-compose.yaml -f docker-compose.sql.yaml -f docker-compose.dev.yaml down --remove-orphans -v
 
 # Mục để chỉ tắt Docker container mà không xóa volume
 down:
 	@echo "Stopping Docker containers..."
 	docker-compose -f docker-compose.yaml -f docker-compose.sql.yaml -f docker-compose.dev.yaml down
+stop:
+	@echo "Stopping Docker containers..."
+	docker-compose -f docker-compose.yaml -f docker-compose.sql.yaml -f docker-compose.dev.yaml stop
 
 # Mục mục tiêu mặc định
 all: help

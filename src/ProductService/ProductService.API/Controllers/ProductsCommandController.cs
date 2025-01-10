@@ -6,7 +6,7 @@ using ProductService.Application.Commands;
 
 namespace ProductService.API.Controllers;
 [ApiVersion("1.0")]
-[Route("api/v{version:apiVersion}/products")]
+[Route("api/v1/products")]
 [ApiController]
 public class ProductsCommandController : ControllerBase
 {

@@ -1,17 +1,18 @@
 using System.ComponentModel.DataAnnotations;
-using Micro.Shared.Common;
+using Micro.Shared.Domain;
 
 namespace ProductService.Domain.Entities;
 
-public class Product : BaseAuditableEntity<Guid>
+public class Product : BaseAuditableEntity
 {
     public string Name { get; set; }
     public decimal Price { get; set; }
     public int StockQuantity { get; set; }
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     public Product() { }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     public Product(string name, decimal price, int stockQuantity, string createdBy)
     {
-        Id = Guid.NewGuid();
         Name = name;
         Price = price;
         StockQuantity = stockQuantity;

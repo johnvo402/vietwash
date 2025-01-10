@@ -11,11 +11,8 @@ public static class ApiVersioningExtensions
     {
         services.AddApiVersioning(options =>
         {
-            // version default
             options.AssumeDefaultVersionWhenUnspecified = true;
             options.DefaultApiVersion = ApiVersion.Parse("1.0");
-
-            // check version from client
             options.ApiVersionReader = new HeaderApiVersionReader("X-API-Version");
 
             options.ReportApiVersions = true;

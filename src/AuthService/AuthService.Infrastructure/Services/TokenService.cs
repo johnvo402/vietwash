@@ -3,72 +3,60 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using AuthService.Application.Interfaces;
-using AuthService.Domain.Entities;
+using AuthService.Domain.ValueObjects;
+using Micro.Shared.Infrastructure.Security.JwtToken;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace AuthService.Infrastructure.Services;
 
-public class TokenService : ITokenService
+public class TokenHelper(IOptions<JwtSettings> jwtOptions) : ITokenHelper
 {
-    private readonly UserManager<User> _userManager;
-    private readonly IConfiguration _configuration;
+    private readonly JwtSettings _jwtSettings = jwtOptions.Value;
 
-    public TokenService(
-        UserManager<User> userManager,
-        IConfiguration configuration)
-    {
-        _userManager = userManager;
-        _configuration = configuration;
-    }
 
-    public (string accessToken, DateTime expiresAt) GenerateAccessToken(User user, string[] roles)
+    public (string accessToken, string time) GenerateAccessToken(
+        string id,
+        string displayName,
+        string email,
+        List<string> permissions,
+        List<string> roles,
+        string OrgId)
     {
-        if (user == null)
-            throw new ArgumentNullException(nameof(user), "User cannot be null");
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Name, user.UserName ?? string.Empty),
-            new Claim(ClaimTypes.Email, user.Email ?? string.Empty)
+            new(JwtRegisteredClaimNames.Name, displayName),
+            new(JwtRegisteredClaimNames.Email, email),
+            new("id", id),
+            new("org_id", OrgId)
         };
-
-        foreach (var role in roles)
-        {
-            claims.Add(new Claim(ClaimTypes.Role, role));
-        }
-
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ??
-            throw new InvalidOperationException("JWT Key is not configured")));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
+        roles.ForEach(role => claims.Add(new("roles", role.ToString())));
+        permissions.ForEach(permission => claims.Add(new("permissions", permission)));
+        var expires = DateTime.UtcNow.AddMinutes(_jwtSettings.TokenExpirationInMinutes);
         var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer is not configured"),
-            audience: _configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT Audience is not configured"),
-            claims: claims,
-            expires: DateTime.Now.AddMinutes(10),
-            signingCredentials: credentials
-        );
+            _jwtSettings.Issuer,
+            _jwtSettings.Audience,
+            claims,
+            expires: expires,
+            signingCredentials: credentials);
 
-        return (new JwtSecurityTokenHandler().WriteToken(token), DateTime.Now.AddMinutes(10));
+        return (new JwtSecurityTokenHandler().WriteToken(token), expires.ToString());
     }
 
-    public async Task<string> GenerateRefreshToken()
+    public string GenerateRefreshToken()
     {
-
-
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ??
-            throw new InvalidOperationException("JWT Key is not configured")));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
         var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer is not configured"),
-            audience: _configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT Audience is not configured"),
-            expires: DateTime.Now.AddMinutes(15),
-            signingCredentials: credentials
-        );
+            _jwtSettings.Issuer,
+            _jwtSettings.Audience,
+            expires: DateTime.Now.AddMinutes(_jwtSettings.TokenExpirationInMinutes),
+            signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
@@ -76,8 +64,7 @@ public class TokenService : ITokenService
     public bool ValidateAccessToken(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ??
-            throw new InvalidOperationException("JWT Key is not configured"));
+        var key = Encoding.UTF8.GetBytes(_jwtSettings.Secret);
 
         try
         {
@@ -87,8 +74,8 @@ public class TokenService : ITokenService
                 IssuerSigningKey = new SymmetricSecurityKey(key),
                 ValidateIssuer = true,
                 ValidateAudience = true,
-                ValidIssuer = _configuration["Jwt:Issuer"],
-                ValidAudience = _configuration["Jwt:Audience"],
+                ValidIssuer = _jwtSettings.Issuer,
+                ValidAudience = _jwtSettings.Audience,
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero
             }, out SecurityToken validatedToken);
@@ -104,14 +91,4 @@ public class TokenService : ITokenService
             return false;
         }
     }
-
-    public async Task<bool> RevokeRefreshToken(string userId)
-    {
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user == null) return false;
-
-        var result = await _userManager.UpdateAsync(user);
-        return result.Succeeded;
-    }
-
 }

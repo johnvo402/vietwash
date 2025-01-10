@@ -1,47 +1,101 @@
-version: "3.8"
-
 services:
   sqlserver:
     ports:
       - "1433:1433"
     volumes:
-      - ./.pgdump:/backup:ro
+      - ./backup:/backup:ro
   redis:
     ports:
       - "6379:6379"
 
   auth-service:
     image: mcr.microsoft.com/dotnet/sdk:9.0
+    ports:
+      - "5001:8080"
     volumes:
-      - ./src/AuthService:/app/AuthService
-      - ./src/Micro.Shared:/app/Micro.Shared
+      - ./src/AuthService:/app/AuthService:ro
+      - ./src/Micro.Shared:/app/Micro.Shared:ro
+      - nuget_cache:/root/.nuget/packages:cached
+      - /app/Micro.Shared/bin/
+      - /app/Micro.Shared/obj/
+      - /app/AuthService/AuthService.API/bin/
+      - /app/AuthService/AuthService.API/obj/
+      - /app/AuthService/AuthService.Infrastructure/bin/
+      - /app/AuthService/AuthService.Infrastructure/obj/
+      - /app/AuthService/AuthService.Domain/bin/
+      - /app/AuthService/AuthService.Domain/obj/
+      - /app/AuthService/AuthService.Application/bin/
+      - /app/AuthService/AuthService.Application/obj/
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     working_dir: /app/AuthService/AuthService.API
-    command: ["dotnet", "watch", "run", "--urls", "http://0.0.0.0:8080"]
+    command:
+      [
+        "dotnet",
+        "watch",
+        "run",
+        "--urls",
+        "http://0.0.0.0:8080",
+        "--no-hot-reload",
+      ]
     restart: always
 
   product-service:
     image: mcr.microsoft.com/dotnet/sdk:9.0
+    ports:
+      - "5002:8080"
     volumes:
-      - ./src/ProductService:/app/ProductService
-      - ./src/Micro.Shared:/app/Micro.Shared
+      - ./src/ProductService:/app/ProductService:ro
+      - ./src/Micro.Shared:/app/Micro.Shared:ro
+      - nuget_cache:/root/.nuget/packages:cached
+      - /app/Micro.Shared/bin/
+      - /app/Micro.Shared/obj/
+      - /app/ProductService/ProductService.API/bin/
+      - /app/ProductService/ProductService.API/obj/
+      - /app/ProductService/ProductService.Infrastructure/bin/
+      - /app/ProductService/ProductService.Infrastructure/obj/
+      - /app/ProductService/ProductService.Domain/bin/
+      - /app/ProductService/ProductService.Domain/obj/
+      - /app/ProductService/ProductService.Application/bin/
+      - /app/ProductService/ProductService.Application/obj/
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     working_dir: /app/ProductService/ProductService.API
-    command: ["dotnet", "watch", "run", "--urls", "http://0.0.0.0:8080"]
+    command:
+      [
+        "dotnet",
+        "watch",
+        "run",
+        "--urls",
+        "http://0.0.0.0:8080",
+        "--no-hot-reload",
+      ]
     restart: always
 
   gateway:
     image: mcr.microsoft.com/dotnet/sdk:9.0
+    ports:
+      - "5000:8080"
     volumes:
-      - ./src/ApiGateway:/app/ApiGateway
-      - ./src/Micro.Shared:/app/Micro.Shared
+      - ./src/ApiGateway:/app/ApiGateway:ro
+      - ./src/Micro.Shared:/app/Micro.Shared:ro
+      - nuget_cache:/root/.nuget/packages:cached
+      - /app/Micro.Shared/bin/
+      - /app/Micro.Shared/obj/
+      - /app/ApiGateway/bin/
+      - /app/ApiGateway/obj/
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     working_dir: /app/ApiGateway
-    command: ["dotnet", "watch", "run", "--urls", "http://0.0.0.0:8080"]
+    command:
+      [
+        "dotnet",
+        "watch",
+        "run",
+        "--urls",
+        "http://0.0.0.0:8080",
+        "--no-hot-reload",
+      ]
     restart: always
-
-  # dotnet ef database update --project src/AuthService/AuthService.Infrastructure --startup-project src/AuthService/AuthService.API
-  # dotnet ef database update --project src/ProductService/ProductService.Infrastructure --startup-project src/ProductService/ProductService.API
+volumes:
+  nuget_cache:

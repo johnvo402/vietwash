@@ -1,19 +1,33 @@
+using System.Data;
+using Dapper;
+using Micro.Shared.Domain;
+using Micro.Shared.Infrastructure.Policies;
+using Micro.Shared.Model;
+using Micro.Shared.QueryServices;
 using Microsoft.EntityFrameworkCore;
 
 namespace Micro.Shared.Repository;
 
 public abstract class Repository<TContext, TEntity, TKey> : IRepository<TEntity, TKey>
        where TContext : DbContext
-       where TEntity : class, new()
+       where TEntity : class
        where TKey : IEquatable<TKey>
 {
     protected readonly TContext _context;
+    protected readonly IDbConnection _dbConnection;
     protected DbSet<TEntity> DbSet { get; }
+    private readonly IDapperQueryBuilder _dapperQueryBuilder;
 
-    public Repository(TContext context)
+    public Repository(TContext context, IDbConnection dbConnection, IDapperQueryBuilder dapperQueryBuilder)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         DbSet = context.Set<TEntity>();
+        _dbConnection = dbConnection;
+        _dapperQueryBuilder = dapperQueryBuilder;
+        Dapper.SqlMapper.SetTypeMap(
+           typeof(TContext),
+           new SnakeCaseTypeMap(typeof(TContext))
+       );
     }
 
     /// <inheritdoc/>
@@ -28,13 +42,16 @@ public abstract class Repository<TContext, TEntity, TKey> : IRepository<TEntity,
     public TEntity? GetByID(TKey id) => DbSet.Find(id);
 
     /// <inheritdoc/>
-    public IQueryable<TEntity> GetAll() => DbSet;
+    public IQueryable<TEntity> GetAll() => DbSet.AsNoTracking().AsQueryable();
 
     /// <inheritdoc/>
-    public async Task<IQueryable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> GetAllAsync(QueryParameters? param)
     {
-        await Task.CompletedTask; // Placeholder for consistency
-        return DbSet;
+        string query = await _dapperQueryBuilder.BuildQuery<TEntity>(param, out DynamicParameters dapperParams);
+
+        var data = await _dbConnection.QueryAsync<TEntity>(query, dapperParams);
+        Console.WriteLine("log: info, created_at: " + DateTimeOffset.UtcNow + ", query: " + query);
+        return data;
     }
 
     /// <inheritdoc/>
@@ -65,8 +82,14 @@ public abstract class Repository<TContext, TEntity, TKey> : IRepository<TEntity,
     }
 
     /// <inheritdoc/>
-    public async ValueTask<TEntity?> GetByIDAsync(TKey id, CancellationToken cancellationToken = default) =>
-        await DbSet.FindAsync(new object[] { id }, cancellationToken);
+    public async ValueTask<TEntity?> GetByIDAsync(TKey id)
+    {
+        var request = new QueryParameters { Where = $"Id = '{id}'" };
+        string query = await _dapperQueryBuilder.BuildQuery<TEntity>(request, out DynamicParameters dapperParams);
+        Console.WriteLine("log: info, created_at: " + DateTimeOffset.UtcNow + ", query: " + query);
+        var data = await _dbConnection.QueryFirstOrDefaultAsync<TEntity>(query, dapperParams);
+        return data;
+    }
 
     /// <inheritdoc/>
     public async ValueTask<bool> UpdateAsync(TEntity t, CancellationToken cancellationToken = default)
@@ -138,4 +161,33 @@ public abstract class Repository<TContext, TEntity, TKey> : IRepository<TEntity,
 
         return totalRowsAffected;
     }
+
+    /// <inheritdoc/>
+    public async Task<int> BulkUpdateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+    {
+        if (entities == null) throw new ArgumentNullException(nameof(entities));
+
+        const int chunkSize = 150;
+        var entitiesList = entities.ToList();
+        var totalRowsAffected = 0;
+
+        if (entitiesList.Count > 300)
+        {
+
+            var entityChunk = entitiesList.Chunk(chunkSize).ToList();
+            foreach (var chunk in entityChunk)
+            {
+                DbSet.UpdateRange(chunk);
+                totalRowsAffected += await _context.SaveChangesAsync(cancellationToken);
+            }
+        }
+        else
+        {
+            DbSet.UpdateRange(entitiesList);
+            totalRowsAffected = await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        return totalRowsAffected;
+    }
+
 }
