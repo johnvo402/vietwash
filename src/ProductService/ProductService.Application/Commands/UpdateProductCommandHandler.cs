@@ -15,7 +15,7 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
 
     public async Task<ApiResponse<bool>> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
-        var product = await _repository.GetByIDAsync(request.Request.Id, cancellationToken);
+        var product = await _repository.GetByIDAsync(request.Request.Id);
         if (product == null)
         {
             return new ApiResponse<bool>
@@ -24,9 +24,9 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
                 Message = "Product not found",
             };
         }
-        product.Name = request.Request.Object.Name;
-        product.Price = request.Request.Object.Price;
-        product.StockQuantity = request.Request.Object.StockQuantity;
+        product.Name = request?.Request?.Object?.Name ?? "";
+        product.Price = request?.Request?.Object?.Price ?? 0;
+        product.StockQuantity = request?.Request?.Object?.StockQuantity ?? 0;
         var result = await _repository.UpdateAsync(product, cancellationToken);
         if (!result)
         {

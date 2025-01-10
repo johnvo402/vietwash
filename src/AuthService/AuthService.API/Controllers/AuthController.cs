@@ -1,78 +1,82 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using AuthService.Application.Commands;
-using AuthService.Application.Queries;
+using AuthService.Application.Auth.Commands.Login;
 using Microsoft.AspNetCore.Authorization;
-using AuthService.Domain.Entities;
-using Microsoft.AspNetCore.Identity;
-using Micro.Shared.Data;
+using AuthService.Application.Auth.Queries.GetMe;
+using AuthService.Application.Auth.Commands.RefreshToken;
+using AuthService.Application.Interfaces;
+using AuthService.Domain.Roles;
+using AuthService.Domain.ValueObjects;
+
 
 namespace AuthService.API.Controllers;
 
 [ApiVersion("1.0")]
-[Route("api/v{version:apiVersion}/auth")]
-[ApiController]
-public class AuthController : ControllerBase
+[Route("auth/api/v1/auth")]
+
+public class AuthController(ISender _mediator, IRoleRepo _roleManager) : ApiController
 {
-    private readonly IMediator _mediator;
-    private readonly RoleManager<Role> _roleManager;
-    public AuthController(IMediator mediator, RoleManager<Role> roleManager)
-    {
-        _mediator = mediator;
-        _roleManager = roleManager;
-    }
 
-    [HttpGet("init")]
-    public async Task<IActionResult> Init()
+    [HttpPost("init")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Init(CancellationToken cancellationToken)
     {
-        var rolenames = typeof(RoleName).GetFields().ToList();
-        foreach (var r in rolenames)
+        try
         {
-            var rolename = (string)r.GetRawConstantValue();
-            var rfound = await _roleManager.FindByNameAsync(rolename);
-            if (rfound == null)
-            {
-                await _roleManager.CreateAsync(new Role { Name = rolename, OrgId = "DOAN" });
-            }
+            IEnumerable<Role> roles = new List<Role>
+        {
+            new Role { RoleName = RoleNameValues.Admin, OrgId = "DOAN" },
+            new Role { RoleName = RoleNameValues.Manager, OrgId = "DOAN" },
+            new Role { RoleName = RoleNameValues.Staff, OrgId = "DOAN" },
+            new Role { RoleName = RoleNameValues.Customer, OrgId = "DOAN" }
+        };
+
+            await _roleManager.BulkAddAsync(roles, cancellationToken);
+
+
+            return Ok("Init success");
         }
-        return Ok("Init success");
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return StatusCode(500, $"An error occurred: {ex.Message}");
+        }
     }
 
-    [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterUserCommand command)
-    {
-        var result = await _mediator.Send(command);
-        if (result.Success)
-            return Ok(result);
-        return BadRequest(result.Message);
-    }
+
+
 
     [HttpPost("login")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(LoginUserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Login([FromBody] LoginUserCommand command)
     {
         var result = await _mediator.Send(command);
-        if (result.Success)
-            return Ok(result);
-        return BadRequest(result);
+        return result.Match(
+           user => Ok(user),
+           Problem);
     }
 
     [HttpGet("me")]
-    [Authorize]
+    [ProducesResponseType(typeof(GetMeResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Me()
     {
         var result = await _mediator.Send(new GetMeQuery());
-        if (result.Success)
-            return Ok(result);
-        return BadRequest(result);
+        return result.Match(
+           user => Ok(user),
+           Problem);
     }
 
+
+    
+    [ProducesResponseType(typeof(LoginUserResponse), StatusCodes.Status200OK)]
     [HttpPost("refresh-token")]
-    [Authorize]
-    public async Task<IActionResult> RefreshToken([FromBody] RefeshTokenQuery query)
+    public async Task<IActionResult> RefreshToken([FromBody] RefeshTokenCommand command)
     {
-        var result = await _mediator.Send(query);
-        if (result.Success)
-            return Ok(result);
-        return BadRequest(result);
+        var result = await _mediator.Send(command);
+        return result.Match(
+         token => Ok(token),
+         Problem);
     }
 }

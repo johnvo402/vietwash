@@ -7,7 +7,7 @@ using ProductService.Domain.Entities;
 
 namespace ProductService.Application.Queries;
 
-public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, IQueryable<Product>>
+public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, IEnumerable<Product>>
 {
     private readonly IProductRepository _repository;
 
@@ -16,10 +16,10 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, IQuerya
         _repository = repository;
     }
 
-    public async Task<IQueryable<Product>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<Product>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
     {
-        var products = _repository.GetAllAsync(cancellationToken);
-        return products.Result;
+        var products = await _repository.GetAllAsync();
+        return products;
     }
 
 

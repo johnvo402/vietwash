@@ -34,8 +34,18 @@ namespace Micro.Shared.Extensions
                         Array.Empty<string>()
                     }
                 });
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = title, Version = "v1" });
-
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Laundry Management API, Service: " + title,
+                    Version = "v1",
+                    Description = "API for managing laundry services",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "John Vo",
+                        Email = "thanhthu040202@gmail.com"
+                    }
+                });
+                c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
                 // Add JWT Authentication
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -67,8 +77,15 @@ namespace Micro.Shared.Extensions
 
         public static IApplicationBuilder UseSharedSwagger(this IApplicationBuilder app)
         {
+            app.UseDeveloperExceptionPage();
             app.UseSwagger();
-            app.UseSwaggerUI();
+            app.UseSwaggerUI(
+                c =>
+                {
+                    c.SwaggerEndpoint("swagger/v1/swagger.json", "Laundry Management API");
+                    c.RoutePrefix = string.Empty;
+                }
+            );
 
             return app;
         }

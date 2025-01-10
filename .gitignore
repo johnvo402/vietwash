@@ -89,3 +89,5 @@ dump.rdb
 [Rr]eleasePublic/
 [Pp]ublish/
 .azure
+
+.fake

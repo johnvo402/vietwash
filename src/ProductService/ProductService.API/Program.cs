@@ -1,20 +1,15 @@
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using ProductService.Application.Commands;
 using ProductService.Application.Interfaces;
 using ProductService.Infrastructure.Persistence;
 using ProductService.Infrastructure.Repositories;
-using System.Security.Claims;
 using Micro.Shared.Extensions;
 using ProductService.API.Extensions;
 using Microsoft.AspNetCore.OData;
 using ProductService.Domain.Entities;
 using Microsoft.OData.ModelBuilder;
 using Microsoft.OData.Edm;
+using Micro.Shared.Infrastructure.CurrentUserProvider;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -26,7 +21,7 @@ builder.Services.AddControllers()
                                    .OrderBy()
                                    .Expand()
                                    .Count()
-                                   .SetMaxTop(100).AddRouteComponents("api/v{version}", GetEdmModel()))
+                                   .SetMaxTop(100).AddRouteComponents("api/v1", GetEdmModel()))
                             .AddJsonOptions(options =>
                             {
                                 // Cấu hình camelCase cho JSON
@@ -34,14 +29,13 @@ builder.Services.AddControllers()
                                 // Bỏ qua các trường có giá trị null
                                 options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
                             });
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddSharedSwagger("Product Service API");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateProductCommand).Assembly));
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
-
-builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, CurrentUserProvider>();
 builder.Services.AddApiVersioningConfig();
 builder.Services.AddDataProtectionConfig(builder.Configuration);
 var app = builder.Build();

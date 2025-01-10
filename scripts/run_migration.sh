@@ -6,8 +6,7 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-# The input is expected as separate arguments, so no need to split by commas
-echo "Input databases: $@"
+
 
 # Lấy ngày tháng năm giờ phút giây hiện tại
 current_datetime=$(date +"%Y%m%d%H%M%S")
@@ -19,7 +18,7 @@ run_migration() {
     local api_path=$3
 
     echo "Running migration for $db_name"
-    dotnet ef migrations add "${current_datetime}_${db_name}_Migration" --project "$project_path" --startup-project "$api_path"
+    dotnet ef migrations add "${current_datetime}_${db_name}_Migration" --project "$project_path" --startup-project "$api_path" --verbose
     if [ $? -eq 0 ]; then
         echo "Migration for $db_name completed successfully."
     else

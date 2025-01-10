@@ -35,5 +35,6 @@ public class ProductsController : ODataController
 
             return BadRequest(ex.Message);
         }
+
     }
 }
