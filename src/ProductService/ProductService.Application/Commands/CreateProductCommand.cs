@@ -1,9 +1,10 @@
+using ErrorOr;
 using MediatR;
 using Micro.Shared.Model;
-using ProductService.Domain.DTOs;
 using ProductService.Domain.Entities;
 
 namespace ProductService.Application.Commands;
 
-public record CreateProductCommand(ApiRequestPost<ProductCreateDto> Request) : IRequest<ApiResponse<string>>;
+public record CreateProductCommand(ApiRequestPost<CreateUpdateProductCommandDto> Request) : IRequest<ErrorOr<string>>;
 
+public record CreateUpdateProductCommandDto(string Name, decimal Price, int Stock);

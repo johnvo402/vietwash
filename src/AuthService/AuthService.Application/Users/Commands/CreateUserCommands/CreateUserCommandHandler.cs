@@ -11,6 +11,7 @@ using Micro.Shared.Infrastructure.CurrentUserProvider;
 using Micro.Shared.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Utilities;
 
 namespace AuthService.Application.Auth.Commands.CreateUserCommands;
 public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, ErrorOr<string>>
@@ -54,6 +55,7 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Error
             Email = request.Email,
             PhoneNumber = request.PhoneNumber,
             OrgId = "DOAN",
+            Keywords = Generator.GenerateKeywords(new List<string> { request?.DisplayName ?? "", request?.Email ?? "" })
         };
 
         // Hash the user's password
