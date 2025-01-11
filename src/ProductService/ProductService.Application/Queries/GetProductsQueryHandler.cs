@@ -1,13 +1,13 @@
 using MediatR;
 using Micro.Shared.Model;
-using ProductService.Domain.DTOs;
 using ProductService.Application.Interfaces;
 using ProductService.Application.Queries;
 using ProductService.Domain.Entities;
+using ErrorOr;
 
 namespace ProductService.Application.Queries;
 
-public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, IEnumerable<Product>>
+public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, ErrorOr<IEnumerable<Product>>>
 {
     private readonly IProductRepository _repository;
 
@@ -16,10 +16,10 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, IEnumer
         _repository = repository;
     }
 
-    public async Task<IEnumerable<Product>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<IEnumerable<Product>>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
     {
-        var products = await _repository.GetAllAsync();
-        return products;
+        var products = await _repository.GetAllAsync(request.query);
+        return products.ToList();
     }
 
 

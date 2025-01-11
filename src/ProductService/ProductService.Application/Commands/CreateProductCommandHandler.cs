@@ -6,55 +6,38 @@ using Micro.Shared.Model;
 using Microsoft.AspNetCore.Http;
 using Micro.Shared.Extensions;
 using Micro.Shared.Infrastructure.CurrentUserProvider;
+using Utilities;
+using ErrorOr;
 
-public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, ApiResponse<string>>
+public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, ErrorOr<string>>
 {
     private readonly IProductRepository _repository;
-    private readonly ICurrentUser _userAccess;
 
-    public CreateProductCommandHandler(IProductRepository repository, ICurrentUser userAccess )
+
+    public CreateProductCommandHandler(IProductRepository repository)
     {
         _repository = repository;
-        _userAccess = userAccess;
+
     }
 
-    public async Task<ApiResponse<string>> Handle(CreateProductCommand request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<string>> Handle(CreateProductCommand request, CancellationToken cancellationToken)
     {
-        
-        if (_userAccess == null || string.IsNullOrEmpty(_userAccess.Id.ToString()))
-        {
-            return new ApiResponse<string>
-            {
-                Success = false,
-                Message = "User ID not found in claims"
-            };
-        }
+
+
         if (request.Request?.Objects?.Count == 0 && request.Request?.Object == null)
         {
-            return new ApiResponse<string>
-            {
-                Success = false,
-                Message = "Invalid request data",
-            };
+            return Error.Failure("backend.product.empty");
         }
         if (request?.Request?.Objects?.Count > 0)
         {
-            var products = request.Request.Objects.Select(o => new Product(o.Name ?? "Name", o.Price, o.StockQuantity, _userAccess.Id.ToString()));
+            var products = request.Request.Objects.Select(o => new Product(o.Name ?? "Name", o.Price, o.Stock, Generator.GenerateKeywords(new List<string> { o.Name ?? "" })));
             var effectRows = await _repository.BulkAddAsync(products, cancellationToken);
 
-            return new ApiResponse<string>
-            {
-                Success = true,
-                Value = effectRows.ToString(),
-            };
+            return effectRows.ToString();
         }
 
-        var product = new Product(request?.Request?.Object?.Name ?? "Name", request?.Request?.Object?.Price ?? 0, request?.Request?.Object?.StockQuantity ?? 0, _userAccess.Id.ToString());
+        var product = new Product(request?.Request?.Object?.Name ?? "Name", request?.Request?.Object?.Price ?? 0, request?.Request?.Object?.Stock ?? 0, Generator.GenerateKeywords(new List<string> { request?.Request?.Object?.Name ?? "" }));
         await _repository.CreateAsync(product, cancellationToken);
-        return new ApiResponse<string>
-        {
-            Success = true,
-            Value = product.Id.ToString(),
-        };
+        return product.Id.ToString();
     }
 }

@@ -4,6 +4,7 @@ using AuthService.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthService.Infrastructure.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    partial class AuthDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250110214605_20250111044553_AuthDb_Migration")]
+    partial class _20250111044553_AuthDb_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -61,7 +64,7 @@ namespace AuthService.Infrastructure.Migrations
                     b.HasIndex("Id")
                         .HasDatabaseName("ix_permission_id");
 
-                    b.ToTable("permission", (string)null);
+                    b.ToTable("permission");
                 });
 
             modelBuilder.Entity("AuthService.Domain.RolePermissions.RolePermission", b =>
@@ -79,7 +82,7 @@ namespace AuthService.Infrastructure.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("role_permission", (string)null);
+                    b.ToTable("role_permission");
                 });
 
             modelBuilder.Entity("AuthService.Domain.Roles.Role", b =>
@@ -122,7 +125,7 @@ namespace AuthService.Infrastructure.Migrations
                     b.HasIndex("Id")
                         .HasDatabaseName("ix_role_id");
 
-                    b.ToTable("role", (string)null);
+                    b.ToTable("role");
                 });
 
             modelBuilder.Entity("AuthService.Domain.UserActivities.UserActivity", b =>
@@ -197,7 +200,7 @@ namespace AuthService.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("user_activities", (string)null);
+                    b.ToTable("user_activities");
                 });
 
             modelBuilder.Entity("AuthService.Domain.UserRoles.UserRole", b =>
@@ -215,7 +218,7 @@ namespace AuthService.Infrastructure.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("user_role", (string)null);
+                    b.ToTable("user_role");
                 });
 
             modelBuilder.Entity("AuthService.Domain.Users.Entity.User", b =>
@@ -282,7 +285,7 @@ namespace AuthService.Infrastructure.Migrations
                     b.HasIndex("Id")
                         .HasDatabaseName("ix_user_id");
 
-                    b.ToTable("user", (string)null);
+                    b.ToTable("user");
                 });
 
             modelBuilder.Entity("AuthService.Domain.RolePermissions.RolePermission", b =>

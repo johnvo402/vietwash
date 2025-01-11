@@ -15,9 +15,12 @@ services:
     volumes:
       - ./src/AuthService:/app/AuthService:ro
       - ./src/Micro.Shared:/app/Micro.Shared:ro
+      - ./src/Utilities:/app/Utilities:ro
       - nuget_cache:/root/.nuget/packages:cached
       - /app/Micro.Shared/bin/
       - /app/Micro.Shared/obj/
+      - /app/Utilities/bin/
+      - /app/Utilities/obj/
       - /app/AuthService/AuthService.API/bin/
       - /app/AuthService/AuthService.API/obj/
       - /app/AuthService/AuthService.Infrastructure/bin/
@@ -47,9 +50,12 @@ services:
     volumes:
       - ./src/ProductService:/app/ProductService:ro
       - ./src/Micro.Shared:/app/Micro.Shared:ro
+      - ./src/Utilities:/app/Utilities:ro
       - nuget_cache:/root/.nuget/packages:cached
       - /app/Micro.Shared/bin/
       - /app/Micro.Shared/obj/
+      - /app/Utilities/bin/
+      - /app/Utilities/obj/
       - /app/ProductService/ProductService.API/bin/
       - /app/ProductService/ProductService.API/obj/
       - /app/ProductService/ProductService.Infrastructure/bin/

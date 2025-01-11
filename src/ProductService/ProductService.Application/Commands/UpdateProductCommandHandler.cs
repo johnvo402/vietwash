@@ -26,7 +26,7 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
         }
         product.Name = request?.Request?.Object?.Name ?? "";
         product.Price = request?.Request?.Object?.Price ?? 0;
-        product.StockQuantity = request?.Request?.Object?.StockQuantity ?? 0;
+        product.StockQuantity = request?.Request?.Object?.Stock ?? 0;
         var result = await _repository.UpdateAsync(product, cancellationToken);
         if (!result)
         {
