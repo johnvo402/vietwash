@@ -1,0 +1,35 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Format the code
+echo 'Formatting code'
+dotnet husky run --name dotnet-format-staged-files
+
+# Check if the format command succeeded
+if [ $? -ne 0 ]; then
+  echo "Formatting failed. Commit aborted."
+  exit 1
+fi
+
+# Build the code
+echo 'Building code'
+dotnet build --no-restore
+
+# Check if the build command succeeded
+if [ $? -ne 0 ]; then
+  echo "Build failed. Commit aborted."
+  exit 1
+fi
+
+# Run tests
+echo 'Running tests'
+dotnet test --no-restore
+
+# Check if the tests succeeded
+if [ $? -ne 0 ]; then
+  echo "Tests failed. Commit aborted."
+  exit 1
+fi
+
+# If all commands succeed, allow the original commit to proceed
+echo "All checks passed. Proceeding with commit..."
