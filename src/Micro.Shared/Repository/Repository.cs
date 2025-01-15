@@ -39,11 +39,27 @@ public abstract class Repository<TContext, TEntity, TKey> : IRepository<TEntity,
     }
 
     /// <inheritdoc/>
-    public TEntity? GetByID(TKey id) => DbSet.Find(id);
+    public TEntity? GetByID(TKey id)
+    {
+        var param = new QueryParameters();
+        param.Where = $"id = '{id}'";
+        string query = _dapperQueryBuilder.BuildQuery<TEntity>(param, out DynamicParameters dapperParams).Result;
+
+        var data = _dbConnection.QueryFirstOrDefault<TEntity>(query, dapperParams);
+        Console.WriteLine("log: info, created_at: " + DateTimeOffset.UtcNow + ", query: " + query);
+        return data;
+    }
+
 
     /// <inheritdoc/>
-    public IQueryable<TEntity> GetAll() => DbSet.AsNoTracking().AsQueryable();
+    public IEnumerable<TEntity> GetAll(QueryParameters? param)
+    {
+        string query = _dapperQueryBuilder.BuildQuery<TEntity>(param, out DynamicParameters dapperParams).Result;
 
+        var data = _dbConnection.Query<TEntity>(query, dapperParams);
+        Console.WriteLine("log: info, created_at: " + DateTimeOffset.UtcNow + ", query: " + query);
+        return data;
+    }
     /// <inheritdoc/>
     public async Task<IEnumerable<TEntity>> GetAllAsync(QueryParameters? param)
     {
@@ -84,7 +100,7 @@ public abstract class Repository<TContext, TEntity, TKey> : IRepository<TEntity,
     /// <inheritdoc/>
     public async ValueTask<TEntity?> GetByIDAsync(TKey id)
     {
-        var request = new QueryParameters { Where = $"Id = '{id}'" };
+        var request = new QueryParameters { Where = $"id = '{id}'" };
         string query = await _dapperQueryBuilder.BuildQuery<TEntity>(request, out DynamicParameters dapperParams);
         Console.WriteLine("log: info, created_at: " + DateTimeOffset.UtcNow + ", query: " + query);
         var data = await _dbConnection.QueryFirstOrDefaultAsync<TEntity>(query, dapperParams);

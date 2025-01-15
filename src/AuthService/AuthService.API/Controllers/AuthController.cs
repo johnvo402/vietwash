@@ -12,7 +12,7 @@ using AuthService.Domain.ValueObjects;
 namespace AuthService.API.Controllers;
 
 [ApiVersion("1.0")]
-[Route("auth/api/v1/auth")]
+[Route("auth/api/v1")]
 
 public class AuthController(ISender _mediator, IRoleRepo _roleManager) : ApiController
 {

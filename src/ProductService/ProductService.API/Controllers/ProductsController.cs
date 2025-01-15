@@ -33,6 +33,19 @@ public class ProductsController : ApiController
             token => Ok(token),
             Problem);
     }
+    [HttpGet("{id}")]
+    [ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var param = new QueryParameters();
+        param.Where = $"id = '{id}'";
+        var query = new GetProductsQuery(param);
+        var result = await _mediator.Send(query);
+        return result.Match(
+          product => Ok(product?.FirstOrDefault()),
+          Problem);
+    }
     [HttpPost]
     [Route("create")]
     [AllowAnonymous]
