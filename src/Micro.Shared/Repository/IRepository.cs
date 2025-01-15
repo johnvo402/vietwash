@@ -12,7 +12,7 @@ public interface IRepository<TEntity, TKey>
 
     TEntity? GetByID(TKey id);
 
-    IQueryable<TEntity> GetAll();
+    IEnumerable<TEntity> GetAll(QueryParameters? param = default);
 
     bool Update(TEntity t);
 

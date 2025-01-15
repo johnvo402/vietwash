@@ -38,7 +38,7 @@ public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, ErrorOr
         {
             return Error.Validation(description: "backend.auth.login_failed");
         }
-        user.UpdateLastLogin();
+        // user.UpdateLastLogin();
 
 
         var roles = _roleRepo.GetRolesByUserId(user.Id, cancellationToken).Result.ToList();
