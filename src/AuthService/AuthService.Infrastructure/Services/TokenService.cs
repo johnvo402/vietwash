@@ -48,17 +48,33 @@ public class TokenHelper(IOptions<JwtSettings> jwtOptions) : ITokenHelper
         return (new JwtSecurityTokenHandler().WriteToken(token), expires.ToString());
     }
 
-    public string GenerateRefreshToken()
+    public string GenerateRefreshToken(string id)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var claims = new List<Claim>
+        {
+            new("id", id)
+        };
         var token = new JwtSecurityToken(
             _jwtSettings.Issuer,
             _jwtSettings.Audience,
-            expires: DateTime.Now.AddMinutes(_jwtSettings.TokenExpirationInMinutes),
+            claims,
+            expires: DateTime.Now.AddMinutes(_jwtSettings.TokenExpirationInMinutes + _jwtSettings.TokenExpirationInMinutes / 2),
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public Guid GetUserIdFromToken(string token)
+    {
+        var handler = new JwtSecurityTokenHandler();
+
+        var jwtToken = handler.ReadJwtToken(token);
+
+        var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+
+        return Guid.Parse(userId?.ToString() ?? "");
     }
 
     public bool ValidateAccessToken(string token)

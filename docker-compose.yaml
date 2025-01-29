@@ -8,6 +8,7 @@ services:
       - Jwt__Key=${JWT_KEY}
       - Jwt__Issuer=${JWT_ISSUER}
       - Jwt__Audience=${JWT_AUDIENCE}
+      - Jwt__TokenExpirationInMinutes=${JWT_TOKEN_EXPIRATION_IN_MINUTES}
     restart: always
 
   product-service:
@@ -19,6 +20,7 @@ services:
       - Jwt__Key=${JWT_KEY}
       - Jwt__Issuer=${JWT_ISSUER}
       - Jwt__Audience=${JWT_AUDIENCE}
+      - Jwt__TokenExpirationInMinutes=${JWT_TOKEN_EXPIRATION_IN_MINUTES}
     restart: always
 
   gateway:

@@ -10,7 +10,7 @@ using System.Text.Json;
 
 namespace ProductService.API.Controllers;
 [ApiVersion("1.0")]
-[Route("api/v1/products")]
+[Route("material/api/v1/product")]
 public class ProductsController : ApiController
 {
     private readonly IMediator _mediator;
@@ -21,8 +21,6 @@ public class ProductsController : ApiController
     }
 
     [HttpGet]
-    // [Authorize]
-    [AllowAnonymous]
     [ProducesResponseType(typeof(IEnumerable<Product>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetProducts([FromQuery] QueryParameters request)
@@ -35,7 +33,6 @@ public class ProductsController : ApiController
     }
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
-    [AllowAnonymous]
     public async Task<IActionResult> GetById(Guid id)
     {
         var param = new QueryParameters();

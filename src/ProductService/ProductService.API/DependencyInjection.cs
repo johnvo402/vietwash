@@ -19,14 +19,12 @@ namespace ProductService.API
             services.AddDataProtectionConfig(builder.Configuration);
             services.AddApplication();
             services.AddInfrastructure(builder.Configuration);
-            services.AddSharedCors("AllowAll");
 
             return services;
         }
 
         public static IApplicationBuilder UseConfigure(this IApplicationBuilder app)
         {
-            app.UseSharedCors("AllowAll");
             // Configure middleware and authentication
             app.UseAuthenticationConfig();
 

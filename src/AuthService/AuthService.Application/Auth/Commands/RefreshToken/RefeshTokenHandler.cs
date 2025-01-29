@@ -1,8 +1,8 @@
+using System.Reflection.Metadata;
 using AuthService.Application.Auth.Commands.Login;
 using AuthService.Application.Interfaces;
 using ErrorOr;
 using MediatR;
-using Micro.Shared.Infrastructure.CurrentUserProvider;
 
 namespace AuthService.Application.Auth.Commands.RefreshToken;
 
@@ -17,15 +17,13 @@ public class RefeshTokenHandler : IRequestHandler<RefeshTokenCommand, ErrorOr<Lo
 {
     private readonly ITokenHelper _tokenHelper;
     private readonly IUserRepo _userRepo;
-    private readonly ICurrentUser _currentUser;
     private readonly IRoleRepo _roleRepo;
     private readonly IPermissionRepo _permissionRepo;
 
-    public RefeshTokenHandler(ITokenHelper tokenHelper, IUserRepo userRepo, ICurrentUser currentUser, IRoleRepo roleRepo, IPermissionRepo permissionRepo)
+    public RefeshTokenHandler(ITokenHelper tokenHelper, IUserRepo userRepo, IRoleRepo roleRepo, IPermissionRepo permissionRepo)
     {
         _tokenHelper = tokenHelper;
         _userRepo = userRepo;
-        _currentUser = currentUser;
         _roleRepo = roleRepo;
         _permissionRepo = permissionRepo;
     }
@@ -39,8 +37,12 @@ public class RefeshTokenHandler : IRequestHandler<RefeshTokenCommand, ErrorOr<Lo
         {
             return Task.FromResult<ErrorOr<LoginUserResponse>>(Error.Validation("backend.auth.invalid_token"));
         }
-
-        var user = _userRepo.GetByID(Guid.Parse(_currentUser.Id));
+        var userId = _tokenHelper.GetUserIdFromToken(request.RefreshToken);
+        if (userId == Guid.Empty)
+        {
+            return Task.FromResult<ErrorOr<LoginUserResponse>>(Error.Validation("backend.auth.invalid_token"));
+        }
+        var user = _userRepo.GetByID(userId);
         if (user == null)
         {
             return Task.FromResult<ErrorOr<LoginUserResponse>>(Error.NotFound("backend.user.notfound"));
@@ -50,7 +52,7 @@ public class RefeshTokenHandler : IRequestHandler<RefeshTokenCommand, ErrorOr<Lo
         var permissions = _permissionRepo.GetPermissionsByRoleIds(roles.Select(s => s.Id).ToList(), cancellationToken).Result.Select(x => x.PermissionKey).ToList();
 
         var (accessToken, exp) = _tokenHelper.GenerateAccessToken(user.Id.ToString(), user.DisplayName ?? "", user.Email, permissions, roles.Select(x => x.RoleName).ToList(), user.OrgId ?? "DOAN");
-        var refreshToken = _tokenHelper.GenerateRefreshToken();
+        var refreshToken = _tokenHelper.GenerateRefreshToken(user.Id.ToString());
         var response = new LoginUserResponse
         {
             AccessToken = accessToken,

@@ -69,8 +69,9 @@ public class AuthController(ISender _mediator, IRoleRepo _roleManager) : ApiCont
     }
 
 
-    
+
     [ProducesResponseType(typeof(LoginUserResponse), StatusCodes.Status200OK)]
+    [AllowAnonymous]
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken([FromBody] RefeshTokenCommand command)
     {

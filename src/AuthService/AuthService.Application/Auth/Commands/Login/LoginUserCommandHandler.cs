@@ -46,7 +46,7 @@ public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, ErrorOr
         var permissions = _permissionRepo.GetPermissionsByRoleIds(roles.Select(s => s.Id).ToList(), cancellationToken).Result.Select(x => x.PermissionKey).ToList();
 
         var (accessToken, exp) = _tokenHelper.GenerateAccessToken(user.Id.ToString(), user.DisplayName ?? "", user.Email, permissions, roles.Select(x => x.RoleName).ToList(), user.OrgId ?? "DOAN");
-        var refreshToken = _tokenHelper.GenerateRefreshToken();
+        var refreshToken = _tokenHelper.GenerateRefreshToken(user.Id.ToString());
         _userRepo.Update(user);
         return new LoginUserResponse
         {

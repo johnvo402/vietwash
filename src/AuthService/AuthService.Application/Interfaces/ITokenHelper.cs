@@ -11,6 +11,7 @@ public interface ITokenHelper
          List<string> permissions,
          List<string> roles,
          string OrgId);
-    string GenerateRefreshToken();
+    string GenerateRefreshToken(string id);
     bool ValidateAccessToken(string token);
+    Guid GetUserIdFromToken(string token);
 }
