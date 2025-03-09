@@ -18,7 +18,7 @@ run_migration() {
     local api_path=$3
 
     echo "Running migration for $db_name"
-    dotnet ef migrations add "${current_datetime}_${db_name}_Migration" --project "$project_path" --startup-project "$api_path" --verbose
+    dotnet ef migrations add "${current_datetime}_${db_name}_Migration" --project "$project_path" --startup-project "$api_path" -o Data/Migrations
     if [ $? -eq 0 ]; then
         echo "Migration for $db_name completed successfully."
     else
@@ -32,7 +32,7 @@ for db in "$@"; do
     db=$(echo "$db" | xargs)  # Trim any leading/trailing spaces
 
     if [ "$db" == "AuthDb" ]; then
-        run_migration "AuthDb" "src/AuthService/AuthService.Infrastructure" "src/AuthService/AuthService.API"
+        run_migration "AuthDb" "src/AuthService/Infrastructure" "src/AuthService/Presentation"
     elif [ "$db" == "ProductDb" ]; then
         run_migration "ProductDb" "src/ProductService/ProductService.Infrastructure" "src/ProductService/ProductService.API"
     else
