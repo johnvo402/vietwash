@@ -88,10 +88,10 @@ public class RoleValidator : AbstractValidator<RoleModel>
             );
 
         When(
-            x => x.RoleClaims != null,
+            x => x.RolePermission != null,
             () =>
             {
-                RuleForEach(x => x.RoleClaims).SetValidator(new RoleClaimValidator());
+                RuleForEach(x => x.RolePermission).SetValidator(new RolePermissionValidator());
             }
         );
     }

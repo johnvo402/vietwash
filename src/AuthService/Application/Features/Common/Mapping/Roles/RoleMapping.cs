@@ -15,7 +15,7 @@ public class RoleMapping : Profile
                 opt => opt.MapFrom(src => src.Name.ToSnakeCase().ToUpper())
             );
 
-        CreateMap<RoleClaimModel, RoleClaim>()
+        CreateMap<RolePermissionModel, RolePermission>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .AfterMap(
                 (src, dest) =>
@@ -26,6 +26,6 @@ public class RoleMapping : Profile
                     }
                 }
             );
-        CreateMap<RoleClaim, RoleClaimDetailProjection>();
+        CreateMap<RolePermission, RolePermissionDetailProjection>();
     }
 }

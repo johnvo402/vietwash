@@ -9,7 +9,7 @@ public class GetUserByIdSpecification : Specification<User>
         Query
             .Where(x => x.Id == id)
             .Include(x => x.Role)
-            .ThenInclude(x => x!.RoleClaims)
+            .ThenInclude(x => x!.RolePermissions)!.ThenInclude(x => x!.Permission)
             .Include(x => x.Address!.Province)
             .Include(x => x.Address!.District)
             .Include(x => x.Address!.Commune)

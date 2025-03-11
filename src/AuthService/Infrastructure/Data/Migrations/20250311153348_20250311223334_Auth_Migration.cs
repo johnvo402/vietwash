@@ -6,13 +6,27 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class _20250309213634_Auth_Migration : Migration
+    public partial class _20250311223334_Auth_Migration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:PostgresExtension:citext", ",,");
+
+            migrationBuilder.CreateTable(
+                name: "permission",
+                columns: table => new
+                {
+                    id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    key = table.Column<string>(type: "text", nullable: false),
+                    description = table.Column<string>(type: "citext", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_permission", x => x.id);
+                });
 
             migrationBuilder.CreateTable(
                 name: "province",
@@ -79,20 +93,25 @@ namespace Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "role_claim",
+                name: "role_permission",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    claim_type = table.Column<string>(type: "text", nullable: false),
-                    claim_value = table.Column<string>(type: "text", nullable: false),
                     role_id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    permission_id = table.Column<string>(type: "character varying(26)", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_role_claim", x => x.id);
+                    table.PrimaryKey("pk_role_permission", x => x.id);
                     table.ForeignKey(
-                        name: "fk_role_claim_role_role_id",
+                        name: "fk_role_permission_permission_permission_id",
+                        column: x => x.permission_id,
+                        principalTable: "permission",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_role_permission_role_role_id",
                         column: x => x.role_id,
                         principalTable: "role",
                         principalColumn: "id",
@@ -254,6 +273,12 @@ namespace Infrastructure.Data.Migrations
                 column: "province_id");
 
             migrationBuilder.CreateIndex(
+                name: "ix_permission_key",
+                table: "permission",
+                column: "key",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "ix_province_code",
                 table: "province",
                 column: "code",
@@ -266,8 +291,13 @@ namespace Infrastructure.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_role_claim_role_id",
-                table: "role_claim",
+                name: "ix_role_permission_permission_id",
+                table: "role_permission",
+                column: "permission_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_role_permission_role_id",
+                table: "role_permission",
                 column: "role_id");
 
             migrationBuilder.CreateIndex(
@@ -322,13 +352,16 @@ namespace Infrastructure.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "role_claim");
+                name: "role_permission");
 
             migrationBuilder.DropTable(
                 name: "user_reset_password");
 
             migrationBuilder.DropTable(
                 name: "user_token");
+
+            migrationBuilder.DropTable(
+                name: "permission");
 
             migrationBuilder.DropTable(
                 name: "user");

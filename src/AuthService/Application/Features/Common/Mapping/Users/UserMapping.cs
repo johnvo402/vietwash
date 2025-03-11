@@ -24,7 +24,7 @@ public class UserMapping : Profile
         CreateMap<Address, UserDetailProjection>();
 
         CreateMap<Role, RoleDetailProjection>();
-        CreateMap<RoleClaim, RoleClaimDetailProjection>();
+        CreateMap<RolePermission, RolePermissionDetailProjection>();
 
     }
 }

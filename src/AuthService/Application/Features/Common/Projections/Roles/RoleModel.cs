@@ -6,5 +6,5 @@ public class RoleModel
 
     public string? Name { get; set; }
 
-    public List<RoleClaimModel>? RoleClaims { get; set; }
+    public List<RolePermissionModel>? RolePermission { get; set; }
 }

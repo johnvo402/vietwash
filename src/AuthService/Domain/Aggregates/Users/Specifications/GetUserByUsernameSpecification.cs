@@ -9,7 +9,8 @@ public class GetUserByUsernameSpecification : Specification<User>
     {
         Query.Where(x => EF.Functions.ILike(x.Username, username))
         .Include(x => x.Role)
-        .ThenInclude(x => x!.RoleClaims!.Where(r => r.ClaimType == "permission"))
+        .ThenInclude(x => x!.RolePermissions!)
+        .ThenInclude(x => x!.Permission)
         .AsNoTracking();
     }
 }

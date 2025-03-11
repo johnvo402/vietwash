@@ -23,7 +23,7 @@ public class UpdateRoleHandler(IRoleManagerService roleManagerService, IMapper m
 
         mapper.Map(command.Role, role);
 
-        List<RoleClaim> roleClaims = mapper.Map<List<RoleClaim>>(command.Role.RoleClaims);
+        List<RolePermission> roleClaims = mapper.Map<List<RolePermission>>(command.Role.RolePermission);
         await roleManagerService.UpdateRoleAsync(role, roleClaims);
         return mapper.Map<UpdateRoleResponse>(role);
     }

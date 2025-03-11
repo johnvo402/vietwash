@@ -13,5 +13,5 @@ public class Role : DefaultEntity
 
     public ICollection<User>? Users { get; set; } = [];
 
-    public ICollection<RoleClaim>? RoleClaims { get; set; } = [];
+    public ICollection<RolePermission>? RolePermissions { get; set; } = [];
 }

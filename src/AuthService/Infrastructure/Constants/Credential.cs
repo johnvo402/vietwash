@@ -38,35 +38,23 @@ public static class Credential
             },
         };
 
-    public static readonly IReadOnlyCollection<KeyValuePair<string, string>> ADMIN_CLAIMS =
+    public static readonly IReadOnlyCollection<string> ADMIN_CLAIMS =
         PermissionGroups
             .SelectMany(x => x.Value)
-            .Select(permission => new KeyValuePair<string, string>(
-                "permission",
-                permission
-            ))
             .ToList();
 
-    public static readonly IReadOnlyCollection<KeyValuePair<string, string>> MANAGER_CLAIMS =
+    public static readonly IReadOnlyCollection<string> MANAGER_CLAIMS =
     [
-        new(
-            "permission",
-            CreatePermission(ActionPermission.create, ObjectPermission.user)
-        ),
-        new("permission", CreatePermission(ActionPermission.list, ObjectPermission.user)),
-        new(
-            "permission",
-            CreatePermission(ActionPermission.detail, ObjectPermission.user)
-        ),
-        new(
-            "permission",
-            CreatePermission(ActionPermission.create, ObjectPermission.role)
-        ),
-        new("permission", CreatePermission(ActionPermission.list, ObjectPermission.role)),
-        new(
-            "permission",
-            CreatePermission(ActionPermission.detail, ObjectPermission.role)
-        ),
+
+            CreatePermission(ActionPermission.create, ObjectPermission.user),
+
+        CreatePermission(ActionPermission.list, ObjectPermission.user),
+
+            CreatePermission(ActionPermission.detail, ObjectPermission.user),
+
+            CreatePermission(ActionPermission.create, ObjectPermission.role),
+       CreatePermission(ActionPermission.list, ObjectPermission.role),
+            CreatePermission(ActionPermission.detail, ObjectPermission.role),
     ];
 
     public const string ADMIN_ROLE_ID = "01J79JQZRWAKCTCQV64VYKMZ56";
