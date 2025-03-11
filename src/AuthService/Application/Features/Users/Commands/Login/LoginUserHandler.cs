@@ -113,7 +113,7 @@ public class LoginUserHandler(
         {
             Id = user.Id,
             Role = user.Role.Name,
-            Permissions = user.Role.RoleClaims?.Select(p => p.ClaimValue).ToList(),
+            Permissions = user.Role.RolePermissions?.Select(p => p.Permission!.Key).ToList(),
         };
         var result = SerializerExtension.Serialize(value!);
         await securityService.AddSessionUserAsync(user.Id, result.StringJson, (refreshExpireTime - DateTime.UtcNow));

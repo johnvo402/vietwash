@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    [Migration("20250309143644_20250309213634_Auth_Migration")]
-    partial class _20250309213634_Auth_Migration
+    [Migration("20250311153348_20250311223334_Auth_Migration")]
+    partial class _20250311223334_Auth_Migration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -228,6 +228,36 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("province", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Aggregates.Roles.Permission", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("citext")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("key");
+
+                    b.HasKey("Id")
+                        .HasName("pk_permission");
+
+                    b.HasIndex("Key")
+                        .IsUnique()
+                        .HasDatabaseName("ix_permission_key");
+
+                    b.ToTable("permission", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Aggregates.Roles.Role", b =>
                 {
                     b.Property<string>("Id")
@@ -261,25 +291,20 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("role", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Roles.RoleClaim", b =>
+            modelBuilder.Entity("Domain.Aggregates.Roles.RolePermission", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("character varying(26)")
                         .HasColumnName("id");
 
-                    b.Property<string>("ClaimType")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("claim_type");
-
-                    b.Property<string>("ClaimValue")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("claim_value");
-
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("PermissionId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("permission_id");
 
                     b.Property<string>("RoleId")
                         .IsRequired()
@@ -287,12 +312,15 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnName("role_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_role_claim");
+                        .HasName("pk_role_permission");
+
+                    b.HasIndex("PermissionId")
+                        .HasDatabaseName("ix_role_permission_permission_id");
 
                     b.HasIndex("RoleId")
-                        .HasDatabaseName("ix_role_claim_role_id");
+                        .HasDatabaseName("ix_role_permission_role_id");
 
-                    b.ToTable("role_claim", (string)null);
+                    b.ToTable("role_permission", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
@@ -522,14 +550,23 @@ namespace Infrastructure.Data.Migrations
                         .HasConstraintName("fk_district_province_province_id");
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Roles.RoleClaim", b =>
+            modelBuilder.Entity("Domain.Aggregates.Roles.RolePermission", b =>
                 {
+                    b.HasOne("Domain.Aggregates.Roles.Permission", "Permission")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_role_permission_permission_permission_id");
+
                     b.HasOne("Domain.Aggregates.Roles.Role", "Role")
-                        .WithMany("RoleClaims")
+                        .WithMany("RolePermissions")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_role_claim_role_role_id");
+                        .HasConstraintName("fk_role_permission_role_role_id");
+
+                    b.Navigation("Permission");
 
                     b.Navigation("Role");
                 });
@@ -644,9 +681,14 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Districts");
                 });
 
+            modelBuilder.Entity("Domain.Aggregates.Roles.Permission", b =>
+                {
+                    b.Navigation("RolePermissions");
+                });
+
             modelBuilder.Entity("Domain.Aggregates.Roles.Role", b =>
                 {
-                    b.Navigation("RoleClaims");
+                    b.Navigation("RolePermissions");
 
                     b.Navigation("Users");
                 });

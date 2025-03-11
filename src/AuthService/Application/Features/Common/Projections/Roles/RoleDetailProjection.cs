@@ -2,5 +2,5 @@ namespace Application.Features.Common.Projections.Roles;
 
 public class RoleDetailProjection : RoleProjection
 {
-    public ICollection<RoleClaimDetailProjection>? RoleClaims { get; set; }
+    public ICollection<RolePermissionDetailProjection>? RoleClaims { get; set; }
 }

@@ -3,11 +3,8 @@ using System.Data.Common;
 using System.Reflection;
 using Application.Common.Interfaces.UnitOfWorks;
 using Ardalis.GuardClauses;
-using Domain.Common;
-using Infrastructure.Data.Configurations;
 using JohnChum.SharedKernel.Domain.Common;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Infrastructure.Data;

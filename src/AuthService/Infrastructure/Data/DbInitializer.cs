@@ -1,4 +1,4 @@
-using System.Data.Common;
+﻿using System.Data.Common;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Aggregates.Regions;
@@ -21,38 +21,55 @@ public class DbInitializer
         var roleManagerService = provider.GetRequiredService<IRoleManagerService>();
         var userManagerService = provider.GetRequiredService<IUserManagerService>();
         var logger = provider.GetRequiredService<ILogger>();
+        // 1. Insert Permissions if not exists
+        var permissionsInsert = Credential
+           .ADMIN_CLAIMS
+           .Select(x => new Permission
+           {
+               Key = x,
+               Description = Credential.PermissionGroups
+                   .FirstOrDefault(p => p.Value.Contains(x)).Key
+           })
+           .ToList();
 
-        Role adminRole =
-            new()
-            {
-                Id = Ulid.Parse(Credential.ADMIN_ROLE_ID),
-                Name = Credential.ADMIN_ROLE,
-                RoleClaims = Credential
-                    .ADMIN_CLAIMS.Select(x => new RoleClaim()
-                    {
-                        ClaimType = x.Key,
-                        ClaimValue = x.Value,
-                    })
-                    .ToList(),
-            };
+        // Insert nếu cần (check trước)
+        if (!await roleManagerService.Permissions.AnyAsync())
+        {
+            DbTransaction dbTransaction1 = await unitOfWork.CreateTransactionAsync();
+            await roleManagerService.Permissions.AddRangeAsync(permissionsInsert);
+            await unitOfWork.SaveAsync();
+            dbTransaction1.Commit();
+        }
 
-        Role managerRole =
-            new()
+        // 2. Lấy lại Permission từ DB theo key
+        var insertedPermissions = await roleManagerService.Permissions
+            .Where(p => Credential.ADMIN_CLAIMS.Contains(p.Key))
+            .ToListAsync();
+
+        // 3. Khởi tạo Role với Permission đã có ID đầy đủ
+        Role adminRole = new()
+        {
+            Id = Ulid.Parse(Credential.ADMIN_ROLE_ID),
+            Name = Credential.ADMIN_ROLE,
+            RolePermissions = insertedPermissions.Select(x => new RolePermission()
             {
-                Id = Ulid.Parse(Credential.MANAGER_ROLE_ID),
-                Name = Credential.MANAGER_ROLE,
-                RoleClaims = Credential
-                    .MANAGER_CLAIMS.Select(x => new RoleClaim()
-                    {
-                        ClaimType = x.Key,
-                        ClaimValue = x.Value,
-                    })
-                    .ToList(),
-            };
+                PermissionId = x.Id
+            }).ToList(),
+        };
+
+        Role managerRole = new()
+        {
+            Id = Ulid.Parse(Credential.MANAGER_ROLE_ID),
+            Name = Credential.MANAGER_ROLE,
+            RolePermissions = insertedPermissions.Select(x => new RolePermission()
+            {
+                PermissionId = x.Id
+            }).ToList(),
+        };
         Role[] roles = [adminRole, managerRole];
-
         try
         {
+
             DbTransaction dbTransaction = await unitOfWork.CreateTransactionAsync();
 
             if (!await roleManagerService.Roles.AnyAsync())
@@ -63,15 +80,15 @@ public class DbInitializer
             }
 
             List<string> permissions = [.. Credential.PermissionGroups.SelectMany(x => x.Value)];
-            List<string> managerPermissions = [.. Credential.MANAGER_CLAIMS.Select(x => x.Value)];
+            List<string> managerPermissions = [.. Credential.MANAGER_CLAIMS];
 
-            await UpdatePermissionAsync(permissions, adminRole, roleManagerService, logger);
-            await UpdatePermissionAsync(
-                managerPermissions,
-                managerRole,
-                roleManagerService,
-                logger
-            );
+            //await UpdatePermissionAsync(permissions, adminRole, roleManagerService, logger);
+            //await UpdatePermissionAsync(
+            //    managerPermissions,
+            //    managerRole,
+            //    roleManagerService,
+            //    logger
+            //);
 
             if (!await unitOfWork.Repository<User>().AnyAsync())
             {
@@ -79,7 +96,7 @@ public class DbInitializer
 
                 List<User> users = await InitializeUserDataAsync(unitOfWork, roles);
                 //users.ForEach(x => x.CreateDefaultUserClaims());
-                await unitOfWork.Repository<User>().AddRangeAsync(users);
+
                 await unitOfWork.SaveAsync();
 
                 foreach (var user in users)
@@ -112,7 +129,7 @@ public class DbInitializer
     {
         Role? processingRole = await roleManagerService
             .Roles.Where(x => x.Id == role.Id)
-            .Include(x => x.RoleClaims!.Where(p => p.ClaimType == "permission"))
+            .Include(x => x.RolePermissions!)!.ThenInclude(x => x.Permission)
             .FirstOrDefaultAsync();
 
         if (role == null)
@@ -120,27 +137,24 @@ public class DbInitializer
             return;
         }
 
-        List<RoleClaim> roleClaims = (List<RoleClaim>)processingRole!.RoleClaims!;
+        List<RolePermission> roleClaims = (List<RolePermission>)processingRole!.RolePermissions!;
 
-        var claimsToDelete = roleClaims.FindAll(x => !permissions.Contains(x.ClaimValue));
-        var claimsToInsert = permissions.FindAll(x => !roleClaims.Exists(p => p.ClaimValue == x));
+        var claimsToDelete = roleClaims.FindAll(x => !permissions.Contains(x.Permission!.Key));
+        var claimsToInsert = roleClaims.FindAll(x => !permissions.Exists(p => p == x.Permission!.Key));
 
         if (claimsToDelete.Count > 0)
         {
             await roleManagerService.RemoveClaimsFromRoleAsync(
                 role,
                 [
-                    .. claimsToDelete.Select(x => new KeyValuePair<string, string>(
-                        x.ClaimType,
-                        x.ClaimValue
-                    )),
+                    .. claimsToDelete.Select(x => x.PermissionId),
                 ]
             );
             logger.Information(
                 "deleting {count} claims of {roleName} inclde {data}",
                 claimsToDelete.Count,
                 role.Name,
-                string.Join(',', claimsToDelete.Select(x => x.ClaimValue))
+                string.Join(',', claimsToDelete.Select(x => x.Permission!.Key))
             );
         }
 
@@ -149,10 +163,9 @@ public class DbInitializer
             await roleManagerService.AddClaimsToRoleAsync(
                 role,
                 [
-                    .. claimsToInsert.Select(x => new KeyValuePair<string, string>(
-                        "permission",
-                        x
-                    )),
+                    .. claimsToInsert.Select(x =>
+                        x.PermissionId
+                    ),
                 ]
             );
             logger.Information(

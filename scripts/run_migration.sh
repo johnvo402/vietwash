@@ -1,13 +1,5 @@
 #!/bin/bash
 
-# Kiểm tra tham số truyền vào
-if [ -z "$1" ]; then
-    echo "Usage: $0 <AuthDb|ProductDb|\"AuthDb, ProductDb\">"
-    exit 1
-fi
-
-
-
 # Lấy ngày tháng năm giờ phút giây hiện tại
 current_datetime=$(date +"%Y%m%d%H%M%S")
 

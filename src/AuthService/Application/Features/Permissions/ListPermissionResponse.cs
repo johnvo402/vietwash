@@ -2,6 +2,6 @@ namespace Application.Features.Permissions;
 
 public class ListPermissionResponse
 {
-    public string? ClaimType { get; set; }
-    public string? ClaimValue { get; set; }
+    public string? Key { get; set; }
+    public string? Description { get; set; }
 }
