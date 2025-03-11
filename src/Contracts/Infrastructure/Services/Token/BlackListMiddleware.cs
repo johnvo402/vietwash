@@ -1,56 +1,104 @@
-
-using Application.Common.Exceptions;
+﻿using Application.Common.Exceptions;
 using Contracts.ApiWrapper;
 using Contracts.Application.Common.Interfaces.Services.Token;
+using Contracts.Dtos.Models;
+using Contracts.Dtos.Responses;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Contracts.Infrastructure.Services.Token
 {
-    public class BlackListMiddleware(RequestDelegate _next, IHttpContextAccessor httpContextAccessor, IServiceProvider serviceProvider)
+    public class BlackListMiddleware
     {
-        private readonly IServiceProvider serviceProvider = serviceProvider;
+        private readonly RequestDelegate _next;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public BlackListMiddleware(RequestDelegate next, IHttpContextAccessor httpContextAccessor, IServiceProvider serviceProvider)
+        {
+            _next = next;
+            _httpContextAccessor = httpContextAccessor;
+            _serviceProvider = serviceProvider;
+        }
 
         public async Task Invoke(HttpContext context)
         {
-            using var scope = serviceProvider.CreateScope();
+            using var scope = _serviceProvider.CreateScope();
+            var blacklistTokenService = scope.ServiceProvider.GetRequiredService<ITokenSecurityService>();
 
-            IBlacklistTokenService blacklistTokenService = scope.ServiceProvider.GetRequiredService<IBlacklistTokenService>();
+            var (token, nonce, signature, timestamp) = GetTokenFromHeader(context);
 
-            string? token = GetTokenFromHeader();
-            if (token != null)
+            if (token is null)
             {
-                bool isBlacklisted = await blacklistTokenService.IsTokenBlacklistedAsync(token!);
-                if (isBlacklisted)
+                await _next(context);
+                return;
+            }
+
+            string? env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            if (env != "Development")
+            {
+                if (nonce is null || signature is null || timestamp is null)
                 {
-
-                    var httpContext = httpContextAccessor.HttpContext;
-                    if (httpContext != null)
-                    {
-                        UnauthorizedException exception = new UnauthorizedException(Message.UNAUTHORIZED);
-                        int statusCode = exception.HttpStatusCode;
-                        httpContext.Response.StatusCode = statusCode;
-
-                        ErrorResponse error =
-                            new(exception.Message, nameof(UnauthorizedException), statusCode: statusCode);
-
-                        await httpContext.Response.WriteAsJsonAsync(error, error.GetOptions());
-                    }
+                    await ReturnUnauthorizedAsync(context);
                     return;
                 }
 
+                var tokenBinding = new TokenBinding
+                {
+                    Token = token,
+                    Nonce = nonce,
+                    Signature = signature,
+                    Timestamp = long.Parse(timestamp),
+                };
+
+                if (!await blacklistTokenService.VerifySignatureAsync(tokenBinding))
+                {
+                    await ReturnUnauthorizedAsync(context);
+                    return;
+                }
             }
+
+            var decodeToken = blacklistTokenService.DecodeToken(token);
+
+            bool isBlacklisted = await blacklistTokenService.IsTokenBlacklistedAsync(decodeToken.FamilyId!);
+            if (isBlacklisted)
+            {
+                await ReturnUnauthorizedAsync(context);
+                return;
+            }
+
             await _next(context);
         }
-        private string? GetTokenFromHeader()
+
+        private (string?, string?, string?, string?) GetTokenFromHeader(HttpContext context)
         {
-            var authorizationHeader = httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString();
-            if (!string.IsNullOrEmpty(authorizationHeader) && authorizationHeader.StartsWith("Bearer "))
+            var headers = context.Request.Headers;
+
+            var authorizationHeader = headers["Authorization"].FirstOrDefault();
+            var nonceHeader = headers["Nonce"].FirstOrDefault();
+            var signatureHeader = headers["Signature"].FirstOrDefault();
+            var timestampHeader = headers["Timestamp"].FirstOrDefault();
+
+            if (!string.IsNullOrEmpty(authorizationHeader) && authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
             {
-                return authorizationHeader["Bearer ".Length..].Trim();
+                var token = authorizationHeader["Bearer ".Length..].Trim();
+                return (token, nonceHeader, signatureHeader, timestampHeader);
             }
-            return null;
+
+            return (null, null, null, null);
+        }
+
+
+        private async Task ReturnUnauthorizedAsync(HttpContext context)
+        {
+            var exception = new UnauthorizedException(Message.UNAUTHORIZED);
+            int statusCode = exception.HttpStatusCode;
+            context.Response.StatusCode = statusCode;
+
+            var error = new ErrorResponse(exception.Message, nameof(UnauthorizedException), statusCode: statusCode);
+
+            await context.Response.WriteAsJsonAsync(error, error.GetOptions());
         }
     }
 }

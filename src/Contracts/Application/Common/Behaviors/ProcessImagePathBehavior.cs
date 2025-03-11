@@ -2,7 +2,6 @@ using System.Collections;
 using System.Reflection;
 using Application.Common.Interfaces.Services.Aws;
 using Application.Common.Security;
-using Contracts.Dtos.Responses;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
 using Mediator;
 using Serilog;

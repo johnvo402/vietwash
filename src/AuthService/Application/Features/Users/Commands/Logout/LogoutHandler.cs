@@ -9,7 +9,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Models;
 namespace Application.Features.Users.Commands.Logout;
 
-public class LogoutHandler(IBlacklistTokenService blacklistService,
+public class LogoutHandler(ITokenSecurityService blacklistService,
     ITokenFactory tokenFactory,
     IUnitOfWork unitOfWork)
     : IRequestHandler<LogoutCommand, LogoutResponse>
@@ -47,7 +47,7 @@ public class LogoutHandler(IBlacklistTokenService blacklistService,
             if (jwtToken != null)
             {
                 var expiry = jwtToken.ValidTo - DateTime.UtcNow;
-                await blacklistService.AddToBlacklistAsync(command.Token, expiry);
+                await blacklistService.AddToBlacklistAsync(decodeToken.FamilyId!, expiry);
             }
 
         }

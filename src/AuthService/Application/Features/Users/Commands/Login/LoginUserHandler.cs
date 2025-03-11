@@ -1,8 +1,7 @@
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using Application.Common.Auth;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.Services.DistributedCache;
 using Application.Common.Interfaces.Services.Token;
 using Application.Common.Interfaces.UnitOfWorks;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
@@ -10,19 +9,23 @@ using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using StackExchange.Redis;
 using Wangkanai.Detection.Services;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Extensions;
 using SerializerExtension = JohnChum.SharedKernel.SpecificationQuery.LHS.Extensions.SerializerExtension;
+using Contracts.Application.Common.Interfaces.Services.Token;
+using Contracts.Dtos.Responses;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Application.Features.Users.Commands.Login;
+
+// ... other using statements
 
 public class LoginUserHandler(
     IUnitOfWork unitOfWork,
     ITokenFactory tokenFactory,
     IDetectionService detectionService,
     ICurrentUser currentUser,
-    IRedisCacheService cache
+    ITokenSecurityService securityService
     ) : IRequestHandler<LoginUserCommand, LoginUserResponse>
 {
     public async ValueTask<LoginUserResponse> Handle(
@@ -70,12 +73,24 @@ public class LoginUserHandler(
         };
 
         var accesstokenExpiredTime = tokenFactory.AccesstokenExpiredTime;
+        var cnfRequest = new TokenCnfModel
+        {
+            Jwk = new JwkModel
+            {
+                Kty = request.PublicKey!.Kty!,
+                Crv = request!.PublicKey!.Crv,
+                X = request.PublicKey.X,
+                Y = request.PublicKey.Y
+            }
+        };
+
 
         string accessToken = tokenFactory.CreateToken(
              [
                 new("family_id", familyId),
                 new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             ],
+             cnfRequest,
             accesstokenExpiredTime
         );
 
@@ -84,6 +99,7 @@ public class LoginUserHandler(
                 new("family_id", familyId),
                 new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             ],
+            cnf: null,
             refreshExpireTime
         );
 
@@ -100,12 +116,7 @@ public class LoginUserHandler(
             Permissions = user.Role.RoleClaims?.Select(p => p.ClaimValue).ToList(),
         };
         var result = SerializerExtension.Serialize(value!);
-        _ = await cache.Database.StringSetAsync(
-            user?.Id.ToString(),
-            result.StringJson,
-            (refreshExpireTime - DateTime.UtcNow),
-            when: When.Always
-        );
+        await securityService.AddSessionUserAsync(user.Id, result.StringJson, (refreshExpireTime - DateTime.UtcNow));
         return new()
         {
             Token = accessToken,

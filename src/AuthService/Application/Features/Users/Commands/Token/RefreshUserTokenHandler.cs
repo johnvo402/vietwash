@@ -84,6 +84,7 @@ public class LogoutHandler(
                 new(JwtRegisteredClaimNames.Sub.ToString(), decodeToken.Sub!.ToString()),
                 new("family_id", decodeToken.FamilyId!)
             ],
+            cnf: decodeToken.Cnf,
             accesstokenExpiredTime
         );
 
@@ -92,12 +93,9 @@ public class LogoutHandler(
         string refreshToken = tokenFactory.CreateToken(
             [
                 new(JwtRegisteredClaimNames.Sub.ToString(), decodeToken.Sub!.ToString()),
-                new("family_id", decodeToken.FamilyId!),
-                new(
-                    JwtRegisteredClaimNames.UniqueName,
-                    DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()
-                ),
+                new("family_id", decodeToken.FamilyId!)
             ],
+            cnf: null,
             refreshTokenExpiredTime
         );
 

@@ -31,10 +31,10 @@ run_migration() {
 for db in "$@"; do
     db=$(echo "$db" | xargs)  # Trim any leading/trailing spaces
 
-    if [ "$db" == "AuthDb" ]; then
-        run_migration "AuthDb" "src/AuthService/Infrastructure" "src/AuthService/Presentation"
-    elif [ "$db" == "ProductDb" ]; then
-        run_migration "ProductDb" "src/ProductService/ProductService.Infrastructure" "src/ProductService/ProductService.API"
+    if [ "$db" == "Auth" ]; then
+        run_migration "Auth" "src/AuthService/Infrastructure" "src/AuthService/Presentation"
+    elif [ "$db" == "Project" ]; then
+        run_migration "Project" "src/ProjectService/Infrastructure" "src/ProjectService/Presentation"
     else
         echo "Unknown database: $db"
         exit 1

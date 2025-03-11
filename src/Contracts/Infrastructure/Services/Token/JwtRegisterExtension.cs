@@ -25,7 +25,7 @@ public static class JwtRegisterExtension
             .GetSection($"SecuritySettings:{nameof(JwtSettings)}")
             .Get<JwtSettings>();
 
-        services.AddSingleton<IBlacklistTokenService, BlacklistTokenService>();
+        services.AddSingleton<ITokenSecurityService, TokenSecurityService>();
 
         return services
             .AddAuthentication(authentication =>

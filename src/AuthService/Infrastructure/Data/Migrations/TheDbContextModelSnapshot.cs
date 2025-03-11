@@ -23,55 +23,6 @@ namespace Infrastructure.Data.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "citext");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Domain.Aggregates.QueueLogs.QueueLog", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("id");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("created_by");
-
-                    b.Property<object>("ErrorDetail")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("error_detail");
-
-                    b.Property<int>("ProcessedBy")
-                        .HasColumnType("integer")
-                        .HasColumnName("processed_by");
-
-                    b.Property<object>("Request")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("request");
-
-                    b.Property<Guid>("RequestId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("request_id");
-
-                    b.Property<int>("RetryCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("retry_count");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by");
-
-                    b.HasKey("Id")
-                        .HasName("pk_queue_log");
-
-                    b.ToTable("queue_log", (string)null);
-                });
-
             modelBuilder.Entity("Domain.Aggregates.Regions.Commune", b =>
                 {
                     b.Property<string>("Id")

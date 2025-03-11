@@ -9,7 +9,7 @@ services:
       - "6379:6379"
 
   auth-service:
-    image: mcr.microsoft.com/dotnet/sdk:9.0
+    image: mcr.microsoft.com/dotnet/sdk:8.0
     ports:
       - "5001:8080"
     volumes:
@@ -33,15 +33,15 @@ services:
     restart: always
 
   gateway:
-    image: mcr.microsoft.com/dotnet/sdk:9.0
+    image: mcr.microsoft.com/dotnet/sdk:8.0
     ports:
       - "5000:8080"
     volumes:
       - ./src/ApiGateway:/app/ApiGateway:ro
-      - ./src/Shared:/app/Shared:ro
+      - ./src/Contracts:/app/Contracts:ro
       - nuget_cache:/root/.nuget/packages:cached
-      - /app/Shared/bin/
-      - /app/Shared/obj/
+      - /app/Contracts/bin/
+      - /app/Contracts/obj/
       - /app/ApiGateway/bin/
       - /app/ApiGateway/obj/
     environment:

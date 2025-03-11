@@ -1,12 +1,7 @@
-﻿using Application.Common.Exceptions;
-using Application.Common.Interfaces.Services;
+﻿using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.DistributedCache;
-using Contracts.ApiWrapper;
-using Contracts.Application.Common.Interfaces.Services.Token;
 using JohnChum.SharedKernel.Extensions;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 

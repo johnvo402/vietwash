@@ -40,8 +40,6 @@ public static class RedisRegisterExtension
                     options.ServicesStartConcurrently = true;
                     options.ServicesStopConcurrently = true;
                 }).AddSingleton<IQueueFactory, QueueFactory>()
-                .AddHostedService<QueueBackgroundService>()
-                .AddHostedService<DeadletterQueueBackgroundService>()
                 .AddSingleton<IRedisCacheService, RedisCacheService>()
                 .AddSingleton<IQueueService, QueueService>()
                 .AddSingleton<IQueueService, DeadLetterQueueService>();

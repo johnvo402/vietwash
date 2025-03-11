@@ -42,12 +42,6 @@ namespace Presentation.Routes
             public const string Tags = $"{nameof(Permissions)} endpoint";
         }
 
-        public static class AuditLogRoute
-        {
-            public const string AuditLog = $"{RouterBase.prefix}{nameof(AuditLog)}";
-            public const string Tags = $"{nameof(AuditLog)} endpoint";
-        }
-
         public static class RegionRoute
         {
             public const string Provinces = $"{RouterBase.prefix}{nameof(Provinces)}";
