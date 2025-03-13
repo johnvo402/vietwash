@@ -77,15 +77,15 @@ public class User : AggregateRoot
 
     public void UpdateAddress(Address address) => Address = address;
 
-    public void UpdateDefaultUserClaims() =>
-        Emit(new UpdateDefaultUserClaimEvent() { User = this });
+    public void CreateUser() =>
+        Emit(new UserCreateEvent() { User = this });
 
     protected override bool TryApplyDomainEvent(INotification domainEvent)
     {
         switch (domainEvent)
         {
-            case UpdateDefaultUserClaimEvent:
-                //ApplyUpdateDefaultUserClaim();
+            case UserCreateEvent:
+                //CreateUser();
                 return true;
             default:
                 return false;

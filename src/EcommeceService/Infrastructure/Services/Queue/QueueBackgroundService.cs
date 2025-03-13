@@ -1,5 +1,7 @@
 using Application.Common.Interfaces.Services.DistributedCache;
+using Application.Features.Users.Commands.Create;
 using Contracts.Application.Common.Interfaces.Services.Queue;
+using Contracts.Dtos.Models;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.QueueLogs;
 using Mediator;
@@ -8,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using ProjectService_gRPC;
 using Serilog;
+using QueueType = Domain.Aggregates.QueueLogs.QueueType;
 
 namespace Infrastructure.Services.DistributedCache;
 
@@ -22,30 +25,44 @@ public class QueueBackgroundService(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using IServiceScope scope = serviceProvider.CreateScope();
-        ISender sender = scope.ServiceProvider.GetRequiredService<ISender>();
         ILogger logger = scope.ServiceProvider.GetRequiredService<ILogger>();
-
         List<Task> runningTasks = new();
 
         while (!stoppingToken.IsCancellationRequested)
         {
+            IQueueService originQueue = queueFactory.GetQueue(QueueType.OriginQueue);
+
+            if (!await originQueue.PingAsync())
+            {
+                logger.Warning("Redis server has shut down");
+                continue;
+            }
             bool hasWork = false;
 
             for (int i = 0; i < 5; i++)
             {
-                // PayCartPayload? request = await queueFactory
-                //     .GetQueue(QueueType.OriginQueue)
-                //     .DequeueAsync<PayCartPayload, PayCartRequest>();
+                CreateUserCommand? request = await queueFactory
+                    .GetQueue(QueueType.OriginQueue)
+                    .DequeueAsync<CreateUserCommand, CreateUserCommand>();
 
-                // if (request != null)
-                // {
-                //     hasWork = true;
-                //     var task = Task.Run(() =>
-                //         ProcessWithRetryAsync<PayCartPayload, PayCartResponse>(
-                //             request, sender, logger, stoppingToken), stoppingToken);
-                //     runningTasks.Add(task);
-                // }
+                if (request != null)
+                {
+                    hasWork = true;
+                    var task = Task.Run(async () =>
+                    {
+                        using var taskScope = serviceProvider.CreateScope();
+                        var taskSender = taskScope.ServiceProvider.GetRequiredService<ISender>();
+                        var taskLogger = taskScope.ServiceProvider.GetRequiredService<ILogger>();
+                        var taskGrpcClient = taskScope.ServiceProvider.GetRequiredService<IQueueLogService>();
+                        var taskQueue = queueFactory.GetQueue(QueueType.OriginQueue);
+
+                        await ProcessWithRetryAsync<CreateUserCommand, CreateUserCommand>(
+                            request, taskSender, taskGrpcClient, taskLogger, taskQueue, stoppingToken);
+                    }, stoppingToken);
+                    runningTasks.Add(task);
+                }
             }
+
 
             if (!hasWork)
             {
@@ -77,8 +94,15 @@ public class QueueBackgroundService(
 
         while (attempt <= maximumRetryAttempt)
         {
-            queueResponse =
+            try
+            {
+                queueResponse =
                 await sender.Send(request, cancellationToken) as QueueResponse<TResponse>;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Error while processing request {payloadId}", queueResponse.PayloadId);
+            }
 
             // sucess case
             if (queueResponse!.IsSuccess)
@@ -148,7 +172,7 @@ public class QueueBackgroundService(
                 ProcessedBy = ProjectService_gRPC.QueueType.OriginQueue,
                 RetryCount = queueResponse.RetryCount
             };
-   
+
             await queueService.EnqueueAsync(request);
             await _grpcClient.CreateLogAsync(requestLog, cancellationToken);
 

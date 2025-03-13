@@ -2,7 +2,7 @@
 
 namespace Domain.Aggregates.Services
 {
-    public class GroupService
+    public class GroupService : DefaultEntity
     {
         public Ulid ServiceId { get; set; }
         public Ulid GroupId { get; set; }

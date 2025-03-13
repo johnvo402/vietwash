@@ -2,7 +2,6 @@ using System.Data;
 using System.Data.Common;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using Ardalis.GuardClauses;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +28,7 @@ public class UserManagerService(
                 await context.DatabaseFacade.BeginTransactionAsync();
 
             await userContext.AddAsync(user);
+
             await context.SaveChangesAsync();
 
             if (!isOwnerTransaction)
@@ -44,6 +44,8 @@ public class UserManagerService(
                 ex.Message,
                 ex.StackTrace
             );
+            user.DequeueUncommittedEvents();
+
 
             if (!isOwnerTransaction)
                 await context.DatabaseFacade.RollbackTransactionAsync();

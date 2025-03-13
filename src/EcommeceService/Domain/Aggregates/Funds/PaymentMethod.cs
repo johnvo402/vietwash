@@ -8,8 +8,6 @@ namespace Domain.Aggregates.Funds
     {
         public string Name { get; set; } = default!;
 
-        public virtual OrderPayment OrderPayment { get; set; } = default!;
-
         public ICollection<Fund> Funds { get; set; } = [];
 
     }

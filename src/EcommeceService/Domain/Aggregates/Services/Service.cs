@@ -9,11 +9,11 @@ namespace Domain.Aggregates.Services
         public string? Description { get; set; }
         public string? Image { get; set; }
         public bool Disable { get; set; } = default!;
-        public string CategoryId { get; set; } = default!;
-        public virtual Category Category { get; set; } = default!;
-        public virtual ICollection<OrderItem> OrderItems { get; set; } = [];
-        public virtual ICollection<UnitRelation> UnitRelations { get; set; } = [];
-        public virtual ICollection<GroupService> GroupServices { get; set; } = [];
+        public Ulid CategoryId { get; set; } = default!;
+        public Category Category { get; set; } = default!;
+        public ICollection<OrderItem> OrderItems { get; set; } = [];
+        public ICollection<UnitRelation> UnitRelations { get; set; } = [];
+        public ICollection<GroupService> GroupServices { get; set; } = [];
 
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {

@@ -8,7 +8,7 @@ namespace Domain.Aggregates.Services
         public Ulid ServiceId { get; set; }
         public Ulid UnitId { get; set; }
         public bool BaseUnit { get; set; }
-        public long Price { get; set; }
+        public decimal Price { get; set; }
 
         public Service Service { get; set; } = default!;
         public Unit Unit { get; set; } = default!;

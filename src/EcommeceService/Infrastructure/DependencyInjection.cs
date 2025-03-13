@@ -117,6 +117,7 @@ public static class DependencyInjection
             .AddJwtAuth(configuration)
             .AddMemoryCache()
             .AddRedis(configuration)
+            .QueueLogClient()
             .AddHostedService<QueueBackgroundService>()
             .AddHostedService<DeadletterQueueBackgroundService>()
             .Configure<CacheSettings>(options =>

@@ -60,7 +60,6 @@ public class UpdateUserHandler(
         string? key = mediaUpdateService.GetKey(avatar);
         user.Avatar = await mediaUpdateService.UploadAvatarAsync(avatar, key);
         // update default claim
-        user.UpdateDefaultUserClaims();
 
         try
         {

@@ -3,14 +3,10 @@ using Mediator;
 
 namespace Domain.Aggregates.Services
 {
-    public class Category : AggregateRoot
+    public class Category : BaseEntity
     {
-
-        string Name { get; set; } = default!;
-        public virtual ICollection<Service> Services { get; set; } = [];
-        protected override bool TryApplyDomainEvent(INotification domainEvent)
-        {
-            throw new NotImplementedException();
-        }
+        public string Name { get; set; } = default!;
+        public ICollection<Service> Services { get; set; } = [];
+        
     }
 }

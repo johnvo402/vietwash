@@ -5,6 +5,6 @@ namespace Domain.Aggregates.Funds
     public class FundType : DefaultEntity<string>
     {
         public string Name { get; set; } = default!;
-
+        public ICollection<Fund> Funds { get; set; } = [];
     }
 }

@@ -9,20 +9,20 @@ namespace Domain.Aggregates.Orders
     {
 
         public string Code { get; set; } = default!;
-        public long Amount { get; set; } = default!;
-        public long Total { get; set; } = default!;
+        public decimal Amount { get; set; } = default!;
+        public decimal Total { get; set; } = default!;
         public bool DiscountType { get; set; } = default!;
-        public double DiscountValue { get; set; } = default!;
-        public Ulid CustomerId { get; set; } = default!;
+        public decimal DiscountValue { get; set; } = default!;
+        public Ulid? CustomerId { get; set; }
         public string Note { get; set; } = default!;
         public string Status { get; set; } = default!;
+        public DateTimeOffset OrderDate { get; set; } = default!;
         public string PaymentMethodId { get; set; } = default!;
+        public PaymentMethod? PaymentMethod { get; set; }
+        public ICollection<OrderPayment> OrderPayments { get; set; } = [];
+        public User? Customer { get; set; }
 
-        public virtual OrderPayment OrderPayment { get; set; }=default!;
-        public virtual User User { get; set; }=default!;
-
-        public virtual ICollection<OrderItem> OrderItems { get; set; } = [];
-
+        public ICollection<OrderItem> OrderItems { get; set; } = [];
 
 
         protected override bool TryApplyDomainEvent(INotification domainEvent)

@@ -28,7 +28,7 @@ for db in "$@"; do
     elif [ "$db" == "Project" ]; then
         run_migration "Project" "src/ProjectService/Infrastructure" "src/ProjectService/Presentation"
     elif [ "$db" == "Ecommerce" ]; then
-        run_migration "Project" "src/EcommerceService/Infrastructure" "src/EcommerceService/Presentation"
+        run_migration "Project" "src/EcommeceService/Infrastructure" "src/EcommeceService/Presentation"
     
     else
         echo "Unknown database: $db"

@@ -1,6 +1,5 @@
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Users.Enums; 
-using Domain.Aggregates.Users.ValueObjects;
 using JohnChum.SharedKernel.Domain.Common; 
 
 namespace Domain.Aggregates.Users;
@@ -20,9 +19,6 @@ public class User : BaseEntity
     public DateTime? DayOfBirth { get; set; }
 
     public Gender? Gender { get; set; }
-
-    public Address? Address { get; private set; }
-
     public string? Avatar { get; set; }
 
     public UserStatus Status { get; set; } = UserStatus.Active;
@@ -39,8 +35,7 @@ public class User : BaseEntity
         string password,
         string email,
         string phoneNumber,
-        Ulid roleId,
-        Address? address = null
+        Ulid roleId
     )
     {
         FirstName = Guard.Against.NullOrEmpty(firstName, nameof(FirstName));
@@ -49,7 +44,6 @@ public class User : BaseEntity
 
         Email = Guard.Against.Null(email, nameof(Email));
         PhoneNumber = Guard.Against.Null(phoneNumber, nameof(PhoneNumber));
-        Address = address;
         RoleId = roleId;
     }
 
@@ -64,8 +58,5 @@ public class User : BaseEntity
         RoleId = new Ulid();
     }
 
-
-
-    public void UpdateAddress(Address address) => Address = address;
 
 }

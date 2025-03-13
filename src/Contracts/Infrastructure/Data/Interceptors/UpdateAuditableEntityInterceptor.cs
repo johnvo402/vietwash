@@ -37,7 +37,7 @@ public class UpdateAuditableEntityInterceptor(ElasticsearchClient elasticsearchC
     {
         DateTimeOffset currentTime = DateTimeOffset.UtcNow;
         var entities = context.ChangeTracker.Entries()
-            .Where(e => e.Entity is BaseEntity || e.Entity is AggregateRoot);
+            .Where(e => e.Entity is BaseEntity || e.Entity is AggregateRoot).ToList();
 
 
         foreach (EntityEntry entry in entities)
