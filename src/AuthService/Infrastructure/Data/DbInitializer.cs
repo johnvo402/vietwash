@@ -19,7 +19,6 @@ public class DbInitializer
     {
         var unitOfWork = provider.GetRequiredService<IUnitOfWork>();
         var roleManagerService = provider.GetRequiredService<IRoleManagerService>();
-        var userManagerService = provider.GetRequiredService<IUserManagerService>();
         var logger = provider.GetRequiredService<ILogger>();
         // 1. Insert Permissions if not exists
         var permissionsInsert = Credential
@@ -35,10 +34,7 @@ public class DbInitializer
         // Insert nếu cần (check trước)
         if (!await roleManagerService.Permissions.AnyAsync())
         {
-            DbTransaction dbTransaction1 = await unitOfWork.CreateTransactionAsync();
             await roleManagerService.Permissions.AddRangeAsync(permissionsInsert);
-            await unitOfWork.SaveAsync();
-            dbTransaction1.Commit();
         }
 
         // 2. Lấy lại Permission từ DB theo key
@@ -67,45 +63,35 @@ public class DbInitializer
             }).ToList(),
         };
         Role[] roles = [adminRole, managerRole];
+        if (!await roleManagerService.Roles.AnyAsync())
+        {
+            logger.Information("Inserting roles is starting.............");
+            await roleManagerService.CreateRangeRoleAsync(roles);
+            logger.Information("Inserting roles has finished.............");
+        }
+
+        List<string> permissions = [.. Credential.PermissionGroups.SelectMany(x => x.Value)];
+        List<string> managerPermissions = [.. Credential.MANAGER_CLAIMS];
         try
         {
-
             DbTransaction dbTransaction = await unitOfWork.CreateTransactionAsync();
 
-            if (!await roleManagerService.Roles.AnyAsync())
-            {
-                logger.Information("Inserting roles is starting.............");
-                await roleManagerService.CreateRangeRoleAsync(roles);
-                logger.Information("Inserting roles has finished.............");
-            }
-
-            List<string> permissions = [.. Credential.PermissionGroups.SelectMany(x => x.Value)];
-            List<string> managerPermissions = [.. Credential.MANAGER_CLAIMS];
-
-            //await UpdatePermissionAsync(permissions, adminRole, roleManagerService, logger);
-            //await UpdatePermissionAsync(
-            //    managerPermissions,
-            //    managerRole,
-            //    roleManagerService,
-            //    logger
-            //);
 
             if (!await unitOfWork.Repository<User>().AnyAsync())
             {
                 logger.Information("Seeding user data is starting.............");
 
                 List<User> users = await InitializeUserDataAsync(unitOfWork, roles);
-                //users.ForEach(x => x.CreateDefaultUserClaims());
 
-                await unitOfWork.SaveAsync();
+              
 
                 foreach (var user in users)
                 {
                     user.CreateUser();
-                    await userManagerService.CreateUserAsync(
-                        user,
-                        transaction: dbTransaction
+                    await unitOfWork.Repository<User>().AddAsync(
+                        user
                     );
+                    await unitOfWork.SaveAsync();
                 }
 
                 logger.Information("Seeding user data has finished.............");
@@ -117,63 +103,6 @@ public class DbInitializer
             await unitOfWork.RollbackAsync();
             logger.Information("error had occured while seeding data with {message}", ex);
             throw;
-        }
-    }
-
-    private static async Task UpdatePermissionAsync(
-        List<string> permissions,
-        Role role,
-        IRoleManagerService roleManagerService,
-        ILogger logger
-    )
-    {
-        Role? processingRole = await roleManagerService
-            .Roles.Where(x => x.Id == role.Id)
-            .Include(x => x.RolePermissions!)!.ThenInclude(x => x.Permission)
-            .FirstOrDefaultAsync();
-
-        if (role == null)
-        {
-            return;
-        }
-
-        List<RolePermission> roleClaims = (List<RolePermission>)processingRole!.RolePermissions!;
-
-        var claimsToDelete = roleClaims.FindAll(x => !permissions.Contains(x.Permission!.Key));
-        var claimsToInsert = roleClaims.FindAll(x => !permissions.Exists(p => p == x.Permission!.Key));
-
-        if (claimsToDelete.Count > 0)
-        {
-            await roleManagerService.RemoveClaimsFromRoleAsync(
-                role,
-                [
-                    .. claimsToDelete.Select(x => x.PermissionId),
-                ]
-            );
-            logger.Information(
-                "deleting {count} claims of {roleName} inclde {data}",
-                claimsToDelete.Count,
-                role.Name,
-                string.Join(',', claimsToDelete.Select(x => x.Permission!.Key))
-            );
-        }
-
-        if (claimsToInsert.Count > 0)
-        {
-            await roleManagerService.AddClaimsToRoleAsync(
-                role,
-                [
-                    .. claimsToInsert.Select(x =>
-                        x.PermissionId
-                    ),
-                ]
-            );
-            logger.Information(
-                "inserting {count} claims of {roleName} inclde {data}",
-                claimsToInsert.Count,
-                role.Name,
-                string.Join(',', claimsToInsert)
-            );
         }
     }
 

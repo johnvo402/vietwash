@@ -4,6 +4,7 @@ using Contracts.ApiWrapper;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Contracts.RouteResults;
 
@@ -14,6 +15,8 @@ public static class Results
 
     public static ActionResult<ApiResponse> Created201(this ControllerBase controller, string routeName, Ulid id, object? data = null) =>
         controller.CreatedAtRoute(routeName, new { id }, data);
+    public static ActionResult<ApiResponse> Created201(this ControllerBase controller) =>
+         controller.ToActionResult(new Result<ApiResponse>(new ApiResponse(null, Message.SUCCESS, StatusCodes.Status201Created)));
 
     public static ActionResult NoContent204(this ControllerBase controller) =>
         controller.NoContent();

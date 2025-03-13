@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Services.gRPC;
@@ -12,17 +13,12 @@ public static class GRPCRegisterExtension
         return services;
     }
 
-    public static IApplicationBuilder UseGrpcEndpoints(this IApplicationBuilder app)
+    public static IEndpointRouteBuilder UseGrpcEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        app.UseRouting();
-
-        app.UseEndpoints(endpoints =>
-        {
+       
             // endpoints.MapGrpcService<QueueLogServiceHandler>();
             endpoints.MapGrpcReflectionService();        
 
-        });
-
-        return app;
+        return endpoints;
     }
 }

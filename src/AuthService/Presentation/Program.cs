@@ -1,4 +1,3 @@
-using Presentation.Converters;
 using Presentation.Extensions;
 using Application;
 using HealthChecks.UI.Client;
@@ -8,7 +7,8 @@ using Infrastructure.Services.Hangfires;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
 using Infrastructure.Services.BackgroundJobs;
-using Contracts.Infrastructure.Services.Token;
+using Contracts.Extensions;
+using Contracts.Converters;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -85,8 +85,8 @@ try
     app.UseSerilogRequestLogging();
     app.LogContext();
     app.ExceptionHandler();
+    app.BlackListContext();
     app.MapControllers();
-    app.UseMiddleware<BlackListMiddleware>();
     Log.Logger.Information(
         "Application is launching with {environment}",
         app.Environment.EnvironmentName
