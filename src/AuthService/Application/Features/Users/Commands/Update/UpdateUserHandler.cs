@@ -6,7 +6,6 @@ using AutoMapper;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
 using Microsoft.AspNetCore.Http;
@@ -16,8 +15,7 @@ namespace Application.Features.Users.Commands.Update;
 public class UpdateUserHandler(
     IUnitOfWork unitOfWork,
     IMapper mapper,
-    IMediaUpdateService<User> mediaUpdateService,
-    IUserManagerService userManagerService
+    IMediaUpdateService<User> mediaUpdateService
 ) : IRequestHandler<UpdateUserCommand, UpdateUserResponse>
 {
     public async ValueTask<UpdateUserResponse> Handle(
@@ -68,11 +66,6 @@ public class UpdateUserHandler(
             await unitOfWork.Repository<User>().UpdateAsync(user);
             await unitOfWork.SaveAsync(cancellationToken);
 
-
-            await userManagerService.UpdateUserAsync(
-                user,
-                transaction
-            );
             await unitOfWork.CommitAsync(cancellationToken);
 
             await mediaUpdateService.DeleteAvatarAsync(oldAvatar);

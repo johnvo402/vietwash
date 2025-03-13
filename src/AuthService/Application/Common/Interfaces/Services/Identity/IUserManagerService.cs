@@ -11,16 +11,7 @@ public interface IUserManagerService : IScope
 
     public DbSet<Role> Roles { get; }
 
-
-    Task CreateUserAsync(
-        User user,
-        DbTransaction? transaction = null
-    );
-
-    Task UpdateUserAsync(
-        User user,
-        DbTransaction? transaction = null
-    );
+    public DbSet<User> Users { get; }
 
     Task<Role> GetRolesInUser(Ulid userId);
 

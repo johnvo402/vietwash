@@ -1,15 +1,14 @@
-using Presentation.Converters;
 using Presentation.Extensions;
 using Application;
 using HealthChecks.UI.Client;
 using Infrastructure;
-using Infrastructure.Data;
 using Infrastructure.Services.Hangfires;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
 using Infrastructure.Services.BackgroundJobs;
-using Contracts.Infrastructure.Services.Token;
 using Infrastructure.Services.gRPC;
+using Contracts.Extensions;
+using Contracts.Converters;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -18,7 +17,7 @@ services.AddScoped<JobScheduler>();
 #region main dependencies
 builder.AddConfiguration();
 
-builder.Services.AddGrpc();
+builder.Services.AddGrpcServices();
 builder
     .Services.AddControllers()
     .AddJsonOptions(option =>
@@ -28,7 +27,7 @@ builder
         option.JsonSerializerOptions.Converters.Add(
             new Cysharp.Serialization.Json.UlidJsonConverter()
         );
-       
+
     });
 services.AddSwagger(configuration);
 builder.AddOpenTelemetryTracing(configuration);
@@ -45,10 +44,7 @@ try
 {
     Log.Logger.Information("Application is starting....");
     var app = builder.Build();
-    app.MapHealthChecks(
-        "/api/health",
-        new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }
-    );
+   
 
     bool isDevelopment = app.Environment.IsDevelopment();
     bool isStaging = app.Environment.IsStaging();
@@ -81,9 +77,12 @@ try
     app.UseSerilogRequestLogging();
     app.LogContext();
     app.ExceptionHandler();
+    app.BlackListContext();
     app.MapControllers();
-    app.UseMiddleware<BlackListMiddleware>();
-
+    app.MapHealthChecks(
+       "/api/health",
+       new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }
+   );
     Log.Logger.Information(
         "Application is launching with {environment}",
         app.Environment.EnvironmentName

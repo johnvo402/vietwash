@@ -4,7 +4,6 @@ using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
 
@@ -13,8 +12,7 @@ namespace Application.Features.Users.Commands.Create;
 public class CreateUserHandler(
     IUnitOfWork unitOfWork,
     IMapper mapper,
-    IMediaUpdateService<User> mediaUpdateService,
-    IUserManagerService userManagerService
+    IMediaUpdateService<User> mediaUpdateService
 ) : IRequestHandler<CreateUserCommand, CreateUserResponse>
 {
     public async ValueTask<CreateUserResponse> Handle(
@@ -56,11 +54,6 @@ public class CreateUserHandler(
             userAvatar = user.Avatar;
 
             await unitOfWork.SaveAsync(cancellationToken);
-
-            await userManagerService.CreateUserAsync(
-                user,
-                transaction
-            );
 
             await unitOfWork.CommitAsync(cancellationToken);
 
