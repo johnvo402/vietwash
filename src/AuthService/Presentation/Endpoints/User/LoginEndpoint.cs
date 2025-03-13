@@ -10,11 +10,11 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Presentation.Endpoints.User;
 
 public class LoginEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<LoginUserCommand>.WithActionResult<ApiResponse>
+    : EndpointBaseAsync.WithRequest<LoginUserCommand>.WithActionResult<ApiResponse<LoginUserResponse>>
 {
     [HttpPost(Router.UserRoute.Login)]
     [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "Logging in User")]
-    public override async Task<ActionResult<ApiResponse>> HandleAsync(
+    public override async Task<ActionResult<ApiResponse<LoginUserResponse>>> HandleAsync(
         LoginUserCommand request,
         CancellationToken cancellationToken = default
     ) => this.Ok200(await sender.Send(request, cancellationToken));

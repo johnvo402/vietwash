@@ -12,13 +12,13 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Presentation.Endpoints.Roles;
 
 public class ListRoleEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<ListRoleQuery>.WithActionResult<ApiResponse>
+    : EndpointBaseAsync.WithRequest<ListRoleQuery>.WithActionResult<ApiResponse<IEnumerable<ListRoleResponse>>>
 {
     [HttpGet(Router.RoleRoute.Roles)]
     [SwaggerOperation(Tags = [Router.RoleRoute.Tags], Summary = "List Role")]
     [AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.role}")]
-    public override async Task<ActionResult<ApiResponse>> HandleAsync(
+    public override async Task<ActionResult<ApiResponse<IEnumerable<ListRoleResponse>>>> HandleAsync(
         [FromQuery] ListRoleQuery request,
         CancellationToken cancellationToken = default
-    ) => new ApiResponse(await sender.Send(request, cancellationToken), Message.SUCCESS);
+    ) => new ApiResponse<IEnumerable<ListRoleResponse>>(await sender.Send(request, cancellationToken), Message.SUCCESS);
 }

@@ -12,15 +12,15 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Presentation.Endpoints.Services
 {
     public class CreateServiceEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<CreateServiceCommand>.WithActionResult<ApiResponse>
+    : EndpointBaseAsync.WithRequest<CreateServiceCommand>.WithActionResult<ApiResponse<Unit>>
     {
         [HttpPost(Router.ServiceRoute.Services)]
         [SwaggerOperation(Tags = [Router.ServiceRoute.Tags], Summary = "create Service")]
         [AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.user}")]
-        public override async Task<ActionResult<ApiResponse>> HandleAsync(
+        public override async Task<ActionResult<ApiResponse<Unit>>> HandleAsync(
             [FromBody]CreateServiceCommand request, CancellationToken cancellationToken = default)
         {
-            CreateServiceResponse user = await sender.Send(request, cancellationToken);
+            var user = await sender.Send(request, cancellationToken);
             return this.Created201();
         }
     }

@@ -3,5 +3,5 @@ using Mediator;
 
 namespace Application.Feature.Services.Command.Create
 {
-    public class CreateServiceCommand : ServiceModel, IRequest<CreateServiceResponse>;
+    public class CreateServiceCommand : ServiceModel, IRequest;
 }

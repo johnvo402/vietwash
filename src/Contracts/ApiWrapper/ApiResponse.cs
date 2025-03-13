@@ -2,13 +2,13 @@ using Microsoft.AspNetCore.Http;
 
 namespace Contracts.ApiWrapper;
 
-public class ApiResponse : ApiBaseResponse
+public class ApiResponse<T> : ApiBaseResponse
 {
-    public object? Results { get; set; }
+    public T? Results { get; set; }
 
     public ApiResponse() { }
 
-    public ApiResponse(object result, string message, int? statusCode = StatusCodes.Status200OK)
+    public ApiResponse(T? result, string message, int? statusCode = StatusCodes.Status200OK)
     {
         Results = result;
 

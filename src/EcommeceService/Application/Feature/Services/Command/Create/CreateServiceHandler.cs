@@ -11,9 +11,9 @@ namespace Application.Feature.Services.Command.Create
     IUnitOfWork unitOfWork,
     IMapper mapper,
     IMediaUpdateService<Service> mediaUpdateService
-) : IRequestHandler<CreateServiceCommand, CreateServiceResponse>
+) : IRequestHandler<CreateServiceCommand>
     {
-        public async ValueTask<CreateServiceResponse> Handle(CreateServiceCommand request, CancellationToken cancellationToken)
+        public async ValueTask<Mediator.Unit> Handle(CreateServiceCommand request, CancellationToken cancellationToken)
         {
             Service mappingService = mapper.Map<Service>(request);
 
@@ -32,10 +32,7 @@ namespace Application.Feature.Services.Command.Create
 
                 await unitOfWork.CommitAsync(cancellationToken);
 
-                return new CreateServiceResponse
-                {
-                    Message = "Service created successfully",
-                };
+                return Mediator.Unit.Value;
             }
             catch (Exception)
             {

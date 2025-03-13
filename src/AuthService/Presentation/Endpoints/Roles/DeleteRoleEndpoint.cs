@@ -13,12 +13,12 @@ using Contracts.Routers;
 namespace Presentation.Endpoints.Roles;
 
 public class DeleteRoleEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<string>.WithActionResult<ApiResponse>
+    : EndpointBaseAsync.WithRequest<string>.WithActionResult<ApiResponse<NoContentResult>>
 {
     [HttpDelete(Router.RoleRoute.GetUpdateDelete)]
     [SwaggerOperation(Tags = [Router.RoleRoute.Tags], Summary = "Delete Role")]
     [AuthorizeBy(permissions: $"{ActionPermission.delete}:{ObjectPermission.role}")]
-    public override async Task<ActionResult<ApiResponse>> HandleAsync(
+    public override async Task<ActionResult<ApiResponse<NoContentResult>>> HandleAsync(
         [FromRoute(Name = RouterBase.Id)] string roleId,
         CancellationToken cancellationToken = default
     )

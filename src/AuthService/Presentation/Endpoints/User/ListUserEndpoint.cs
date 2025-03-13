@@ -15,12 +15,12 @@ using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
 namespace Presentation.Endpoints.User;
 
 public class ListUserEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<ListUserQuery>.WithActionResult<ApiResponse>
+    : EndpointBaseAsync.WithRequest<ListUserQuery>.WithActionResult<ApiResponse<PaginationResponse<ListUserResponse>>>
 {
     [HttpGet(Router.UserRoute.Users)]
     [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "list User")]
     [AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.user}")]
-    public override async Task<ActionResult<ApiResponse>> HandleAsync(
+    public override async Task<ActionResult<ApiResponse<PaginationResponse<ListUserResponse>>>> HandleAsync(
         [FromQuery] ListUserQuery request,
         CancellationToken cancellationToken = default
     ) => this.Ok200(await sender.Send(request, cancellationToken));

@@ -11,12 +11,12 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Presentation.Endpoints.User
 {
     public class LogoutEndpoint(ISender sender)
-    : EndpointBaseAsync.WithoutRequest.WithActionResult<ApiResponse>
+    : EndpointBaseAsync.WithoutRequest.WithActionResult<ApiResponse<LogoutResponse>>
     {
         [HttpPost(Router.UserRoute.Logout)]
         [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "Logout in User")]
         [AuthorizeBy]
-        public override async Task<ActionResult<ApiResponse>> HandleAsync(
+        public override async Task<ActionResult<ApiResponse<LogoutResponse>>> HandleAsync(
             CancellationToken cancellationToken = default
         )
         {
