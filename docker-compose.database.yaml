@@ -1,0 +1,44 @@
+services:
+  database:
+    container_name: database
+    image: postgis/postgis:14-master
+    restart: always
+    command:
+      - "-cshared_preload_libraries=postgis-3,pg_stat_statements"
+      - "-cpg_stat_statements.max=10000"
+      - "-cpg_stat_statements.track=all"
+      - "-cmax_connections=200"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      # - ./scripts/bootstrap:/bootstrap:ro
+      - ./scripts/docker-entrypoint-initdb.d/000_createdb.sql:/docker-entrypoint-initdb.d/000_createdb.sql
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    shm_size: ${POSTGRES_SHM_SIZE}
+
+  redis:
+    image: redis:latest  # Use the latest official Redis image
+    container_name: redis-db  # Optional: name the container for easy identification
+    volumes:
+      - rd_data:/data  # Persist Redis data using a named volume
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}  # Secure Redis with a password (replace with a strong password)
+    command: >
+      redis-server --requirepass "${REDIS_PASSWORD}"
+
+  gateway:
+    depends_on:
+      - "database"
+
+  auth-service:
+    depends_on:
+      - "database"
+      
+volumes:
+  db_data:
+  rd_data:
+

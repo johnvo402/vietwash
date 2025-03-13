@@ -31,25 +31,25 @@ status:
 
 # Mục để chạy Docker container cho môi trường phát triển
 dev:
-	docker-compose -f docker-compose.yaml -f docker-compose.sql.yaml -f docker-compose.dev.yaml up -d ${SERVICE}
+	docker-compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml up -d ${SERVICE}
 
 dev-build:
-	docker-compose -f docker-compose.yaml -f docker-compose.sql.yaml -f docker-compose.dev.yaml up -d --build ${SERVICE}
+	docker-compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml up -d --build ${SERVICE}
 
 staging:
-	docker-compose -f docker-compose.yaml -f docker-compose.sql.yaml -f docker-compose.staging.yaml up -d --build ${SERVICE}
+	docker-compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.staging.yaml up -d --build ${SERVICE}
 # Mục để tắt Docker container và xóa volume
 clean:
 	@echo "Stopping Docker containers and removing volumes..."
-	docker-compose -f docker-compose.yaml -f docker-compose.sql.yaml -f docker-compose.dev.yaml down --remove-orphans -v
+	docker-compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml down --remove-orphans -v
 
 # Mục để chỉ tắt Docker container mà không xóa volume
 down:
 	@echo "Stopping Docker containers..."
-	docker-compose -f docker-compose.yaml -f docker-compose.sql.yaml -f docker-compose.dev.yaml down
+	docker-compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml down
 stop:
 	@echo "Stopping Docker containers..."
-	docker-compose -f docker-compose.yaml -f docker-compose.sql.yaml -f docker-compose.dev.yaml stop
+	docker-compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml stop
 .PHONY: backup
 
 backup: 

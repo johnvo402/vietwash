@@ -15,14 +15,7 @@ services:
     build:
       context: .
       dockerfile: ./src/AuthService/Dockerfile
-  product-service:
-    <<: *common_config
-    image: product-service
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Staging
-    build:
-      context: .
-      dockerfile: ./src/ProductService/Dockerfile
+      
   gateway:
     <<: *common_config
     image: gateway

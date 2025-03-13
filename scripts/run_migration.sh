@@ -1,13 +1,5 @@
 #!/bin/bash
 
-# Kiểm tra tham số truyền vào
-if [ -z "$1" ]; then
-    echo "Usage: $0 <AuthDb|ProductDb|\"AuthDb, ProductDb\">"
-    exit 1
-fi
-
-
-
 # Lấy ngày tháng năm giờ phút giây hiện tại
 current_datetime=$(date +"%Y%m%d%H%M%S")
 
@@ -18,7 +10,7 @@ run_migration() {
     local api_path=$3
 
     echo "Running migration for $db_name"
-    dotnet ef migrations add "${current_datetime}_${db_name}_Migration" --project "$project_path" --startup-project "$api_path" --verbose
+    dotnet ef migrations add "${current_datetime}_${db_name}_Migration" --project "$project_path" --startup-project "$api_path" -o Data/Migrations
     if [ $? -eq 0 ]; then
         echo "Migration for $db_name completed successfully."
     else
@@ -31,10 +23,13 @@ run_migration() {
 for db in "$@"; do
     db=$(echo "$db" | xargs)  # Trim any leading/trailing spaces
 
-    if [ "$db" == "AuthDb" ]; then
-        run_migration "AuthDb" "src/AuthService/AuthService.Infrastructure" "src/AuthService/AuthService.API"
-    elif [ "$db" == "ProductDb" ]; then
-        run_migration "ProductDb" "src/ProductService/ProductService.Infrastructure" "src/ProductService/ProductService.API"
+    if [ "$db" == "Auth" ]; then
+        run_migration "Auth" "src/AuthService/Infrastructure" "src/AuthService/Presentation"
+    elif [ "$db" == "Project" ]; then
+        run_migration "Project" "src/ProjectService/Infrastructure" "src/ProjectService/Presentation"
+    elif [ "$db" == "Ecommerce" ]; then
+        run_migration "Project" "src/EcommeceService/Infrastructure" "src/EcommeceService/Presentation"
+    
     else
         echo "Unknown database: $db"
         exit 1

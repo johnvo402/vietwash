@@ -1,0 +1,25 @@
+syntax = "proto3";
+option csharp_namespace = "ProjectService_gRPC";
+
+package queue_log;
+
+enum QueueType {
+    ORIGIN_QUEUE = 0;
+    DEAD_LETTER_QUEUE = 1;
+}
+
+message CreateQueueLogRequest {
+    string request_id = 1;
+    string request_data = 2;
+    string error_detail = 3;
+    QueueType processed_by = 4;
+    int32 retry_count = 5;
+}
+
+message CreateQueueLogResponse {
+    bool success = 1;
+}
+
+service QueueLogService {
+    rpc CreateQueueLog (CreateQueueLogRequest) returns (CreateQueueLogResponse);
+}

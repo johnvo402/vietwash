@@ -1,26 +1,24 @@
 services:
+  aspire-dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
+    container_name: aspire-dashboard
+    ports:
+      - "18888:18888" # Cổng web UI
+      - "18889:18889" # OTLP/gRPC
+      - "18890:18890" # OTLP/HTTP
+    environment:
+      ASPNETCORE_URLS: "http://+:18888"
+      DASHBOARD__OTLP__AUTHMODE: 'ApiKey'
+      DASHBOARD__OTLP__PRIMARYAPIKEY: ${ASPIRE_API_KEY}
+      DOTNET_DASHBOARD_OTLP_ENDPOINT_URL: "http://+:18889"
+      DOTNET_DASHBOARD_OTLP_HTTP_ENDPOINT_URL: "http://+:18890"
+    restart: always
+
   auth-service:
     container_name: auth-service
     image: auth-service
     ports:
       - "8080"
-    environment:
-      - Jwt__Key=${JWT_KEY}
-      - Jwt__Issuer=${JWT_ISSUER}
-      - Jwt__Audience=${JWT_AUDIENCE}
-      - Jwt__TokenExpirationInMinutes=${JWT_TOKEN_EXPIRATION_IN_MINUTES}
-    restart: always
-
-  product-service:
-    container_name: product-service
-    image: product-service
-    ports:
-      - "8080"
-    environment:
-      - Jwt__Key=${JWT_KEY}
-      - Jwt__Issuer=${JWT_ISSUER}
-      - Jwt__Audience=${JWT_AUDIENCE}
-      - Jwt__TokenExpirationInMinutes=${JWT_TOKEN_EXPIRATION_IN_MINUTES}
     restart: always
 
   gateway:
@@ -29,9 +27,7 @@ services:
     ports:
       - "8080"
     restart: always
+
 volumes:
   db_data:
   rd_data:
-
-  # dotnet ef database update --project src/AuthService/AuthService.Infrastructure --startup-project src/AuthService/AuthService.API
-  # dotnet ef database update --project src/ProductService/ProductService.Infrastructure --startup-project src/ProductService/ProductService.API

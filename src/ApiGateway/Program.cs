@@ -2,7 +2,6 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.DependencyInjection;
-using ProductService.API.Extensions;
 using StackExchange.Redis;
 using Yarp.ReverseProxy.Transforms;
 
@@ -35,7 +34,6 @@ builder.Services.AddCors(options =>
             .AllowCredentials();
     });
 });
-builder.Services.AddDataProtectionConfig(builder.Configuration);
 var app = builder.Build();
 app.UseCors("AllowFrontend");
 app.UseRateLimiter();
