@@ -1,7 +1,6 @@
 using Application.Common.Interfaces.Services.DistributedCache;
 using Contracts.Application.Common.Interfaces.Services.Queue;
 using Contracts.Dtos.Responses;
-using Domain.Aggregates.QueueLogs;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

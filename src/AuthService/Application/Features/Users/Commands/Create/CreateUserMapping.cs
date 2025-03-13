@@ -17,5 +17,7 @@ public class CreateUserMapping : Profile
             );
 
         CreateMap<User, CreateUserResponse>().IncludeBase<User, UserDetailProjection>();
+        CreateMap<User, CreateUserCommand>()
+            .ForMember(dest => dest.Password, opt => opt.Ignore());
     }
 }

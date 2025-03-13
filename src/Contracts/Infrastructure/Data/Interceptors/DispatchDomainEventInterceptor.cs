@@ -10,14 +10,14 @@ namespace Infrastructure.Data.Interceptors;
 public class DispatchDomainEventInterceptor(IServiceScopeFactory serviceScopeFactory)
     : SaveChangesInterceptor
 {
-    public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
-        DbContextEventData eventData,
-        InterceptionResult<int> result,
-        CancellationToken cancellationToken = default
-    )
+    public override async ValueTask<int> SavedChangesAsync(
+    SaveChangesCompletedEventData eventData,
+    int result,
+    CancellationToken cancellationToken = default
+)
     {
         await DispatchDomainEvents(eventData.Context);
-        return await base.SavingChangesAsync(eventData, result, cancellationToken);
+        return await base.SavedChangesAsync(eventData, result, cancellationToken);
     }
 
     public async Task DispatchDomainEvents(DbContext? context)

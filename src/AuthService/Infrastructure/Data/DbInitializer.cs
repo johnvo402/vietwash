@@ -101,9 +101,9 @@ public class DbInitializer
 
                 foreach (var user in users)
                 {
+                    user.CreateUser();
                     await userManagerService.CreateUserAsync(
                         user,
-
                         transaction: dbTransaction
                     );
                 }
@@ -683,7 +683,6 @@ public class DbInitializer
                 Gender = (Gender)new Random().Next(1, 3),
                 Id = Credential.UserIds.LIAM_PEREZ_ID,
             };
-
         return
         [
             user,

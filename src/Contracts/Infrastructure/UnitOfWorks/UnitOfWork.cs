@@ -1,7 +1,6 @@
 using System.Data.Common;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
-using Domain.Common;
 using Infrastructure.UnitOfWorks.CachedRepositories;
 using Infrastructure.UnitOfWorks.Repositories;
 using JohnChum.SharedKernel.Domain.Common;
