@@ -33,7 +33,7 @@
         "name": "AuthService",
         "type": "coreclr",
         "request": "launch",
-        "preLaunchTask": "build EcommeceService",
+        "preLaunchTask": "build AuthService",
         "program": "${workspaceFolder}/src/AuthService/Presentation/bin/Debug/net8.0/Presentation.dll",
         "args": [],
         "cwd": "${workspaceFolder}/src/AuthService/Presentation",
