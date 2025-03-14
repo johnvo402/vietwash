@@ -1,10 +1,9 @@
 # Build stage
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /src
 
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 # Copy project files and restore dependencies
-COPY ["src/Micro.Shared/Micro.Shared.csproj", "Micro.Shared/"]
 COPY ["src/ApiGateway/ApiGateway.csproj", "ApiGateway/"]
 
 # Restore dependencies

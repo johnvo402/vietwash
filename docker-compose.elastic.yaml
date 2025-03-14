@@ -1,12 +1,8 @@
-
-
 services:
   setup:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     volumes:
       - certs:/usr/share/elasticsearch/config/certs
-    networks:
-      - micro_default
     user: "0"
     command: >
       bash -c '
@@ -62,8 +58,6 @@ services:
       - esdata01:/usr/share/elasticsearch/data
     ports:
       - ${ES_PORT}:9200
-    networks:
-      - micro_default
     environment:
       - node.name=es01
       - cluster.name=${CLUSTER_NAME}
@@ -194,8 +188,6 @@ services:
       - kibanadata:/usr/share/kibana/data
     ports:
       - ${KIBANA_PORT}:5601
-    networks:
-      - micro_default
     environment:
       - SERVERNAME=kibana
       - ELASTICSEARCH_HOSTS=https://es01:9200
@@ -224,8 +216,3 @@ volumes:
   #   driver: local
   kibanadata:
     driver: local
-
-networks: 
-  micro_default:
-    external:
-      true

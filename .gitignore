@@ -12,7 +12,6 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
-/micro-frontend
 
 # Visual Studio files
 .vs/
@@ -28,7 +27,6 @@ bld/
 
 # IDE files
 .idea/
-.vscode/
 *.swp
 *.swo
 *._*
@@ -71,7 +69,9 @@ appsettings.Development.json
 # Redis dump file
 dump.rdb
 
-backup/
+
+.pgdump/*
+!.pgdump/.gitkeep
 
 # Environment files
 .env

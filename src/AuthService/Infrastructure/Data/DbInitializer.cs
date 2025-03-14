@@ -57,7 +57,7 @@ public class DbInitializer
         {
             Id = Ulid.Parse(Credential.MANAGER_ROLE_ID),
             Name = Credential.MANAGER_ROLE,
-            RolePermissions = insertedPermissions.Select(x => new RolePermission()
+            RolePermissions = insertedPermissions.Where(x => Credential.MANAGER_CLAIMS.Contains(x.Key)).Select(x => new RolePermission()
             {
                 PermissionId = x.Id
             }).ToList(),

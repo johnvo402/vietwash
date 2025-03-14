@@ -42,26 +42,27 @@ staging:
 clean:
 	@echo "Stopping Docker containers and removing volumes..."
 	docker-compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml down --remove-orphans -v
-
+external:
+	docker-compose -f docker-compose.s3.yaml -f docker-compose.elastic.yaml up -d
 # Mục để chỉ tắt Docker container mà không xóa volume
 down:
 	@echo "Stopping Docker containers..."
-	docker-compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml down
+	docker-compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml -f docker-compose.s3.yaml -f docker-compose.elastic.yaml down
 stop:
 	@echo "Stopping Docker containers..."
-	docker-compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml stop
+	docker-compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml -f docker-compose.s3.yaml -f docker-compose.elastic.yaml stop
 .PHONY: backup
 
 backup: 
 	@echo "Backup database..."
-	./scripts/backup.sh backup
+	./scripts/pgdump.sh backup
 .PHONY: restore
 restore: 
-	./scripts/backup.sh restore
+	./scripts/pgdump.sh restore
 
 .PHONY: sql
 sql:
-	./scripts/backup.sh sql
+	./scripts/pgdump.sh sql
 # Mục mục tiêu mặc định
 all: help
 
