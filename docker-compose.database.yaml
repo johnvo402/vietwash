@@ -41,7 +41,13 @@ services:
     depends_on:
       - "database"
 
-  auth-service:
+  auth:
+    depends_on:
+      - "database"
+  project:
+    depends_on:
+      - "database"
+  ecommerce:
     depends_on:
       - "database"
       

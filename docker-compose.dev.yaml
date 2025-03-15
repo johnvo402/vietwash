@@ -11,48 +11,6 @@ services:
     ports:
       - "5050:80"
 
-  auth-service:
-    image: mcr.microsoft.com/dotnet/sdk:8.0
-    ports:
-      - "5001:8080"
-    volumes:
-      - ./src/AuthService:/app/AuthService:ro
-      - ./src/Contracts:/app/Contracts:ro
-      - nuget_cache:/root/.nuget/packages:cached
-      - /app/Contracts/bin/
-      - /app/Contracts/obj/
-      - /app/AuthService/Presentation/bin/
-      - /app/AuthService/Presentation/obj/
-      - /app/AuthService/Infrastructure/bin/
-      - /app/AuthService/Infrastructure/obj/
-      - /app/AuthService/Domain/bin/
-      - /app/AuthService/Domain/obj/
-      - /app/AuthService/Application/bin/
-      - /app/AuthService/Application/obj/
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    working_dir: /app/AuthService/Presentation
-    command: ["dotnet","run"]
-    restart: always
-
-  gateway:
-    image: mcr.microsoft.com/dotnet/sdk:8.0
-    ports:
-      - "5000:8080"
-    volumes:
-      - ./src/ApiGateway:/app/ApiGateway:ro
-      - ./src/Contracts:/app/Contracts:ro
-      - nuget_cache:/root/.nuget/packages:cached
-      - /app/Contracts/bin/
-      - /app/Contracts/obj/
-      - /app/ApiGateway/bin/
-      - /app/ApiGateway/obj/
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    working_dir: /app/ApiGateway
-    command:
-      ["dotnet","run"]
-    restart: always
 volumes:
   nuget_cache:
   pgadmin_data:
