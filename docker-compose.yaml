@@ -28,6 +28,3 @@ services:
       - "8080"
     restart: always
 
-volumes:
-  db_data:
-  rd_data:

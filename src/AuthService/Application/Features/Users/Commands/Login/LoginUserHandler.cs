@@ -13,8 +13,6 @@ using Wangkanai.Detection.Services;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Extensions;
 using SerializerExtension = JohnChum.SharedKernel.SpecificationQuery.LHS.Extensions.SerializerExtension;
 using Contracts.Application.Common.Interfaces.Services.Token;
-using Contracts.Dtos.Responses;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Application.Features.Users.Commands.Login;
 
@@ -73,24 +71,13 @@ public class LoginUserHandler(
         };
 
         var accesstokenExpiredTime = tokenFactory.AccesstokenExpiredTime;
-        var cnfRequest = new TokenCnfModel
-        {
-            Jwk = new JwkModel
-            {
-                Kty = request.PublicKey!.Kty!,
-                Crv = request!.PublicKey!.Crv,
-                X = request.PublicKey.X,
-                Y = request.PublicKey.Y
-            }
-        };
-
 
         string accessToken = tokenFactory.CreateToken(
              [
                 new("family_id", familyId),
                 new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new("public_key", request.PublicKey!)
             ],
-             cnfRequest,
             accesstokenExpiredTime
         );
 
@@ -99,7 +86,6 @@ public class LoginUserHandler(
                 new("family_id", familyId),
                 new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             ],
-            cnf: null,
             refreshExpireTime
         );
 

@@ -1,48 +1,31 @@
 #!/bin/bash
 
-# Tải các biến môi trường từ tệp .env
-if [ -f "$(dirname "$0")/../.env" ]; then
-    source "$(dirname "$0")/../.env"
-else
-    echo ".env file not found"
-    exit 1
-fi
-if [ -z "$1" ]; then
-    echo "Usage: $0 <AuthDb|ProductDb|\"AuthDb, ProductDb\">"
-    exit 1
-fi
-# Thay thế sqlserver thành localhost trong chuỗi kết nối
-AUTHDB_CONNECTION="${AUTHDB_CONNECTION//sqlserver/localhost}"
-PRODUCTDB_CONNECTION="${PRODUCTDB_CONNECTION//sqlserver/localhost}"
+echo "Starting database migrations..."
 
-# Hàm chạy migration cho cả 2 cơ sở dữ liệu
 run_update() {
-    local db_name=$1
-    local connection=$2
-    local project_path=$3
-    local api_path=$4
+    local service_name=$1
+    local infra_path=$2
 
-    echo "Running update for $db_name"
-    dotnet ef database update --project "$project_path" --startup-project "$api_path" --connection "$connection"
+    echo "--------------------------------------"
+    echo "Running migration for $service_name..."
+
+    cd "$infra_path" || { echo "❌ Failed to cd into $infra_path"; exit 1; }
+
+    dotnet ef database update
     if [ $? -eq 0 ]; then
-        echo "Update for $db_name completed successfully."
+        echo "✅ Migration for $service_name completed successfully."
     else
-        echo "Update for $db_name failed."
+        echo "❌ Migration for $service_name failed."
         exit 1
     fi
+
+    cd - > /dev/null
 }
-for db in "$@"; do
-        db=$(echo "$db" | xargs)
-        # Kiểm tra và chạy migration theo tham số
-        if [ "$db" == "AuthDb" ]; then
-            echo "Updating AuthDb..."
-            run_update "AuthDb" "$AUTHDB_CONNECTION" "src/AuthService/AuthService.Infrastructure" "src/AuthService/AuthService.API"
-        elif [ "$db" == "ProductDb" ]; then
-            echo "Updating ProductDb..."
-            run_update "ProductDb" "$PRODUCTDB_CONNECTION" "src/ProductService/ProductService.Infrastructure" "src/ProductService/ProductService.API"
-        else
-            echo "Unknown database: $db"
-            exit 1
-        fi 
-done
-echo "All updates completed successfully!"
+
+# Danh sách các service cần migrate
+run_update "AuthService" "src/AuthService/Infrastructure"
+run_update "EcommeceService" "src/EcommeceService/Infrastructure"
+run_update "ProjectService" "src/ProjectService/Infrastructure"
+
+echo "--------------------------------------"
+echo "🎉 All migrations completed successfully!"

@@ -12,10 +12,6 @@ services:
       - db_data:/var/lib/postgresql/data
       # - ./scripts/bootstrap:/bootstrap:ro
       - ./scripts/docker-entrypoint-initdb.d/000_createdb.sql:/docker-entrypoint-initdb.d/000_createdb.sql
-    logging:
-      driver: gelf
-      options:
-        gelf-address: "udp://localhost:12201"
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     shm_size: ${POSTGRES_SHM_SIZE}

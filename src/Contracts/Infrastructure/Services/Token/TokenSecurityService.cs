@@ -38,13 +38,13 @@ namespace Contracts.Infrastructure.Services.Token
 
         public async Task<bool> VerifySignatureAsync(TokenBinding request)
         {
-            var decodeToken = DecodeToken(request.Token);
+            var decodeToken = DecodeToken(request.Token!);
 
-            if (await ExistsNonceAsync(request.Nonce)) return false;
-            await StoreNonceAsync(request.Nonce);
+            if (await ExistsNonceAsync(request.Nonce!)) return false;
+            await StoreNonceAsync(request.Nonce!);
 
             var data = $"{request.Timestamp}:{request.Nonce}";
-            return VerifySignature(decodeToken?.Cnf?.Jwk!, data, request.Signature);
+            return VerifySignature(decodeToken?.PublicKey!, data, request.Signature!);
         }
 
         public async Task<bool> ExistsNonceAsync(string nonce) =>
@@ -58,34 +58,15 @@ namespace Contracts.Infrastructure.Services.Token
             return await _cache.Database.KeyExistsAsync(key);
         }
 
-        private static bool VerifySignature(JwkModel jwk, string data, string base64Signature)
+        private static bool VerifySignature(string publicKeyBase64, string data, string signatureBase64)
         {
-            try
-            {
-                byte[] xBytes = Convert.FromBase64String(jwk.X!);
-                byte[] yBytes = Convert.FromBase64String(jwk.Y!);
+            var rsa = RSA.Create();
+            rsa.ImportSubjectPublicKeyInfo(Convert.FromBase64String(publicKeyBase64), out _);
 
-                var ecParams = new ECParameters
-                {
-                    Q = new ECPoint
-                    {
-                        X = xBytes,
-                        Y = yBytes
-                    },
-                    Curve = ECCurve.NamedCurves.nistP256
-                };
+            var dataBytes = Encoding.UTF8.GetBytes(data);
+            var signatureBytes = Convert.FromBase64String(signatureBase64);
 
-                using var ecdsa = ECDsa.Create(ecParams);
-
-                byte[] dataBytes = Encoding.UTF8.GetBytes(data);
-                byte[] signatureBytes = Convert.FromBase64String(base64Signature);
-
-                return ecdsa.VerifyData(dataBytes, signatureBytes, HashAlgorithmName.SHA256);
-            }
-            catch
-            {
-                return false;
-            }
+            return rsa.VerifyData(dataBytes, signatureBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         }
 
         public async Task AddSessionUserAsync(Ulid userId, string userData, TimeSpan expiry)

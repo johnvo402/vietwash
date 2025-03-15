@@ -21,8 +21,7 @@ migration:
 
 # Mục để cập nhật migration (tùy chọn)
 update:
-	@echo "Updating migration... $(NAME)"
-	./scripts/update-db.sh $(foreach db,$(NAME),$(db))
+	./scripts/update-db.sh
 
 # Mục để kiểm tra migration status
 status:
