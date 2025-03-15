@@ -7,6 +7,9 @@ services:
   redis:
     ports:
       - "6379:6379"
+  pgadmin:
+    ports:
+      - "5050:80"
 
   auth-service:
     image: mcr.microsoft.com/dotnet/sdk:8.0
@@ -52,3 +55,4 @@ services:
     restart: always
 volumes:
   nuget_cache:
+  pgadmin_data:

@@ -1,10 +1,10 @@
 services:
   database:
     container_name: database
-    image: postgis/postgis:14-master
+    image:  postgis/postgis:14-master
     restart: always
     command:
-      - "-cshared_preload_libraries=postgis-3,pg_stat_statements"
+      - "-cshared_preload_libraries=pg_stat_statements"
       - "-cpg_stat_statements.max=10000"
       - "-cpg_stat_statements.track=all"
       - "-cmax_connections=200"
@@ -12,10 +12,21 @@ services:
       - db_data:/var/lib/postgresql/data
       # - ./scripts/bootstrap:/bootstrap:ro
       - ./scripts/docker-entrypoint-initdb.d/000_createdb.sql:/docker-entrypoint-initdb.d/000_createdb.sql
+      - ./scripts/docker-entrypoint-initdb.d/001_createextention.sql:/docker-entrypoint-initdb.d/001_createextention.sql
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     shm_size: ${POSTGRES_SHM_SIZE}
-
+    
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_DEFAULT_SERVER: database
+    depends_on:
+      - database
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin/
   redis:
     image: redis:latest  # Use the latest official Redis image
     container_name: redis-db  # Optional: name the container for easy identification

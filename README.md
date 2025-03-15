@@ -10,7 +10,8 @@ Technology: .NET 8, Entity Framework Core, Docker, Clean Architecture
    - Add msys2 Path to the environment variable `PATH` in the `C:\msys64\usr\bin`
 2. How to run the project
    - Open the terminal in the root of the project
-   - Run `make dev SERVICE="database redis aspire-dashboard"`
+   - Run `make dev SERVICE="redis aspire-dashboard database" `
+   - Run `make dev SERVICE="pgadmin"` if use pgadmin web
    - Run `make external`
    - Run `make update`
    - Run all service
