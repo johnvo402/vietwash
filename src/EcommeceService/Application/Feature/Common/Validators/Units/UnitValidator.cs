@@ -31,7 +31,7 @@ namespace Application.Feature.Common.Validators.Units
 				.NotEmpty()
 				.WithState(x =>
 				Messager
-					.Create<Service>()
+					.Create<Unit>()
 					.Property(x => x.Name)
 					.Message(MessageType.Null)
 					.Negative()
@@ -40,7 +40,7 @@ namespace Application.Feature.Common.Validators.Units
 			.MaximumLength(256)
 			.WithState(x =>
 				Messager
-					.Create<Service>()
+					.Create<Unit>()
 					.Property(x => x.Name)
 					.Message(MessageType.MaximumLength)
 					.Build()
