@@ -89,120 +89,95 @@ public class RoleManagerService(IDbContext context) : IRoleManagerService
 
     public async Task UpdateRoleClaimAsync(IEnumerable<RolePermission> roleClaims, Role role)
     {
-        Role currentRole = Guard.Against.NotFound(
-            $"{role.Id}",
-            await roleContext
-                .Where(x => x.Id == role.Id)
-                .Include(x => x.RolePermissions)!.ThenInclude(x => x.Permission)
-                .FirstOrDefaultAsync(),
-            NOT_FOUND_MESSAGE
-        );
-        Guard.Against.Null(roleClaims, nameof(roleClaims), $"{nameof(roleClaims)} is not null");
-
-        IEnumerable<RolePermission> rolesClaimsToProcess = roleClaims;
-        ICollection<RolePermission> currentRoleClaims = currentRole.RolePermissions!;
-
-        IEnumerable<RolePermission> roleClaimsToInsert = rolesClaimsToProcess.Where(x =>
-            !currentRoleClaims.Any(p => p.Id == x.Id)
-        );
-        IEnumerable<RolePermission> roleClaimsToModify = currentRoleClaims.Where(x =>
-            rolesClaimsToProcess.Any(p => p.Id == x.Id)
-        );
-        IEnumerable<RolePermission> roleClaimsToRemove = currentRoleClaims.Where(x =>
-            !rolesClaimsToProcess.Any(p => p.Id == x.Id)
-        );
-
-        //IEnumerable<UserClaim> userClaims = ProcessUserClaimUpdate(
-        //    roleClaimsToModify,
-        //    rolesClaimsToProcess
-        //);
-
-        // remove
-        await RemoveClaimsFromRoleAsync(
-            role,
-            [
-                .. roleClaimsToRemove.Select(x => x.PermissionId),
-            ]
-        );
-
-        //update
-        roleClaimContext.UpdateRange(roleClaimsToModify);
-        await context.SaveChangesAsync();
-
-        var keyValuePairClaims = roleClaimsToInsert.Select(x => x.PermissionId).ToList();
-        // insert
-        await AddClaimsToRoleAsync(role, keyValuePairClaims);
-    }
-
-    public async Task AddClaimsToRoleAsync(
-        Role role,
-        IEnumerable<Ulid> claims
-    )
-    {
+        // Lấy Role từ database cùng với RolePermissions và Permission
         Role currentRole = Guard.Against.NotFound(
             $"{role.Id}",
             await roleContext
                 .Where(x => x.Id == role.Id)
                 .Include(x => x.RolePermissions)!
-                .AsSplitQuery()
+                .ThenInclude(x => x.Permission)
                 .FirstOrDefaultAsync(),
             NOT_FOUND_MESSAGE
         );
-        ICollection<RolePermission> currentRoleClaims = currentRole.RolePermissions!;
-        IEnumerable<Ulid> roleClaimsToProcess = claims;
 
-        if (
-            roleClaimsToProcess.Any(x =>
-                currentRoleClaims.Any(p => p.PermissionId == x)
-            )
-        )
+        Guard.Against.Null(roleClaims, nameof(roleClaims), $"{nameof(roleClaims)} cannot be null");
+
+        var currentRoleClaims = currentRole.RolePermissions!;
+        var rolesClaimsToProcess = roleClaims.ToList();
+
+        // Tạo HashSet để tối ưu tìm kiếm
+        var currentRoleClaimIds = currentRoleClaims.Select(x => x.PermissionId).ToHashSet();
+        var newRoleClaimIds = rolesClaimsToProcess.Select(x => x.PermissionId).ToHashSet();
+
+        // Xác định quyền cần xử lý
+        var roleClaimsToInsert = rolesClaimsToProcess.Where(x => !currentRoleClaimIds.Contains(x.PermissionId)).ToList();
+        var roleClaimsToModify = currentRoleClaims.Where(x => newRoleClaimIds.Contains(x.PermissionId)).ToList();
+        var roleClaimsToRemove = currentRoleClaims.Where(x => !newRoleClaimIds.Contains(x.PermissionId)).ToList();
+
+        // Xóa quyền không còn trong danh sách
+        await RemoveClaimsFromRoleAsync(currentRole, roleClaimsToRemove.Select(x => x.PermissionId));
+
+        // Cập nhật quyền hiện có (nếu có logic cập nhật)
+        roleClaimContext.UpdateRange(roleClaimsToModify);
+
+        // Thêm quyền mới
+        if (roleClaimsToInsert.Any())
         {
-            throw new Exception($"1 or more elements of {nameof(claims)} exists in role claims");
+            await AddClaimsToRoleAsync(currentRole, roleClaimsToInsert.Select(x => x.PermissionId));
         }
 
-        List<RolePermission> roleClaimsToInsert =
-        [
-            .. roleClaimsToProcess.Select(x => new RolePermission
-            {   
-                 PermissionId = x,
+        await context.SaveChangesAsync();
+    }
+
+    public async Task AddClaimsToRoleAsync(Role currentRole, IEnumerable<Ulid> claims)
+    {
+        if (!claims.Any()) return;
+
+        // Tạo HashSet để kiểm tra nhanh hơn
+        HashSet<Ulid> existingRoleClaims = currentRole.RolePermissions!
+            .Select(p => p.PermissionId)
+            .ToHashSet();
+
+        // Kiểm tra quyền trùng lặp
+        var duplicateClaims = claims.Where(x => existingRoleClaims.Contains(x)).ToList();
+        if (duplicateClaims.Any())
+        {
+            throw new Exception($"The following claims already exist in role: {string.Join(", ", duplicateClaims)}");
+        }
+
+        // Tạo danh sách RolePermission mới
+        var roleClaimsToInsert = claims
+            .Select(x => new RolePermission
+            {
+                PermissionId = x,
                 RoleId = currentRole.Id,
-            }),
-        ];
+            })
+            .ToList();
 
-
+        // Chèn dữ liệu mới
         await roleClaimContext.AddRangeAsync(roleClaimsToInsert);
         await context.SaveChangesAsync();
     }
 
-    public async Task RemoveClaimsFromRoleAsync(
-        Role role,
-        IEnumerable<Ulid> permission
-    )
+
+
+    public async Task RemoveClaimsFromRoleAsync(Role currentRole, IEnumerable<Ulid> permissions)
     {
-        if (!permission.Any())
+        if (!permissions.Any())
         {
             return;
         }
 
-        Role currentRole = Guard.Against.NotFound(
-            $"{role.Id}",
-            await FindByIdAsync(role.Id),
-            NOT_FOUND_MESSAGE
-        );
-
         ICollection<RolePermission> currentRoleClaims = currentRole.RolePermissions!;
-        if (
-            permission.Any(x =>
-                !currentRoleClaims.Any(p => p.Id == x)
-            )
-        )
+
+        if (permissions.Any(x => !currentRoleClaims.Any(p => p.PermissionId == x)))
         {
-            throw new Exception("One or many claims is not existed in role.");
+            throw new Exception("One or many claims do not exist in the role.");
         }
 
-        IEnumerable<RolePermission> claimsToDelete = currentRoleClaims.Where(x =>
-            permission.Any(p => p == x.PermissionId)
-        );
+        IEnumerable<RolePermission> claimsToDelete = currentRoleClaims
+            .Where(x => permissions.Contains(x.PermissionId))
+            .ToList();
 
         roleClaimContext.RemoveRange(claimsToDelete);
         await context.SaveChangesAsync();
