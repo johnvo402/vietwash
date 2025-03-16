@@ -73,9 +73,9 @@ namespace Contracts.Middlewares
             var headers = context.Request.Headers;
 
             var authorizationHeader = headers["Authorization"].FirstOrDefault();
-            var nonceHeader = headers["Nonce"].FirstOrDefault();
-            var signatureHeader = headers["Signature"].FirstOrDefault();
-            var timestampHeader = headers["Timestamp"].FirstOrDefault();
+            var nonceHeader = headers["X-Nonce"].FirstOrDefault();
+            var signatureHeader = headers["X-Signature"].FirstOrDefault();
+            var timestampHeader = headers["X-Timestamp"].FirstOrDefault();
 
             if (!string.IsNullOrEmpty(authorizationHeader) && authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
             {

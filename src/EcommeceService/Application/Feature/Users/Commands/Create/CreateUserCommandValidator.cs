@@ -1,8 +1,5 @@
-using System.Text.RegularExpressions;
 using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Features.Common.Validators.Users;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Domain.Aggregates.Users;
 using FluentValidation;
@@ -38,14 +35,6 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                     .Negative()
                     .Build()
             )
-            .WithState(x =>
-                Messager
-                    .Create<CreateUserCommand>(nameof(User))
-                    .Property(x => x.Payload!.Username!)
-                    .Message(MessageType.Valid)
-                    .Negative()
-                    .Build()
-            )
             .MustAsync(
                 (username, cancellationToken) =>
                     IsUsernameAvailableAsync(username!, cancellationToken: cancellationToken)
@@ -76,14 +65,6 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                     .Property(x => x.Payload!.Status!)
                     .Message(MessageType.Null)
                     .Negative()
-                    .Build()
-            )
-            .IsInEnum()
-            .WithState(x =>
-                Messager
-                    .Create<CreateUserCommand>(nameof(User))
-                    .Property(x => x.Payload!.Status!)
-                    .Message(MessageType.OuttaOption)
                     .Build()
             );
 

@@ -7,9 +7,9 @@ x-refs:
         gelf-address: "udp://localhost:12201"
 
 services:
-  auth-service:
+  auth:
     <<: *common_config
-    image: auth-service
+    image: auth
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
     build:

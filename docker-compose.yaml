@@ -14,9 +14,21 @@ services:
       DOTNET_DASHBOARD_OTLP_HTTP_ENDPOINT_URL: "http://+:18890"
     restart: always
 
-  auth-service:
-    container_name: auth-service
-    image: auth-service
+  auth:
+    container_name: auth
+    image: auth
+    ports:
+      - "8080"
+    restart: always
+  ecommerce:
+    container_name: ecommerce
+    image: ecommerce
+    ports:
+      - "8080"
+    restart: always
+  project:
+    container_name: project
+    image: project
     ports:
       - "8080"
     restart: always
@@ -28,6 +40,3 @@ services:
       - "8080"
     restart: always
 
-volumes:
-  db_data:
-  rd_data:

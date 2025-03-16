@@ -1,0 +1,56 @@
+{
+    "version": "0.2.0",
+    "compounds": [
+      {
+        "name": "Run all",
+        "configurations": ["AuthService", "EcommerceService", "ProjectService","ApiGateway"]
+      }
+    ],
+    "configurations": [
+      {
+        "name": "ApiGateway",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build ApiGateway",
+        "program": "${workspaceFolder}/src/ApiGateway/bin/Debug/net8.0/ApiGateway.dll",
+        "args": [],
+        "cwd": "${workspaceFolder}/src/ApiGateway",
+        "stopAtEntry": false,
+        "console": "internalConsole"
+      },
+      {
+        "name": "ProjectService",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build ProjectService",
+        "program": "${workspaceFolder}/src/ProjectService/Presentation/bin/Debug/net8.0/Presentation.dll",
+        "args": [],
+        "cwd": "${workspaceFolder}/src/ProjectService/Presentation",
+        "stopAtEntry": false,
+        "console": "internalConsole"
+      },
+      {
+        "name": "AuthService",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build AuthService",
+        "program": "${workspaceFolder}/src/AuthService/Presentation/bin/Debug/net8.0/Presentation.dll",
+        "args": [],
+        "cwd": "${workspaceFolder}/src/AuthService/Presentation",
+        "stopAtEntry": false,
+        "console": "internalConsole"
+      },
+      {
+        "name": "EcommerceService",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build EcommeceService",
+        "program": "${workspaceFolder}/src/EcommeceService/Presentation/bin/Debug/net8.0/Presentation.dll",
+        "args": [],
+        "cwd": "${workspaceFolder}/src/EcommeceService/Presentation",
+        "stopAtEntry": false,
+        "console": "internalConsole"
+      }
+    ]
+  }
+  

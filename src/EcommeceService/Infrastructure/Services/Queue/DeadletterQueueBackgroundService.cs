@@ -3,6 +3,7 @@ using Application.Features.Users.Commands.Create;
 using Contracts.Application.Common.Interfaces.Services.Queue;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.QueueLogs;
+using JohnChum.SharedKernel.Extensions;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -56,7 +57,7 @@ public class DeadletterQueueBackgroundService(
 
 
                         await ProcessWithRetryAsync<CreateUserCommand, CreateUserCommand>(
-                            request, taskSender, taskGrpcClient, taskLogger, originQueue, stoppingToken);
+                            request, taskSender, taskGrpcClient, taskLogger, stoppingToken);
                     }, stoppingToken);
                     runningTasks.Add(task);
                 }
@@ -80,7 +81,6 @@ public class DeadletterQueueBackgroundService(
         ISender sender,
         IQueueLogService _grpcClient,
         ILogger logger,
-        IQueueService queueService,
         CancellationToken cancellationToken
     )
         where TRequest : class
@@ -162,8 +162,8 @@ public class DeadletterQueueBackgroundService(
         return new CreateQueueLogRequest()
         {
             RequestId = response.PayloadId!.Value.ToString(),
-            ErrorDetail = response.Error?.ToString(),
-            RequestData = request.ToString(),
+            ErrorDetail = SerializerExtension.Serialize(response.Error!).StringJson,
+            RequestData = SerializerExtension.Serialize(request).StringJson,
             RetryCount = response.RetryCount,
             ProcessedBy = ProjectService_gRPC.QueueType.DeadLetterQueue,
         };

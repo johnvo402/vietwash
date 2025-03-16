@@ -38,13 +38,17 @@ namespace Contracts.Infrastructure.Services.Token
 
         public async Task<bool> VerifySignatureAsync(TokenBinding request)
         {
-            var decodeToken = DecodeToken(request.Token);
+            var decodeToken = DecodeToken(request.Token!);
+            long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-            if (await ExistsNonceAsync(request.Nonce)) return false;
-            await StoreNonceAsync(request.Nonce);
+            // Kiểm tra timestamp có quá cũ không
+            if (Math.Abs(now - request.Timestamp) > 100 * 1000)
+                return false;
+            if (await ExistsNonceAsync(request.Nonce!)) return false;
+            await StoreNonceAsync(request.Nonce!);
 
             var data = $"{request.Timestamp}:{request.Nonce}";
-            return VerifySignature(decodeToken?.Cnf?.Jwk!, data, request.Signature);
+            return VerifySignature(decodeToken?.PublicKey!, data, request.Signature!);
         }
 
         public async Task<bool> ExistsNonceAsync(string nonce) =>
@@ -58,29 +62,20 @@ namespace Contracts.Infrastructure.Services.Token
             return await _cache.Database.KeyExistsAsync(key);
         }
 
-        private static bool VerifySignature(JwkModel jwk, string data, string base64Signature)
+        public bool VerifySignature(string publicKeyHex, string message, string signatureHex)
         {
             try
             {
-                byte[] xBytes = Convert.FromBase64String(jwk.X!);
-                byte[] yBytes = Convert.FromBase64String(jwk.Y!);
+                // Chuyển đổi public key từ hex sang dạng byte
+                byte[] publicKeyBytes = Convert.FromHexString(publicKeyHex);
+                byte[] signatureBytes = Convert.FromHexString(signatureHex);
+                byte[] messageBytes = Encoding.UTF8.GetBytes(message);
 
-                var ecParams = new ECParameters
+                using (ECDsa ecdsa = ECDsa.Create())
                 {
-                    Q = new ECPoint
-                    {
-                        X = xBytes,
-                        Y = yBytes
-                    },
-                    Curve = ECCurve.NamedCurves.nistP256
-                };
-
-                using var ecdsa = ECDsa.Create(ecParams);
-
-                byte[] dataBytes = Encoding.UTF8.GetBytes(data);
-                byte[] signatureBytes = Convert.FromBase64String(base64Signature);
-
-                return ecdsa.VerifyData(dataBytes, signatureBytes, HashAlgorithmName.SHA256);
+                    ecdsa.ImportSubjectPublicKeyInfo(publicKeyBytes, out _);
+                    return ecdsa.VerifyData(messageBytes, signatureBytes, HashAlgorithmName.SHA256);
+                }
             }
             catch
             {

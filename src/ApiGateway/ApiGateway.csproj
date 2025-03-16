@@ -7,11 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="StackExchange.Redis" Version="2.8.22" />
     <PackageReference Include="Yarp.ReverseProxy" Version="2.2.0" />
     <PackageReference Include="System.Text.Json" Version="9.0.0" />
     <PackageReference Include="System.Security.Cryptography.Xml" Version="9.0.0" />
     <PackageReference Include="System.Text.Encodings.Web" Version="9.0.0" />
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 
 </Project>

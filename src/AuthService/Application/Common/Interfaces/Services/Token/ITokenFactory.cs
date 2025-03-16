@@ -12,5 +12,5 @@ public interface ITokenFactory : ISingleton
 
     DecodeTokenResponse DecodeToken(string token);
 
-    string CreateToken(IEnumerable<Claim> claims, TokenCnfModel? cnf, DateTime expirationTime);
+    string CreateToken(IEnumerable<Claim> claims, DateTime expirationTime);
 }
