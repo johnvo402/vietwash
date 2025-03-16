@@ -20,7 +20,7 @@ namespace Application.Feature.Units.Queries.List
 			) =>
 			await unitOfWork
 				.CachedRepository<Unit>()
-				.CursorPagedListAsync<ListUnitResponse>(
+				.PagedListAsync<ListUnitResponse>(
 					new ListUnitSpecification(),
 					query.ValidateQuery().ValidateFilter(typeof(ListUnitResponse))
 				);
