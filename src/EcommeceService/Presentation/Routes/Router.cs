@@ -12,5 +12,12 @@ namespace Presentation.Routes
             public const string Services = $"{Ecommerce}/{RouterBase.prefix}{nameof(Services)}";
         }
 
+        public static class TariffRoute
+        {
+            public const string Tags = $"{nameof(TariffRoute)} endpoint";
+            public const string Tariffs = $"{Ecommerce}/{RouterBase.prefix}{nameof(Tariffs)}";
+            public const string GetUpdateDelete = $"{Ecommerce}/{RouterBase.prefix}{nameof(Tariffs)}/" + "{" + RouterBase.Id + "}";
+        }
+
     }
 }
