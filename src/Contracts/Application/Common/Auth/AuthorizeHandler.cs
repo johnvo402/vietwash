@@ -1,13 +1,18 @@
-﻿using Application.Common.Interfaces.Services;
+﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.DistributedCache;
+using Contracts.Application.Common.Interfaces.Services.Token;
+using Elastic.Transport;
 using JohnChum.SharedKernel.Extensions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection.Metadata;
 using System.Text.Json;
 
 namespace Application.Common.Auth;
 
-public class AuthorizeHandler(IServiceProvider serviceProvider)
+public class AuthorizeHandler(IServiceProvider serviceProvider, IHttpContextAccessor _httpContextAccessor)
     : AuthorizationHandler<AuthorizationRequirement>
 {
     private readonly IServiceProvider serviceProvider = serviceProvider;
@@ -20,9 +25,22 @@ public class AuthorizeHandler(IServiceProvider serviceProvider)
         using var scope = serviceProvider.CreateScope();
         IRedisCacheService cache =
             scope.ServiceProvider.GetRequiredService<IRedisCacheService>();
-        ICurrentUser currentUser = scope.ServiceProvider.GetRequiredService<ICurrentUser>();
+        ITokenSecurityService tokenSecurity = scope.ServiceProvider.GetRequiredService<ITokenSecurityService>();
 
-        Ulid? userId = currentUser.Id;
+        string? userId = null;
+
+        var authorizationHeader = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].FirstOrDefault();
+        if (!string.IsNullOrEmpty(authorizationHeader) && authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        {
+            var token = authorizationHeader["Bearer ".Length..].Trim();
+            var decodeToken = tokenSecurity.DecodeToken(token);
+            if (decodeToken == null || decodeToken.ExpiredTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds() || decodeToken.TokenType != "access")
+            {
+                context.Fail(new AuthorizationFailureReason(this, "Refresh token invalid or expired."));
+                return;
+            }
+            userId = decodeToken.Sub;
+        }
 
         if (userId == null)
         {
@@ -52,7 +70,7 @@ public class AuthorizeHandler(IServiceProvider serviceProvider)
                 context.Succeed(requirement);
                 return;
             }
-            var user = await cache.Database.StringGetAsync(userId.Value.ToString());
+            var user = await cache.Database.StringGetAsync(userId);
             if (string.IsNullOrEmpty(user))
             {
                 context.Fail();

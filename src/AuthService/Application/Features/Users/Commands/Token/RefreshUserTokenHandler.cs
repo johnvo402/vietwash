@@ -27,10 +27,7 @@ public class LogoutHandler(
     )
     {
         DecodeTokenResponse decodeToken = tokenFactory.DecodeToken(command.RefreshToken!);
-        if (decodeToken == null || decodeToken.ExpiredTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
-        {
-            throw new UnauthorizedException("Refresh token invalid or expired.");
-        }
+ 
         UserToken? refresh = await unitOfWork
             .Repository<UserToken>()
             .FindByConditionAsync(
@@ -83,7 +80,7 @@ public class LogoutHandler(
             [
                 new(JwtRegisteredClaimNames.Sub.ToString(), decodeToken.Sub!.ToString()),
                 new("family_id", decodeToken.FamilyId!),
-                new("public_key",decodeToken.PublicKey!)
+                new("token_type", "access")
             ],
             accesstokenExpiredTime
         );
@@ -93,7 +90,8 @@ public class LogoutHandler(
         string refreshToken = tokenFactory.CreateToken(
             [
                 new(JwtRegisteredClaimNames.Sub.ToString(), decodeToken.Sub!.ToString()),
-                new("family_id", decodeToken.FamilyId!)
+                new("family_id", decodeToken.FamilyId!),
+                new("token_type", "refresh")
             ],
             refreshTokenExpiredTime
         );

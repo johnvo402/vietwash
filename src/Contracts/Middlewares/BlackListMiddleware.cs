@@ -32,32 +32,7 @@ namespace Contracts.Middlewares
                 return;
             }
 
-            string? env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-            if (env != "Development")
-            {
-                if (nonce is null || signature is null || timestamp is null)
-                {
-                    await ReturnUnauthorizedAsync(context);
-                    return;
-                }
-
-                var tokenBinding = new TokenBinding
-                {
-                    Token = token,
-                    Nonce = nonce,
-                    Signature = signature,
-                    Timestamp = long.Parse(timestamp),
-                };
-
-                if (!await blacklistTokenService.VerifySignatureAsync(tokenBinding))
-                {
-                    await ReturnUnauthorizedAsync(context);
-                    return;
-                }
-            }
-
             var decodeToken = blacklistTokenService.DecodeToken(token);
-
             bool isBlacklisted = await blacklistTokenService.IsTokenBlacklistedAsync(decodeToken.FamilyId!);
             if (isBlacklisted)
             {
