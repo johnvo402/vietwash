@@ -85,7 +85,7 @@ try
    );
     Log.Logger.Information(
         "Application is launching with {environment}",
-        app.Environment.EnvironmentName
+		app.Environment.EnvironmentName
     );
     app.Run();
 }

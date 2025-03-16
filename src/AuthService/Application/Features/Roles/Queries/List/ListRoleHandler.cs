@@ -10,5 +10,5 @@ public class ListRoleHandler(IRoleManagerService roleManagerService, IMapper map
     public async ValueTask<IEnumerable<ListRoleResponse>> Handle(
         ListRoleQuery query,
         CancellationToken cancellationToken
-    ) => mapper.Map<IEnumerable<ListRoleResponse>>(await roleManagerService.ListAsync());
+    ) => mapper.Map<IEnumerable<ListRoleResponse>>(await roleManagerService.ListAsync()); 
 }
