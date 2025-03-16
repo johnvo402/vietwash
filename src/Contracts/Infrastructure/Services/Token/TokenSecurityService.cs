@@ -39,7 +39,11 @@ namespace Contracts.Infrastructure.Services.Token
         public async Task<bool> VerifySignatureAsync(TokenBinding request)
         {
             var decodeToken = DecodeToken(request.Token!);
+            long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
+            // Kiểm tra timestamp có quá cũ không
+            if (Math.Abs(now - request.Timestamp) > 100 * 1000)
+                return false;
             if (await ExistsNonceAsync(request.Nonce!)) return false;
             await StoreNonceAsync(request.Nonce!);
 
@@ -58,15 +62,25 @@ namespace Contracts.Infrastructure.Services.Token
             return await _cache.Database.KeyExistsAsync(key);
         }
 
-        private static bool VerifySignature(string publicKeyBase64, string data, string signatureBase64)
+        public bool VerifySignature(string publicKeyHex, string message, string signatureHex)
         {
-            var rsa = RSA.Create();
-            rsa.ImportSubjectPublicKeyInfo(Convert.FromBase64String(publicKeyBase64), out _);
+            try
+            {
+                // Chuyển đổi public key từ hex sang dạng byte
+                byte[] publicKeyBytes = Convert.FromHexString(publicKeyHex);
+                byte[] signatureBytes = Convert.FromHexString(signatureHex);
+                byte[] messageBytes = Encoding.UTF8.GetBytes(message);
 
-            var dataBytes = Encoding.UTF8.GetBytes(data);
-            var signatureBytes = Convert.FromBase64String(signatureBase64);
-
-            return rsa.VerifyData(dataBytes, signatureBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                using (ECDsa ecdsa = ECDsa.Create())
+                {
+                    ecdsa.ImportSubjectPublicKeyInfo(publicKeyBytes, out _);
+                    return ecdsa.VerifyData(messageBytes, signatureBytes, HashAlgorithmName.SHA256);
+                }
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public async Task AddSessionUserAsync(Ulid userId, string userData, TimeSpan expiry)
