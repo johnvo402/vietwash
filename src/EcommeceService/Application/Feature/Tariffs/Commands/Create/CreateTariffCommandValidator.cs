@@ -29,9 +29,8 @@ namespace Application.Feature.Tariffs.Commands.Create
         }
         private void ApplyRules()
         {
-            RuleFor(t => t.Payload)
-                .SetValidator(new TariffValidator(unitOfWork, accessorService));
-            RuleFor(t => t.Payload!.Disable)
+            Include(new TariffValidator(unitOfWork, accessorService));
+            RuleFor(t => t.Disable)
                 .Equal(false)
                 .WithState(x =>
                     Messager
@@ -39,8 +38,7 @@ namespace Application.Feature.Tariffs.Commands.Create
                         .Property(x => x.Name)
                         .Message(MessageType.Valid)
                         .Negative()
-                        .Build())
-                .WithMessage("New tariff must be enabled when created.");
+                        .Build());
         }
     }
 }

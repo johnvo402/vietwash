@@ -15,13 +15,12 @@ namespace Application.Feature.Tariffs.Commands.Create
 {
     public class CreateTariffHandler(
     IUnitOfWork unitOfWork,
-    IMapper mapper,
-    IMediaUpdateService<Tariff> mediaUpdateService
-) : IRequestHandler<CreateTariffCommand, QueueResponse<CreateTariffCommand>>
+    IMapper mapper
+) : IRequestHandler<CreateTariffCommand, CreateTariffResponse>
     {
-        public async ValueTask<QueueResponse<CreateTariffCommand>> Handle(CreateTariffCommand request, CancellationToken cancellationToken)
+        public async ValueTask<CreateTariffResponse> Handle(CreateTariffCommand request, CancellationToken cancellationToken)
         {
-            Tariff mappingTaiff = mapper.Map<Tariff>(request.Payload);
+            Tariff mappingTaiff = mapper.Map<Tariff>(request);
             try
             {
                 DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
@@ -33,28 +32,18 @@ namespace Application.Feature.Tariffs.Commands.Create
                 await unitOfWork.SaveAsync(cancellationToken);
 
                 await unitOfWork.CommitAsync(cancellationToken);
-                return new QueueResponse<CreateTariffCommand>
+                return new CreateTariffResponse
                 {
-                    Error = "lỗi",
-                    ErrorType = Contracts.Dtos.Responses.QueueErrorType.Transient,
-                    IsSuccess = false,
-                    ResponseData = request,
-                    LastAttemptTime = DateTime.UtcNow,
-                    PayloadId = request.PayloadId,
+                    Message = "Tariff created successfully"
                 };
             }
             catch (Exception ex)
             {
 
                 await unitOfWork.RollbackAsync(cancellationToken);
-                return new QueueResponse<CreateTariffCommand>
+                return new CreateTariffResponse
                 {
-                    Error = ex.Message,
-                    ErrorType = Contracts.Dtos.Responses.QueueErrorType.Transient,
-                    IsSuccess = false,
-                    ResponseData = request,
-                    LastAttemptTime = DateTime.UtcNow,
-                    PayloadId = request.PayloadId,
+                    Message = ex.Message
                 };
             }
         }

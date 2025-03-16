@@ -9,7 +9,7 @@ using Mediator;
 
 namespace Application.Feature.Tariffs.Commands.Create
 {
-    public class CreateTariffCommand : QueueBasePayload<TariffModel>, IRequest<QueueResponse<CreateTariffCommand>>
+    public class CreateTariffCommand : TariffModel, IRequest<CreateTariffResponse>
     {
 
     }
