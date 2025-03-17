@@ -4,6 +4,7 @@ using Contracts.Application.Common.Interfaces.Services.Queue;
 using Contracts.Dtos.Models;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.QueueLogs;
+using JohnChum.SharedKernel.Extensions;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -54,7 +55,7 @@ public class QueueBackgroundService(
                         var taskSender = taskScope.ServiceProvider.GetRequiredService<ISender>();
                         var taskLogger = taskScope.ServiceProvider.GetRequiredService<ILogger>();
                         var taskGrpcClient = taskScope.ServiceProvider.GetRequiredService<IQueueLogService>();
-                        var taskQueue = queueFactory.GetQueue(QueueType.OriginQueue);
+                        var taskQueue = queueFactory.GetQueue(QueueType.DeadLetterQueue);
 
                         await ProcessWithRetryAsync<CreateUserCommand, CreateUserCommand>(
                             request, taskSender, taskGrpcClient, taskLogger, taskQueue, stoppingToken);
@@ -99,9 +100,9 @@ public class QueueBackgroundService(
                 queueResponse =
                 await sender.Send(request, cancellationToken) as QueueResponse<TResponse>;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                logger.Error(ex, "Error while processing request {payloadId}", queueResponse.PayloadId);
+                logger.Error("Error while processing request {payloadId}", queueResponse!.PayloadId!);
             }
 
             // sucess case
@@ -120,8 +121,8 @@ public class QueueBackgroundService(
                 var requestLog = new CreateQueueLogRequest
                 {
                     RequestId = queueResponse.PayloadId!.Value.ToString(),
-                    RequestData = request.ToString(),
-                    ErrorDetail = queueResponse.Error?.ToString(),
+                    RequestData = SerializerExtension.Serialize(request).StringJson,
+                    ErrorDetail = SerializerExtension.Serialize(queueResponse.Error!).StringJson,
                     ProcessedBy = ProjectService_gRPC.QueueType.OriginQueue,
                     RetryCount = attempt,
                 };
@@ -162,18 +163,22 @@ public class QueueBackgroundService(
             var requestLog = new CreateQueueLogRequest
             {
                 RequestId = queueResponse.PayloadId!.Value.ToString(),
-                RequestData = request.ToString(),
-                ErrorDetail = new
+                RequestData = SerializerExtension.Serialize(request).StringJson,
+                ErrorDetail = SerializerExtension.Serialize(new
                 {
                     queueResponse.ErrorType,
                     queueResponse.Error,
                     Message = $"Push request {queueResponse.PayloadId} into dead letter queue for maximum attempts",
-                }.ToString(),
+                }).StringJson,
                 ProcessedBy = ProjectService_gRPC.QueueType.OriginQueue,
                 RetryCount = queueResponse.RetryCount
             };
 
-            await queueService.EnqueueAsync(request);
+            var check = await queueService.EnqueueAsync(request);
+            if (check)
+            {
+                logger.Error("Push request {queueResponse.PayloadId} into dead letter queue for maximum attempts");
+            }
             await _grpcClient.CreateLogAsync(requestLog, cancellationToken);
 
         }

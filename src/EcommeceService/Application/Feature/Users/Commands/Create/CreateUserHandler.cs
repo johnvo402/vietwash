@@ -24,7 +24,6 @@ public class CreateUserHandler(
         string? userAvatar = null;
         try
         {
-
             DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
 
             User user = await unitOfWork
@@ -35,15 +34,7 @@ public class CreateUserHandler(
             await unitOfWork.SaveAsync(cancellationToken);
 
             await unitOfWork.CommitAsync(cancellationToken);
-            return new QueueResponse<CreateUserCommand>
-            {
-                Error = "lỗi",
-                ErrorType = Contracts.Dtos.Responses.QueueErrorType.Transient,
-                IsSuccess = false,
-                ResponseData = command,
-                LastAttemptTime = DateTime.UtcNow,
-                PayloadId = command.PayloadId,
-            };
+
 
             return new QueueResponse<CreateUserCommand>
             {

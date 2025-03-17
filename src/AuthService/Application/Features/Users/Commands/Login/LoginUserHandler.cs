@@ -76,7 +76,7 @@ public class LoginUserHandler(
              [
                 new("family_id", familyId),
                 new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new("public_key", request.PublicKey!)
+                new("token_type", "access")
             ],
             accesstokenExpiredTime
         );
@@ -85,6 +85,7 @@ public class LoginUserHandler(
             [
                 new("family_id", familyId),
                 new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new("token_type", "refresh")
             ],
             refreshExpireTime
         );
@@ -102,7 +103,7 @@ public class LoginUserHandler(
             Permissions = user.Role.RolePermissions?.Select(p => p.Permission!.Key).ToList(),
         };
         var result = SerializerExtension.Serialize(value!);
-        await securityService.AddSessionUserAsync(user.Id, result.StringJson, (refreshExpireTime - DateTime.UtcNow));
+        await securityService.AddSessionUserAsync(user.Id.ToString(), result.StringJson, (refreshExpireTime - DateTime.UtcNow));
         return new()
         {
             Token = accessToken,
