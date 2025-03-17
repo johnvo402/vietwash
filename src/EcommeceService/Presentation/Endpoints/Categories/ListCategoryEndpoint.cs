@@ -12,13 +12,13 @@ namespace Presentation.Endpoints.Categories;
 
 public class ListCategoryEndpoint(ISender sender)
     : EndpointBaseAsync.WithRequest<ListCategoryQuery>.WithActionResult<
-        ApiResponse<PaginationResponse<ListCategoryResponse>>
+        ApiResponse<IEnumerable<ListCategoryResponse>>
     >
 {
     [HttpGet(Router.CategoryRoute.Categories)]
     [SwaggerOperation(Tags = [Router.CategoryRoute.Tags], Summary = "Category list")]
     public override async Task<
-        ActionResult<ApiResponse<PaginationResponse<ListCategoryResponse>>>
+        ActionResult<ApiResponse<IEnumerable<ListCategoryResponse>>>
     > HandleAsync(ListCategoryQuery request, CancellationToken cancellationToken = default) =>
         this.Ok200(await sender.Send(request, cancellationToken));
 }

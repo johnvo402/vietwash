@@ -1,3 +1,5 @@
+using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Categories.Command.Update;
 using Application.Feature.Common.Projections.Services;
 using Domain.Aggregates.Services;
@@ -6,10 +8,15 @@ using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 
 namespace Application.Feature.Common.Validators.Categories;
 
-public class CategoryModelValidation : AbstractValidator<CategoryModel>
+public class CategoryValidator : AbstractValidator<CategoryModel>
 {
-    public CategoryModelValidation()
+    private readonly IUnitOfWork unitOfWork;
+    private readonly IActionAccessorService accessorService;
+
+    public CategoryValidator(IUnitOfWork unitOfWork, IActionAccessorService accessorService)
     {
+        this.unitOfWork = unitOfWork;
+        this.accessorService = accessorService;
         ApplyRules();
     }
 
@@ -31,37 +38,6 @@ public class CategoryModelValidation : AbstractValidator<CategoryModel>
                     .Create<Category>()
                     .Property(x => x.Name)
                     .Message(MessageType.MaximumLength)
-                    .Negative()
-                    .Build()
-            );
-    }
-}
-
-public class UpdateCategoryCommandValidation : AbstractValidator<UpdateCategoryCommand>
-{
-    public UpdateCategoryCommandValidation()
-    {
-        ApplyRules();
-    }
-
-    private void ApplyRules()
-    {
-        RuleFor(x => x.CategoryId)
-            .NotEmpty()
-            .WithState(x =>
-                Messager
-                    .Create<UpdateCategoryCommand>()
-                    .Property(x => x.CategoryId)
-                    .Message(MessageType.Null)
-                    .Negative()
-                    .Build()
-            )
-            .Must(x => Ulid.TryParse(x, out _))
-            .WithState(x =>
-                Messager
-                    .Create<UpdateCategoryCommand>()
-                    .Property(x => x.CategoryId)
-                    .Message(MessageType.Valid)
                     .Negative()
                     .Build()
             );

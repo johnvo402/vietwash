@@ -9,6 +9,7 @@ public class ListCategoryMapping : Profile
     public ListCategoryMapping()
     {
         CreateMap<Category, CategoryProjection>();
+
         CreateMap<Category, ListCategoryResponse>().IncludeBase<Category, CategoryProjection>();
     }
 }

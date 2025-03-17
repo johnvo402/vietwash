@@ -21,14 +21,7 @@ public class UpdateCategoryEndpoint(ISender sender)
         CancellationToken cancellationToken = default
     )
     {
-        try
-        {
-            await sender.Send(request);
-            return this.Created201();
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.ToString());
-        }
+        await sender.Send(request);
+        return this.Created201();
     }
 }

@@ -4,6 +4,4 @@ using Mediator;
 
 namespace Application.Feature.Categories.Queries.List;
 
-public class ListCategoryQuery
-    : QueryParamRequest,
-        IRequest<PaginationResponse<ListCategoryResponse>>;
+public class ListCategoryQuery : QueryParamRequest, IRequest<IEnumerable<ListCategoryResponse>>;
