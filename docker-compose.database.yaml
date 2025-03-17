@@ -17,16 +17,6 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     shm_size: ${POSTGRES_SHM_SIZE}
     
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-      PGADMIN_DEFAULT_SERVER: database
-    depends_on:
-      - database
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin/
   redis:
     image: redis:latest  # Use the latest official Redis image
     container_name: redis-db  # Optional: name the container for easy identification
