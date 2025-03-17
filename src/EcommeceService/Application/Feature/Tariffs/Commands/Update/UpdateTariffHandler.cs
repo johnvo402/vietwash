@@ -23,7 +23,7 @@ namespace Application.Feature.Tariffs.Commands.Update
             CancellationToken cancellationToken
         )
         {
-            Tariff Tariff =
+            Tariff tariff =
                 await unitOfWork
                     .Repository<Tariff>()
                     .FindByConditionAsync(
@@ -35,7 +35,7 @@ namespace Application.Feature.Tariffs.Commands.Update
                 );
 
 
-            mapper.Map(command.Tariff, Tariff);
+            mapper.Map(command.Tariff, tariff);
 
             // update default claim
 
@@ -44,12 +44,9 @@ namespace Application.Feature.Tariffs.Commands.Update
                 DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
 
                 await unitOfWork.Repository<Tariff>().UpdateAsync(Tariff);
+
                 await unitOfWork.SaveAsync(cancellationToken);
 
-
-                await unitOfWork.Repository<Tariff>().UpdateAsync(
-                    Tariff
-                );
                 await unitOfWork.CommitAsync(cancellationToken);
 
                 return mapper.Map<UpdateTariffResponse>(Tariff);

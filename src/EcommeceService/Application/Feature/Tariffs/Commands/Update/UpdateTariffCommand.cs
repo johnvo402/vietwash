@@ -14,7 +14,7 @@ namespace Application.Feature.Tariffs.Commands.Update
         [FromRoute(Name = RouterBase.Id)]
         public string TariffId { get; set; } = string.Empty;
 
-        [FromForm]
+        [FromBody]
         public UpdateTariff? Tariff { get; set; }
     }
     public class UpdateTariff : TariffModel

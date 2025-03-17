@@ -24,7 +24,7 @@ namespace Presentation.Endpoints.Tariffs
         [SwaggerOperation(Tags = [Router.TariffRoute.Tags], Summary = "Create Tariff")]
         //[AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.tariff}")]
         public override async Task<ActionResult<ApiResponse<Unit>>> HandleAsync(
-            [FromForm] CreateTariffCommand request, CancellationToken cancellationToken = default)
+            [FromBody] CreateTariffCommand request, CancellationToken cancellationToken = default)
         {
             var tariff = await sender.Send(request, cancellationToken);
             return this.Created201();

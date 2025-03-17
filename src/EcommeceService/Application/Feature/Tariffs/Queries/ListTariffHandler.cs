@@ -15,7 +15,7 @@ namespace Application.Feature.Tariffs.Queries
     {
         public async ValueTask<PaginationResponse<ListTariffResponse>> Handle(ListTariffQuery request,
             CancellationToken cancellationToken) => await unitOfWork.CachedRepository<Tariff>()
-                                                                    .CursorPagedListAsync<ListTariffResponse>(
+                                                                    .PagedListAsync<ListTariffResponse>(
                                                                         new ListTariffSpecification(),
                                                                         request.ValidateQuery().ValidateFilter(typeof(ListTariffResponse))
                                                                     );

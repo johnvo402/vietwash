@@ -22,7 +22,7 @@ namespace Presentation.Endpoints.Tariffs
         [SwaggerOperation(Tags = [Router.TariffRoute.Tags], Summary = "Update Tariff")]
         //[AuthorizeBy(permissions: $"{ActionPermission.update}:{ObjectPermission.tariff}")]
         public override async Task<ActionResult<ApiResponse<UpdateTariffResponse>>> HandleAsync(
-            [FromForm] UpdateTariffCommand request,
+            [FromBody] UpdateTariffCommand request,
             CancellationToken cancellationToken = default)
         {
             var response = await sender.Send(request, cancellationToken);
