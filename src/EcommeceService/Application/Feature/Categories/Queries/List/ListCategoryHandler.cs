@@ -17,9 +17,7 @@ public class ListCategoryHandler(IUnitOfWork unitOfWork)
         ListCategoryQuery query,
         CancellationToken cancellationToken
     ) =>
-        (
-            await unitOfWork
-                .CachedRepository<Category>()
-                .ListAsync<CategoryProjection>(cancellationToken)
-        ).Select(c => new ListCategoryResponse { Name = c.Name });
+        await unitOfWork
+            .CachedRepository<Category>()
+            .ListAsync<ListCategoryResponse>(cancellationToken);
 }
