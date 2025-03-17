@@ -12,5 +12,12 @@ namespace Presentation.Routes
             public const string Services = $"{Ecommerce}/{RouterBase.prefix}{nameof(Services)}";
         }
 
+        public static class CategoryRoute
+        {
+            public const string Tags = $"{nameof(CategoryRoute)} endpoint";
+            public const string Categories = $"{Ecommerce}/{RouterBase.prefix}{nameof(Categories)}";
+            public const string GetUpdateDelete =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Categories)}/" + "{" + RouterBase.Id + "}";
+        }
     }
 }
