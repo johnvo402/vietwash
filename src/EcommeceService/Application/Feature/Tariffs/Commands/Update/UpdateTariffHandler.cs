@@ -43,13 +43,13 @@ namespace Application.Feature.Tariffs.Commands.Update
             {
                 DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
 
-                await unitOfWork.Repository<Tariff>().UpdateAsync(Tariff);
+                await unitOfWork.Repository<Tariff>().UpdateAsync(tariff);
 
                 await unitOfWork.SaveAsync(cancellationToken);
 
                 await unitOfWork.CommitAsync(cancellationToken);
 
-                return mapper.Map<UpdateTariffResponse>(Tariff);
+                return mapper.Map<UpdateTariffResponse>(tariff);
             }
             catch (Exception)
             {
