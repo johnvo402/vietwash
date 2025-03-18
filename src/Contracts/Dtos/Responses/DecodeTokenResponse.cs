@@ -9,8 +9,8 @@ public class DecodeTokenResponse
 
     [JsonPropertyName("family_id")]
     public string? FamilyId { get; set; }
-    [JsonPropertyName("public_key")]
-    public string? PublicKey { get; set; }
+    [JsonPropertyName("token_type")]
+    public string? TokenType { get; set; }
     [JsonPropertyName("exp")]
     public long? ExpiredTime { get; set; }
 }

@@ -30,26 +30,12 @@ namespace Contracts.Infrastructure.Services.Token
                 .Create()
                 .WithAlgorithm(new HMACSHA256Algorithm())
                 .WithSecret(settings.SecretKey).Issuer(settings.Issuer).Audience(settings.Audience)
-                .MustVerifySignature()
+                .DoNotVerifySignature()
                 .Decode(token);
 
             return SerializerExtension.Deserialize<DecodeTokenResponse>(json).Object!;
         }
 
-        public async Task<bool> VerifySignatureAsync(TokenBinding request)
-        {
-            var decodeToken = DecodeToken(request.Token!);
-            long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
-            // Kiểm tra timestamp có quá cũ không
-            if (Math.Abs(now - request.Timestamp) > 100 * 1000)
-                return false;
-            if (await ExistsNonceAsync(request.Nonce!)) return false;
-            await StoreNonceAsync(request.Nonce!);
-
-            var data = $"{request.Timestamp}:{request.Nonce}";
-            return VerifySignature(decodeToken?.PublicKey!, data, request.Signature!);
-        }
 
         public async Task<bool> ExistsNonceAsync(string nonce) =>
             (await _cache.Database.StringGetAsync(nonce)).HasValue;
@@ -83,11 +69,11 @@ namespace Contracts.Infrastructure.Services.Token
             }
         }
 
-        public async Task AddSessionUserAsync(Ulid userId, string userData, TimeSpan expiry)
+        public async Task AddSessionUserAsync(string userId, string userData, TimeSpan expiry)
         {
 
             await _cache.Database.StringSetAsync(
-                userId.ToString(),
+                userId,
                 userData,
                 expiry,
                 when: When.Always

@@ -1,5 +1,4 @@
-﻿using System.Data.Common;
-using Application.Common.Interfaces.Services.Identity;
+﻿using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Aggregates.Regions;
 using Domain.Aggregates.Roles;
@@ -20,62 +19,76 @@ public class DbInitializer
         var unitOfWork = provider.GetRequiredService<IUnitOfWork>();
         var roleManagerService = provider.GetRequiredService<IRoleManagerService>();
         var logger = provider.GetRequiredService<ILogger>();
-        // 1. Insert Permissions if not exists
-        var permissionsInsert = Credential
-           .ADMIN_CLAIMS
-           .Select(x => new Permission
-           {
-               Key = x,
-               Description = Credential.PermissionGroups
-                   .FirstOrDefault(p => p.Value.Contains(x)).Key
-           })
-           .ToList();
 
-        // Insert nếu cần (check trước)
-        if (!await roleManagerService.Permissions.AnyAsync())
-        {
-            await roleManagerService.Permissions.AddRangeAsync(permissionsInsert);
-        }
+        using var dbTransaction = await unitOfWork.CreateTransactionAsync();
 
-        // 2. Lấy lại Permission từ DB theo key
-        var insertedPermissions = await roleManagerService.Permissions
-            .Where(p => Credential.ADMIN_CLAIMS.Contains(p.Key))
-            .ToListAsync();
-
-        // 3. Khởi tạo Role với Permission đã có ID đầy đủ
-        Role adminRole = new()
-        {
-            Id = Ulid.Parse(Credential.ADMIN_ROLE_ID),
-            Name = Credential.ADMIN_ROLE,
-            RolePermissions = insertedPermissions.Select(x => new RolePermission()
-            {
-                PermissionId = x.Id
-            }).ToList(),
-        };
-
-        Role managerRole = new()
-        {
-            Id = Ulid.Parse(Credential.MANAGER_ROLE_ID),
-            Name = Credential.MANAGER_ROLE,
-            RolePermissions = insertedPermissions.Where(x => Credential.MANAGER_CLAIMS.Contains(x.Key)).Select(x => new RolePermission()
-            {
-                PermissionId = x.Id
-            }).ToList(),
-        };
-        Role[] roles = [adminRole, managerRole];
-        if (!await roleManagerService.Roles.AnyAsync())
-        {
-            logger.Information("Inserting roles is starting.............");
-            await roleManagerService.CreateRangeRoleAsync(roles);
-            logger.Information("Inserting roles has finished.............");
-        }
-
-        List<string> permissions = [.. Credential.PermissionGroups.SelectMany(x => x.Value)];
-        List<string> managerPermissions = [.. Credential.MANAGER_CLAIMS];
         try
         {
-            DbTransaction dbTransaction = await unitOfWork.CreateTransactionAsync();
+            // Lấy danh sách quyền hiện có từ DB
+            var existingPermissions = (await roleManagerService.Permissions
+                .Select(p => p.Key)
+                .ToListAsync())
+                .ToHashSet();
 
+            // Xác định các quyền cần thêm mới
+            var newPermissions = Credential.ADMIN_CLAIMS
+                .Where(x => !existingPermissions.Contains(x))
+                .Select(x => new Permission
+                {
+                    Key = x,
+                    Description = Credential.PermissionGroups
+                        .FirstOrDefault(p => p.Value.Contains(x)).Key
+                })
+                .ToList();
+
+            // Thêm quyền mới nếu có
+            if (newPermissions.Any())
+            {
+                await roleManagerService.Permissions.AddRangeAsync(newPermissions);
+                await unitOfWork.SaveAsync();
+            }
+
+            // Lấy lại danh sách quyền từ DB (bao gồm quyền mới vừa thêm)
+            var insertedPermissions = await roleManagerService.Permissions
+                .Where(p => Credential.ADMIN_CLAIMS.Contains(p.Key))
+                .ToListAsync();
+
+            // Lấy danh sách Role hiện có từ DB
+            var existingRoles = await roleManagerService.Roles
+                .Include(r => r.RolePermissions)
+                .ToListAsync();
+
+            // Tạo danh sách Role mới hoặc cập nhật RolePermissions nếu Role đã tồn tại
+            var adminRole = existingRoles.FirstOrDefault(r => r.Id == Ulid.Parse(Credential.ADMIN_ROLE_ID))
+                ?? new Role { Id = Ulid.Parse(Credential.ADMIN_ROLE_ID), Name = Credential.ADMIN_ROLE };
+
+            var managerRole = existingRoles.FirstOrDefault(r => r.Id == Ulid.Parse(Credential.MANAGER_ROLE_ID))
+                ?? new Role { Id = Ulid.Parse(Credential.MANAGER_ROLE_ID), Name = Credential.MANAGER_ROLE };
+
+            // Cập nhật quyền cho Role (nếu chưa có)
+            adminRole.RolePermissions = insertedPermissions
+                .Select(x => new RolePermission { PermissionId = x.Id, RoleId = adminRole.Id })
+                .ToList();
+
+            managerRole.RolePermissions = insertedPermissions
+                .Where(x => Credential.MANAGER_CLAIMS.Contains(x.Key))
+                .Select(x => new RolePermission { PermissionId = x.Id, RoleId = managerRole.Id })
+                .ToList();
+            Role[] roles = [adminRole, managerRole];
+            // Lưu Role vào DB (update nếu đã tồn tại, insert nếu chưa)
+            if (existingRoles.Any())
+            {
+                roleManagerService.Roles.UpdateRange(roles);
+            }
+            else
+            {
+                logger.Information("Inserting roles is starting...");
+                await roleManagerService.CreateRangeRoleAsync(roles);
+                logger.Information("Inserting roles has finished...");
+            }
+
+            await unitOfWork.SaveAsync();
+          
 
             if (!await unitOfWork.Repository<User>().AnyAsync())
             {
@@ -83,7 +96,7 @@ public class DbInitializer
 
                 List<User> users = await InitializeUserDataAsync(unitOfWork, roles);
 
-              
+
 
                 foreach (var user in users)
                 {

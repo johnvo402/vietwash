@@ -7,6 +7,17 @@ x-refs:
         gelf-address: "udp://localhost:12201"
 
 services:
+  nginx-api:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./logs:/var/log/nginx
+    depends_on:
+      - gateway
+
   auth:
     <<: *common_config
     image: auth
@@ -15,6 +26,22 @@ services:
     build:
       context: .
       dockerfile: ./src/AuthService/Dockerfile
+  ecommerce:
+    <<: *common_config
+    image: ecommerce
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+    build:
+      context: .
+      dockerfile: ./src/EcommeceService/Dockerfile
+  project:
+    <<: *common_config
+    image: project
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+    build:
+      context: .
+      dockerfile: ./src/ProjectService/Dockerfile
       
   gateway:
     <<: *common_config

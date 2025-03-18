@@ -22,6 +22,9 @@ migration:
 # Mục để cập nhật migration (tùy chọn)
 update:
 	./scripts/update-db.sh
+publish:
+	./scripts/publish.sh
+
 
 # Mục để kiểm tra migration status
 status:

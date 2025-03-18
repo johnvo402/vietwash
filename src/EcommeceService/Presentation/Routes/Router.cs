@@ -17,6 +17,12 @@ namespace Presentation.Routes
 			public const string Units = $"{Ecommerce}/{RouterBase.prefix}{nameof(Units)}";
 			public const string GetUpdateDelete = $"{Ecommerce}/{RouterBase.prefix}{nameof(Units)}/" + "{" + RouterBase.Id + "}";
 		}
-
-	}
+        public static class CategoryRoute
+        {
+            public const string Tags = $"{nameof(CategoryRoute)} endpoint";
+            public const string Categories = $"{Ecommerce}/{RouterBase.prefix}{nameof(Categories)}";
+            public const string GetUpdateDelete =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Categories)}/" + "{" + RouterBase.Id + "}";
+        }
+    }
 }

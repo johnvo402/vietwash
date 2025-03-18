@@ -36,6 +36,17 @@ public static class Credential
                     CreatePermission(ActionPermission.detail, ObjectPermission.role),
                 ]
             },
+             {
+                "Services",
+
+                [
+                    CreatePermission(ActionPermission.create, ObjectPermission.service),
+                    CreatePermission(ActionPermission.update, ObjectPermission.service),
+                    CreatePermission(ActionPermission.delete, ObjectPermission.service),
+                    CreatePermission(ActionPermission.list, ObjectPermission.service),
+                    CreatePermission(ActionPermission.detail, ObjectPermission.service),
+                ]
+            },
         };
 
     public static readonly IReadOnlyCollection<string> ADMIN_CLAIMS =
@@ -48,12 +59,12 @@ public static class Credential
 
             CreatePermission(ActionPermission.create, ObjectPermission.user),
 
-        CreatePermission(ActionPermission.list, ObjectPermission.user),
+            CreatePermission(ActionPermission.list, ObjectPermission.user),
 
             CreatePermission(ActionPermission.detail, ObjectPermission.user),
 
             CreatePermission(ActionPermission.create, ObjectPermission.role),
-       CreatePermission(ActionPermission.list, ObjectPermission.role),
+            CreatePermission(ActionPermission.list, ObjectPermission.role),
             CreatePermission(ActionPermission.detail, ObjectPermission.role),
     ];
 

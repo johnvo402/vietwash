@@ -55,8 +55,10 @@ ScaffoldingReadMe.txt
 *.coveragexml
 
 # Local development settings
-appsettings.Development.json
-*.Development.json
+
+appsettings.Staging.json
+appsettings.Production.json
+
 
 # Rider
 .idea/
@@ -91,5 +93,5 @@ dump.rdb
 [Rr]eleasePublic/
 [Pp]ublish/
 .azure
-
+app/
 .fake

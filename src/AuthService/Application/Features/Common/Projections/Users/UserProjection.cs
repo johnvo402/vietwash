@@ -3,6 +3,7 @@ using Application.Features.Common.Projections.Regions;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users.Enums;
 using JohnChum.SharedKernel.Application.Common;
+using System.Text.Json.Serialization;
 
 namespace Application.Features.Common.Projections.Users;
 
@@ -19,7 +20,7 @@ public class UserProjection : BaseResponse
     public string? PhoneNumber { get; set; }
 
     public DateTime? DayOfBirth { get; set; }
-
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public Gender? Gender { get; set; }
 
     public ProvinceProjection? Province { get; set; }
