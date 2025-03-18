@@ -30,6 +30,7 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 app.UseCors("AllowFrontend");
 app.UseRateLimiter();
+app.MapGet("/", () => "Run oke!");
 // Map YARP
 app.MapReverseProxy();
 
