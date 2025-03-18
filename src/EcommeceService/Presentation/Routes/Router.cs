@@ -19,6 +19,12 @@ namespace Presentation.Routes
             public const string GetUpdateDelete = $"{Ecommerce}/{RouterBase.prefix}{nameof(Tariffs)}/" + "{" + RouterBase.Id + "}";
         }
 
+        public static class UnitRoute
+        {
+            public const string Tags = $"{nameof(UnitRoute)} endpoint";
+            public const string Units = $"{Ecommerce}/{RouterBase.prefix}{nameof(Units)}";
+            public const string GetUpdateDelete = $"{Ecommerce}/{RouterBase.prefix}{nameof(Units)}/" + "{" + RouterBase.Id + "}";
+        }
         public static class CategoryRoute
         {
             public const string Tags = $"{nameof(CategoryRoute)} endpoint";

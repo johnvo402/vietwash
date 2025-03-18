@@ -12,8 +12,8 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Presentation.Endpoints.Services
 {
     public class CreateServiceEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<CreateServiceCommand>.WithActionResult<ApiResponse<Unit>>
-    {
+	: EndpointBaseAsync.WithRequest<CreateServiceCommand>.WithActionResult<ApiResponse<Unit>>
+	{
         [HttpPost(Router.ServiceRoute.Services)]
         [SwaggerOperation(Tags = [Router.ServiceRoute.Tags], Summary = "create Service")]
         [AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.user}")]
