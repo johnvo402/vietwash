@@ -33,7 +33,7 @@ public class UserProjection : BaseResponse
 
     [File]
     public string? Avatar { get; set; }
-
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public UserStatus Status { get; set; }
     public Ulid RoleId { get; set; }
 }
