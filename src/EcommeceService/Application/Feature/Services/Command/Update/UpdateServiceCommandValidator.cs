@@ -1,18 +1,20 @@
 ﻿using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Feature.Common.Projections.Services;
 using Domain.Aggregates.Services;
 using FluentValidation;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 
-namespace Application.Feature.Common.Validators.Services
+namespace Application.Feature.Services.Command.Update
 {
-    public class ServiceValidator : AbstractValidator<ServiceModel>
+    public class UpdateServiceCommandValidator : AbstractValidator<UpdateServiceCommand>
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly IActionAccessorService accessorService;
 
-        public ServiceValidator(IUnitOfWork unitOfWork, IActionAccessorService accessorService)
+        public UpdateServiceCommandValidator(
+            IUnitOfWork unitOfWork,
+            IActionAccessorService accessorService
+        )
         {
             this.unitOfWork = unitOfWork;
             this.accessorService = accessorService;
@@ -21,7 +23,7 @@ namespace Application.Feature.Common.Validators.Services
 
         private void ApplyRules()
         {
-            RuleFor(x => x.Name)
+            RuleFor(x => x.Service.Name)
                 .NotEmpty()
                 .WithState(x =>
                     Messager

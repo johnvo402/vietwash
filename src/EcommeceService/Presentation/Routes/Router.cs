@@ -1,4 +1,5 @@
 ﻿using Contracts.Routers;
+using Domain.Aggregates.Tariffs;
 
 namespace Presentation.Routes
 {
@@ -10,6 +11,7 @@ namespace Presentation.Routes
         {
             public const string Tags = $"{nameof(ServiceRoute)} endpoint";
             public const string Services = $"{Ecommerce}/{RouterBase.prefix}{nameof(Services)}";
+            public const string GetUpdateDelete = $"{Ecommerce}/{RouterBase.prefix}{nameof(Services)}/" + "{" + RouterBase.Id + "}";
         }
 
         public static class TariffRoute
