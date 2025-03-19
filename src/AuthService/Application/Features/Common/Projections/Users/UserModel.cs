@@ -14,11 +14,11 @@ public class UserModel
 
     public DateTime? DayOfBirth { get; set; }
 
-    public Ulid ProvinceId { get; set; }
+    public string? ProvinceId { get; set; }
 
-    public Ulid DistrictId { get; set; }
+    public string? DistrictId { get; set; }
 
-    public Ulid? CommuneId { get; set; }
+    public string? CommuneId { get; set; }
 
     public string? Street { get; set; }
 

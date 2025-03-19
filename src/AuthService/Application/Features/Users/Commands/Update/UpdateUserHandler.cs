@@ -41,17 +41,17 @@ public class UpdateUserHandler(
 
         Province? province = await unitOfWork
             .Repository<Province>()
-            .FindByIdAsync(command.User.ProvinceId, cancellationToken);
+            .FindByIdAsync(Ulid.Parse(command.User.ProvinceId), cancellationToken);
         District? district = await unitOfWork
             .Repository<District>()
-            .FindByIdAsync(command.User.DistrictId, cancellationToken);
+            .FindByIdAsync(Ulid.Parse(command.User.DistrictId), cancellationToken);
 
         Commune? commune = null;
-        if (command.User.CommuneId.HasValue)
+        if (string.IsNullOrEmpty(command.User.CommuneId))
         {
             commune = await unitOfWork
                 .Repository<Commune>()
-                .FindByIdAsync(command.User.CommuneId.Value, cancellationToken);
+                .FindByIdAsync(Ulid.Parse(command.User.CommuneId), cancellationToken);
         }
         user.UpdateAddress(new(province!, district!, commune, command.User.Street!));
 

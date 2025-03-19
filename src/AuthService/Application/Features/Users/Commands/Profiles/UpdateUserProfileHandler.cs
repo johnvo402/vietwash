@@ -42,17 +42,17 @@ public class UpdateUserProfileHandler(
 
         Province? province = await unitOfWork
             .Repository<Province>()
-            .FindByIdAsync(command.ProvinceId, cancellationToken);
+            .FindByIdAsync(Ulid.Parse(command.ProvinceId)!, cancellationToken);
         District? district = await unitOfWork
             .Repository<District>()
-            .FindByIdAsync(command.DistrictId, cancellationToken);
+            .FindByIdAsync(Ulid.Parse(command.DistrictId)!, cancellationToken);
 
         Commune? commune = null;
-        if (command.CommuneId.HasValue)
+        if (string.IsNullOrEmpty(command.CommuneId))
         {
             commune = await unitOfWork
                 .Repository<Commune>()
-                .FindByIdAsync(command.CommuneId.Value, cancellationToken);
+                .FindByIdAsync(Ulid.Parse(command.CommuneId), cancellationToken);
         }
         user.UpdateAddress(new(province!, district!, commune, command.Street!));
 

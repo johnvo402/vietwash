@@ -184,7 +184,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
         RuleFor(x => x.CommuneId)
             .MustAsync(
                 (communeId, cancellationToken) =>
-                    IsCommuneAvailableAsync(communeId!.Value, cancellationToken)
+                    IsCommuneAvailableAsync(Ulid.Parse(communeId!), cancellationToken)
             )
             .When(x => x.CommuneId != null, ApplyConditionTo.CurrentValidator)
             .WithState(x =>
@@ -223,20 +223,20 @@ public partial class UserValidator : AbstractValidator<UserModel>
             );
 
     private async Task<bool> IsProvinceAvailableAsync(
-        Ulid provinceId,
+        string provinceId,
         CancellationToken cancellationToken
     ) =>
         await unitOfWork
             .Repository<Province>()
-            .AnyAsync(x => x.Id == provinceId, cancellationToken);
+            .AnyAsync(x => x.Id == Ulid.Parse(provinceId), cancellationToken);
 
     private async Task<bool> IsDistrictAvailableAsync(
-        Ulid districtId,
+        string districtId,
         CancellationToken cancellationToken
     ) =>
         await unitOfWork
             .Repository<District>()
-            .AnyAsync(x => x.Id == districtId, cancellationToken);
+            .AnyAsync(x => x.Id == Ulid.Parse(districtId), cancellationToken);
 
     private async Task<bool> IsCommuneAvailableAsync(
         Ulid communeId,
