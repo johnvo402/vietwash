@@ -13,7 +13,7 @@ namespace Application.Feature.Services.Command.Create
                 .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => Ulid.Parse(src.CategoryId)))
                 .ForMember(dest => dest.UnitRelations, opt => opt.MapFrom(src =>
                     src.UnitRelations.Select(unit => new UnitRelation
-                    {F
+                    {
                         UnitId = Ulid.Parse(unit.UnitId),
                         BaseUnit = unit.BaseUnit,
                         Price = unit.Price
