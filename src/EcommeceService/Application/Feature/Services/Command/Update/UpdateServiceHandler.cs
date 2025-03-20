@@ -35,7 +35,6 @@ public class UpdateServiceHandler(
             await unitOfWork.Repository<Service>().UpdateAsync(getService);
 
             await unitOfWork.SaveAsync(cancellationToken);
-            await unitOfWork.Repository<Service>().UpdateAsync(getService);
             await unitOfWork.CommitAsync(cancellationToken);
             await mediaUpdateService.DeleteAvatarAsync(oldServiceImage);
 

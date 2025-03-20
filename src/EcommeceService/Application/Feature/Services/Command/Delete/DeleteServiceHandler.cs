@@ -1,16 +1,15 @@
+using System.Data.Common;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
+using AutoMapper;
 using Domain.Aggregates.Services;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Mediator;
 
 namespace Application.Feature.Services.Command.Delete;
 
-public class DeleteServiceHandler(
-    IUnitOfWork unitOfWork,
-    IMediaUpdateService<Service> MediaUpdateService
-) : IRequestHandler<DeleteServiceCommand>
+public class DeleteServiceHandler(IUnitOfWork unitOfWork) : IRequestHandler<DeleteServiceCommand>
 {
     public async ValueTask<Mediator.Unit> Handle(
         DeleteServiceCommand command,
@@ -23,12 +22,22 @@ public class DeleteServiceHandler(
                 [Messager.Create<Service>().Message(MessageType.Found).Negative().BuildMessage()]
             );
 
-        string? oldServiceImage = getService.Image;
+        getService.Disable = true;
 
-        await unitOfWork.Repository<Service>().DeleteAsync(getService);
-        await unitOfWork.SaveAsync(cancellationToken);
+        try
+        {
+            DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
 
-        await MediaUpdateService.DeleteAvatarAsync(oldServiceImage);
-        return Mediator.Unit.Value;
+            await unitOfWork.Repository<Service>().UpdateAsync(getService);
+            await unitOfWork.SaveAsync(cancellationToken);
+            await unitOfWork.CommitAsync(cancellationToken);
+
+            return Mediator.Unit.Value;
+        }
+        catch
+        {
+            await unitOfWork.RollbackAsync(cancellationToken);
+            throw;
+        }
     }
 }
