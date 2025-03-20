@@ -50,5 +50,11 @@ namespace Presentation.Routes
             public const string Communes = $"{Auth}/{RouterBase.prefix}{nameof(Communes)}";
             public const string Tags = $"{nameof(RegionRoute)} endpoint";
         }
+
+        public static class MediaRoute
+        {
+            public const string Media = $"{Auth}/{RouterBase.prefix}{nameof(Media)}";
+            public const string Tags = $"{nameof(Media)} endpoint";
+        }
     }
 }
