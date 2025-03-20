@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Common.Mapping.Units
 {
-	public class UnitMapping : Profile
-	{
-		public UnitMapping()
-		{
-			CreateMap<UnitModel, Unit>();
+    public class UnitMapping : Profile
+    {
+        public UnitMapping()
+        {
+            CreateMap<UnitModel, Unit>();
+            CreateMap<UnitRelationModel, UnitRelation>();
 
 
-
-		}
-	}
+        }
+    }
 }

@@ -9,7 +9,7 @@ namespace Application.Feature.Common.Projections.Units
 {
     public class UnitRelationModel
     {
-        public Ulid Id { get; set; }
+        public string UnitId { get; set; }
         public bool BaseUnit { get; set; }
         public decimal Price { get; set; }
 
