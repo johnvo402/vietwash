@@ -7,6 +7,7 @@ public class ApplicationMappingProfile : Profile
 {
     public ApplicationMappingProfile()
     {
+        CreateMap<string, Ulid>().ConvertUsing(src => Ulid.Parse(src));
         CreateMap<MessageMailMetaData, MailData>()
             .ForMember(dest => dest.Body, opt => opt.MapFrom(src => src.Message));
 

@@ -1,6 +1,7 @@
 using Application.Features.Common.Projections.Roles;
 using Application.Features.Common.Projections.Users;
 using AutoMapper;
+using CaseConverter;
 using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
@@ -23,7 +24,10 @@ public class UserMapping : Profile
         CreateMap<Address, UserProjection>();
         CreateMap<Address, UserDetailProjection>();
 
-        CreateMap<Role, RoleDetailProjection>();
+        CreateMap<Role, RoleDetailProjection>().ForMember(
+                dest => dest.RoleClaims,
+                opt => opt.MapFrom(src => src.RolePermissions)
+            );
         CreateMap<RolePermission, RolePermissionDetailProjection>();
 
     }

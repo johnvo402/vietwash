@@ -26,6 +26,11 @@ public class RoleMapping : Profile
                     }
                 }
             );
-        CreateMap<RolePermission, RolePermissionDetailProjection>();
+        CreateMap<RolePermission, RolePermissionDetailProjection>().ForMember(
+                        dest => dest.Permission,
+                        opt => opt.MapFrom(src => src.Permission)
+                );
+
+        CreateMap<Permission, PermissionModel>();
     }
 }

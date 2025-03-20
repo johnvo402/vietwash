@@ -1,6 +1,7 @@
 using Application.Features.Common.Projections.Users;
 using AutoMapper;
 using Domain.Aggregates.Users;
+using System;
 
 namespace Application.Features.Users.Commands.Create;
 
@@ -8,7 +9,10 @@ public class CreateUserMapping : Profile
 {
     public CreateUserMapping()
     {
+        
+
         CreateMap<CreateUserCommand, User>()
+            .ForMember(dest => dest.RoleId, opt => opt.MapFrom(src => Ulid.Parse(src.RoleId)))
             .AfterMap(
                 (src, dest) =>
                 {

@@ -163,9 +163,9 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
             );
     }
 
-    private async Task<bool> IsRolesAvailableAsync(Ulid roles)
+    private async Task<bool> IsRolesAvailableAsync(string roles)
     {
-        return await roleManagerService.Roles.AnyAsync(x => roles == x.Id);
+        return await roleManagerService.Roles.AnyAsync(x => Ulid.Parse(roles) == x.Id);
     }
 
     [GeneratedRegex(@"^[a-zA-Z0-9_.]+$")]
