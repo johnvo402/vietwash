@@ -1,0 +1,21 @@
+﻿using Application.Feature.Orders;
+using Domain.Aggregates.Orders.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Application.Feature.Common.Projections.Orders
+{
+	public class OrderModel
+	{
+		public Ulid? CustomerId { get; set; }
+		public string? Note { get; set; } = string.Empty;
+		public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Cash;
+		public bool? DiscountType { get; set; } // true = percentage, false = fixed amount
+		public decimal? DiscountValue { get; set; }
+		public List<OrderItemModel> OrderItems { get; set; } = [];
+		public decimal PaymentAmount { get; set; } // Số tiền thanh toán ban đầu
+	}
+}

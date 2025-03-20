@@ -1,4 +1,5 @@
-﻿using Elasticsearch.Net;
+﻿using Domain.Aggregates.Orders.Enums;
+using Elasticsearch.Net;
 using JohnChum.SharedKernel.Domain.Common;
 using Mediator;
 using Nest;
@@ -18,10 +19,9 @@ namespace Domain.Aggregates.Funds
         public decimal Amount { get; set; } = default!;
         public string Note { get; set; } = default!;
         public DateTimeOffset TransactionDate { get; set; }
-        public string PaymentMethodId { get; set; } = default!;
+        public PaymentMethod PaymentMethodId { get; set; } = default!;
         public FundBehavior FundBehavior { get; set; } = default!;
         public FundType FundType { get; set; } = default!;
-        public PaymentMethod PaymentMethod { get; set; }=default!;
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
             throw new NotImplementedException();

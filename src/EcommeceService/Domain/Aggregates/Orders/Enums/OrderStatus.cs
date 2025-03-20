@@ -1,0 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Domain.Aggregates.Orders.Enums
+{
+	public enum OrderStatus : byte
+	{
+		Pending = 1,
+		InProgress = 2,
+		Processed = 3,
+		Completed = 4,
+		Disabled = 5,
+	}
+}

@@ -12,7 +12,6 @@ namespace Infrastructure.Data.Configurations
             builder.HasIndex(x => x.Id);
             builder.Property(x => x.Name).HasColumnType("citext");
             builder.Property(x => x.Amount).HasColumnType("numeric");
-            builder.HasOne(x => x.PaymentMethod).WithMany(x => x.Funds).HasForeignKey(x => x.PaymentMethodId);
             builder.HasOne(x => x.FundType).WithMany(x => x.Funds).HasForeignKey(x => x.TypeId);
             builder.HasOne(x => x.FundBehavior).WithMany(x => x.Funds).HasForeignKey(x => x.BehaviorId);
 
