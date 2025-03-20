@@ -1,15 +1,38 @@
 using Application.Feature.Common.Projections.Services;
+using Application.Feature.Common.Projections.Units;
 using AutoMapper;
 using Domain.Aggregates.Services;
 
-namespace Application.Feature.Services.Command.Update;
-
-public class UpdateServiceMapping : Profile
+namespace Application.Feature.Services.Command.Update
 {
-    public UpdateServiceMapping()
+    public class UpdateServiceMapping : Profile
     {
-        CreateMap<ServiceModel, Service>();
-        CreateMap<Service, UpdateServiceResponse>().IncludeBase<Service, ServiceDetailProjection>();
+        public UpdateServiceMapping()
+        {
+            CreateMap<ServiceModel, Service>()
+                .ForMember(
+                    dest => dest.CategoryId,
+                    opt => opt.MapFrom(src => Ulid.Parse(src.CategoryId))
+                )
+                .ForMember(
+                    dest => dest.UnitRelations,
+                    opt =>
+                        opt.MapFrom(src =>
+                            src.UnitRelations.Select(unit => new UnitRelation
+                                {
+                                    UnitId = Ulid.Parse(unit.UnitId),
+                                    BaseUnit = unit.BaseUnit,
+                                    Price = unit.Price,
+                                })
+                                .ToList()
+                        )
+                );
 
+            CreateMap<Service, UpdateServiceResponse>()
+                .IncludeBase<Service, ServiceDetailProjection>();
+
+            CreateMap<UnitRelationModel, UnitRelation>()
+                .ForMember(dest => dest.UnitId, opt => opt.MapFrom(src => Ulid.Parse(src.UnitId)));
+        }
     }
 }

@@ -16,7 +16,7 @@ namespace Presentation.Endpoints.Services
         [SwaggerOperation(Tags = [Router.ServiceRoute.Tags], Summary = "create Service")]
         // [AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.user}")]
         public override async Task<ActionResult<ApiResponse<Unit>>> HandleAsync(
-            [FromForm] CreateServiceCommand request,
+            [FromBody] CreateServiceCommand request,
             CancellationToken cancellationToken = default
         )
         {
