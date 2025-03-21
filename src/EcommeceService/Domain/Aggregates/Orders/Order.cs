@@ -18,9 +18,6 @@ namespace Domain.Aggregates.Orders
         public string Note { get; set; } = default!;
         public OrderStatus Status { get; set; } = default!;
         public DateTimeOffset OrderDate { get; set; } = default!;
-        public string PaymentMethodId { get; set; } = default!;
-        public PaymentMethod? PaymentMethod { get; set; } = default!;
-
 		public ICollection<OrderPayment> OrderPayments { get; set; } = [];
         public User? Customer { get; set; }
 

@@ -17,6 +17,5 @@ namespace Application.Feature.Common.Projections.Orders
 		public Ulid? CustomerId { get; set; }
 		public string Note { get; set; } = string.Empty;
 		public DateTimeOffset OrderDate { get; set; }
-		public string PaymentMethodId { get; set; } = string.Empty;
 	}
 }
