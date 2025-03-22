@@ -1,5 +1,8 @@
 ﻿using Application.Common.Security;
+using Application.Feature.Common.Projections.Units;
+using Domain.Aggregates.Services.Enums;
 using JohnChum.SharedKernel.Domain.Common;
+using System.Text.Json.Serialization;
 
 namespace Application.Feature.Common.Projections.Services
 {
@@ -10,6 +13,11 @@ namespace Application.Feature.Common.Projections.Services
         public string? Description { get; set; }
         [File]
         public string? Image { get; set; }
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public ServiceStatus? Status { get; set; }
         public Ulid CategoryId { get; set; } = default!;
+
+        public List<UnitRelationProjection> UnitRelations { get; set; } = new();
     }
 }

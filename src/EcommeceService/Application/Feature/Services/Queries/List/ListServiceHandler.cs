@@ -1,9 +1,9 @@
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.QueryStringProcessing;
 using Domain.Aggregates.Services;
 using Domain.Aggregates.Services.Specifications;
-using Mediator;
-using Application.Common.QueryStringProcessing;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
+using Mediator;
 
 namespace Application.Feature.Services.Queries.List;
 
@@ -14,11 +14,10 @@ public class ListServiceHandler(IUnitOfWork unitOfWork)
         ListServiceQuery query,
         CancellationToken cancellationToken
     ) =>
-        await unitOfWork
-            .CachedRepository<Service>()
-            .PagedListAsync<ListServiceResponse>(
-                new ListServiceSpecification(),
-                query.ValidateQuery().ValidateFilter(typeof(ListServiceResponse))
-            );
+        await unitOfWork.Repository<Service>().
+               PagedListAsync<ListServiceResponse>(
+            new ListServiceSpecification(),
+            query.ValidateQuery().ValidateFilter(typeof(ListServiceResponse))
+            
+        );
 }
-

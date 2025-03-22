@@ -9,5 +9,6 @@ public class ListServiceSpecification : Specification<Service>
         Query.AsNoTracking().AsSplitQuery();
         string key = GetUniqueCachedKey();
         Query.EnableCache(key);
+        Query.Include(s => s.UnitRelations);
     }
 }

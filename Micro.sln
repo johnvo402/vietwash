@@ -5,41 +5,41 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{96958AE6-2E9C-4102-A2F6-C6C7F8F2109B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiGateway", "src\ApiGateway\ApiGateway.csproj", "{1BF731F4-9FE2-4025-9CB4-4D7B45D16CF1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiGateway", "src\ApiGateway\ApiGateway.csproj", "{1BF731F4-9FE2-4025-9CB4-4D7B45D16CF1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts", "src\Contracts\Contracts.csproj", "{4C7A88B8-3911-4CC2-88C0-2231B305ABFB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contracts", "src\Contracts\Contracts.csproj", "{4C7A88B8-3911-4CC2-88C0-2231B305ABFB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AuthService", "AuthService", "{FD1C3495-63FA-43BD-8A77-F773462469BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "src\AuthService\Domain\Domain.csproj", "{018CF8E8-A102-488D-86E7-473478C3315C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "src\AuthService\Domain\Domain.csproj", "{018CF8E8-A102-488D-86E7-473478C3315C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "src\AuthService\Application\Application.csproj", "{E854FAA2-F5A8-4FCA-A728-97B151CA439F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application", "src\AuthService\Application\Application.csproj", "{E854FAA2-F5A8-4FCA-A728-97B151CA439F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "src\AuthService\Infrastructure\Infrastructure.csproj", "{C0336D26-4969-4AFC-848A-A7A0D29C350C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "src\AuthService\Infrastructure\Infrastructure.csproj", "{C0336D26-4969-4AFC-848A-A7A0D29C350C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Presentation", "src\AuthService\Presentation\Presentation.csproj", "{F1104635-A254-4BCF-95B5-B784C09A77AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Presentation", "src\AuthService\Presentation\Presentation.csproj", "{F1104635-A254-4BCF-95B5-B784C09A77AC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0222AEB9-6D3D-4C03-BD11-3C1CD2AB5B2C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProjectService", "ProjectService", "{F9D93182-CA34-482D-9063-B31405687071}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "src\ProjectService\Domain\Domain.csproj", "{45A49B7B-4CC0-4748-B9CE-31B357B49C92}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "src\ProjectService\Domain\Domain.csproj", "{45A49B7B-4CC0-4748-B9CE-31B357B49C92}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "src\ProjectService\Application\Application.csproj", "{CD176A2E-98C7-4084-B186-A8E11B847E3F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application", "src\ProjectService\Application\Application.csproj", "{CD176A2E-98C7-4084-B186-A8E11B847E3F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "src\ProjectService\Infrastructure\Infrastructure.csproj", "{C412414E-981D-4C29-BA3D-F411BFC1C773}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "src\ProjectService\Infrastructure\Infrastructure.csproj", "{C412414E-981D-4C29-BA3D-F411BFC1C773}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Presentation", "src\ProjectService\Presentation\Presentation.csproj", "{185D179F-D3D1-41A9-9612-337EAAA03F3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Presentation", "src\ProjectService\Presentation\Presentation.csproj", "{185D179F-D3D1-41A9-9612-337EAAA03F3C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EcommeceService", "EcommeceService", "{2ED6F769-9A6E-4348-BF35-B7B88AF34606}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "src\EcommeceService\Domain\Domain.csproj", "{F9C173B5-7F4D-446B-B56A-D65DEEA7F16A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "src\EcommeceService\Domain\Domain.csproj", "{F9C173B5-7F4D-446B-B56A-D65DEEA7F16A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "src\EcommeceService\Application\Application.csproj", "{D26103A5-85D7-42FB-B89C-CDE30A2FD387}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application", "src\EcommeceService\Application\Application.csproj", "{D26103A5-85D7-42FB-B89C-CDE30A2FD387}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "src\EcommeceService\Infrastructure\Infrastructure.csproj", "{A2AF7A58-9D80-43EF-8A24-D7D0AB06A6B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "src\EcommeceService\Infrastructure\Infrastructure.csproj", "{A2AF7A58-9D80-43EF-8A24-D7D0AB06A6B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Presentation", "src\EcommeceService\Presentation\Presentation.csproj", "{A4C202AD-A1E4-4F6D-A6F9-A617F572E780}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Presentation", "src\EcommeceService\Presentation\Presentation.csproj", "{A4C202AD-A1E4-4F6D-A6F9-A617F572E780}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

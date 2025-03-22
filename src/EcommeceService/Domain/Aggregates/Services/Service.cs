@@ -1,6 +1,8 @@
 ﻿using Domain.Aggregates.Orders;
+using Domain.Aggregates.Services.Enums;
 using JohnChum.SharedKernel.Domain.Common;
 using Mediator;
+
 namespace Domain.Aggregates.Services
 {
     public class Service : AggregateRoot
@@ -10,6 +12,7 @@ namespace Domain.Aggregates.Services
         public string? Image { get; set; }
         public bool Disable { get; set; } = default!;
         public Ulid CategoryId { get; set; } = default!;
+        public ServiceStatus Status { get; set; } = default!;
         public Category Category { get; set; } = default!;
         public ICollection<OrderItem> OrderItems { get; set; } = [];
         public ICollection<UnitRelation> UnitRelations { get; set; } = [];
