@@ -16,6 +16,10 @@ public static class Results
 
     public static ActionResult<ApiResponse<T>> Created201<T>(this ControllerBase controller, string routeName, Ulid id, T? data = default) =>
         controller.CreatedAtRoute(routeName, new { id }, data);
+    public static ActionResult<ApiResponse<T>> Created201<T>(this ControllerBase controller, T data)
+    {
+        return controller.Created(string.Empty, data);
+    }
 
     public static ActionResult<ApiResponse<Unit>> Created201(this ControllerBase controller) =>
          controller.ToActionResult(new Result<ApiResponse<Unit>>(new ApiResponse<Unit>(Unit.Value, Message.SUCCESS, StatusCodes.Status201Created)));
