@@ -19,7 +19,7 @@ namespace Application.Feature.Units.Queries.List
 			ListUnitQuery query, CancellationToken cancellationToken
 			) =>
 			await unitOfWork
-				.CachedRepository<Unit>()
+				.Repository<Unit>()
 				.PagedListAsync<ListUnitResponse>(
 					new ListUnitSpecification(),
 					query.ValidateQuery().ValidateFilter(typeof(ListUnitResponse))

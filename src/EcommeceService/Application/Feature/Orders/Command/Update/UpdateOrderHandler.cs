@@ -2,6 +2,7 @@
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
 using Domain.Aggregates.Orders;
+using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Specifications;
 using Infrastructure.UnitOfWorks;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
@@ -36,32 +37,100 @@ namespace Application.Feature.Orders.Command.Update
 					[Messager.Create<Order>().Message(MessageType.Found).Negative().BuildMessage()]
 				);
 
-			// Ánh xạ thông tin từ command.Order sang order
+
 			mapper.Map(command.Order, order);
 
-			if (command.Status.HasValue)
+			// Cập nhật Amount từ OrderItems nếu có
+			if (command.Order.OrderItems is not null && command.Order.OrderItems.Any())
 			{
-				order.Status = command.Status.Value; 
+				order.Amount = command.Order.OrderItems.Sum(i => i.Price);
+
+				foreach (var orderItemModel in command.Order.OrderItems)
+				{
+					var existingItem = order.OrderItems.FirstOrDefault(x =>
+						x.Id != null && x.Id == Ulid.Parse(orderItemModel.OrderItemId));
+
+					if (existingItem != null)
+					{
+						// Cập nhật item hiện có
+						existingItem.ServiceId = Ulid.Parse(orderItemModel.ServiceId);
+						existingItem.UnitRelationId = Ulid.Parse(orderItemModel.UnitRelationId);
+						existingItem.Price = orderItemModel.Price;
+					}
+					else
+					{
+						// Thêm mới OrderItem
+						var newItem = new OrderItem
+						{
+							ServiceId = Ulid.Parse(orderItemModel.ServiceId),
+							UnitRelationId = Ulid.Parse(orderItemModel.UnitRelationId),
+							Price = orderItemModel.Price
+						};
+						order.OrderItems.Add(newItem);
+					}
+				}
 			}
 
-			// Cập nhật OrderPayment nếu có PaymentAmount
-			if (command.Order.PaymentAmount > 0)
+			decimal discountValue = command.Order.DiscountValue ?? 0m;
+			order.Total = command.Order.DiscountType == null
+				? order.Amount // Không giảm giá nếu DiscountType null
+				: command.Order.DiscountType.Value
+					? order.Amount * (1 - discountValue / 100) // Giảm theo phần trăm
+					: order.Amount - discountValue;
+
+			// Kiểm tra và cập nhật trạng thái
+			if (command.Status.HasValue)
 			{
-				var orderPayment = new OrderPayment
+				if (command.Status.Value < order.Status)
+					throw new BadRequestException(
+						[Messager.Create<Order>().Property(x => x.Status).Message(MessageType.Valid).Negative().Build()]);
+
+				order.Status = command.Status.Value;
+
+				// Kiểm tra nếu Status chuyển sang Completed
+				if (command.Status.Value == OrderStatus.Completed)
 				{
-					OrderId = order.Id,
-					PaymentMethod = command.Order.PaymentMethod,
-					Amount = command.Order.PaymentAmount,
-					PaymentDate = DateTimeOffset.UtcNow
-				};
-				order.OrderPayments.Add(orderPayment);
+					// Tính tổng Payment hiện có
+					decimal totalPayments = order.OrderPayments.Sum(p => p.Amount);
+					decimal newPaymentAmount = command.Order.PaymentAmount ?? 0m; 
+					decimal totalPaid = totalPayments + newPaymentAmount;
+
+					if (totalPaid < order.Total)
+						throw new BadRequestException(
+						[Messager
+						.Create<Order>()
+						.Property(x => x.Status)
+						.Message(MessageType.Valid)
+						.Negative()
+						.Build()]
+					);
+				}
+			}
+
+			// Kiểm tra PaymentAmount cơ bản (nếu có)
+			if (command.Order.PaymentAmount > 0 && command.Order.PaymentAmount < order.Total &&
+				order.Status != OrderStatus.Completed) 
+			{
+				throw new BadRequestException(
+					[Messager.Create<Order>().Property(x => x.Status).Message(MessageType.Valid).Negative().Build()]);
 			}
 
 			// Bắt đầu giao dịch
 			try
 			{
 				DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
-
+				
+				// Cập nhật OrderPayment nếu có PaymentAmount
+				if (command.Order.PaymentAmount.HasValue && command.Order.PaymentAmount > 0)
+				{
+					order.OrderPayments.Add(new OrderPayment
+					{
+						OrderId = order.Id,
+						PaymentMethod = command.Order.PaymentMethod.Value,
+						Amount = command.Order.PaymentAmount.Value,
+						PaymentDate = DateTimeOffset.UtcNow
+					});
+				}
 				// Cập nhật Order
 				await unitOfWork.Repository<Order>().UpdateAsync(order);
 				await unitOfWork.SaveAsync(cancellationToken);

@@ -1,9 +1,6 @@
-﻿using JohnChum.SharedKernel.Domain.Common.Specs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Aggregates.Orders.Enums;
+using JohnChum.SharedKernel.Domain.Common.Specs;
+
 
 namespace Domain.Aggregates.Orders.Specifications
 {
@@ -12,12 +9,11 @@ namespace Domain.Aggregates.Orders.Specifications
 		public ListOrderSpecification()
 		{
 			Query
+				.Where(x => x.Status != OrderStatus.Cancelled)
 				.Include(x => x.OrderItems)
 				.Include(x => x.OrderPayments)
 				.AsNoTracking()
 				.AsSplitQuery();
-				//Chưa OrderBy
-
 		}
 	}
 }

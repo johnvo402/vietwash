@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Common.Validators.Orders
 {
-	public class OrderValidator : AbstractValidator<OrderModel>
+	public class OrderValidator : AbstractValidator<CreateOrderModel>
 	{
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly IActionAccessorService _accessorService;
@@ -37,7 +37,7 @@ namespace Application.Feature.Common.Validators.Orders
 				.LessThanOrEqualTo(100)
 				.When(x => x.DiscountType == true)// Giảm giá theo %
 				.WithState(x => Messager
-					.Create<OrderModel>(nameof(Order))
+					.Create<CreateOrderModel>(nameof(Order))
 					.Property(x => x.DiscountValue)
 					.Message(MessageType.LessThanEqual)
 					.Negative()
@@ -46,24 +46,28 @@ namespace Application.Feature.Common.Validators.Orders
 				//Customer không rong
 				.NotEmpty()
 				.WithState(x => Messager
-					.Create<OrderModel>(nameof(Order))
+					.Create<CreateOrderModel>(nameof(Order))
 					.Property(x => x.CustomerId)
 					.Message(MessageType.Null)
 					.Negative()
 					.Build())
 				//Customer phải tồn tại
 				.MustAsync(async (customerId, ct) =>
-					await _unitOfWork.Repository<User>().AnyAsync(u => u.Id == customerId, ct))
-				.WithState(x => Messager
-					.Create<OrderModel>(nameof(Order))
-					.Property(x => x.CustomerId)
-					.Message(MessageType.Existence)
-					.Negative()
-					.Build());
+				{
+					bool isValidUlid = Ulid.TryParse(customerId, out Ulid ulid);
+					Console.WriteLine($"Parsed ULID: {ulid} (Valid: {isValidUlid})");
 
+					if (!isValidUlid) return false;
+
+					bool userExists = await _unitOfWork.Repository<User>().AnyAsync(u => u.Id.Equals(ulid), ct);
+					Console.WriteLine($"User exists: {userExists}");
+
+					return userExists;
+				});
+			
 			RuleFor(x => x.PaymentMethod)
 				.IsInEnum()
-				.WithState(x => Messager.Create<OrderModel>(nameof(Order))
+				.WithState(x => Messager.Create<CreateOrderModel>(nameof(Order))
 				.Property(x => x.PaymentMethod)
 				.Message(MessageType.OuttaOption)
 				.Build());
@@ -71,7 +75,7 @@ namespace Application.Feature.Common.Validators.Orders
 			RuleFor(x => x.DiscountValue)
 				.GreaterThanOrEqualTo(0)
 				.WithState(x => Messager
-					.Create<OrderModel>(nameof(Order))
+					.Create<CreateOrderModel>(nameof(Order))
 					.Property(x => x.DiscountValue)
 					.Message(MessageType.GreaterThanEqual)
 					.Negative()
@@ -80,7 +84,7 @@ namespace Application.Feature.Common.Validators.Orders
 			RuleFor(x => x.Note)
 				.MaximumLength(500)
 				.WithState(x => Messager
-					.Create<OrderModel>(nameof(Order))
+					.Create<CreateOrderModel>(nameof(Order))
 					.Property(x => x.Note)
 					.Message(MessageType.MaximumLength)
 					.Build());
@@ -88,7 +92,7 @@ namespace Application.Feature.Common.Validators.Orders
 			RuleFor(x => x.OrderItems)
 				.NotEmpty()
 				.WithState(x => Messager
-					.Create<OrderModel>(nameof(Order))
+					.Create<CreateOrderModel>(nameof(Order))
 					.Property(x => x.OrderItems)
 					.Message(MessageType.Null)
 					.Negative()
@@ -99,41 +103,41 @@ namespace Application.Feature.Common.Validators.Orders
 				item.RuleFor(x => x.ServiceId)
 						.NotEmpty()
 						.WithState(x => Messager
-							.Create<OrderItemModel>(nameof(OrderItem))
+							.Create<CreateOrderItemModel>(nameof(OrderItem))
 							.Property(x => x.ServiceId)
 							.Message(MessageType.Null)
 							.Negative()
 							.Build())
 						.MustAsync(async (serviceId, ct) =>
-							await _unitOfWork.Repository<Service>().AnyAsync(s => s.Id == serviceId, ct))
+							await _unitOfWork.Repository<Service>().AnyAsync(s => s.Id.Equals(Ulid.Parse(serviceId)), ct))
 						.WithState(x => Messager
-							.Create<OrderItemModel>(nameof(OrderItem))
+							.Create<CreateOrderItemModel>(nameof(OrderItem))
 							.Property(x => x.ServiceId)
 							.Message(MessageType.Existence)
 							.Negative()
 							.Build());
 
-				item.RuleFor(x => x.UnitRelationId)
-					.NotEmpty()
-					.WithState(x => Messager
-						.Create<OrderItemModel>(nameof(OrderItem))
-						.Property(x => x.UnitRelationId)
-						.Message(MessageType.Null)
-						.Negative()
-						.Build())
-					.MustAsync(async (unitRelationId, ct) =>
-						await _unitOfWork.Repository<UnitRelation>().AnyAsync(u => u.Id == unitRelationId, ct))
-					.WithState(x => Messager
-						.Create<OrderItemModel>(nameof(OrderItem))
-						.Property(x => x.UnitRelationId)
-						.Message(MessageType.Existence)
-						.Negative()
-						.Build());
+				//item.RuleFor(x => x.UnitRelationId)
+				//	.NotEmpty()
+				//	.WithState(x => Messager
+				//		.Create<OrderItemModel>(nameof(OrderItem))
+				//		.Property(x => x.UnitRelationId)
+				//		.Message(MessageType.Null)
+				//		.Negative()
+				//		.Build())
+				//	.MustAsync(async (unitRelationId, ct) =>
+				//		await _unitOfWork.Repository<UnitRelation>().AnyAsync(u => u.Id.Equals(Ulid.Parse(unitRelationId)), ct))
+				//	.WithState(x => Messager
+				//		.Create<OrderItemModel>(nameof(OrderItem))
+				//		.Property(x => x.UnitRelationId)
+				//		.Message(MessageType.Existence)
+				//		.Negative()
+				//		.Build());
 
 				item.RuleFor(x => x.Price)
 					.GreaterThan(0)
 					.WithState(x => Messager
-						.Create<OrderItemModel>(nameof(OrderItem))
+						.Create<CreateOrderItemModel>(nameof(OrderItem))
 						.Property(x => x.Price)
 						.Message(MessageType.GreaterThan)
 						.Negative()
@@ -143,7 +147,7 @@ namespace Application.Feature.Common.Validators.Orders
 			RuleFor(x => x.PaymentAmount)
 				.GreaterThanOrEqualTo(0)
 				.WithState(x => Messager
-					.Create<OrderModel>(nameof(Order))
+					.Create<CreateOrderModel>(nameof(Order))
 					.Property(x => x.PaymentAmount)
 					.Message(MessageType.GreaterThanEqual)
 					.Negative()
@@ -152,24 +156,24 @@ namespace Application.Feature.Common.Validators.Orders
 			RuleFor(x => x)
 				.MustAsync(async (model, ct) => await IsTotalValidAsync(model, ct)) // Sửa tham số thành OrderModel
 				.WithState(x => Messager
-					.Create<OrderModel>(nameof(Order)) // Sửa CreateOrderCommand thành OrderModel
+					.Create<CreateOrderModel>(nameof(Order)) // Sửa CreateOrderCommand thành OrderModel
 					.Property("Total")
 					.Message(MessageType.Valid)
 					.Negative()
 					.Build());
 
-			RuleFor(x => x.PaymentAmount)
-				.Must((model, paymentAmount) => IsPaymentAmountValid(model, paymentAmount)) // Sửa tham số thành OrderModel
-				.When(x => x.PaymentAmount > 0)
-				.WithState(x => Messager
-					.Create<OrderModel>(nameof(Order)) // Sửa CreateOrderCommand thành OrderModel
-					.Property(x => x.PaymentAmount)
-					.Message(MessageType.LessThanEqual)
-					.Negative()
-					.Build());
+			//RuleFor(x => x.PaymentAmount)
+			//	.Must((model, paymentAmount) => IsPaymentAmountValid(model, paymentAmount)) // Sửa tham số thành OrderModel
+			//	.When(x => x.PaymentAmount > 0)
+			//	.WithState(x => Messager
+			//		.Create<CreateOrderModel>(nameof(Order)) // Sửa CreateOrderCommand thành OrderModel
+			//		.Property(x => x.PaymentAmount)
+			//		.Message(MessageType.LessThanEqual)
+			//		.Negative()
+			//		.Build());
 		}
 
-		private async Task<bool> IsTotalValidAsync(OrderModel model, CancellationToken ct)
+		private async Task<bool> IsTotalValidAsync(CreateOrderModel model, CancellationToken ct)
 		{
 			decimal amount = model.OrderItems?.Sum(i => i.Price) ?? 0m; 
 			decimal discountValue = model.DiscountValue ?? 0m; 
@@ -189,24 +193,24 @@ namespace Application.Feature.Common.Validators.Orders
 			return total >= 0;
 		}
 
-		private bool IsPaymentAmountValid(OrderModel model, decimal paymentAmount)
-		{
-			decimal amount = model.OrderItems?.Sum(i => i.Price) ?? 0m;
-			decimal discountValue = model.DiscountValue ?? 0m; 
-			decimal total;
+		//private bool IsPaymentAmountValid(CreateOrderModel model, decimal paymentAmount)
+		//{
+		//	decimal amount = model.OrderItems?.Sum(i => i.Price) ?? 0m;
+		//	decimal discountValue = model.DiscountValue ?? 0m; 
+		//	decimal total;
 
-			if (model.DiscountType == null)
-			{
-				total = amount; 
-			}
-			else
-			{
-				total = model.DiscountType.Value
-					? amount * (1 - discountValue / 100) // Giảm theo phần trăm
-					: amount - discountValue; // Giảm theo số tiền cố định
-			}
+		//	if (model.DiscountType == null)
+		//	{
+		//		total = amount; 
+		//	}
+		//	else
+		//	{
+		//		total = model.DiscountType.Value
+		//			? amount * (1 - discountValue / 100) // Giảm theo phần trăm
+		//			: amount - discountValue; // Giảm theo số tiền cố định
+		//	}
 
-			return paymentAmount <= total; // Số tiền thanh toán không vượt quá tổng
-		}
+		//	return paymentAmount <= total; // Số tiền thanh toán không vượt quá tổng
+		//}
 	}
 }

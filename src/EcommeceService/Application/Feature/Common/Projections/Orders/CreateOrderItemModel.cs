@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Common.Projections.Orders
 {
-	public class OrderItemModel
+	public class CreateOrderItemModel
 	{
-		public Ulid ServiceId { get; set; }
-		public Ulid UnitRelationId { get; set; }
+		public string ServiceId { get; set; }
+		public string UnitRelationId { get; set; }
 		public decimal Price { get; set; }
 	}
 }

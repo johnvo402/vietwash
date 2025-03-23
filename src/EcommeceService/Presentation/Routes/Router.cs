@@ -39,6 +39,7 @@ namespace Presentation.Routes
 			public const string Tags = $"{nameof(OrderRoute)} endpoint";
 			public const string Orders = $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}";
 			public const string GetUpdateDelete = $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/" + "{" + RouterBase.Id + "}";
+			public const string UpdateStatus = $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(UpdateStatus)}" + "{" + RouterBase.Id + "}";
 		}
 	}
 }

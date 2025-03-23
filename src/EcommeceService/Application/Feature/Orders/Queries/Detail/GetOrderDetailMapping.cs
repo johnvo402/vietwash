@@ -8,7 +8,9 @@ namespace Application.Feature.Orders.Queries.Detail
 	{
 		public GetOrderDetailMapping()
 		{
+
 			CreateMap<Order, GetOrderDetailResponse>().IncludeBase<Order, OrderDetailProjection>();
+			CreateMap<OrderPayment, OrderPaymentProjection>();
 		}
 	}
 }

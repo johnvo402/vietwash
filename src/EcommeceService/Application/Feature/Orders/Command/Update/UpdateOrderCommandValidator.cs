@@ -42,8 +42,8 @@ namespace Application.Feature.Orders.Command.Update
 			// Rule cho Order (tái sử dụng OrderValidator)
 			RuleFor(x => x.Order)
 				.NotNull()
-				.WithState(x => Messager.Create<UpdateOrderCommand>(nameof(Order)).Property(x => x.Order).Message(MessageType.Null).Negative().Build())
-				.SetValidator(new OrderValidator(_unitOfWork, _accessorService)); // Include OrderValidator
+				.WithState(x => Messager.Create<UpdateOrderCommand>(nameof(Order)).Property(x => x.Order).Message(MessageType.Null).Negative().Build());
+				//.SetValidator(new OrderValidator(_unitOfWork, _accessorService)); // Include OrderValidator
 		}
 	}
 }

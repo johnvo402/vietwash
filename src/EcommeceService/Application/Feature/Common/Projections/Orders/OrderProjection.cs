@@ -1,4 +1,5 @@
-﻿using JohnChum.SharedKernel.Application.Common;
+﻿using Domain.Aggregates.Orders.Enums;
+using JohnChum.SharedKernel.Application.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,5 +18,6 @@ namespace Application.Feature.Common.Projections.Orders
 		public Ulid? CustomerId { get; set; }
 		public string Note { get; set; } = string.Empty;
 		public DateTimeOffset OrderDate { get; set; }
+		public OrderStatus Status { get; set; }
 	}
 }

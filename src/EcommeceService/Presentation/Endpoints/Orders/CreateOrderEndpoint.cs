@@ -13,18 +13,18 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Presentation.Endpoints.Orders
 {
 	public class CreateOrderEndpoint(ISender sender)
-		: EndpointBaseAsync.WithRequest<CreateOrderCommand>.WithActionResult<ApiResponse<CreateOrderResponse>>
+		: EndpointBaseAsync.WithRequest<CreateOrderCommand>.WithActionResult<ApiResponse<Unit>>
 	{
 		[HttpPost(Router.OrderRoute.Orders)]
 		[SwaggerOperation(Tags = [Router.OrderRoute.Tags], Summary = "Create a new order")]
 		//[AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.order}")]
-		public override async Task<ActionResult<ApiResponse<CreateOrderResponse>>> HandleAsync(
+		public override async Task<ActionResult<ApiResponse<Unit>>> HandleAsync(
 			[FromBody]CreateOrderCommand request, 
 			CancellationToken cancellationToken = default)
 		{
-			CreateOrderResponse order = await sender.Send(request, cancellationToken);
-
-			return this.Created201(Router.OrderRoute.Orders, order.Id, order);
+		
+			var order = await sender.Send(request, cancellationToken);
+			return this.Created201();
 		}
 	}
 }

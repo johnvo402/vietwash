@@ -1,29 +1,24 @@
-﻿using Application.Common.Interfaces.Services.Identity;
+﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
-using Contracts.Dtos.Responses;
 using Domain.Aggregates.Orders;
-using Domain.Aggregates.Orders.Enums;
-using Infrastructure.UnitOfWorks;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Mediator;
-using System;
-using System.Collections.Generic;
 using System.Data.Common;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Application.Feature.Orders.Command.Create
 {
 	public class CreateOrderHandler(
 		IUnitOfWork unitOfWork,
 		IMapper mapper
-	) : IRequestHandler<CreateOrderCommand, CreateOrderResponse>
+	) : IRequestHandler<CreateOrderCommand, Unit>
 	{
-		public async ValueTask<CreateOrderResponse> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+		public async ValueTask<Unit> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
 		{
 			var order = mapper.Map<Order>(request);
-			order.Code = $"ORD-{DateTimeOffset.UtcNow.Ticks}";
+			order.Code = $"ORD-{DateTimeOffset.UtcNow.Ticks.ToString()[^6..]}";
 			order.Amount = request.OrderItems.Sum(i => i.Price);
 
 			decimal discountValue = request.DiscountValue ?? 0m;
@@ -33,6 +28,19 @@ namespace Application.Feature.Orders.Command.Create
 						? order.Amount * (1 - discountValue / 100) 
 						: order.Amount - discountValue; 
 			order.OrderDate = DateTimeOffset.UtcNow;
+
+			// Kiểm tra nếu PaymentAmount không đủ để thanh toán
+			if (request.PaymentAmount < order.Total)
+			{
+				throw new BadRequestException(
+						[Messager
+						.Create<Order>()
+						.Property(x => x.OrderPayments)
+						.Message(MessageType.Valid)
+						.Negative()
+						.Build()]
+					);
+			}
 
 			try
 			{
@@ -62,8 +70,7 @@ namespace Application.Feature.Orders.Command.Create
 				await unitOfWork.RollbackAsync(cancellationToken);
 				throw;
 			}
-
-			return mapper.Map<CreateOrderResponse>(order);
+			return Mediator.Unit.Value;
 		}
 	}
 }

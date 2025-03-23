@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Aggregates.Orders.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,15 +14,17 @@ namespace Application.Feature.Common.Projections.Orders
 	}
 	public class OrderItemProjection
 	{
-		public Ulid Id { get; set; }
-		public Ulid ServiceId { get; set; }
-		public Ulid UnitRelationId { get; set; }
+		public string Id { get; set; }
+		public string ServiceId { get; set; }
+		public string UnitRelationId { get; set; }
 		public decimal Price { get; set; }
 	}
 
-	public enum OrderPaymentProjection : byte
+	public class OrderPaymentProjection
 	{
-		Cash = 1,
-		Card = 2
+		public string OrderId { get; set; }
+		public PaymentMethod PaymentMethod { get; set; } // Có thể là string nếu đã đổi từ enum
+		public decimal Amount { get; set; }
+		public DateTimeOffset PaymentDate { get; set; }
 	}
 }

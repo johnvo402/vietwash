@@ -1,5 +1,5 @@
 ﻿using Application.Feature.Common.Projections.Orders;
-using Application.Feature.Common.Projections.Units;
+using Application.Feature.Orders.Command.Update;
 using Contracts.Routers;
 using Domain.Aggregates.Orders.Enums;
 using Mediator;
@@ -10,14 +10,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Feature.Orders.Command.Update
+namespace Application.Feature.Orders.Command.UpdateStatus
 {
-	public class UpdateOrderCommand : IRequest<UpdateOrderResponse>
+	public class UpdateStatusCommand : IRequest<UpdateStatusResponse>
 	{
 		[FromRoute(Name = RouterBase.Id)]
 		public string OrderId { get; set; } = string.Empty;
 		public OrderStatus? Status { get; set; }
-		[FromBody]
-		public UpdateOrderModel Order { get; set; } = new UpdateOrderModel();
 	}
 }
