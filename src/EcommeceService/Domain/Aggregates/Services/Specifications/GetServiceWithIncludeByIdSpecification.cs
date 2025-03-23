@@ -11,7 +11,10 @@ namespace Domain.Aggregates.Services.Specifications
     {
         public GetServiceWithIncludeByIdSpecification(Ulid id)
         {
-            Query.Where(x => x.Id == id).Include(x=>x.UnitRelations).AsNoTracking();
+            Query.Where(x => x.Id == id)
+                 .Include(x => x.UnitRelations)
+                 .ThenInclude(ur => ur.Unit)
+                 .AsNoTracking();
         }
     }
 }
