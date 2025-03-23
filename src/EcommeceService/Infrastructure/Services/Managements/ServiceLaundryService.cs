@@ -67,32 +67,40 @@ namespace Infrastructure.Services.Managements
             }
         }
 
-        public async Task UpdateServiceAsync(Service service, DbTransaction? transaction = null)
+        public async Task UpdateServiceAsync(Service service, IEnumerable<UnitRelation> unitRelations, DbTransaction? transaction = null)
         {
-            var isOwnerTransaction = transaction != null;
+            bool hasExternalTransaction = transaction != null;
+
             try
             {
-                if (!isOwnerTransaction && _context.DatabaseFacade.CurrentTransaction == null)
+                if (!hasExternalTransaction)
                     await _context.DatabaseFacade.BeginTransactionAsync();
 
+                // Xóa toàn bộ UnitRelation cũ
+                _unitRelationContext.RemoveRange(service.UnitRelations);
+                service.UnitRelations.Clear(); // Xóa trong bộ nhớ
+
+                // Thêm tất cả UnitRelation mới
+                var newUnitRelations = unitRelations.ToList();
+                foreach (var unitRelation in newUnitRelations)
+                {
+                    unitRelation.ServiceId = service.Id; // Liên kết với Service
+                    _unitRelationContext.Add(unitRelation); // Thêm mới
+                }
+                service.UnitRelations = newUnitRelations; // Gán danh sách mới
+
+                // Cập nhật Service
                 _serviceContext.Update(service);
+
                 await _context.SaveChangesAsync();
 
-                if (!isOwnerTransaction)
+                if (!hasExternalTransaction)
                     await _context.DatabaseFacade.CommitTransactionAsync();
             }
             catch (Exception ex)
             {
-                _logger.Error(
-                    ex,
-                    "Error in method {MethodName}. Exception Type: {ExceptionType}. Error Message: {ErrorMessage}. StackTrace: {StackTrace}",
-                    nameof(UpdateServiceAsync),
-                    ex.GetType().Name,
-                    ex.Message,
-                    ex.StackTrace
-                );
-
-                if (!isOwnerTransaction)
+                _logger.Error(ex, "Error updating service {ServiceId}", service.Id);
+                if (!hasExternalTransaction)
                     await _context.DatabaseFacade.RollbackTransactionAsync();
                 throw;
             }

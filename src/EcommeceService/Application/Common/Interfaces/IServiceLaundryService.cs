@@ -10,12 +10,13 @@ namespace Application.Common.Interfaces
         public DbSet<Service> Services { get; }
         public DbSet<Group> Groups { get; }
         public DbSet<Unit> Units { get; }
+        public DbSet<UnitRelation> UnitRelations { get; }
 
         Task CreateCategory(Category category, DbTransaction? transaction = null);
 
         Task CreateServiceAsync(Service service, DbTransaction? transaction = null);
 
-        Task UpdateServiceAsync(Service service, DbTransaction? transaction = null);
+        Task UpdateServiceAsync(Service service, IEnumerable<UnitRelation> unitRelations, DbTransaction? transaction = null);
 
         Task CreateGroupAsync(Group group, DbTransaction? transaction = null);
 
