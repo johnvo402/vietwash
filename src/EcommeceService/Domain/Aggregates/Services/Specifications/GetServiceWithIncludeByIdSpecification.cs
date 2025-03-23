@@ -1,20 +1,14 @@
-﻿using JohnChum.SharedKernel.Domain.Common.Specs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Aggregates.Services;
+using JohnChum.SharedKernel.Domain.Common.Specs;
 
-namespace Domain.Aggregates.Services.Specifications
+public class GetServiceWithIncludeByIdSpecification : Specification<Service>
 {
-    public class GetServiceWithIncludeByIdSpecification : Specification<Service>
+    public GetServiceWithIncludeByIdSpecification(Ulid id)
     {
-        public GetServiceWithIncludeByIdSpecification(Ulid id)
-        {
-            Query.Where(x => x.Id == id)
-                 .Include(x => x.UnitRelations)
-                 .ThenInclude(ur => ur.Unit)
-                 .AsNoTracking();
-        }
+        Query.Where(x => x.Id == id)
+             .Include(x => x.UnitRelations)
+             .ThenInclude(ur => ur.Unit)
+             .Include(x => x.Category)
+             .AsNoTracking();
     }
 }
