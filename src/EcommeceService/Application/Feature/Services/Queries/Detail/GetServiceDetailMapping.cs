@@ -11,13 +11,16 @@ namespace Application.Feature.Services.Queries.Detail
     {
         public GetServiceDetailMapping()
         {
-
-            CreateMap<Service, GetServiceDetailResponse>().IncludeBase<Service, ServiceProjection>();
+            CreateMap<Service, GetServiceDetailResponse>()
+                .IncludeBase<Service, ServiceProjection>()
+                .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category)); // 🔹 Map Category
 
             CreateMap<UnitRelation, UnitRelationProjection>()
                 .ForMember(dest => dest.Unit, opt => opt.MapFrom(src => src.Unit));
 
             CreateMap<Unit, UnitProjection>();
+
+            CreateMap<Category, CategoryModel>(); // 🔹 Map Category sang CategoryProjection
 
             CreateMap<User, UserDTO>();
         }

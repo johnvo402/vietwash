@@ -10,7 +10,5 @@ namespace Application.Feature.Common.Projections.Services
 {
     public class ServiceDetailProjection : ServiceProjection
     {
-
-        public List<UnitRelationProjection> UnitRelation { get; set; } = [];
     }
 }
