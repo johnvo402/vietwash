@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    partial class TheDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250318103134_20250318173103_Project_Migration")]
+    partial class _20250318173103_Project_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,9 +60,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("note");
 
-                    b.Property<byte>("PaymentMethod")
+                    b.Property<byte>("PaymentMethodId")
                         .HasColumnType("smallint")
-                        .HasColumnName("payment_method");
+                        .HasColumnName("payment_method_id");
 
                     b.Property<DateTimeOffset>("TransactionDate")
                         .HasColumnType("timestamp with time zone")
@@ -190,9 +193,14 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("order_date");
 
-                    b.Property<byte>("Status")
+                    b.Property<byte?>("PaymentMethod")
                         .HasColumnType("smallint")
-                        .HasColumnName("status");
+                        .HasColumnName("payment_method");
+
+                    b.Property<string>("PaymentMethodId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payment_method_id");
 
                     b.Property<decimal>("Total")
                         .HasColumnType("numeric")
@@ -470,10 +478,6 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("citext")
                         .HasColumnName("name");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")

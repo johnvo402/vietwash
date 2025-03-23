@@ -19,7 +19,6 @@ namespace Infrastructure.Data.Configurations
             builder.Property(x => x.Total).HasColumnType("numeric");
             builder.Property(x => x.DiscountValue).HasColumnType("numeric");
             builder.HasOne(x => x.Customer).WithMany().HasForeignKey(x => x.CustomerId);
-            builder.HasOne(x => x.PaymentMethod).WithMany().HasForeignKey(x => x.PaymentMethodId);
         }
     }
 }
