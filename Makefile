@@ -23,7 +23,7 @@ migration:
 update:
 	./scripts/update-db.sh
 publish:
-	./scripts/publish.sh
+	./scripts/publish.sh $(foreach db,$(NAME),$(db))
 
 
 # Mục để kiểm tra migration status

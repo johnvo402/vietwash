@@ -23,12 +23,23 @@ publish_service() {
 
     cd - > /dev/null
 }
+for db in "$@"; do
+    db=$(echo "$db" | xargs)  # Trim any leading/trailing spaces
 
-# Danh sách các service cần publish
-publish_service "ApiGateway" "src/ApiGateway"
-publish_service "AuthService" "src/AuthService/Presentation"
-publish_service "EcommerceService" "src/EcommeceService/Presentation"
-publish_service "ProjectService" "src/ProjectService/Presentation"
+    if [ "$db" == "gateway" ]; then
+        publish_service "ApiGateway" "src/ApiGateway"
+    elif [ "$db" == "auth" ]; then
+        publish_service "AuthService" "src/AuthService/Presentation"
+    elif [ "$db" == "ecommerce" ]; then
+       publish_service "EcommerceService" "src/EcommeceService/Presentation"
+    elif [ "$db" == "project" ]; then
+        publish_service "ProjectService" "src/ProjectService/Presentation"
+    else
+        echo "Unknown database: $db"
+        exit 1
+    fi
+    echo "--------------------------------------"
+    echo "🎉 All services published successfully!"
+done
 
-echo "--------------------------------------"
-echo "🎉 All services published successfully!"
+
