@@ -8,43 +8,31 @@ namespace Infrastructure.Data.Migrations
     public partial class _20250323171532_Project_Migration : Migration
     {
         /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
+                protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<byte>(
+            migrationBuilder.DropColumn(
                 name: "payment_method",
-                table: "order_payment",
-                type: "smallint",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "text");
-
-            migrationBuilder.AlterColumn<byte>(
+                table: "fund");
+            migrationBuilder.DropColumn(
                 name: "payment_method",
-                table: "fund",
-                type: "smallint",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "text");
+                table: "order_payment");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<string>(
-                name: "payment_method",
-                table: "order_payment",
-                type: "text",
-                nullable: false,
-                oldClrType: typeof(byte),
-                oldType: "smallint");
-
-            migrationBuilder.AlterColumn<string>(
+            migrationBuilder.AddColumn<string>(
                 name: "payment_method",
                 table: "fund",
                 type: "text",
                 nullable: false,
-                oldClrType: typeof(byte),
-                oldType: "smallint");
+                defaultValue: "cash");
+             migrationBuilder.AddColumn<string>(
+                name: "payment_method",
+                table: "order_payment",
+                type: "text",
+                nullable: false,
+                defaultValue: "cash");
         }
     }
 }
