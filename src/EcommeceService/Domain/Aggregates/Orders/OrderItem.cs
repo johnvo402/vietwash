@@ -10,6 +10,7 @@ namespace Domain.Aggregates.Orders
         public Ulid ServiceId { get; set; }
         public Ulid UnitRelationId { get; set; }
         public decimal Price { get; set; }
+        public int Quantity { get; set; }
         public virtual Service Service { get; set; } = default!;
         public virtual Order Order { get; set; } = default!;
         public virtual UnitRelation UnitRelation { get; set; } = default!;

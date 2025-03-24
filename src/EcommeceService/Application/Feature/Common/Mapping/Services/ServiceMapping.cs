@@ -1,6 +1,4 @@
-﻿
-
-using Application.Feature.Common.Projections.Services;
+﻿using Application.Feature.Common.Projections.Services;
 using AutoMapper;
 using Domain.Aggregates.Services;
 
@@ -12,6 +10,7 @@ namespace Application.Feature.Common.Mapping.Services
         {
             CreateMap<Service, ServiceProjection>();
             CreateMap<Service, ServiceDetailProjection>();
+            CreateMap<Service, ServiceModel>();
         }
     }
 }

@@ -1,11 +1,6 @@
 ﻿using Application.Feature.Common.Projections.Orders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Feature.Orders.Command.Create
 {
-	public class CreateOrderResponse : OrderDetailProjection;
+    public class CreateOrderResponse : OrderDetailProjection;
 }
