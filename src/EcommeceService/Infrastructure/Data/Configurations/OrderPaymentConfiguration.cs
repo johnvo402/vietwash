@@ -16,7 +16,8 @@ namespace Infrastructure.Data.Configurations
             builder.HasKey(x => x.Id);
             builder.HasIndex(x => x.Id);
             builder.Property(x => x.Amount).HasColumnType("numeric");
-            builder.HasOne(x => x.Order).WithMany(x => x.OrderPayments).HasForeignKey(x => x.OrderId);
+			builder.HasIndex(x => x.OrderId);
+			builder.HasOne(x => x.Order).WithMany(x => x.OrderPayments).HasForeignKey(x => x.OrderId);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Application.Feature.Common.Projections.Orders;
+using Application.Feature.Orders.Queries.Detail;
 using AutoMapper;
 using Domain.Aggregates.Orders;
 using System;
@@ -22,6 +23,8 @@ namespace Application.Feature.Orders.Command.Create
 						UnitRelationId = Ulid.Parse(item.UnitRelationId),
 						Price = item.Price
 					}).ToList()));
+
+			CreateMap<Order, CreateOrderResponse>().IncludeBase<Order, OrderDetailProjection>();
 		}
 	}
 }
