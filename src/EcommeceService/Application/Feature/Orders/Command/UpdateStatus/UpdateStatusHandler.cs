@@ -26,23 +26,23 @@ namespace Application.Feature.Orders.Command.UpdateStatus
 			try
 			{
 				// Tìm Order theo OrderId
+				Order order =
+				await unitOfWork
+					.Repository<Order>()
+					.FindByConditionAsync(
+						new GetOrderByIdSpecification(Ulid.Parse(request.OrderId)),
+						cancellationToken
+					)
+				?? throw new NotFoundException(
+					[Messager.Create<Order>().Message(MessageType.Found).Negative().BuildMessage()]
+				);
 				//Order order =
 				//	await unitOfWork
 				//		.Repository<Order>()
-				//		.FindByConditionAsync(
-				//			new GetOrderByIdSpecification(Ulid.Parse(request.OrderId)),
-				//			cancellationToken
-				//		)
+				//		.FindByIdAsync(Ulid.Parse(request.OrderId))
 				//	?? throw new NotFoundException(
 				//		[Messager.Create<Order>().Message(MessageType.Found).Negative().BuildMessage()]
 				//	);
-				Order order =
-					await unitOfWork
-						.Repository<Order>()
-						.FindByIdAsync(Ulid.Parse(request.OrderId))
-					?? throw new NotFoundException(
-						[Messager.Create<Order>().Message(MessageType.Found).Negative().BuildMessage()]
-					);
 
 
 
@@ -52,7 +52,7 @@ namespace Application.Feature.Orders.Command.UpdateStatus
 						throw new BadRequestException(
 							[Messager.Create<Order>().Property(x => x.Status).Message(MessageType.Valid).Negative().Build()]);
 
-					order.Status = request.Status.Value;
+					order.UpdateStatus(request.Status.Value);
 				}
 				using var transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
 

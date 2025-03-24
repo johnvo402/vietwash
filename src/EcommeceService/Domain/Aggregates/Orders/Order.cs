@@ -1,5 +1,6 @@
 ﻿using Domain.Aggregates.Funds;
 using Domain.Aggregates.Orders.Enums;
+using Domain.Aggregates.Orders.Events;
 using Domain.Aggregates.Users;
 using JohnChum.SharedKernel.Domain.Common;
 using Mediator;
@@ -29,10 +30,43 @@ namespace Domain.Aggregates.Orders
         {
             switch (domainEvent)
             {
-
-                default:
+				case UpdateStatusOrderEvent:
+					return true;
+				default:
                     return false;
             }
         }
-    }
+
+		public void UpdateStatus(OrderStatus status)
+        {
+            switch (status)
+			{
+				case OrderStatus.Completed:
+					Status = OrderStatus.Completed;
+					Emit(new UpdateStatusOrderEvent() {
+						TypeId = "income",
+						BehaviorId = "order",
+						Amount = Total,
+                        PaymentMethod = this.OrderPayments.FirstOrDefault()!.PaymentMethod,
+						ReferenceId = this.Id
+					});
+					break;
+				case OrderStatus.Cancelled:
+					Status = OrderStatus.Cancelled;
+					Emit(new UpdateStatusOrderEvent()
+					{
+						TypeId = "expense",
+						BehaviorId = "order_cancelled",
+						Amount = Total,
+						PaymentMethod = this.OrderPayments.FirstOrDefault()!.PaymentMethod,
+						ReferenceId = this.Id
+					});
+					break;
+				default:
+					Status = status;
+					break;
+			}
+		}
+
+	}
 }

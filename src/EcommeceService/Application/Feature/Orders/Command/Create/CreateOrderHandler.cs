@@ -53,7 +53,7 @@ namespace Application.Feature.Orders.Command.Create
 				{
 					var orderPayment = new OrderPayment
 					{
-						OrderId = order.Id, // Id sẽ được sinh sau khi AddAsync
+						OrderId = order.Id,
 						PaymentMethod = request.PaymentMethod,
 						Amount = request.PaymentAmount,
 						PaymentDate = DateTimeOffset.UtcNow
@@ -65,7 +65,7 @@ namespace Application.Feature.Orders.Command.Create
 
 				await unitOfWork.CommitAsync(cancellationToken);
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 				await unitOfWork.RollbackAsync(cancellationToken);
 				throw;
