@@ -51,5 +51,12 @@ namespace Presentation.Routes
 			public const string GetUpdateDelete = $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/" + "{" + RouterBase.Id + "}";
 			public const string UpdateStatus = $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(UpdateStatus)}" + "{" + RouterBase.Id + "}";
 		}
+		public static class FundRoute
+		{
+			public const string Tags = $"{nameof(FundRoute)} endpoint";
+			public const string Funds = $"{Ecommerce}/{RouterBase.prefix}{nameof(Funds)}";
+			public const string GetUpdateDelete = $"{Ecommerce}/{RouterBase.prefix}{nameof(Funds)}/" + "{" + RouterBase.Id + "}";
+		}
+		
 	}
 }

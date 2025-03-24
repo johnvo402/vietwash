@@ -22,7 +22,8 @@ namespace Domain.Aggregates.Funds
         public PaymentMethod PaymentMethod { get; set; } = default!;
         public FundBehavior FundBehavior { get; set; } = default!;
         public FundType FundType { get; set; } = default!;
-        protected override bool TryApplyDomainEvent(INotification domainEvent)
+        public Ulid? ReferenceId { get; set; }
+		protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
             throw new NotImplementedException();
         }
