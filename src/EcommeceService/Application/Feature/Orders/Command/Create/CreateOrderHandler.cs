@@ -13,9 +13,9 @@ namespace Application.Feature.Orders.Command.Create
 	public class CreateOrderHandler(
 		IUnitOfWork unitOfWork,
 		IMapper mapper
-	) : IRequestHandler<CreateOrderCommand, Unit>
+	) : IRequestHandler<CreateOrderCommand, CreateOrderResponse>
 	{
-		public async ValueTask<Unit> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+		public async ValueTask<CreateOrderResponse> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
 		{
 			var order = mapper.Map<Order>(request);
 			order.Code = $"ORD-{DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()[^6..]}";
@@ -64,13 +64,15 @@ namespace Application.Feature.Orders.Command.Create
 				await unitOfWork.SaveAsync(cancellationToken);
 
 				await unitOfWork.CommitAsync(cancellationToken);
+
+				var response = mapper.Map<CreateOrderResponse>(order);
+				return response;
 			}
 			catch (Exception)
 			{
 				await unitOfWork.RollbackAsync(cancellationToken);
 				throw;
 			}
-			return Mediator.Unit.Value;
 		}
 	}
 }
