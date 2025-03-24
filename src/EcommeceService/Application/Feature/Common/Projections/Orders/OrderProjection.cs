@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Application.Feature.Common.Projections.Orders
@@ -18,6 +19,9 @@ namespace Application.Feature.Common.Projections.Orders
 		public Ulid? CustomerId { get; set; }
 		public string Note { get; set; } = string.Empty;
 		public DateTimeOffset OrderDate { get; set; }
+		public DateTimeOffset ReceivedTime { get; set; }
+
+		[JsonConverter(typeof(JsonStringEnumConverter))]
 		public OrderStatus Status { get; set; }
 	}
 }

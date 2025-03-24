@@ -18,7 +18,7 @@ namespace Application.Feature.Orders.Command.Create
 		public async ValueTask<Unit> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
 		{
 			var order = mapper.Map<Order>(request);
-			order.Code = $"ORD-{DateTimeOffset.UtcNow.Ticks.ToString()[^6..]}";
+			order.Code = $"ORD-{DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()[^6..]}";
 			order.Amount = request.OrderItems.Sum(i => i.Price);
 
 			decimal discountValue = request.DiscountValue ?? 0m;
