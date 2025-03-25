@@ -5,6 +5,7 @@ namespace Application.Features.Common.Projections.Users;
 
 public class UserModel
 {
+    public Ulid Id { get; set; }
     public string? Username { get; set; }
 
     public Gender? Gender { get; set; }
@@ -22,5 +23,4 @@ public class UserModel
 
     public DateTime? DayOfBirth { get; set; }
     public string? Street { get; set; }
-
 }

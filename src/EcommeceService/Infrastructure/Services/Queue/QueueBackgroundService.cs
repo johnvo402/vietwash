@@ -44,7 +44,7 @@ public class QueueBackgroundService(
             {
                 CreateUserCommand? request = await queueFactory
                     .GetQueue(QueueType.OriginQueue)
-                    .DequeueAsync<CreateUserCommand, CreateUserCommand>();
+                    .DequeueAsync<CreateUserCommand, CreateUserEvent>();
 
                 if (request != null)
                 {
