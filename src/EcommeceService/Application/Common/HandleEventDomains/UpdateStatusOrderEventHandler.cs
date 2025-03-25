@@ -24,8 +24,9 @@ namespace Application.Common.HandleEventDomains
 				ReferenceId = notification.ReferenceId,
 				TransactionDate = DateTimeOffset.UtcNow,
 				Name = $"Fund for Order - {notification.TypeId}", // Gán giá trị cho Name
-				Note = $"Created due to order status update with BehaviorId: {notification.BehaviorId}" // Gán giá trị cho Note
-			};
+				Note = $"Created due to order status update with BehaviorId: {notification.BehaviorId}", // Gán giá trị cho Note
+				Code = $"FU-{DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()[^6..]}"
+            };
 			try
 			{
 				DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
