@@ -25,19 +25,19 @@ public class GetSaleResultHandler(IUnitOfWork unitOfWork)
 
         int numberOrder = orderList
             .Where(o =>
-                (o.Status == OrderStatus.Completed) && (o.CreatedAt.Date == DateTime.UtcNow.Date)
+                (o.Status == OrderStatus.Completed) && (o.OrderDate.Date == DateTime.UtcNow.Date)
             )
             .Count();
 
         decimal revenue = orderList
             .Where(o =>
-                (o.Status == OrderStatus.Completed) && (o.CreatedAt.Date == DateTime.UtcNow.Date)
+                (o.Status == OrderStatus.Completed) && (o.OrderDate.Date == DateTime.UtcNow.Date)
             )
             .Sum(o => o.Amount);
 
         decimal netRevenue = orderList
             .Where(o =>
-                (o.Status == OrderStatus.Completed) && (o.CreatedAt.Date == DateTime.UtcNow.Date)
+                (o.Status == OrderStatus.Completed) && (o.OrderDate.Date == DateTime.UtcNow.Date)
             )
             .Sum(o => o.Amount);
 
@@ -45,7 +45,7 @@ public class GetSaleResultHandler(IUnitOfWork unitOfWork)
             .Where(o =>
                 (o.OrderDate.Date == DateTime.UtcNow.Date.AddDays(-1))
                 && (o.Status == OrderStatus.Completed)
-                && (o.CreatedAt.Date == DateTime.UtcNow.Date)
+                && (o.OrderDate.Date == DateTime.UtcNow.Date)
             )
             .Sum(o => o.Amount);
 
@@ -53,7 +53,7 @@ public class GetSaleResultHandler(IUnitOfWork unitOfWork)
             .Where(o =>
                 (o.OrderDate.Month == DateTime.UtcNow.AddMonths(-1).Month)
                 && (o.Status == OrderStatus.Completed)
-                && (o.CreatedAt.Date == DateTime.UtcNow.Date)
+                && (o.OrderDate.Date == DateTime.UtcNow.Date)
             )
             .Sum(o => o.Amount);
 

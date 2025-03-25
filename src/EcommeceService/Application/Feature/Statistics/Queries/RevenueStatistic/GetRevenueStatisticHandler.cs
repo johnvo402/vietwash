@@ -40,7 +40,7 @@ public class GetRevenueStatisticHandler(IUnitOfWork unitOfWork)
                 Date = date,
                 Revenue = orderList
                     .Where(o =>
-                        (o.Status == OrderStatus.Completed) && (o.CreatedAt.Date == date.Date)
+                        (o.Status == OrderStatus.Completed) && (o.OrderDate.Date == date.Date)
                     )
                     .Sum(o => o.Amount),
             })
