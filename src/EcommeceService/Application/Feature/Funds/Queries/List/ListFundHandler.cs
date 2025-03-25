@@ -17,7 +17,7 @@ namespace Application.Feature.Funds.Queries.List
 			return await unitOfWork
 				.Repository<Fund>()
 				.PagedListAsync<ListFundResponse>(
-					new ListFundSpecification(),
+					new ListFundSpecification(DateTime.Parse(request.From), DateTime.Parse(request.To)),
 					request.ValidateQuery().ValidateFilter(typeof(ListFundResponse))
 				);
 		}
