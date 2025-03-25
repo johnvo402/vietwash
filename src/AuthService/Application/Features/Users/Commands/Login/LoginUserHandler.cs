@@ -13,6 +13,7 @@ using Wangkanai.Detection.Services;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Extensions;
 using SerializerExtension = JohnChum.SharedKernel.SpecificationQuery.LHS.Extensions.SerializerExtension;
 using Contracts.Application.Common.Interfaces.Services.Token;
+using Domain.Aggregates.Users.Enums;
 
 namespace Application.Features.Users.Commands.Login;
 
@@ -41,7 +42,32 @@ public class LoginUserHandler(
             ?? throw new NotFoundException(
                 [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
             );
-
+        if (!(user.Status == UserStatus.Active))
+        {
+            throw new BadRequestException(
+                [
+                    Messager
+                        .Create<User>()
+                        .Property(x => x.Status)
+                        .Message(MessageType.Active)
+                        .Negative()
+                        .BuildMessage(),
+                ]
+            );
+        }
+        if ((user.Role.Name == "CUSTOMER"))
+        {
+            throw new BadRequestException(
+                [
+                    Messager
+                        .Create<User>()
+                        .Property(x => x.RoleId)
+                        .Message(MessageType.Valid)
+                        .Negative()
+                        .BuildMessage(),
+                ]
+            );
+        }
         if (!Verify(request.Password, user.Password))
         {
             throw new BadRequestException(

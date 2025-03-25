@@ -1,4 +1,5 @@
-﻿using Application.Feature.Services.Queries.Detail;
+﻿using Application.Common.Auth;
+using Application.Feature.Services.Queries.Detail;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -22,7 +23,7 @@ namespace Presentation.Endpoints.Services
             Tags = [Presentation.Routes.Router.ServiceRoute.Tags],
             Summary = "Detail service"
         )]
-        // [AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.user}")]
+         [AuthorizeBy(permissions: $"{ActionPermission.detail}:{ObjectPermission.service}")]
         public override async Task<ActionResult<ApiResponse<GetServiceDetailResponse>>> HandleAsync(
             [FromRoute(Name = RouterBase.Id)] string serviceId,
             CancellationToken cancellationToken = default

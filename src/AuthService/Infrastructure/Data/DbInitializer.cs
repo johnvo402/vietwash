@@ -63,7 +63,10 @@ public class DbInitializer
                 ?? new Role { Id = Ulid.Parse(Credential.ADMIN_ROLE_ID), Name = Credential.ADMIN_ROLE };
 
             var managerRole = existingRoles.FirstOrDefault(r => r.Id == Ulid.Parse(Credential.MANAGER_ROLE_ID))
-                ?? new Role { Id = Ulid.Parse(Credential.MANAGER_ROLE_ID), Name = Credential.MANAGER_ROLE };
+                ?? new Role { Id = Ulid.Parse(Credential.MANAGER_ROLE_ID), Name = Credential.STAFF_ROLE };
+
+            var customerRole = existingRoles.FirstOrDefault(r => r.Id == Ulid.Parse(Credential.CUSTOMER_ROLE_ID))
+                ?? new Role { Id = Ulid.Parse(Credential.CUSTOMER_ROLE_ID), Name = Credential.CUSTOMER };
 
             // Cập nhật quyền cho Role (nếu chưa có)
             adminRole.RolePermissions = insertedPermissions
@@ -74,7 +77,7 @@ public class DbInitializer
                 .Where(x => Credential.MANAGER_CLAIMS.Contains(x.Key))
                 .Select(x => new RolePermission { PermissionId = x.Id, RoleId = managerRole.Id })
                 .ToList();
-            Role[] roles = [adminRole, managerRole];
+            Role[] roles = [adminRole, managerRole, customerRole];
             // Lưu Role vào DB (update nếu đã tồn tại, insert nếu chưa)
             if (existingRoles.Any())
             {
@@ -134,7 +137,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "chloe.kim@gmail.com",
                 "0925123123",
-                roles[new Random().Next(0, 2)].Id,
+                roles[new Random().Next(0, 3)].Id,
                 new Address(region.Province!, region.District!, region.Commune, "132 Ham Nghi")
             )
             {
@@ -153,7 +156,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "john.doe@example.com",
                 "0803456789",
-                roles[new Random().Next(0, 2)].Id,
+                roles[new Random().Next(0, 3)].Id,
                 new Address(
                     johnDoeRegion.Province!,
                     johnDoeRegion.District!,
@@ -177,7 +180,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "alice.smith@example.com",
                 "0912345678",
-                roles[new Random().Next(0, 2)].Id,
+                roles[new Random().Next(0, 3)].Id,
                 new Address(
                     aliceSmithRegion.Province!,
                     aliceSmithRegion.District!,
@@ -201,7 +204,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "bob.johnson@example.com",
                 "0934567890",
-                roles[new Random().Next(0, 2)].Id,
+                roles[new Random().Next(0, 3)].Id,
                 new Address(
                     bobJohnsonRegion.Province!,
                     bobJohnsonRegion.District!,
@@ -225,7 +228,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "emily.brown@example.com",
                 "0945678901",
-                                roles[new Random().Next(0, 2)].Id,
+                                roles[new Random().Next(0, 3)].Id,
 
                 new Address(
                     emilyBrownRegion.Province!,
@@ -250,7 +253,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "james.williams@example.com",
                 "0978901234",
-                                roles[new Random().Next(0, 2)].Id,
+                                roles[new Random().Next(0, 3)].Id,
 
                 new Address(
                     jamesWilliamsRegion.Province!,
@@ -275,7 +278,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "olivia.taylor@example.com",
                 "0989012345",
-                                roles[new Random().Next(0, 2)].Id,
+                                roles[new Random().Next(0, 3)].Id,
 
                 new Address(
                     oliviaTaylorRegion.Province!,
@@ -300,7 +303,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "daniel.lee@example.com",
                 "0901234567",
-                                roles[new Random().Next(0, 2)].Id,
+                                roles[new Random().Next(0, 3)].Id,
 
                 new Address(
                     danielLeeRegion.Province!,
@@ -325,7 +328,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "sophia.garcia@example.com",
                 "0912345679",
-                                roles[new Random().Next(0, 2)].Id,
+                                roles[new Random().Next(0, 3)].Id,
 
                 new Address(
                     sophiaGarciaRegion.Province!,
@@ -355,7 +358,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "michael.martinez@example.com",
                 "0913456789",
-                                roles[new Random().Next(0, 2)].Id,
+                                roles[new Random().Next(0, 3)].Id,
 
                 new Address(
                     michaelMartinezRegion.Province!,
@@ -380,7 +383,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "isabella.harris@example.com",
                 "0945678902",
-                                roles[new Random().Next(0, 2)].Id,
+                                roles[new Random().Next(0, 3)].Id,
 
                 new Address(
                     isabellaHarrisRegion.Province!,
@@ -405,7 +408,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "david.clark@example.com",
                 "0934567891",
-                                roles[new Random().Next(0, 2)].Id,
+                                roles[new Random().Next(0, 3)].Id,
 
                 new Address(
                     davidClarkRegion.Province!,
@@ -430,7 +433,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "emma.rodriguez@example.com",
                 "0956789012",
-                                roles[new Random().Next(0, 2)].Id,
+                                roles[new Random().Next(0, 3)].Id,
 
                 new Address(
                     emmaRodriguezRegion.Province!,
@@ -455,7 +458,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "andrew.moore@example.com",
                 "0923456789",
-                                roles[new Random().Next(0, 2)].Id,
+                                roles[new Random().Next(0, 3)].Id,
 
                 new Address(
                     andrewMooreRegion.Province!,
@@ -480,7 +483,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "ava.jackson@example.com",
                 "0935678903",
-                                roles[new Random().Next(0, 2)].Id,
+                                roles[new Random().Next(0, 3)].Id,
 
                 new Address(
                     avaJacksonRegion.Province!,
@@ -505,7 +508,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "joshua.white@example.com",
                 "0914567890",
-                                roles[new Random().Next(0, 2)].Id,
+                                roles[new Random().Next(0, 3)].Id,
 
                 new Address(
                     joshuaWhiteRegion.Province!,
@@ -535,7 +538,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "charlotte.thomas@example.com",
                 "0934567892",
-                                roles[new Random().Next(0, 2)].Id,
+                                roles[new Random().Next(0, 3)].Id,
 
                 new Address(
                     charlotteThomasRegion.Province!,
@@ -560,7 +563,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "ethan.king@example.com",
                 "0923456781",
-                                roles[new Random().Next(0, 2)].Id,
+                                roles[new Random().Next(0, 3)].Id,
 
                 new Address(
                     ethanKingRegion.Province!,
@@ -585,7 +588,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "abigail.scott@example.com",
                 "0916789013",
-                                roles[new Random().Next(0, 2)].Id,
+                                roles[new Random().Next(0, 3)].Id,
 
                 new Address(
                     abigailScottRegion.Province!,
@@ -610,7 +613,7 @@ public class DbInitializer
                 HashPassword(Credential.USER_DEFAULT_PASSWORD),
                 "liam.perez@example.com",
                 "0909876543",
-                                roles[new Random().Next(0, 2)].Id,
+                                roles[new Random().Next(0, 3)].Id,
 
                 new Address(
                     liamPerezRegion.Province!,

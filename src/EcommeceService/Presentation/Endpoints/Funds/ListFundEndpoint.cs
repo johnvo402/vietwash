@@ -18,7 +18,7 @@ namespace Presentation.Endpoints.Funds
 	{
 		[HttpGet(Router.FundRoute.Funds)]
 		[SwaggerOperation(Tags = [Router.FundRoute.Tags], Summary = "list Fund")]
-		//[AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.fund}")]
+		[AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.fund}")]
 		public override async Task<ActionResult<ApiResponse<PaginationResponse<ListFundResponse>>>> HandleAsync(
 		[FromQuery]	ListFundQuery request,
 			CancellationToken cancellationToken = default

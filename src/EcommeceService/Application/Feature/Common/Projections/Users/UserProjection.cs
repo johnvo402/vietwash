@@ -24,7 +24,7 @@ public class UserProjection : BaseResponse
 
     [File]
     public string? Avatar { get; set; }
-
+    public CustomerType CustomerType { get; set; }
     public UserStatus Status { get; set; }
     public Ulid RoleId { get; set; }
 }

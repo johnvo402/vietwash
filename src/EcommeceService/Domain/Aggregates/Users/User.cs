@@ -20,7 +20,7 @@ public class User : BaseEntity
 
     public Gender? Gender { get; set; }
     public string? Avatar { get; set; }
-
+    public CustomerType? CustomerType { get; set; } = Enums.CustomerType.normal;
     public UserStatus Status { get; set; } = UserStatus.Active;
     public Ulid RoleId { get; set; }
 

@@ -1,8 +1,10 @@
-﻿using Application.Feature.Statistics.Queries.RevenueStatistic;
+﻿using Application.Common.Auth;
+using Application.Feature.Statistics.Queries.RevenueStatistic;
 using Application.Feature.Statistics.Queries.SaleResult;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
+using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -19,6 +21,7 @@ namespace Presentation.Endpoints.SaleStatistic
             Tags = [Presentation.Routes.Router.SaleResultRoute.Tags],
             Summary = "statistic result"
         )]
+        [AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.dashboard}")]
         public override async Task<
             ActionResult<ApiResponse<IEnumerable<GetSaleResultResponse>>>
         > HandleAsync(CancellationToken cancellationToken = default) =>

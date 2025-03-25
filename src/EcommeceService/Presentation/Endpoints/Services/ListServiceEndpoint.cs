@@ -1,7 +1,9 @@
+using Application.Common.Auth;
 using Application.Feature.Services.Queries.List;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
+using Infrastructure.Constants;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +19,7 @@ public class ListServiceEndpoint(ISender sender)
 {
     [HttpGet(Router.ServiceRoute.Services)]
     [SwaggerOperation(Tags = [Router.ServiceRoute.Tags], Summary = "Service list")]
+    [AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.service}")]
     public override async Task<
         ActionResult<ApiResponse<PaginationResponse<ListServiceResponse>>>
     > HandleAsync(ListServiceQuery request, CancellationToken cancellationToken = default) =>

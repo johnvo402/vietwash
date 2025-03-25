@@ -9,45 +9,109 @@ public static class Credential
 
     public const string ADMIN_ROLE = "ADMIN";
 
-    public const string MANAGER_ROLE = "MANAGER";
+    public const string STAFF_ROLE = "STAFF";
+    public const string CUSTOMER = "CUSTOMER";
 
     public static readonly Dictionary<string, string[]> PermissionGroups =
-        new()
+    new()
+    {
         {
-            {
-                nameof(User) + "s",
+            "Users",
+            [
+                CreatePermission(ActionPermission.create, ObjectPermission.user),
+                CreatePermission(ActionPermission.update, ObjectPermission.user),
+                CreatePermission(ActionPermission.delete, ObjectPermission.user),
+                CreatePermission(ActionPermission.detail, ObjectPermission.user),
+                CreatePermission(ActionPermission.list, ObjectPermission.user),
+                CreatePermission(ActionPermission.testa, ObjectPermission.user)
+            ]
+        },
+        {
+            "Roles",
+            [
+                CreatePermission(ActionPermission.create, ObjectPermission.role),
+                CreatePermission(ActionPermission.update, ObjectPermission.role),
+                CreatePermission(ActionPermission.delete, ObjectPermission.role),
+                CreatePermission(ActionPermission.detail, ObjectPermission.role),
+                CreatePermission(ActionPermission.list, ObjectPermission.role),
+                CreatePermission(ActionPermission.testa, ObjectPermission.role)
+            ]
+        },
+        {
+            "Orders",
+            [
+                CreatePermission(ActionPermission.create, ObjectPermission.order),
+                CreatePermission(ActionPermission.update, ObjectPermission.order),
+                CreatePermission(ActionPermission.delete, ObjectPermission.order),
+                CreatePermission(ActionPermission.detail, ObjectPermission.order),
+                CreatePermission(ActionPermission.list, ObjectPermission.order),
+                CreatePermission(ActionPermission.testa, ObjectPermission.order)
+            ]
+        },
+        {
+            "Services",
+            [
+                CreatePermission(ActionPermission.create, ObjectPermission.service),
+                CreatePermission(ActionPermission.update, ObjectPermission.service),
+                CreatePermission(ActionPermission.delete, ObjectPermission.service),
+                CreatePermission(ActionPermission.detail, ObjectPermission.service),
+                CreatePermission(ActionPermission.list, ObjectPermission.service),
+                CreatePermission(ActionPermission.testa, ObjectPermission.service)
+            ]
+        },
+        {
+            "Tariffs",
+            [
+                CreatePermission(ActionPermission.create, ObjectPermission.tariff),
+                CreatePermission(ActionPermission.update, ObjectPermission.tariff),
+                CreatePermission(ActionPermission.delete, ObjectPermission.tariff),
+                CreatePermission(ActionPermission.detail, ObjectPermission.tariff),
+                CreatePermission(ActionPermission.list, ObjectPermission.tariff),
+                CreatePermission(ActionPermission.testa, ObjectPermission.tariff)
+            ]
+        },
+        {
+            "Funds",
+            [
+                CreatePermission(ActionPermission.create, ObjectPermission.fund),
+                CreatePermission(ActionPermission.update, ObjectPermission.fund),
+                CreatePermission(ActionPermission.delete, ObjectPermission.fund),
+                CreatePermission(ActionPermission.detail, ObjectPermission.fund),
+                CreatePermission(ActionPermission.list, ObjectPermission.fund),
+                CreatePermission(ActionPermission.testa, ObjectPermission.fund)
+            ]
+        },
+        {
+            "Reportservices",
+            [
+                CreatePermission(ActionPermission.create, ObjectPermission.reportservice),
+                CreatePermission(ActionPermission.update, ObjectPermission.reportservice),
+                CreatePermission(ActionPermission.delete, ObjectPermission.reportservice),
+                CreatePermission(ActionPermission.detail, ObjectPermission.reportservice),
+                CreatePermission(ActionPermission.list, ObjectPermission.reportservice),
+                CreatePermission(ActionPermission.testa, ObjectPermission.reportservice)
+            ]
+        },
+        {
+            "Customer",
+            [
+                CreatePermission(ActionPermission.create, ObjectPermission.customer),
+                CreatePermission(ActionPermission.update, ObjectPermission.customer),
+                CreatePermission(ActionPermission.delete, ObjectPermission.customer),
+                CreatePermission(ActionPermission.detail, ObjectPermission.customer),
+                CreatePermission(ActionPermission.list, ObjectPermission.customer),
+                CreatePermission(ActionPermission.testa, ObjectPermission.customer)
+            ]
+        },
+        {
+            "Dashboard",
+            [
 
-                [
-                    CreatePermission(ActionPermission.create, ObjectPermission.user),
-                    CreatePermission(ActionPermission.update, ObjectPermission.user),
-                    CreatePermission(ActionPermission.delete, ObjectPermission.user),
-                    CreatePermission(ActionPermission.list, ObjectPermission.user),
-                    CreatePermission(ActionPermission.detail, ObjectPermission.user),
-                ]
-            },
-            {
-                nameof(Role) + "s",
+                CreatePermission(ActionPermission.list, ObjectPermission.dashboard),
 
-                [
-                    CreatePermission(ActionPermission.create, ObjectPermission.role),
-                    CreatePermission(ActionPermission.update, ObjectPermission.role),
-                    CreatePermission(ActionPermission.delete, ObjectPermission.role),
-                    CreatePermission(ActionPermission.list, ObjectPermission.role),
-                    CreatePermission(ActionPermission.detail, ObjectPermission.role),
-                ]
-            },
-             {
-                "Services",
-
-                [
-                    CreatePermission(ActionPermission.create, ObjectPermission.service),
-                    CreatePermission(ActionPermission.update, ObjectPermission.service),
-                    CreatePermission(ActionPermission.delete, ObjectPermission.service),
-                    CreatePermission(ActionPermission.list, ObjectPermission.service),
-                    CreatePermission(ActionPermission.detail, ObjectPermission.service),
-                ]
-            },
-        };
+            ]
+        }
+    };
 
     public static readonly IReadOnlyCollection<string> ADMIN_CLAIMS =
         PermissionGroups
@@ -57,19 +121,21 @@ public static class Credential
     public static readonly IReadOnlyCollection<string> MANAGER_CLAIMS =
     [
 
-            CreatePermission(ActionPermission.create, ObjectPermission.user),
+            CreatePermission(ActionPermission.create, ObjectPermission.order),
 
-            CreatePermission(ActionPermission.list, ObjectPermission.user),
+            CreatePermission(ActionPermission.list, ObjectPermission.order),
 
-            CreatePermission(ActionPermission.detail, ObjectPermission.user),
+            CreatePermission(ActionPermission.detail, ObjectPermission.order),
+            CreatePermission(ActionPermission.update, ObjectPermission.order),
+         CreatePermission(ActionPermission.create, ObjectPermission.user),
+         CreatePermission(ActionPermission.list, ObjectPermission.customer),
 
-            CreatePermission(ActionPermission.create, ObjectPermission.role),
-            CreatePermission(ActionPermission.list, ObjectPermission.role),
-            CreatePermission(ActionPermission.detail, ObjectPermission.role),
+
     ];
 
     public const string ADMIN_ROLE_ID = "01J79JQZRWAKCTCQV64VYKMZ56";
     public const string MANAGER_ROLE_ID = "01JB19HK30BGYJBZGNETQY8905";
+    public const string CUSTOMER_ROLE_ID = "01JB19HK30BGYJBZGNETQY8908";
 
     public static class UserIds
     {

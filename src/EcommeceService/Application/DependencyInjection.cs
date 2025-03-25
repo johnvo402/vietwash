@@ -31,7 +31,7 @@ public static class DependencyInjection
             .AddAutoMapper(typeof(ApplicationMappingProfile))
             .AddSingleton<IAuthorizationPolicyProvider, AuthorizePolicyProvider>()
             .AddSingleton<IAuthorizationHandler, AuthorizeHandler>()
-            .AddScoped<UpdateUserStatusJob>();
+            .AddScoped<CheckCustomerLoyal>();
         ;
     }
 }

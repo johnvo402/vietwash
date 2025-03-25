@@ -16,6 +16,7 @@ namespace Presentation.Endpoints.Medias
     {
         [HttpPost(Router.MediaRoute.Media)]
         [SwaggerOperation(Tags = [Router.MediaRoute.Tags], Summary = "Upload Media")]
+        [AuthorizeBy]
         public override async Task<ActionResult<ApiResponse<UploadMediaResponse>>> HandleAsync(
             [FromForm] UploadMediaCommand request,
             CancellationToken cancellationToken = default

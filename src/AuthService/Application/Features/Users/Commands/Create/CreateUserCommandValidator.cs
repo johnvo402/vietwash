@@ -71,20 +71,11 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
             );
 
         RuleFor(x => x.Password)
-            .NotEmpty()
-            .WithState(x =>
-                Messager
-                    .Create<CreateUserCommand>(nameof(User))
-                    .Property(x => x.Password!)
-                    .Message(MessageType.Null)
-                    .Negative()
-                    .Build()
-            )
             .Must(
                 (_, x) =>
                 {
                     Regex regex = PassowordValidationRegex();
-                    return regex.IsMatch(x!);
+                    return regex.IsMatch(x!) && !string.IsNullOrEmpty(x);
                 }
             )
             .WithState(x =>

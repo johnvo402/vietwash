@@ -20,7 +20,7 @@ namespace Presentation.Endpoints.Reports
 	{
 		[HttpGet(Router.ReportRoute.ReportServiceOrder)]
 		[SwaggerOperation(Tags = [Router.ReportRoute.Tags], Summary = "Report service order")]
-		//[AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.reportservice}")]
+		[AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.reportservice}")]
 		public override async Task<ActionResult<ApiResponse<List<ServiceRevenueReportResponse>>>> HandleAsync(
 			[FromQuery] ServiceRevenueReportQuery request, 
 			CancellationToken cancellationToken = default

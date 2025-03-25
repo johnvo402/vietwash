@@ -1,8 +1,10 @@
 ﻿
+using Application.Common.Auth;
 using Application.Feature.Statistics.Queries.TopService;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
+using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -17,6 +19,7 @@ namespace Presentation.Endpoints.SaleStatistic
     {
         [HttpGet(Presentation.Routes.Router.SaleResultRoute.TopService)]
         [SwaggerOperation(Tags = [Presentation.Routes.Router.SaleResultRoute.Tags], Summary = "Top Service")]
+        [AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.dashboard}")]
         public override async Task<
             ActionResult<ApiResponse<IEnumerable<GetTopServiceResponse>>>
         > HandleAsync([FromQuery] GetTopServiceQuery request, CancellationToken cancellationToken = default) =>

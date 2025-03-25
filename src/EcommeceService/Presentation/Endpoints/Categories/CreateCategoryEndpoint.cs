@@ -14,6 +14,7 @@ public class CreateCategoryEndpoint(ISender sender)
 {
     [HttpPost(Router.CategoryRoute.Categories)]
     [SwaggerOperation(Tags = [Router.CategoryRoute.Tags], Summary = "Create category")]
+    
     public override async Task<ActionResult<ApiResponse<Unit>>> HandleAsync(
         CreateCategoryCommand request,
         CancellationToken cancellationToken = default

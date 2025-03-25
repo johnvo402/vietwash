@@ -1,17 +1,61 @@
-﻿using System;
+﻿using Application.Common.Interfaces.UnitOfWorks;
+using Domain.Aggregates.Orders;
+using Domain.Aggregates.Orders.Specifications;
+using Domain.Aggregates.Users;
+using Domain.Aggregates.Users.Enums;
+using Domain.Aggregates.Users.Specifications;
+using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Application.Jobs
 {
-    public class UpdateUserStatusJob : IJob
+    public class CheckCustomerLoyal : IJob
     {
-        public Task ExecuteAsync()
+        private readonly IUnitOfWork _unitOfWork;
+
+        public CheckCustomerLoyal(IUnitOfWork unitOfWork)
         {
-            Console.WriteLine("Updating user status...");
-            return Task.CompletedTask;
+            _unitOfWork = unitOfWork;
+        }
+
+        public async Task ExecuteAsync()
+        {
+            IEnumerable<User> users = await _unitOfWork.Repository<User>().ListAsync();
+            List<Ulid> userIds = new List<Ulid>();
+            foreach (User user in users)
+            {
+                userIds.Add(user.Id);
+            }
+            foreach (Ulid userId in userIds)
+            {
+                var order = await _unitOfWork.Repository<Order>().FindByConditionAsync<List<Order>>(new GetOrderByCustomerIdSpecification(userId));
+                if (order != null || order?.Count() > 0)
+                {
+                    var totalOrder = order.Count();
+                    var totalRevenue = order.Sum(x => x.Total);
+                    if (totalOrder >= 5 || totalRevenue > 500000)
+                    {
+                        var user = await _unitOfWork.Repository<User>().FindByConditionAsync(new GetUserByIdWithoutIncludeSpecification(userId));
+                        user.CustomerType = CustomerType.loyal;
+                        try
+                        {
+                            DbTransaction transaction = await _unitOfWork.CreateTransactionAsync();
+                            await _unitOfWork.Repository<User>().UpdateAsync(user);
+                            await _unitOfWork.SaveAsync();
+                            await _unitOfWork.CommitAsync();
+                        }
+                        catch (Exception)
+                        {
+                            await _unitOfWork.RollbackAsync();
+                            throw;
+                        }
+                    }
+                }
+            }
         }
     }
 }

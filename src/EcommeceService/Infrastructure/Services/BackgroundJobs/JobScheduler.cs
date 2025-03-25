@@ -20,7 +20,7 @@ namespace Infrastructure.Services.BackgroundJobs
         {
             var jobs = new Dictionary<string, (Type JobType, string CronSchedule)>
             {
-                { "update-user-status", (typeof(UpdateUserStatusJob), "0 * * * *") }
+                { "check-customer-loyal", (typeof(CheckCustomerLoyal), "5 * * * *") }
             };
 
             foreach (var job in jobs)
