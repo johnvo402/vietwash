@@ -19,5 +19,7 @@ public static class ObjectPermission
     public const string service = nameof(service);
     public const string tariff = nameof(tariff);
 	public const string fund = nameof(fund);
+	public const string reportservice = nameof(reportservice);
+
 
 }
