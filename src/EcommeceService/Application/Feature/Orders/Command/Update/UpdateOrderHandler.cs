@@ -43,7 +43,7 @@ namespace Application.Feature.Orders.Command.Update
 			// Cập nhật Amount từ OrderItems nếu có
 			if (command.Order.OrderItems is not null && command.Order.OrderItems.Any())
 			{
-				order.Amount = command.Order.OrderItems.Sum(i => i.Price);
+				order.Amount = command.Order.OrderItems.Sum(i => i.Price * i.Quantity);
 
 				foreach (var orderItemModel in command.Order.OrderItems)
 				{
