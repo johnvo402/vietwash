@@ -20,7 +20,7 @@ namespace Presentation.Endpoints.Funds
 		[SwaggerOperation(Tags = [Router.FundRoute.Tags], Summary = "list Fund")]
 		//[AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.fund}")]
 		public override async Task<ActionResult<ApiResponse<PaginationResponse<ListFundResponse>>>> HandleAsync(
-			ListFundQuery request,
+		[FromQuery]	ListFundQuery request,
 			CancellationToken cancellationToken = default
 		) => this.Ok200(await sender.Send(request, cancellationToken));
 	}
