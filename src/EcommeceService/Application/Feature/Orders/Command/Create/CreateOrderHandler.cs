@@ -21,7 +21,7 @@ namespace Application.Feature.Orders.Command.Create
         {
             var order = mapper.Map<Order>(request);
             order.Code = $"ORD-{DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()[^6..]}";
-            order.Amount = request.OrderItems.Sum(i => i.Price);
+            order.Amount = request.OrderItems.Sum(i => i.Price * i.Quantity);
 
             decimal discountValue = request.DiscountValue ?? 0m;
             order.Total =

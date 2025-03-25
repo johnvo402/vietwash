@@ -11,6 +11,7 @@ namespace Application.Feature.Common.Projections.Orders
 		public string OrderItemId { get; set; }
 		public string ServiceId { get; set; }
 		public string UnitRelationId { get; set; }
+		public int Quantity { get; set; }
 		public decimal Price { get; set; }
 	}
 }
