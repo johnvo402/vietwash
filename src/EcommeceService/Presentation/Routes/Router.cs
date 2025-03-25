@@ -71,9 +71,12 @@ namespace Presentation.Routes
             public const string Users = $"{Ecommerce}/{RouterBase.prefix}{nameof(Users)}";
             public const string GetRouteName = $"{Users}DetailEndpoint";
             public const string Tags = $"{nameof(Users)} endpoint";
-
-
         }
-    }
+		public static class ReportRoute
+		{
+			public const string Tags = $"{nameof(ReportRoute)} endpoint";
+			public const string ReportServiceOrder = $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportServiceOrder)}";
+		}
+	}
 }
 
