@@ -58,7 +58,7 @@ namespace Presentation.Routes
             public const string SaleResult = $"{Ecommerce}/{RouterBase.prefix}{nameof(SaleResult)}";
             public const string RevenueStatistic = $"{Ecommerce}/{RouterBase.prefix}{nameof(RevenueStatistic)}";
             public const string TopService = $"{Ecommerce}/{RouterBase.prefix}{nameof(TopService)}";
-
+        }
         public static class FundRoute
         {
             public const string Tags = $"{nameof(FundRoute)} endpoint";
@@ -76,4 +76,4 @@ namespace Presentation.Routes
         }
     }
 }
-}
+
