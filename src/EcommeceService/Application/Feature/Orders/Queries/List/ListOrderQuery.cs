@@ -8,9 +8,9 @@ namespace Application.Feature.Orders.Queries.List
     public class ListOrderQuery : QueryParamRequest, IRequest<PaginationResponse<ListOrderResponse>>
     {
         [FromQuery]
-        public string From { get; set; }
+        public string? From { get; set; }
 
         [FromQuery]
-        public string To { get; set; }
+        public string? To { get; set; }
     }
 }

@@ -9,17 +9,21 @@ using Mediator;
 
 namespace Application.Feature.Funds.Queries.List
 {
-	public class ListFundHandler(IUnitOfWork unitOfWork)
-	: IRequestHandler<ListFundQuery, PaginationResponse<ListFundResponse>>
-	{
-		public async ValueTask<PaginationResponse<ListFundResponse>> Handle(ListFundQuery request, CancellationToken cancellationToken)
-		{
-			return await unitOfWork
-				.Repository<Fund>()
-				.PagedListAsync<ListFundResponse>(
-					new ListFundSpecification(DateTime.Parse(request.From), DateTime.Parse(request.To)),
-					request.ValidateQuery().ValidateFilter(typeof(ListFundResponse))
-				);
-		}
-	}
+    public class ListFundHandler(IUnitOfWork unitOfWork)
+    : IRequestHandler<ListFundQuery, PaginationResponse<ListFundResponse>>
+    {
+        public async ValueTask<PaginationResponse<ListFundResponse>> Handle(ListFundQuery request, CancellationToken cancellationToken)
+        {
+
+
+
+            return await unitOfWork
+                .Repository<Fund>()
+                .PagedListAsync<ListFundResponse>(
+                    new ListFundSpecification(request.From,
+                        request.To),
+                    request.ValidateQuery().ValidateFilter(typeof(ListFundResponse))
+                );
+        }
+    }
 }

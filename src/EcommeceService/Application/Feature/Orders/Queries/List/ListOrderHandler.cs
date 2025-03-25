@@ -13,15 +13,19 @@ namespace Application.Feature.Orders.Queries.List
         public async ValueTask<PaginationResponse<ListOrderResponse>> Handle(
             ListOrderQuery query,
             CancellationToken cancellationToken
-        ) =>
-            await unitOfWork
+        )
+        {
+
+
+            return await unitOfWork
                 .Repository<Order>()
                 .PagedListAsync<ListOrderResponse>(
                     new ListOrderSpecification(
-                        DateTime.Parse(query.From),
-                        DateTime.Parse(query.To)
+                      query.From,
+                       query.To
                     ),
                     query.ValidateQuery().ValidateFilter(typeof(ListOrderResponse))
                 );
+        }
     }
 }
