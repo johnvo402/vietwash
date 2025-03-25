@@ -82,15 +82,11 @@ public class GetSaleResultHandler(IUnitOfWork unitOfWork)
 
     public float CaculatePercentageChange(float today, float last)
     {
-        float result = 0;
-        if (last != 0)
+        if (last == 0)
         {
-            if (today != 0)
-            {
-                result = (float)(today / last) * 100;
-            }
-            result = 100;
+            return today == 0 ? 0 : 100;
         }
-        return result;
+
+        return ((today - last) / last) * 100;
     }
 }
