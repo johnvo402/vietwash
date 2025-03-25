@@ -29,7 +29,7 @@ public class GetTopServiceHandler(IUnitOfWork unitOfWork)
 
 
             var orders = await unitOfWork.Repository<Order>().ListAsync(
-                new GetOrderItemSpecification(DateTime.Parse(query.From) , DateTime.Parse(query.To) ),
+                new GetOrderItemSpecification(DateTime.Parse(query.From), DateTime.Parse(query.To)),
                 queryParamRequest,
                 cancellationToken);
 
@@ -62,7 +62,7 @@ public class GetTopServiceHandler(IUnitOfWork unitOfWork)
                     ServiceName = serviceDict.ContainsKey(g.Key) ? serviceDict[g.Key].Name : "Unknown",
                     Description = serviceDict.ContainsKey(g.Key) ? serviceDict[g.Key].Description : "No description",
                     UsageCount = g.Count(),
-                    TotalRevenue = g.Sum(oi => oi.Price)
+                    TotalRevenue = g.Sum(oi => oi.Price * oi.Quantity)
                 })
                 .OrderByDescending(x => x.TotalRevenue)
                 .Take(10)
