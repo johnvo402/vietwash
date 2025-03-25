@@ -61,6 +61,10 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("payment_method");
 
+                    b.Property<string>("ReferenceId")
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("reference_id");
+
                     b.Property<DateTimeOffset>("TransactionDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("transaction_date");
@@ -244,6 +248,10 @@ namespace Infrastructure.Data.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric")
                         .HasColumnName("price");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("quantity");
 
                     b.Property<string>("ServiceId")
                         .IsRequired()

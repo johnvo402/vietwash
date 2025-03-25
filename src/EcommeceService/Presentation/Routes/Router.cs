@@ -50,6 +50,7 @@ namespace Presentation.Routes
             public const string UpdateStatus = $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(UpdateStatus)}" + "{" + RouterBase.Id + "}";
         }
 
+
         public static class SaleResultRoute
         {
             public const string Tags = $"{nameof(SaleResultRoute)} endpoint";
@@ -57,6 +58,20 @@ namespace Presentation.Routes
             public const string SaleResult = $"{Ecommerce}/{RouterBase.prefix}{nameof(SaleResult)}";
             public const string RevenueStatistic = $"{Ecommerce}/{RouterBase.prefix}{nameof(RevenueStatistic)}";
             public const string TopService = $"{Ecommerce}/{RouterBase.prefix}{nameof(TopService)}";
+
+        public static class FundRoute
+        {
+            public const string Tags = $"{nameof(FundRoute)} endpoint";
+            public const string Funds = $"{Ecommerce}/{RouterBase.prefix}{nameof(Funds)}";
+            public const string GetUpdateDelete = $"{Ecommerce}/{RouterBase.prefix}{nameof(Funds)}/" + "{" + RouterBase.Id + "}";
+        }
+
+        public static class UserRoute
+        {
+            public const string Users = $"{Ecommerce}/{RouterBase.prefix}{nameof(Users)}";
+            public const string GetRouteName = $"{Users}DetailEndpoint";
+            public const string Tags = $"{nameof(Users)} endpoint";
+
 
         }
     }

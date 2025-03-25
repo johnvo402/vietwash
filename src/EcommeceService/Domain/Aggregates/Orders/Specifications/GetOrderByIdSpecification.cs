@@ -1,22 +1,20 @@
 ﻿using Domain.Aggregates.Orders.Enums;
 using JohnChum.SharedKernel.Domain.Common.Specs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Domain.Aggregates.Orders.Specifications
 {
-	public class GetOrderByIdSpecification : Specification<Order>
-	{
-		public GetOrderByIdSpecification(Ulid id)
-		{
-			Query
-				.Where(x => x.Id == id && x.Status != OrderStatus.Cancelled)
-				.Include(x => x.OrderItems)
-				.Include(x => x.OrderPayments)
-				.AsSplitQuery();
-		}
-	}
+    public class GetOrderByIdSpecification : Specification<Order>
+    {
+        public GetOrderByIdSpecification(Ulid id)
+        {
+            Query
+                .Where(x => x.Id == id && x.Status != OrderStatus.Cancelled)
+                .Include(x => x.OrderItems)
+                .ThenInclude(x => x.Service)
+                .Include(x => x.OrderItems)
+                .ThenInclude(x => x.UnitRelation)
+                .Include(x => x.OrderPayments)
+                .AsSplitQuery();
+        }
+    }
 }

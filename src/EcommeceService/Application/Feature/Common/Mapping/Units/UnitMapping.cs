@@ -1,12 +1,6 @@
 ﻿using Application.Feature.Common.Projections.Units;
-using Application.Feature.Units.Command.Update;
 using AutoMapper;
 using Domain.Aggregates.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Feature.Common.Mapping.Units
 {
@@ -16,8 +10,7 @@ namespace Application.Feature.Common.Mapping.Units
         {
             CreateMap<UnitModel, Unit>();
             CreateMap<UnitRelationModel, UnitRelation>();
-
-
+            CreateMap<UnitRelation, UnitRelationModel>();
         }
     }
 }

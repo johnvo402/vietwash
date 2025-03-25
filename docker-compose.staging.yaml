@@ -18,9 +18,9 @@ services:
     depends_on:
       - gateway
 
-  auth:
+  authen:
     <<: *common_config
-    image: auth
+    image: authen
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
     build:

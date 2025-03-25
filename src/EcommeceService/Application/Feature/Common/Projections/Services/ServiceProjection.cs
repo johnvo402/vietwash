@@ -1,16 +1,16 @@
-﻿using Application.Common.Security;
+﻿using System.Text.Json.Serialization;
+using Application.Common.Security;
 using Application.Feature.Common.Projections.Units;
 using Domain.Aggregates.Services.Enums;
 using JohnChum.SharedKernel.Domain.Common;
-using System.Text.Json.Serialization;
 
 namespace Application.Feature.Common.Projections.Services
 {
     public class ServiceProjection : BaseEntity
     {
-
         public string Name { get; set; } = default!;
         public string? Description { get; set; }
+
         [File]
         public string? Image { get; set; }
 

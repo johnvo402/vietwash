@@ -1,14 +1,12 @@
-﻿using Application.Feature.Common.Projections.Units;
-using JohnChum.SharedKernel.Domain.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Application.Feature.Common.Projections.Units;
+using JohnChum.SharedKernel.Domain.Common;
 
 namespace Application.Feature.Common.Projections.Services
 {
-    public class ServiceDetailProjection : ServiceProjection
-    {
-    }
+    public class ServiceDetailProjection : ServiceProjection { }
 }

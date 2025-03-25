@@ -63,7 +63,12 @@ namespace Application.Feature.Common.Validators.Orders
 					Console.WriteLine($"User exists: {userExists}");
 
 					return userExists;
-				});
+				}).WithState(x => Messager
+                    .Create<CreateOrderModel>(nameof(Order))
+                    .Property(x => x.CustomerId)
+                    .Message(MessageType.Found)
+                    .Negative()
+                    .Build());
 			
 			RuleFor(x => x.PaymentMethod)
 				.IsInEnum()

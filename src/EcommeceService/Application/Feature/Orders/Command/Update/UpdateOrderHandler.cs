@@ -43,7 +43,7 @@ namespace Application.Feature.Orders.Command.Update
 			// Cập nhật Amount từ OrderItems nếu có
 			if (command.Order.OrderItems is not null && command.Order.OrderItems.Any())
 			{
-				order.Amount = command.Order.OrderItems.Sum(i => i.Price);
+				order.Amount = command.Order.OrderItems.Sum(i => i.Price * i.Quantity);
 
 				foreach (var orderItemModel in command.Order.OrderItems)
 				{
@@ -85,7 +85,7 @@ namespace Application.Feature.Orders.Command.Update
 					throw new BadRequestException(
 						[Messager.Create<Order>().Property(x => x.Status).Message(MessageType.Valid).Negative().Build()]);
 
-				order.Status = command.Status.Value;
+				order.UpdateStatus(command.Status.Value);
 
 				// Kiểm tra nếu Status chuyển sang Completed
 				if (command.Status.Value == OrderStatus.Completed)

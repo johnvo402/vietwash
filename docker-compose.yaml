@@ -14,9 +14,9 @@ services:
       DOTNET_DASHBOARD_OTLP_HTTP_ENDPOINT_URL: "http://+:18890"
     restart: always
 
-  auth:
-    container_name: auth
-    image: auth
+  authen:
+    container_name: authen
+    image: authen
     ports:
       - "8080"
     restart: always

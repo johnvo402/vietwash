@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 set -eo pipefail
 
@@ -32,9 +32,9 @@ backup() {
 }
 
 sql() {
+  echo "Running: scp -r -P $REMOTE_SERVER_PORT $REMOTE_SERVER_USER@$REMOTE_SERVER_IP:~/micro/.pgdump ."
   scp -r -P $REMOTE_SERVER_PORT $REMOTE_SERVER_USER@$REMOTE_SERVER_IP:~/micro/.pgdump .
 }
-
 restore() {
   for db in ${DB_LIST[@]}; do
     case "$db" in
