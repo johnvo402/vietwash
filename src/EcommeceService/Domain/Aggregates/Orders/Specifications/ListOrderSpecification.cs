@@ -9,7 +9,7 @@ namespace Domain.Aggregates.Orders.Specifications
         {
             Query
                 .Where(x =>
-                    x.Status != OrderStatus.Cancelled && x.OrderDate >= from && x.OrderDate < to
+                    x.OrderDate >= from && x.OrderDate < to
                 )
                 .Include(x => x.OrderItems)
                 .Include(x => x.OrderPayments)
