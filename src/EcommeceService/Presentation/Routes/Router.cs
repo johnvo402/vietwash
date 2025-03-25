@@ -1,6 +1,4 @@
 ﻿using Contracts.Routers;
-using Domain.Aggregates.Services;
-using Domain.Aggregates.Tariffs;
 
 namespace Presentation.Routes
 {
@@ -44,12 +42,22 @@ namespace Presentation.Routes
             public const string GetUpdateDelete =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Categories)}/" + "{" + RouterBase.Id + "}";
         }
-		public static class OrderRoute
-		{
-			public const string Tags = $"{nameof(OrderRoute)} endpoint";
-			public const string Orders = $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}";
-			public const string GetUpdateDelete = $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/" + "{" + RouterBase.Id + "}";
-			public const string UpdateStatus = $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(UpdateStatus)}" + "{" + RouterBase.Id + "}";
-		}
-	}
+        public static class OrderRoute
+        {
+            public const string Tags = $"{nameof(OrderRoute)} endpoint";
+            public const string Orders = $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}";
+            public const string GetUpdateDelete = $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/" + "{" + RouterBase.Id + "}";
+            public const string UpdateStatus = $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(UpdateStatus)}" + "{" + RouterBase.Id + "}";
+        }
+
+        public static class SaleResultRoute
+        {
+            public const string Tags = $"{nameof(SaleResultRoute)} endpoint";
+
+            public const string SaleResult = $"{Ecommerce}/{RouterBase.prefix}{nameof(SaleResult)}";
+            public const string RevenueStatistic = $"{Ecommerce}/{RouterBase.prefix}{nameof(RevenueStatistic)}";
+            public const string TopService = $"{Ecommerce}/{RouterBase.prefix}{nameof(TopService)}";
+
+        }
+    }
 }
