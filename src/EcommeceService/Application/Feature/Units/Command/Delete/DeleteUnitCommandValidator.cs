@@ -52,7 +52,7 @@ namespace Application.Feature.Units.Command.Delete
 				.WithMessage("Unit with the specified UnitId does not exist.");
 		}
 
-		private async Task<bool> IsUnitExistsAsync(Ulid unitId, CancellationToken cancellationToken)
+		private async Task<bool> IsUnitExistsAsync(long unitId, CancellationToken cancellationToken)
 		{
 			return await _unitOfWork
 				.Repository<Unit>()

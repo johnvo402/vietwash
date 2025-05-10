@@ -22,7 +22,7 @@ namespace Application.Feature.Orders.Queries.Detail
             await unitOfWork
                 .Repository<Order>()
                 .FindByConditionAsync<GetOrderDetailResponse>(
-                    new GetOrderByIdSpecification(Ulid.Parse(request.OrderId)),
+                    new GetOrderByIdSpecification(long.Parse(request.OrderId)),
                     cancellationToken
                 )
             ?? throw new NotFoundException(

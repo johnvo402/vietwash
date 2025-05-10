@@ -5,7 +5,7 @@ namespace Domain.Aggregates.Orders.Specifications
 {
     public class GetOrderByIdSpecification : Specification<Order>
     {
-        public GetOrderByIdSpecification(Ulid id)
+        public GetOrderByIdSpecification(long id)
         {
             Query
                 .Where(x => x.Id == id && x.Status != OrderStatus.Cancelled)

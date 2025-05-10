@@ -15,7 +15,7 @@ public class UserToken : BaseEntity
 
     public bool IsBlocked { get; set; }
 
-    public Ulid UserId { get; set; }
+    public long UserId { get; set; }
 
     public User? User { get; set; }
 

@@ -9,20 +9,27 @@ using Mediator;
 namespace Application.Features.Users.Commands.ChangePassword;
 
 public class ChangeUserPasswordHandler(IUnitOfWork unitOfWork, ICurrentUser currentUser)
-    : IRequestHandler<ChangeUserPasswordCommand>
+   : IRequestHandler<ChangeUserPasswordCommand>
 {
     public async ValueTask<Unit> Handle(
         ChangeUserPasswordCommand request,
         CancellationToken cancellationToken
     )
     {
-        Ulid? userId = currentUser.Id;
+        long? userId = currentUser.Id;
+
+        if (!userId.HasValue)
+        {
+            throw new NotFoundException(
+                [Messager.Create<User>().Message(MessageType.Found).Negative().Build()]
+            );
+        }
 
         User user =
             await unitOfWork
                 .Repository<User>()
                 .FindByConditionAsync(
-                    new GetUserByIdWithoutIncludeSpecification(userId ?? Ulid.Empty),
+                    new GetUserByIdWithoutIncludeSpecification(userId.Value),
                     cancellationToken
                 )
             ?? throw new NotFoundException(
@@ -34,12 +41,12 @@ public class ChangeUserPasswordHandler(IUnitOfWork unitOfWork, ICurrentUser curr
             throw new BadRequestException(
                 [
                     Messager
-                        .Create<ChangeUserPasswordCommand>(nameof(User))
-                        .Property(x => x.OldPassword!)
-                        .Message(MessageType.Correct)
-                        .Negative()
-                        .Build(),
-                ]
+                       .Create<ChangeUserPasswordCommand>(nameof(User))
+                       .Property(x => x.OldPassword!)
+                       .Message(MessageType.Correct)
+                       .Negative()
+                       .Build(),
+               ]
             );
         }
 

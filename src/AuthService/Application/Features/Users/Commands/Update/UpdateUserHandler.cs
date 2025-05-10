@@ -4,7 +4,6 @@ using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
-using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
@@ -27,7 +26,7 @@ public class UpdateUserHandler(
             await unitOfWork
                 .Repository<User>()
                 .FindByConditionAsync(
-                    new GetUserByIdSpecification(Ulid.Parse(command.UserId)),
+                    new GetUserByIdSpecification(long.Parse(command.UserId)),
                     cancellationToken
                 )
             ?? throw new NotFoundException(
@@ -39,21 +38,6 @@ public class UpdateUserHandler(
 
         mapper.Map(command.User, user);
 
-        Province? province = await unitOfWork
-            .Repository<Province>()
-            .FindByIdAsync(Ulid.Parse(command.User.ProvinceId), cancellationToken);
-        District? district = await unitOfWork
-            .Repository<District>()
-            .FindByIdAsync(Ulid.Parse(command.User.DistrictId), cancellationToken);
-
-        Commune? commune = null;
-        if (string.IsNullOrEmpty(command.User.CommuneId))
-        {
-            commune = await unitOfWork
-                .Repository<Commune>()
-                .FindByIdAsync(Ulid.Parse(command.User.CommuneId), cancellationToken);
-        }
-        user.UpdateAddress(new(province!, district!, commune, command.User.Street!));
 
         string? key = mediaUpdateService.GetKey(avatar);
         user.Avatar = await mediaUpdateService.UploadAvatarAsync(avatar, key);

@@ -4,7 +4,6 @@ using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
-using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;
@@ -28,7 +27,7 @@ public class UpdateUserProfileHandler(
             await unitOfWork
                 .Repository<User>()
                 .FindByConditionAsync(
-                    new GetUserByIdWithoutIncludeSpecification(currentUser.Id ?? Ulid.Empty),
+new GetUserByIdWithoutIncludeSpecification(currentUser.Id!.Value),
                     cancellationToken
                 )
             ?? throw new NotFoundException(
@@ -39,22 +38,6 @@ public class UpdateUserProfileHandler(
         string? oldAvatar = user.Avatar;
 
         mapper.Map(command, user);
-
-        Province? province = await unitOfWork
-            .Repository<Province>()
-            .FindByIdAsync(Ulid.Parse(command.ProvinceId)!, cancellationToken);
-        District? district = await unitOfWork
-            .Repository<District>()
-            .FindByIdAsync(Ulid.Parse(command.DistrictId)!, cancellationToken);
-
-        Commune? commune = null;
-        if (string.IsNullOrEmpty(command.CommuneId))
-        {
-            commune = await unitOfWork
-                .Repository<Commune>()
-                .FindByIdAsync(Ulid.Parse(command.CommuneId), cancellationToken);
-        }
-        user.UpdateAddress(new(province!, district!, commune, command.Street!));
 
         string? key = avatarUpdate.GetKey(avatar);
         user.Avatar = await avatarUpdate.UploadAvatarAsync(avatar, key);
