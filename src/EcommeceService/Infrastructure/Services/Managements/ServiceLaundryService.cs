@@ -351,14 +351,14 @@ namespace Infrastructure.Services.Managements
         }
 
         // Helper methods
-        public async Task<List<Service>> GetServicesByGroupIdAsync(long groupId)
+        public async Task<List<Service>> GetServicesByGroupIdAsync(Ulid groupId)
         {
             return await _serviceContext
                 .Where(s => s.GroupServices.Any(gs => gs.GroupId == groupId))
                 .ToListAsync();
         }
 
-        public async Task<List<Group>> GetGroupsByServiceIdAsync(long serviceId)
+        public async Task<List<Group>> GetGroupsByServiceIdAsync(Ulid serviceId)
         {
             return await _groupContext
                 .Where(g => g.GroupServices.Any(gs => gs.ServiceId == serviceId))

@@ -12,6 +12,7 @@ public class CreateUserMapping : Profile
         
 
         CreateMap<CreateUserCommand, User>()
+            .ForMember(dest => dest.RoleId, opt => opt.MapFrom(src => Ulid.Parse(src.RoleId)))
             .AfterMap(
                 (src, dest) =>
                 {

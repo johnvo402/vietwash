@@ -14,6 +14,6 @@ public class CreateUserCommand : UserModel, IRequest<CreateUserResponse>
 
     public UserStatus Status { get; set; }
 
-    public string Role { get; set; }
+    public string RoleId { get; set; }
 
 }

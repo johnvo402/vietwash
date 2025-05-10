@@ -6,9 +6,9 @@ namespace Domain.Aggregates.Orders
     public class OrderItem : DefaultEntity
     {
 
-        public long OrderId { get; set; }
-        public long ServiceId { get; set; }
-        public long UnitRelationId { get; set; }
+        public Ulid OrderId { get; set; }
+        public Ulid ServiceId { get; set; }
+        public Ulid UnitRelationId { get; set; }
         public decimal Price { get; set; }
         public int Quantity { get; set; }
         public virtual Service Service { get; set; } = default!;

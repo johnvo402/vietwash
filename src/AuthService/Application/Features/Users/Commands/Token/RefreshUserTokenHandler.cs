@@ -33,7 +33,7 @@ public class LogoutHandler(
             .FindByConditionAsync(
                 new GetRefreshtokenSpecification(
                     command.RefreshToken!,
-                    long.Parse(decodeToken.Sub!)
+                    Ulid.Parse(decodeToken.Sub!)
                 ),
                 cancellationToken
             );
@@ -43,7 +43,7 @@ public class LogoutHandler(
             .ListAsync(
                 new ListRefreshtokenByFamillyIdSpecification(
                     decodeToken.FamilyId!,
-                    long.Parse(decodeToken.Sub!)
+                    Ulid.Parse(decodeToken.Sub!)
                 ),
                 new() { Sort = $"{nameof(UserToken.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}" },
                 cancellationToken
@@ -99,7 +99,7 @@ public class LogoutHandler(
         var userToken = new UserToken()
         {
             FamilyId = decodeToken.FamilyId,
-            UserId = long.Parse(decodeToken.Sub!),
+            UserId = Ulid.Parse(decodeToken.Sub!),
             ExpiredTime = refreshTokenExpiredTime,
             RefreshToken = refreshToken,
             UserAgent = detectionService.UserAgent.ToString(),

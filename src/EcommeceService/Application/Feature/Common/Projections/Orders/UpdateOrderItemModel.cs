@@ -8,9 +8,9 @@ namespace Application.Feature.Common.Projections.Orders
 {
 	public class UpdateOrderItemModel
 	{
-		public long OrderItemId { get; set; }
-		public long ServiceId { get; set; }
-		public long UnitRelationId { get; set; }
+		public string OrderItemId { get; set; }
+		public string ServiceId { get; set; }
+		public string UnitRelationId { get; set; }
 		public int Quantity { get; set; }
 		public decimal Price { get; set; }
 	}

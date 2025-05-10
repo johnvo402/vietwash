@@ -25,12 +25,12 @@ namespace Application.Jobs
         public async Task ExecuteAsync()
         {
             IEnumerable<User> users = await _unitOfWork.Repository<User>().ListAsync();
-            List<long> userIds = new List<long>();
+            List<Ulid> userIds = new List<Ulid>();
             foreach (User user in users)
             {
                 userIds.Add(user.Id);
             }
-            foreach (long userId in userIds)
+            foreach (Ulid userId in userIds)
             {
                 var order = await _unitOfWork.Repository<Order>().FindByConditionAsync<List<Order>>(new GetOrderByCustomerIdSpecification(userId));
                 if (order != null || order?.Count() > 0)

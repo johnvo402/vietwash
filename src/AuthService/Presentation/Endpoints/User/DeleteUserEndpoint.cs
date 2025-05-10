@@ -12,17 +12,17 @@ using Contracts.Routers;
 namespace Presentation.Endpoints.User;
 
 public class DeleteUserEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<long>.WithActionResult
+    : EndpointBaseAsync.WithRequest<string>.WithActionResult
 {
     [HttpDelete(Router.UserRoute.GetUpdateDelete)]
     [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "Delete User")]
     [AuthorizeBy(permissions: $"{ActionPermission.delete}:{ObjectPermission.user}")]
     public override async Task<ActionResult> HandleAsync(
-        [FromRoute(Name = RouterBase.Id)] long userId,
+        [FromRoute(Name = RouterBase.Id)] string userId,
         CancellationToken cancellationToken = default
     )
     {
-        await sender.Send(new DeleteUserCommand(userId), cancellationToken);
+        await sender.Send(new DeleteUserCommand(Ulid.Parse(userId)), cancellationToken);
         return this.NoContent204();
     }
 }

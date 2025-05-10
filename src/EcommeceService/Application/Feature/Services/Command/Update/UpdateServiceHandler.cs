@@ -22,7 +22,7 @@ public class UpdateServiceHandler(
 {
     public async ValueTask<UpdateServiceResponse> Handle(UpdateServiceCommand command, CancellationToken cancellationToken)
     {
-        Service? getService = await unitOfWork.Repository<Service>().FindByConditionAsync(new GetServiceWithIncludeByIdSpecification(long.Parse(command.ServiceId)), cancellationToken)
+        Service? getService = await unitOfWork.Repository<Service>().FindByConditionAsync(new GetServiceWithIncludeByIdSpecification(Ulid.Parse(command.ServiceId)), cancellationToken)
             ?? throw new NotFoundException(
      [Messager.Create<Service>().Message(MessageType.Found).Negative().BuildMessage()]
  );

@@ -1,6 +1,9 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using Ardalis.GuardClauses;
+using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Users.Events;
+using Domain.Aggregates.Users.ValueObjects;
 using JohnChum.SharedKernel.Domain.Common;
 using Mediator;
 
@@ -24,14 +27,17 @@ public class User : AggregateRoot
 
     public Gender? Gender { get; set; }
 
+    public Address? Address { get; private set; }
+
     public string? Avatar { get; set; }
 
-    public string Role { get; set; } = string.Empty;
-
     public UserStatus Status { get; set; } = UserStatus.Active;
+    public Ulid RoleId { get; set; }
     public ICollection<UserToken>? UserTokens { get; set; } = [];
 
     public ICollection<UserResetPassword>? UserResetPasswords { get; set; } = [];
+
+    public Role Role { get; set; } = default!;
 
 
     public User(
@@ -41,7 +47,8 @@ public class User : AggregateRoot
         string password,
         string email,
         string phoneNumber,
-        string role
+        Ulid roleId,
+        Address? address = null
     )
     {
         FirstName = Guard.Against.NullOrEmpty(firstName, nameof(FirstName));
@@ -50,8 +57,8 @@ public class User : AggregateRoot
         Password = Guard.Against.Null(password, nameof(Password));
         Email = Guard.Against.Null(email, nameof(Email));
         PhoneNumber = Guard.Against.Null(phoneNumber, nameof(PhoneNumber));
-        Role = Guard.Against.NullOrEmpty(role, nameof(Role));
-        
+        Address = address;
+        RoleId = roleId;
     }
 
     private User()
@@ -62,11 +69,13 @@ public class User : AggregateRoot
         Password = string.Empty;
         Email = string.Empty;
         PhoneNumber = string.Empty;
-        Role = string.Empty;
+        RoleId = new Ulid();
     }
 
     public void SetPassword(string password) =>
         Password = Guard.Against.NullOrWhiteSpace(password, nameof(password));
+
+    public void UpdateAddress(Address address) => Address = address;
 
     public void CreateUser() =>
         Emit(new UserCreateEvent() { User = this });

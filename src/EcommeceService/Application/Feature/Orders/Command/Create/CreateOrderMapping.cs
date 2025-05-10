@@ -25,8 +25,8 @@ namespace Application.Feature.Orders.Command.Create
                         opt.MapFrom(src =>
                             src.OrderItems.Select(item => new OrderItem
                                 {
-                                    ServiceId = item.ServiceId,
-                                    UnitRelationId = item.UnitRelationId,
+                                    ServiceId = Ulid.Parse(item.ServiceId),
+                                    UnitRelationId = Ulid.Parse(item.UnitRelationId),
                                     Quantity = item.Quantity,
                                     Price = item.Price,
                                 })

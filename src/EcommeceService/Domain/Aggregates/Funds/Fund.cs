@@ -23,7 +23,7 @@ namespace Domain.Aggregates.Funds
         public PaymentMethod PaymentMethod { get; set; } = default!;
         public FundBehavior FundBehavior { get; set; } = default!;
         public FundType FundType { get; set; } = default!;
-        public long? ReferenceId { get; set; }
+        public Ulid? ReferenceId { get; set; }
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
             throw new NotImplementedException();

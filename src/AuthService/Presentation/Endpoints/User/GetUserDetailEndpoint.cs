@@ -13,16 +13,16 @@ using Contracts.Routers;
 namespace Presentation.Endpoints.User;
 
 public class GetUserDetailEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<long>.WithActionResult<ApiResponse<GetUserDetailResponse>>
+    : EndpointBaseAsync.WithRequest<string>.WithActionResult<ApiResponse<GetUserDetailResponse>>
 {
     [HttpGet(Router.UserRoute.GetUpdateDelete, Name = Router.UserRoute.GetRouteName)]
     [SwaggerOperation(Tags = [Router.UserRoute.Tags], Summary = "Detail User")]
     [AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.user}")]
     public override async Task<ActionResult<ApiResponse<GetUserDetailResponse>>> HandleAsync(
-        [FromRoute(Name = RouterBase.Id)] long userId,
+        [FromRoute(Name = RouterBase.Id)] string userId,
         CancellationToken cancellationToken = default
     ) =>
         this.Ok200(
-            await sender.Send(new GetUserDetailQuery(userId), cancellationToken)
+            await sender.Send(new GetUserDetailQuery(Ulid.Parse(userId)), cancellationToken)
         );
 }
