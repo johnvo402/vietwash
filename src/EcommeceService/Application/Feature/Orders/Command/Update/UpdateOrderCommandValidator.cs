@@ -36,7 +36,7 @@ namespace Application.Feature.Orders.Command.Update
 				.WithState(x => Messager.Create<UpdateOrderCommand>(nameof(Order)).Property(x => x.OrderId).Message(MessageType.Null).Negative().Build())
 				.Must(id => Ulid.TryParse(id, out _)) // Kiểm tra OrderId có phải Ulid hợp lệ không
 				.WithState(x => Messager.Create<UpdateOrderCommand>(nameof(Order)).Property(x => x.OrderId).Message(MessageType.Valid).Negative().Build())
-				.MustAsync(async (id, ct) => await _unitOfWork.Repository<Order>().AnyAsync(o => o.Id == Ulid.Parse(id), ct))
+				.MustAsync(async (id, ct) => await _unitOfWork.Repository<Order>().AnyAsync(o => o.Id == long.Parse(id), ct))
 				.WithState(x => Messager.Create<UpdateOrderCommand>(nameof(Order)).Property(x => x.OrderId).Message(MessageType.Existence).Negative().Build());
 
 			// Rule cho Order (tái sử dụng OrderValidator)

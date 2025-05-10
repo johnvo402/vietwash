@@ -55,13 +55,13 @@ public class LoginUserHandler(
                 ]
             );
         }
-        if ((user.Role.Name == "CUSTOMER"))
+        if ((user.Role == "CUSTOMER"))
         {
             throw new BadRequestException(
                 [
                     Messager
                         .Create<User>()
-                        .Property(x => x.RoleId)
+                        .Property(x => x.Role)
                         .Message(MessageType.Valid)
                         .Negative()
                         .BuildMessage(),
@@ -125,8 +125,7 @@ public class LoginUserHandler(
         UserAuth value = new UserAuth()
         {
             Id = user.Id,
-            Role = user.Role.Name,
-            Permissions = user.Role.RolePermissions?.Select(p => p.Permission!.Key).ToList(),
+            Role = user.Role,
         };
         var result = SerializerExtension.Serialize(value!);
         await securityService.AddSessionUserAsync(user.Id.ToString(), result.StringJson, (refreshExpireTime - DateTime.UtcNow));

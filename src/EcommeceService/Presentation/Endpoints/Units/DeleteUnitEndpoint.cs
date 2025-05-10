@@ -12,15 +12,15 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Presentation.Endpoints.Units
 {
 	public class DeleteUnitEndpoint(ISender sender)
-	: EndpointBaseAsync.WithRequest<string>.WithActionResult
+	: EndpointBaseAsync.WithRequest<long>.WithActionResult
 	{
 		[HttpDelete(Router.UnitRoute.GetUpdateDelete)]
 		[SwaggerOperation(Tags = [Router.UnitRoute.Tags], Summary = "Delete Unit")]
 		//[AuthorizeBy(permissions: $"{ActionPermission.delete}:{ObjectPermission.unit}")]
 		public override async Task<ActionResult> HandleAsync(
-			[FromRoute(Name = RouterBase.Id)]string unitId, CancellationToken cancellationToken = default)
+			[FromRoute(Name = RouterBase.Id)] long unitId, CancellationToken cancellationToken = default)
 		{
-			await sender.Send(new DeleteUnitCommand(Ulid.Parse(unitId)), cancellationToken);
+			await sender.Send(new DeleteUnitCommand(unitId), cancellationToken);
 			return this.NoContent204();
 		}
 	}

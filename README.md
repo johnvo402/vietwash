@@ -29,3 +29,4 @@ Technology: .NET 8, Entity Framework Core, Docker, Clean Architecture
 - ProjectService: This service is responsible for managing project as log,...
 - EcommerceService: This service is responsible for e-commerce.
 - FinanceService: This service is responsible for managing finance.
+- NotificationService: This service is push notify

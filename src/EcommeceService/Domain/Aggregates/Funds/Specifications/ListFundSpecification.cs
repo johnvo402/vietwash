@@ -11,22 +11,23 @@ namespace Domain.Aggregates.Funds.Specifications
             if (from != null || to != null)
             {
                 Query
-              .Where(x => x.TransactionDate >= DateTime.Parse(from) && x.TransactionDate < DateTime.Parse(to))
-              .Include(x => x.FundType)
-              .Include(x => x.FundBehavior)
-              .AsNoTracking()
-              .AsSplitQuery();
+                    .Where(x =>
+                        x.TransactionDate >= DateTime.Parse(from)
+                        && x.TransactionDate < DateTime.Parse(to)
+                    )
+                    .Include(x => x.FundType)
+                    .Include(x => x.FundBehavior)
+                    .AsNoTracking()
+                    .AsSplitQuery();
             }
             else
             {
                 Query
-             .Include(x => x.FundType)
-             .Include(x => x.FundBehavior)
-             .AsNoTracking()
-             .AsSplitQuery();
-
+                    .Include(x => x.FundType)
+                    .Include(x => x.FundBehavior)
+                    .AsNoTracking()
+                    .AsSplitQuery();
             }
-
         }
     }
 }

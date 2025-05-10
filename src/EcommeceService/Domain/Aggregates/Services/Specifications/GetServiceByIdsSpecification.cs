@@ -1,15 +1,15 @@
-﻿using JohnChum.SharedKernel.Domain.Common.Specs;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using JohnChum.SharedKernel.Domain.Common.Specs;
 
 namespace Domain.Aggregates.Services.Specifications
 {
     public class GetServiceByIdsSpecification : Specification<Service>
     {
-        public GetServiceByIdsSpecification(List<Ulid> serviceIds)
+        public GetServiceByIdsSpecification(List<long> serviceIds)
         {
             Query.Where(s => serviceIds.Contains(s.Id));
         }

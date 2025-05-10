@@ -6,7 +6,7 @@ using Mediator;
 
 namespace Application.Feature.Tariffs.Commands.Delete
 {
-public record DeleteTariffCommand(Ulid TariffId) : IRequest
+public record DeleteTariffCommand(long TariffId) : IRequest
     {
         
     }

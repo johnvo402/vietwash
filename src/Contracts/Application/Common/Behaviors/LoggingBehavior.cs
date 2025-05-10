@@ -11,7 +11,7 @@ public class LoggingBehavior<TMessage, TResponse>(ILogger logger, ICurrentUser c
     protected override ValueTask Handle(TMessage message, CancellationToken cancellationToken)
     {
         string requestName = typeof(TMessage).Name;
-        Ulid? id = currentUser.Id;
+        long? id = currentUser.Id;
 
         const string replacePhrase = "is userId {userId}";
         string loggingMessage =
