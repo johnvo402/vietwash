@@ -26,7 +26,7 @@ public class UpdateUserHandler(
             await unitOfWork
                 .Repository<User>()
                 .FindByConditionAsync(
-                    new GetUserByIdWithoutIncludeSpecification(command.UserId),
+                    new GetUserByIdWithoutIncludeSpecification(Ulid.Parse(command.UserId)),
                     cancellationToken
                 )
             ?? throw new NotFoundException(

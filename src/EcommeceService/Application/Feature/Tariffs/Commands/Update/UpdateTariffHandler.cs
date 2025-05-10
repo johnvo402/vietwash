@@ -27,7 +27,7 @@ namespace Application.Feature.Tariffs.Commands.Update
                 await unitOfWork
                     .Repository<Tariff>()
                     .FindByConditionAsync(
-                        new GetTariffByIdWithoutIncludeSpecification(long.Parse(command.TariffId)),
+                        new GetTariffByIdWithoutIncludeSpecification(Ulid.Parse(command.TariffId)),
                         cancellationToken
                     )
                 ?? throw new NotFoundException(

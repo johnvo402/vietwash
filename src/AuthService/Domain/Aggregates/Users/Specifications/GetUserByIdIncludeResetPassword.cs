@@ -4,7 +4,7 @@ namespace Domain.Aggregates.Users.Specifications;
 
 public class GetUserByIdIncludeResetPassword : Specification<User>
 {
-    public GetUserByIdIncludeResetPassword(long id)
+    public GetUserByIdIncludeResetPassword(Ulid id)
     {
         Query.Where(x => x.Id == id).Include(x => x.UserResetPasswords).AsNoTracking();
     }

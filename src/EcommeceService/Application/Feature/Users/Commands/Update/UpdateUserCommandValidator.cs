@@ -28,12 +28,12 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
             )
             .SetValidator(new UserValidator(unitOfWork, accessorService)!);
 
-        RuleFor(x => x.User!.Role)
+        RuleFor(x => x.User!.RoleId)
             .NotEmpty()
             .WithState(x =>
                 Messager
                     .Create<UpdateUser>(nameof(User))
-                    .Property(x => x.Role!)
+                    .Property(x => x.RoleId!)
                     .Message(MessageType.Null)
                     .Negative()
                     .Build()

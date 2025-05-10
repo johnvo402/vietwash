@@ -30,7 +30,7 @@ namespace Application.Feature.Orders.Command.Update
 				await unitOfWork
 					.Repository<Order>()
 					.FindByConditionAsync(
-						new GetOrderByIdSpecification(long.Parse(command.OrderId)),
+						new GetOrderByIdSpecification(Ulid.Parse(command.OrderId)),
 						cancellationToken
 					)
 				?? throw new NotFoundException(
@@ -48,13 +48,13 @@ namespace Application.Feature.Orders.Command.Update
 				foreach (var orderItemModel in command.Order.OrderItems)
 				{
 					var existingItem = order.OrderItems.FirstOrDefault(x =>
-						x.Id != null && x.Id == orderItemModel.OrderItemId);
+						x.Id != null && x.Id == Ulid.Parse(orderItemModel.OrderItemId));
 
 					if (existingItem != null)
 					{
 						// Cập nhật item hiện có
-						existingItem.ServiceId = orderItemModel.ServiceId;
-						existingItem.UnitRelationId = orderItemModel.UnitRelationId;
+						existingItem.ServiceId = Ulid.Parse(orderItemModel.ServiceId);
+						existingItem.UnitRelationId = Ulid.Parse(orderItemModel.UnitRelationId);
 						existingItem.Price = orderItemModel.Price;
 					}
 					else
@@ -62,8 +62,8 @@ namespace Application.Feature.Orders.Command.Update
 						// Thêm mới OrderItem
 						var newItem = new OrderItem
 						{
-							ServiceId = orderItemModel.ServiceId,
-							UnitRelationId = orderItemModel.UnitRelationId,
+							ServiceId = Ulid.Parse(orderItemModel.ServiceId),
+							UnitRelationId = Ulid.Parse(orderItemModel.UnitRelationId),
 							Price = orderItemModel.Price
 						};
 						order.OrderItems.Add(newItem);

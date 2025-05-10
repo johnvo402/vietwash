@@ -12,7 +12,7 @@ public class UserModel
 
     public UserStatus Status { get; set; }
 
-    public string Role { get; set; }
+    public Ulid RoleId { get; set; }
     public string? FirstName { get; set; }
 
     public string? LastName { get; set; }

@@ -21,10 +21,10 @@ public class AuthorizeByAttribute : AuthorizeAttribute
                 new()
                 {
                     Roles = roles?.Trim()?.Split(',', StringSplitOptions.TrimEntries)?.ToList(),
-                    //Permissions = permissions
-                    //    ?.Trim()
-                    //    ?.Split(',', StringSplitOptions.TrimEntries)
-                    //    ?.ToList(),
+                    Permissions = permissions
+                        ?.Trim()
+                        ?.Split(',', StringSplitOptions.TrimEntries)
+                        ?.ToList(),
                 };
             Value = SerializerExtension.Serialize(authorizeModel).StringJson;
         }

@@ -1,4 +1,6 @@
 using Application.Common.Security;
+using Application.Features.Common.Projections.Regions;
+using Domain.Aggregates.Roles;
 using Domain.Aggregates.Users.Enums;
 using JohnChum.SharedKernel.Application.Common;
 using System.Text.Json.Serialization;
@@ -21,9 +23,17 @@ public class UserProjection : BaseResponse
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public Gender? Gender { get; set; }
 
+    public ProvinceProjection? Province { get; set; }
+
+    public DistrictProjection? District { get; set; }
+
+    public CommuneProjection? Commune { get; set; }
+
+    public string? Street { get; set; }
+
     [File]
     public string? Avatar { get; set; }
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public UserStatus Status { get; set; }
-    public string? Role { get; set; }
+    public Ulid RoleId { get; set; }
 }

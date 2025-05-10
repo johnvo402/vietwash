@@ -1,14 +1,20 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="IdGen.DependencyInjection" />
-    <PackageReference Include="JohnChum.SharedKernel" />
-    <PackageReference Include="NEST" />
-    <PackageReference Include="NewId" />
-    <PackageReference Include="CSharpFunctionalExtensions" />
-  </ItemGroup>
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="IdGen.DependencyInjection" Version="3.0.5" />
+		<PackageReference Include="JohnChum.SharedKernel" Version="1.2.2" />
+		<PackageReference Include="NEST" Version="7.17.5" />
+		<PackageReference Include="NewId" Version="4.0.1" />
+		<PackageReference Include="CSharpFunctionalExtensions" Version="3.1.0" />
+
+	</ItemGroup>
+
+
 </Project>
+

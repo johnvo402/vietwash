@@ -23,7 +23,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
 
     private void ApplyRules()
     {
-        _ = long.TryParse(accessorService.Id, out long id);
+        _ = Ulid.TryParse(accessorService.Id, out Ulid id);
 
         RuleFor(x => x.LastName)
             .NotEmpty()
@@ -145,7 +145,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
 
     private async Task<bool> IsEmailAvailableAsync(
         string email,
-        long? id = null,
+        Ulid? id = null,
         CancellationToken cancellationToken = default
     ) =>
         !await unitOfWork

@@ -6,7 +6,7 @@ namespace Domain.Aggregates.Orders
 {
     public class OrderPayment : DefaultEntity
     {
-        public long OrderId { get; set; } = default!;
+        public Ulid OrderId { get; set; } = default!;
 		public PaymentMethod PaymentMethod { get; set; }
 
 		public decimal Amount { get; set; } = default!;

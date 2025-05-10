@@ -8,7 +8,7 @@ namespace Application.Features.Users.Commands.Update;
 public class UpdateUserCommand : IRequest<UpdateUserResponse>
 {
     [FromRoute(Name = RouterBase.Id)]
-    public long UserId { get; set; }
+    public string UserId { get; set; } = string.Empty;
 
     [FromForm]
     public UpdateUser? User { get; set; }
@@ -16,4 +16,5 @@ public class UpdateUserCommand : IRequest<UpdateUserResponse>
 
 public class UpdateUser : UserModel
 {
+    public Ulid RoleId { get; set; }
 }

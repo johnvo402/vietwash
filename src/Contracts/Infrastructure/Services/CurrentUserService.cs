@@ -6,7 +6,7 @@ namespace Infrastructure.Services;
 
 public class CurrentUserService : ICurrentUser
 {
-    public long? Id { get; private set; }
+    public Ulid? Id { get; private set; }
 
     public string? ClientIp { get; private set; }
 
@@ -19,7 +19,7 @@ public class CurrentUserService : ICurrentUser
 
         if (!string.IsNullOrWhiteSpace(id))
         {
-            Id = long.Parse(id);
+            Id = Ulid.Parse(id);
         }
         else
         {
