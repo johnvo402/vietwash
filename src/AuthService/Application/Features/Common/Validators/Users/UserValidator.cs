@@ -3,7 +3,6 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Projections.Users;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
-using Domain.Aggregates.Regions;
 using Domain.Aggregates.Users;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +23,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
 
     private void ApplyRules()
     {
-        _ = Ulid.TryParse(accessorService.Id, out Ulid id);
+        _ = long.TryParse(accessorService.Id, out long id);
 
         RuleFor(x => x.LastName)
             .NotEmpty()
@@ -141,76 +140,11 @@ public partial class UserValidator : AbstractValidator<UserModel>
                     .Build()
             );
 
-        RuleFor(x => x.ProvinceId)
-            .NotEmpty()
-            .WithState(x =>
-                Messager
-                    .Create<User>()
-                    .Property(nameof(x.ProvinceId))
-                    .Message(MessageType.Null)
-                    .Negative()
-                    .Build()
-            )
-            .MustAsync(IsProvinceAvailableAsync)
-            .WithState(x =>
-                Messager
-                    .Create<User>()
-                    .Property(nameof(x.ProvinceId))
-                    .Message(MessageType.Existence)
-                    .Negative()
-                    .Build()
-            );
-
-        RuleFor(x => x.DistrictId)
-            .NotEmpty()
-            .WithState(x =>
-                Messager
-                    .Create<User>()
-                    .Property(nameof(UserModel.DistrictId))
-                    .Message(MessageType.Null)
-                    .Negative()
-                    .Build()
-            )
-            .MustAsync(IsDistrictAvailableAsync)
-            .WithState(x =>
-                Messager
-                    .Create<User>()
-                    .Property(nameof(x.DistrictId))
-                    .Message(MessageType.Existence)
-                    .Negative()
-                    .Build()
-            );
-
-        RuleFor(x => x.CommuneId)
-            .MustAsync(
-                (communeId, cancellationToken) =>
-                    IsCommuneAvailableAsync(Ulid.Parse(communeId!), cancellationToken)
-            )
-            .When(x => x.CommuneId != null, ApplyConditionTo.CurrentValidator)
-            .WithState(x =>
-                Messager
-                    .Create<User>()
-                    .Property(nameof(x.CommuneId))
-                    .Message(MessageType.Existence)
-                    .Negative()
-                    .Build()
-            );
-
-        RuleFor(x => x.Street)
-            .NotEmpty()
-            .WithState(x =>
-                Messager
-                    .Create<User>()
-                    .Property(nameof(UserModel.Street))
-                    .Message(MessageType.Null)
-                    .Negative()
-                    .Build()
-            );
     }
 
     private async Task<bool> IsEmailAvailableAsync(
         string email,
-        Ulid? id = null,
+        long? id = null,
         CancellationToken cancellationToken = default
     ) =>
         !await unitOfWork
@@ -222,26 +156,6 @@ public partial class UserValidator : AbstractValidator<UserModel>
                 cancellationToken
             );
 
-    private async Task<bool> IsProvinceAvailableAsync(
-        string provinceId,
-        CancellationToken cancellationToken
-    ) =>
-        await unitOfWork
-            .Repository<Province>()
-            .AnyAsync(x => x.Id == Ulid.Parse(provinceId), cancellationToken);
-
-    private async Task<bool> IsDistrictAvailableAsync(
-        string districtId,
-        CancellationToken cancellationToken
-    ) =>
-        await unitOfWork
-            .Repository<District>()
-            .AnyAsync(x => x.Id == Ulid.Parse(districtId), cancellationToken);
-
-    private async Task<bool> IsCommuneAvailableAsync(
-        Ulid communeId,
-        CancellationToken cancellationToken
-    ) => await unitOfWork.Repository<Commune>().AnyAsync(x => x.Id == communeId, cancellationToken);
 
     [GeneratedRegex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$")]
     private static partial Regex EmailValidationRegex();

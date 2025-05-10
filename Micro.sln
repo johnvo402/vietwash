@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -19,8 +19,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "src\AuthS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Presentation", "src\AuthService\Presentation\Presentation.csproj", "{F1104635-A254-4BCF-95B5-B784C09A77AC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0222AEB9-6D3D-4C03-BD11-3C1CD2AB5B2C}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProjectService", "ProjectService", "{F9D93182-CA34-482D-9063-B31405687071}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "src\ProjectService\Domain\Domain.csproj", "{45A49B7B-4CC0-4748-B9CE-31B357B49C92}"
@@ -40,6 +38,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "src\EcommeceService\Infrastructure\Infrastructure.csproj", "{A2AF7A58-9D80-43EF-8A24-D7D0AB06A6B5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Presentation", "src\EcommeceService\Presentation\Presentation.csproj", "{A4C202AD-A1E4-4F6D-A6F9-A617F572E780}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{652984FE-ED8F-40D7-89ED-EC15D58D895E}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Packages.props = Directory.Packages.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

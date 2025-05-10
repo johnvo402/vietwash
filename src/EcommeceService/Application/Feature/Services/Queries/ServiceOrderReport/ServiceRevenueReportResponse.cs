@@ -10,9 +10,9 @@ namespace Application.Feature.Services.Queries.ServiceOrderReport
 {
 	public class ServiceRevenueReportResponse
 	{
-		public Ulid ServiceId { get; set; }
+		public long ServiceId { get; set; }
 		public string ServiceName { get; set; }
-		public Ulid UnitId { get; set; }
+		public long UnitId { get; set; }
 		public string UnitName { get; set; }
 		public int TotalOrderCount { get; set; }
 		public decimal TotalNetRevenue { get; set; }// Tổng doanh thu thuần

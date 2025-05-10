@@ -54,7 +54,6 @@ try
     #region seeding area
     var scope = app.Services.CreateScope();
     var serviceProvider = scope.ServiceProvider;
-    await RegionDataSeeding.SeedingAsync(serviceProvider);
     var jobScheduler = scope.ServiceProvider.GetRequiredService<JobScheduler>();
     jobScheduler.ScheduleJobs();
     if (!isStaging && !isProduction)

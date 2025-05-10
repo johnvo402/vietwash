@@ -28,7 +28,7 @@ public class LogoutHandler(ITokenSecurityService blacklistService,
             .ListAsync(
             new ListRefreshtokenByFamillyIdSpecification(
                     decodeToken.FamilyId!,
-                    Ulid.Parse(decodeToken.Sub!)
+                    long.Parse(decodeToken.Sub!)
                     ),
                     new() { Sort = $"{nameof(UserToken.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}" },
                     cancellationToken

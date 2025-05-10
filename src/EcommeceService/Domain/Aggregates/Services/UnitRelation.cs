@@ -5,8 +5,8 @@ namespace Domain.Aggregates.Services
 {
     public class UnitRelation : DefaultEntity
     {
-        public Ulid ServiceId { get; set; }
-        public Ulid UnitId { get; set; }
+        public long ServiceId { get; set; }
+        public long UnitId { get; set; }
         public bool BaseUnit { get; set; }
         public decimal Price { get; set; }
 

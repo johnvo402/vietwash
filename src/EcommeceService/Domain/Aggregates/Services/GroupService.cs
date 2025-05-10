@@ -4,9 +4,9 @@ namespace Domain.Aggregates.Services
 {
     public class GroupService : DefaultEntity
     {
-        public Ulid ServiceId { get; set; }
-        public Ulid GroupId { get; set; }
-        public Ulid UnitRelationId { get; set; }
+        public long ServiceId { get; set; }
+        public long GroupId { get; set; }
+        public long UnitRelationId { get; set; }
 
         public Service Service { get; set; } = default!;
         public Group Group { get; set; } = default!;

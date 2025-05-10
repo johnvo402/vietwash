@@ -30,7 +30,7 @@ namespace Application.Feature.Orders.Command.UpdateStatus
 				await unitOfWork
 					.Repository<Order>()
 					.FindByConditionAsync(
-						new GetOrderByIdSpecification(Ulid.Parse(request.OrderId)),
+						new GetOrderByIdSpecification(long.Parse(request.OrderId)),
 						cancellationToken
 					)
 				?? throw new NotFoundException(
