@@ -17,8 +17,8 @@ namespace Application.Feature.Orders.Command.Update
 				.ForMember(dest => dest.OrderItems, opt => opt.MapFrom(src =>
 					src.OrderItems.Select(item => new OrderItem
 					{
-						ServiceId = Ulid.Parse(item.ServiceId),
-						UnitRelationId = Ulid.Parse(item.UnitRelationId),
+						ServiceId = item.ServiceId,
+						UnitRelationId = item.UnitRelationId,
 						Price = item.Price
 					}).ToList()));
 

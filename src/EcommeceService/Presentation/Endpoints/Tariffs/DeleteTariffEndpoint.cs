@@ -17,16 +17,16 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Presentation.Endpoints.Tariffs
 {
     public class DeleteTariffEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<string>.WithActionResult
+    : EndpointBaseAsync.WithRequest<long>.WithActionResult
     {
         [HttpDelete(Router.TariffRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.TariffRoute.Tags], Summary = "Delete Tariff")]
         //[AuthorizeBy(permissions: $"{ActionPermission.delete}:{ObjectPermission.tariff}")]
         public override async Task<ActionResult> HandleAsync(
-            [FromRoute(Name = RouterBase.Id)] string tariffId,
+            [FromRoute(Name = RouterBase.Id)] long tariffId,
             CancellationToken cancellationToken = default)
         {
-            await sender.Send(new DeleteTariffCommand(Ulid.Parse(tariffId)), cancellationToken);
+            await sender.Send(new DeleteTariffCommand(tariffId), cancellationToken);
             return this.NoContent204();
         }
 

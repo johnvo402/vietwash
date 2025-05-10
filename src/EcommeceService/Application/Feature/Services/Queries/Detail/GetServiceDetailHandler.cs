@@ -26,7 +26,7 @@ public class GetServiceDetailHandler(IUnitOfWork unitOfWork, IMapper mapper)
             await unitOfWork
                 .Repository<Service>()
                 .FindByConditionAsync(
-                    new GetServiceWithIncludeByIdSpecification(Ulid.Parse(command.ServiceId)),
+                    new GetServiceWithIncludeByIdSpecification(long.Parse(command.ServiceId)),
                     cancellationToken
                 )
             ?? throw new NotFoundException(
@@ -38,7 +38,7 @@ public class GetServiceDetailHandler(IUnitOfWork unitOfWork, IMapper mapper)
             createdByUser = await unitOfWork
                .Repository<User>()
                .FindByConditionAsync(
-                   new GetUserByIdWithoutIncludeSpecification(Ulid.Parse(service.CreatedBy)),
+                   new GetUserByIdWithoutIncludeSpecification(long.Parse(service.CreatedBy)),
                    cancellationToken
                );
         }
@@ -48,7 +48,7 @@ public class GetServiceDetailHandler(IUnitOfWork unitOfWork, IMapper mapper)
            ? await unitOfWork
                .Repository<User>()
                .FindByConditionAsync(
-                   new GetUserByIdWithoutIncludeSpecification(Ulid.Parse(service.UpdatedBy)),
+                   new GetUserByIdWithoutIncludeSpecification(long.Parse(service.UpdatedBy)),
                    cancellationToken
                )
            : null;

@@ -3,6 +3,6 @@
 
 namespace Application.Feature.Units.Command.Delete
 {
-	public record DeleteUnitCommand(Ulid UnitId) : IRequest;
+	public record DeleteUnitCommand(long UnitId) : IRequest;
 
 }

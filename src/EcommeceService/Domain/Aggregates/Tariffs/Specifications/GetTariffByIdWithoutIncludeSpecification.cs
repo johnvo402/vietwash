@@ -9,7 +9,7 @@ namespace Domain.Aggregates.Tariffs.Specifications
 {
     public class GetTariffByIdWithoutIncludeSpecification : Specification<Tariff>
     {
-        public GetTariffByIdWithoutIncludeSpecification(Ulid id)
+        public GetTariffByIdWithoutIncludeSpecification(long id)
         {
             Query.Where(x => x.Id == id).AsNoTracking();
         }

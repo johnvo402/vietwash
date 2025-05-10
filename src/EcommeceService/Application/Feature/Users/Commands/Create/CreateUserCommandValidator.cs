@@ -82,7 +82,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
 
     private async Task<bool> IsUsernameAvailableAsync(
         string username,
-        Ulid? id = null,
+        long? id = null,
         CancellationToken cancellationToken = default
     )
     {

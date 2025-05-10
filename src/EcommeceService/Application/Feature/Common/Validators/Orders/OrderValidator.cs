@@ -114,7 +114,7 @@ namespace Application.Feature.Common.Validators.Orders
 							.Negative()
 							.Build())
 						.MustAsync(async (serviceId, ct) =>
-							await _unitOfWork.Repository<Service>().AnyAsync(s => s.Id.Equals(Ulid.Parse(serviceId)), ct))
+							await _unitOfWork.Repository<Service>().AnyAsync(s => s.Id.Equals(serviceId), ct))
 						.WithState(x => Messager
 							.Create<CreateOrderItemModel>(nameof(OrderItem))
 							.Property(x => x.ServiceId)

@@ -15,17 +15,14 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
     private readonly IUnitOfWork unitOfWork;
     private readonly IActionAccessorService accessorService;
 
-    private readonly IRoleManagerService roleManagerService;
 
     public CreateUserCommandValidator(
         IUnitOfWork unitOfWork,
-        IActionAccessorService accessorService,
-        IRoleManagerService roleManagerService
+        IActionAccessorService accessorService
     )
     {
         this.unitOfWork = unitOfWork;
         this.accessorService = accessorService;
-        this.roleManagerService = roleManagerService;
 
         ApplyRules();
     }
@@ -116,12 +113,12 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
                     .Build()
             );
 
-        RuleFor(x => x.RoleId)
+        RuleFor(x => x.Role)
             .NotEmpty()
             .WithState(x =>
                 Messager
                     .Create<CreateUserCommand>(nameof(User))
-                    .Property(x => x.RoleId)
+                    .Property(x => x.Role)
                     .Message(MessageType.Null)
                     .Negative()
                     .Build()
@@ -130,7 +127,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
             .WithState(x =>
                 Messager
                     .Create<CreateUserCommand>(nameof(User))
-                    .Property(x => x.RoleId)
+                    .Property(x => x.Role)
                     .Message(MessageType.Found)
                     .Negative()
                     .Build()
@@ -140,7 +137,7 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
 
     private async Task<bool> IsUsernameAvailableAsync(
         string username,
-        Ulid? id = null,
+        long? id = null,
         CancellationToken cancellationToken = default
     )
     {
@@ -156,7 +153,9 @@ public partial class CreateUserCommandValidator : AbstractValidator<CreateUserCo
 
     private async Task<bool> IsRolesAvailableAsync(string roles)
     {
-        return await roleManagerService.Roles.AnyAsync(x => Ulid.Parse(roles) == x.Id);
+        return new List<string> {
+           "ADMIN", "MANAGER", "STAFF","CUSTOMER"
+       }.Contains(roles);
     }
 
     [GeneratedRegex(@"^[a-zA-Z0-9_.]+$")]

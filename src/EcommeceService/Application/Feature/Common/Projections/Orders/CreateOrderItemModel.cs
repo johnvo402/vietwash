@@ -8,8 +8,8 @@ namespace Application.Feature.Common.Projections.Orders
 {
     public class CreateOrderItemModel
     {
-        public string ServiceId { get; set; } = default!;
-        public string UnitRelationId { get; set; } = default!;
+        public long ServiceId { get; set; } = default!;
+        public long UnitRelationId { get; set; } = default!;
         public int Quantity { get; set; }
         public decimal Price { get; set; }
     }
