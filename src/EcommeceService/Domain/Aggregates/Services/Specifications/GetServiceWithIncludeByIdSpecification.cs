@@ -8,7 +8,6 @@ public class GetServiceWithIncludeByIdSpecification : Specification<Service>
         Query
             .Where(x => x.Id == id)
             .Include(x => x.UnitRelations)
-            .ThenInclude(ur => ur.Unit)
             .Include(x => x.Category)
             .AsNoTracking();
     }
