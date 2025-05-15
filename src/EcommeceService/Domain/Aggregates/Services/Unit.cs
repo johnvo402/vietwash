@@ -1,4 +1,5 @@
-﻿using JohnChum.SharedKernel.Domain.Common;
+﻿using Domain.Aggregates.Suppliers;
+using JohnChum.SharedKernel.Domain.Common;
 
 namespace Domain.Aggregates.Services
 {

@@ -1,12 +1,13 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class _20250313002415_Project_Migration : Migration
+    public partial class _20250515165320_Project_Migration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,8 +19,11 @@ namespace Infrastructure.Data.Migrations
                 name: "category",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "citext", nullable: false),
+                    status = table.Column<short>(type: "smallint", nullable: false),
+                    public_id = table.Column<string>(type: "character varying(26)", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     created_by = table.Column<string>(type: "text", nullable: false),
                     updated_by = table.Column<string>(type: "text", nullable: true),
@@ -60,11 +64,13 @@ namespace Infrastructure.Data.Migrations
                 name: "group",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "citext", nullable: false),
                     description = table.Column<string>(type: "citext", nullable: true),
                     price = table.Column<decimal>(type: "numeric", nullable: false),
                     disable = table.Column<bool>(type: "boolean", nullable: false),
+                    public_id = table.Column<string>(type: "character varying(26)", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     created_by = table.Column<string>(type: "text", nullable: false),
                     updated_by = table.Column<string>(type: "text", nullable: true),
@@ -76,25 +82,39 @@ namespace Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "payment_method",
+                name: "supplier",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "text", nullable: false),
-                    name = table.Column<string>(type: "citext", nullable: false),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    name = table.Column<string>(type: "text", nullable: false),
+                    code = table.Column<string>(type: "citext", nullable: false),
+                    email = table.Column<string>(type: "text", nullable: false),
+                    address = table.Column<string>(type: "text", nullable: false),
+                    phone = table.Column<string>(type: "text", nullable: false),
+                    description = table.Column<string>(type: "text", nullable: false),
+                    status = table.Column<short>(type: "smallint", nullable: false),
+                    branch_id = table.Column<long>(type: "bigint", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    created_by = table.Column<string>(type: "text", nullable: false),
+                    updated_by = table.Column<string>(type: "text", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_payment_method", x => x.id);
+                    table.PrimaryKey("pk_supplier", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "tariff",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "citext", nullable: false),
                     disable = table.Column<bool>(type: "boolean", nullable: false),
+                    branch_id = table.Column<long>(type: "bigint", nullable: false),
+                    public_id = table.Column<string>(type: "character varying(26)", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     version = table.Column<long>(type: "bigint", nullable: false),
                     created_by = table.Column<string>(type: "text", nullable: false),
@@ -110,8 +130,10 @@ namespace Infrastructure.Data.Migrations
                 name: "unit",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "citext", nullable: false),
+                    public_id = table.Column<string>(type: "character varying(26)", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     created_by = table.Column<string>(type: "text", nullable: false),
                     updated_by = table.Column<string>(type: "text", nullable: true),
@@ -126,7 +148,8 @@ namespace Infrastructure.Data.Migrations
                 name: "user",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     first_name = table.Column<string>(type: "text", nullable: false),
                     last_name = table.Column<string>(type: "text", nullable: false),
                     username = table.Column<string>(type: "citext", nullable: false),
@@ -135,8 +158,10 @@ namespace Infrastructure.Data.Migrations
                     day_of_birth = table.Column<DateTime>(type: "date", nullable: true),
                     gender = table.Column<int>(type: "integer", nullable: true),
                     avatar = table.Column<string>(type: "text", nullable: true),
+                    customer_type = table.Column<byte>(type: "smallint", nullable: true),
                     status = table.Column<byte>(type: "smallint", nullable: false),
                     role_id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    public_id = table.Column<string>(type: "character varying(26)", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     created_by = table.Column<string>(type: "text", nullable: false),
                     updated_by = table.Column<string>(type: "text", nullable: true),
@@ -148,15 +173,38 @@ namespace Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "warehouse",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    name = table.Column<string>(type: "text", nullable: false),
+                    code = table.Column<string>(type: "citext", nullable: false),
+                    description = table.Column<string>(type: "text", nullable: false),
+                    reorder_level = table.Column<int>(type: "integer", nullable: false),
+                    branch_id = table.Column<long>(type: "bigint", nullable: false),
+                    status = table.Column<short>(type: "smallint", nullable: false),
+                    public_id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_warehouse", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "service",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "citext", nullable: false),
                     description = table.Column<string>(type: "text", nullable: true),
                     image = table.Column<string>(type: "text", nullable: true),
                     disable = table.Column<bool>(type: "boolean", nullable: false),
-                    category_id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    category_id = table.Column<long>(type: "bigint", nullable: false),
+                    status = table.Column<int>(type: "integer", nullable: false),
+                    public_id = table.Column<string>(type: "character varying(26)", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     version = table.Column<long>(type: "bigint", nullable: false),
                     created_by = table.Column<string>(type: "text", nullable: false),
@@ -178,14 +226,18 @@ namespace Infrastructure.Data.Migrations
                 name: "fund",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "citext", nullable: false),
                     type_id = table.Column<string>(type: "text", nullable: false),
                     behavior_id = table.Column<string>(type: "text", nullable: false),
                     amount = table.Column<decimal>(type: "numeric", nullable: false),
                     note = table.Column<string>(type: "text", nullable: false),
+                    code = table.Column<string>(type: "text", nullable: false),
                     transaction_date = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    payment_method_id = table.Column<string>(type: "text", nullable: false),
+                    payment_method = table.Column<byte>(type: "smallint", nullable: false),
+                    reference_id = table.Column<long>(type: "bigint", nullable: true),
+                    public_id = table.Column<string>(type: "character varying(26)", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     version = table.Column<long>(type: "bigint", nullable: false),
                     created_by = table.Column<string>(type: "text", nullable: false),
@@ -207,10 +259,49 @@ namespace Infrastructure.Data.Migrations
                         principalTable: "fund_type",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "product_supplying",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    product_id = table.Column<long>(type: "bigint", nullable: false),
+                    supplier_id = table.Column<long>(type: "bigint", nullable: false),
+                    invetory_document_id = table.Column<long>(type: "bigint", nullable: false),
+                    quantity = table.Column<int>(type: "integer", nullable: false),
+                    lot_number = table.Column<string>(type: "text", nullable: false),
+                    sku = table.Column<string>(type: "text", nullable: false),
+                    price = table.Column<decimal>(type: "numeric", nullable: false),
+                    type = table.Column<short>(type: "smallint", nullable: false),
+                    unit_id = table.Column<long>(type: "bigint", nullable: false),
+                    expery_date = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    arrive_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    supplier_id1 = table.Column<long>(type: "bigint", nullable: true),
+                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    created_by = table.Column<string>(type: "text", nullable: false),
+                    updated_by = table.Column<string>(type: "text", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_product_supplying", x => x.id);
                     table.ForeignKey(
-                        name: "fk_fund_payment_method_payment_method_id",
-                        column: x => x.payment_method_id,
-                        principalTable: "payment_method",
+                        name: "fk_product_supplying_supplier_supplier_id",
+                        column: x => x.supplier_id,
+                        principalTable: "supplier",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_product_supplying_supplier_supplier_id1",
+                        column: x => x.supplier_id1,
+                        principalTable: "supplier",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "fk_product_supplying_unit_unit_id",
+                        column: x => x.unit_id,
+                        principalTable: "unit",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -219,17 +310,19 @@ namespace Infrastructure.Data.Migrations
                 name: "order",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     code = table.Column<string>(type: "text", nullable: false),
                     amount = table.Column<decimal>(type: "numeric", nullable: false),
                     total = table.Column<decimal>(type: "numeric", nullable: false),
                     discount_type = table.Column<bool>(type: "boolean", nullable: false),
                     discount_value = table.Column<decimal>(type: "numeric", nullable: false),
-                    customer_id = table.Column<string>(type: "character varying(26)", nullable: true),
+                    customer_id = table.Column<long>(type: "bigint", nullable: true),
                     note = table.Column<string>(type: "text", nullable: false),
-                    status = table.Column<string>(type: "text", nullable: false),
+                    status = table.Column<byte>(type: "smallint", nullable: false),
                     order_date = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    payment_method_id = table.Column<string>(type: "text", nullable: false),
+                    received_time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    public_id = table.Column<string>(type: "character varying(26)", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     version = table.Column<long>(type: "bigint", nullable: false),
                     created_by = table.Column<string>(type: "text", nullable: false),
@@ -240,12 +333,6 @@ namespace Infrastructure.Data.Migrations
                 {
                     table.PrimaryKey("pk_order", x => x.id);
                     table.ForeignKey(
-                        name: "fk_order_payment_method_payment_method_id",
-                        column: x => x.payment_method_id,
-                        principalTable: "payment_method",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "fk_order_user_customer_id",
                         column: x => x.customer_id,
                         principalTable: "user",
@@ -253,14 +340,48 @@ namespace Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "service_price_tariff_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    service_id = table.Column<long>(type: "bigint", nullable: false),
+                    tariff_id = table.Column<long>(type: "bigint", nullable: false),
+                    unit_relation_id = table.Column<long>(type: "bigint", nullable: false),
+                    price = table.Column<decimal>(type: "numeric", nullable: false),
+                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    created_by = table.Column<string>(type: "text", nullable: false),
+                    updated_by = table.Column<string>(type: "text", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_service_price_tariff_history", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_service_price_tariff_history_service_service_id",
+                        column: x => x.service_id,
+                        principalTable: "service",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_service_price_tariff_history_tariff_tariff_id",
+                        column: x => x.tariff_id,
+                        principalTable: "tariff",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "unit_relation",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    service_id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    unit_id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    service_id = table.Column<long>(type: "bigint", nullable: false),
+                    unit_id = table.Column<long>(type: "bigint", nullable: false),
                     base_unit = table.Column<bool>(type: "boolean", nullable: false),
                     price = table.Column<decimal>(type: "numeric", nullable: false),
+                    public_id = table.Column<string>(type: "character varying(26)", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -284,11 +405,13 @@ namespace Infrastructure.Data.Migrations
                 name: "order_payment",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    order_id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    payment_method_id = table.Column<string>(type: "text", nullable: false),
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    order_id = table.Column<long>(type: "bigint", nullable: false),
+                    payment_method = table.Column<byte>(type: "smallint", nullable: false),
                     amount = table.Column<decimal>(type: "numeric", nullable: false),
                     payment_date = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    public_id = table.Column<string>(type: "character varying(26)", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -300,22 +423,18 @@ namespace Infrastructure.Data.Migrations
                         principalTable: "order",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_order_payment_payment_method_payment_method_id",
-                        column: x => x.payment_method_id,
-                        principalTable: "payment_method",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "group_service",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    service_id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    group_id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    unit_relation_id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    service_id = table.Column<long>(type: "bigint", nullable: false),
+                    group_id = table.Column<long>(type: "bigint", nullable: false),
+                    unit_relation_id = table.Column<long>(type: "bigint", nullable: false),
+                    public_id = table.Column<string>(type: "character varying(26)", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -345,11 +464,14 @@ namespace Infrastructure.Data.Migrations
                 name: "order_item",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    order_id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    service_id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    unit_relation_id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    order_id = table.Column<long>(type: "bigint", nullable: false),
+                    service_id = table.Column<long>(type: "bigint", nullable: false),
+                    unit_relation_id = table.Column<long>(type: "bigint", nullable: false),
                     price = table.Column<decimal>(type: "numeric", nullable: false),
+                    quantity = table.Column<int>(type: "integer", nullable: false),
+                    public_id = table.Column<string>(type: "character varying(26)", nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -379,12 +501,16 @@ namespace Infrastructure.Data.Migrations
                 name: "service_tariff",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    tariff_id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    service_id = table.Column<string>(type: "character varying(26)", nullable: false),
-                    unit_relation_id = table.Column<string>(type: "character varying(26)", nullable: false),
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    tariff_id = table.Column<long>(type: "bigint", nullable: false),
+                    service_id = table.Column<long>(type: "bigint", nullable: false),
+                    unit_relation_id = table.Column<long>(type: "bigint", nullable: false),
                     price = table.Column<decimal>(type: "numeric", nullable: false),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    created_by = table.Column<string>(type: "text", nullable: false),
+                    updated_by = table.Column<string>(type: "text", nullable: true),
+                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -423,11 +549,6 @@ namespace Infrastructure.Data.Migrations
                 name: "ix_fund_id",
                 table: "fund",
                 column: "id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_fund_payment_method_id",
-                table: "fund",
-                column: "payment_method_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_fund_type_id",
@@ -475,11 +596,6 @@ namespace Infrastructure.Data.Migrations
                 column: "id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_order_payment_method_id",
-                table: "order",
-                column: "payment_method_id");
-
-            migrationBuilder.CreateIndex(
                 name: "ix_order_item_id",
                 table: "order_item",
                 column: "id");
@@ -510,14 +626,24 @@ namespace Infrastructure.Data.Migrations
                 column: "order_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_order_payment_payment_method_id",
-                table: "order_payment",
-                column: "payment_method_id");
+                name: "ix_product_supplying_id",
+                table: "product_supplying",
+                column: "id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_payment_method_id",
-                table: "payment_method",
-                column: "id");
+                name: "ix_product_supplying_supplier_id",
+                table: "product_supplying",
+                column: "supplier_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_product_supplying_supplier_id1",
+                table: "product_supplying",
+                column: "supplier_id1");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_product_supplying_unit_id",
+                table: "product_supplying",
+                column: "unit_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_service_category_id",
@@ -528,6 +654,17 @@ namespace Infrastructure.Data.Migrations
                 name: "ix_service_id",
                 table: "service",
                 column: "id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_service_price_tariff_history_service_id",
+                table: "service_price_tariff_history",
+                column: "service_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_service_price_tariff_history_tariff_id_service_id_unit_rela",
+                table: "service_price_tariff_history",
+                columns: new[] { "tariff_id", "service_id", "unit_relation_id" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_service_tariff_service_id",
@@ -544,6 +681,11 @@ namespace Infrastructure.Data.Migrations
                 name: "ix_service_tariff_unit_relation_id",
                 table: "service_tariff",
                 column: "unit_relation_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_supplier_id",
+                table: "supplier",
+                column: "id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_tariff_id",
@@ -586,6 +728,11 @@ namespace Infrastructure.Data.Migrations
                 table: "user",
                 column: "username",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_warehouse_id",
+                table: "warehouse",
+                column: "id");
         }
 
         /// <inheritdoc />
@@ -604,7 +751,16 @@ namespace Infrastructure.Data.Migrations
                 name: "order_payment");
 
             migrationBuilder.DropTable(
+                name: "product_supplying");
+
+            migrationBuilder.DropTable(
+                name: "service_price_tariff_history");
+
+            migrationBuilder.DropTable(
                 name: "service_tariff");
+
+            migrationBuilder.DropTable(
+                name: "warehouse");
 
             migrationBuilder.DropTable(
                 name: "fund_behavior");
@@ -619,13 +775,13 @@ namespace Infrastructure.Data.Migrations
                 name: "order");
 
             migrationBuilder.DropTable(
+                name: "supplier");
+
+            migrationBuilder.DropTable(
                 name: "tariff");
 
             migrationBuilder.DropTable(
                 name: "unit_relation");
-
-            migrationBuilder.DropTable(
-                name: "payment_method");
 
             migrationBuilder.DropTable(
                 name: "user");

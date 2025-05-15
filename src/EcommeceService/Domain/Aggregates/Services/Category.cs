@@ -6,7 +6,7 @@ namespace Domain.Aggregates.Services
     public class Category : BaseEntity
     {
         public string Name { get; set; } = default!;
+        public short status { get; set; } = default!;
         public ICollection<Service> Services { get; set; } = [];
-        
     }
 }

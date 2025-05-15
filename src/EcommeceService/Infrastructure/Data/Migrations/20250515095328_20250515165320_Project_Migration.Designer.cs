@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    [Migration("20250323174437_20250323174405_Project_Migration")]
-    partial class _20250323174405_Project_Migration
+    [Migration("20250515095328_20250515165320_Project_Migration")]
+    partial class _20250515165320_Project_Migration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -28,9 +28,12 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Funds.Fund", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric")
@@ -40,6 +43,11 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("behavior_id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -63,6 +71,15 @@ namespace Infrastructure.Data.Migrations
                     b.Property<byte>("PaymentMethod")
                         .HasColumnType("smallint")
                         .HasColumnName("payment_method");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
+
+                    b.Property<long?>("ReferenceId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("reference_id");
 
                     b.Property<DateTimeOffset>("TransactionDate")
                         .HasColumnType("timestamp with time zone")
@@ -150,9 +167,12 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Orders.Order", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric")
@@ -172,8 +192,8 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
-                    b.Property<string>("CustomerId")
-                        .HasColumnType("character varying(26)")
+                    b.Property<long?>("CustomerId")
+                        .HasColumnType("bigint")
                         .HasColumnName("customer_id");
 
                     b.Property<bool>("DiscountType")
@@ -192,6 +212,15 @@ namespace Infrastructure.Data.Migrations
                     b.Property<DateTimeOffset>("OrderDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("order_date");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
+
+                    b.Property<DateTimeOffset?>("ReceivedTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("received_time");
 
                     b.Property<byte>("Status")
                         .HasColumnType("smallint")
@@ -227,31 +256,40 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Orders.OrderItem", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("OrderId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("OrderId")
+                        .HasColumnType("bigint")
                         .HasColumnName("order_id");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric")
                         .HasColumnName("price");
 
-                    b.Property<string>("ServiceId")
+                    b.Property<string>("PublicId")
                         .IsRequired()
                         .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("quantity");
+
+                    b.Property<long>("ServiceId")
+                        .HasColumnType("bigint")
                         .HasColumnName("service_id");
 
-                    b.Property<string>("UnitRelationId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("UnitRelationId")
+                        .HasColumnType("bigint")
                         .HasColumnName("unit_relation_id");
 
                     b.HasKey("Id")
@@ -274,9 +312,12 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Orders.OrderPayment", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric")
@@ -286,9 +327,8 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("OrderId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("OrderId")
+                        .HasColumnType("bigint")
                         .HasColumnName("order_id");
 
                     b.Property<DateTimeOffset>("PaymentDate")
@@ -298,6 +338,11 @@ namespace Infrastructure.Data.Migrations
                     b.Property<byte>("PaymentMethod")
                         .HasColumnType("smallint")
                         .HasColumnName("payment_method");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
 
                     b.HasKey("Id")
                         .HasName("pk_order_payment");
@@ -313,9 +358,12 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Services.Category", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -331,6 +379,11 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("citext")
                         .HasColumnName("name");
 
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
+
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -338,6 +391,10 @@ namespace Infrastructure.Data.Migrations
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
+
+                    b.Property<short>("status")
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
 
                     b.HasKey("Id")
                         .HasName("pk_category");
@@ -350,9 +407,12 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Services.Group", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -380,6 +440,11 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("price");
 
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
+
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -399,27 +464,32 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Services.GroupService", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("GroupId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("GroupId")
+                        .HasColumnType("bigint")
                         .HasColumnName("group_id");
 
-                    b.Property<string>("ServiceId")
+                    b.Property<string>("PublicId")
                         .IsRequired()
                         .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
+
+                    b.Property<long>("ServiceId")
+                        .HasColumnType("bigint")
                         .HasColumnName("service_id");
 
-                    b.Property<string>("UnitRelationId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("UnitRelationId")
+                        .HasColumnType("bigint")
                         .HasColumnName("unit_relation_id");
 
                     b.HasKey("Id")
@@ -439,13 +509,15 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Services.Service", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    b.Property<string>("CategoryId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("CategoryId")
+                        .HasColumnType("bigint")
                         .HasColumnName("category_id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
@@ -474,6 +546,15 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("citext")
                         .HasColumnName("name");
 
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -500,9 +581,12 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Services.Unit", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -517,6 +601,11 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("citext")
                         .HasColumnName("name");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -537,9 +626,12 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Services.UnitRelation", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<bool>("BaseUnit")
                         .HasColumnType("boolean")
@@ -553,14 +645,17 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("price");
 
-                    b.Property<string>("ServiceId")
+                    b.Property<string>("PublicId")
                         .IsRequired()
                         .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
+
+                    b.Property<long>("ServiceId")
+                        .HasColumnType("bigint")
                         .HasColumnName("service_id");
 
-                    b.Property<string>("UnitId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("UnitId")
+                        .HasColumnType("bigint")
                         .HasColumnName("unit_id");
 
                     b.HasKey("Id")
@@ -578,34 +673,269 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("unit_relation", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Tariffs.ServiceTariff", b =>
+            modelBuilder.Entity("Domain.Aggregates.Suppliers.ProductSupplying", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("ArriveAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("arrive_at");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset>("ExperyDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expery_date");
+
+                    b.Property<long>("InvetoryDocumentId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("invetory_document_id");
+
+                    b.Property<string>("LotNumber")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("lot_number");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric")
                         .HasColumnName("price");
 
-                    b.Property<string>("ServiceId")
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("product_id");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("quantity");
+
+                    b.Property<string>("Sku")
                         .IsRequired()
-                        .HasColumnType("character varying(26)")
+                        .HasColumnType("text")
+                        .HasColumnName("sku");
+
+                    b.Property<long>("SupplierId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("supplier_id");
+
+                    b.Property<long?>("SupplierId1")
+                        .HasColumnType("bigint")
+                        .HasColumnName("supplier_id1");
+
+                    b.Property<short>("Type")
+                        .HasColumnType("smallint")
+                        .HasColumnName("type");
+
+                    b.Property<long>("UnitId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("unit_id");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_product_supplying");
+
+                    b.HasIndex("Id")
+                        .HasDatabaseName("ix_product_supplying_id");
+
+                    b.HasIndex("SupplierId")
+                        .HasDatabaseName("ix_product_supplying_supplier_id");
+
+                    b.HasIndex("SupplierId1")
+                        .HasDatabaseName("ix_product_supplying_supplier_id1");
+
+                    b.HasIndex("UnitId")
+                        .HasDatabaseName("ix_product_supplying_unit_id");
+
+                    b.ToTable("product_supplying", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Suppliers.Supplier", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("address");
+
+                    b.Property<long>("BranchId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("branch_id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("citext")
+                        .HasColumnName("code");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("email");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("phone");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_supplier");
+
+                    b.HasIndex("Id")
+                        .HasDatabaseName("ix_supplier_id");
+
+                    b.ToTable("supplier", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Tariffs.ServicePriceTariffHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric")
+                        .HasColumnName("price");
+
+                    b.Property<long>("ServiceId")
+                        .HasColumnType("bigint")
                         .HasColumnName("service_id");
 
-                    b.Property<string>("TariffId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("TariffId")
+                        .HasColumnType("bigint")
                         .HasColumnName("tariff_id");
 
-                    b.Property<string>("UnitRelationId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("UnitRelationId")
+                        .HasColumnType("bigint")
                         .HasColumnName("unit_relation_id");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_service_price_tariff_history");
+
+                    b.HasIndex("ServiceId")
+                        .HasDatabaseName("ix_service_price_tariff_history_service_id");
+
+                    b.HasIndex("TariffId", "ServiceId", "UnitRelationId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_service_price_tariff_history_tariff_id_service_id_unit_rela");
+
+                    b.ToTable("service_price_tariff_history", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Tariffs.ServiceTariff", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric")
+                        .HasColumnName("price");
+
+                    b.Property<long>("ServiceId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("service_id");
+
+                    b.Property<long>("TariffId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("tariff_id");
+
+                    b.Property<long>("UnitRelationId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("unit_relation_id");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
 
                     b.HasKey("Id")
                         .HasName("pk_service_tariff");
@@ -625,9 +955,16 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Tariffs.Tariff", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("BranchId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("branch_id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -646,6 +983,11 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("citext")
                         .HasColumnName("name");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -670,9 +1012,12 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(26)")
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Avatar")
                         .HasColumnType("text")
@@ -686,6 +1031,10 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("created_by");
+
+                    b.Property<byte?>("CustomerType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("customer_type");
 
                     b.Property<DateTime?>("DayOfBirth")
                         .HasColumnType("date")
@@ -714,6 +1063,11 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("phone_number");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
 
                     b.Property<string>("RoleId")
                         .IsRequired()
@@ -752,6 +1106,60 @@ namespace Infrastructure.Data.Migrations
                         .HasDatabaseName("ix_user_username");
 
                     b.ToTable("user", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Warehouses.Warehouse", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("BranchId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("branch_id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("citext")
+                        .HasColumnName("code");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
+
+                    b.Property<int>("ReorderLevel")
+                        .HasColumnType("integer")
+                        .HasColumnName("reorder_level");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id")
+                        .HasName("pk_warehouse");
+
+                    b.HasIndex("Id")
+                        .HasDatabaseName("ix_warehouse_id");
+
+                    b.ToTable("warehouse", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Funds.Fund", b =>
@@ -890,6 +1298,53 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Unit");
                 });
 
+            modelBuilder.Entity("Domain.Aggregates.Suppliers.ProductSupplying", b =>
+                {
+                    b.HasOne("Domain.Aggregates.Suppliers.Supplier", "Suppliers")
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_product_supplying_supplier_supplier_id");
+
+                    b.HasOne("Domain.Aggregates.Suppliers.Supplier", null)
+                        .WithMany("ProductSupplyings")
+                        .HasForeignKey("SupplierId1")
+                        .HasConstraintName("fk_product_supplying_supplier_supplier_id1");
+
+                    b.HasOne("Domain.Aggregates.Services.Unit", "Units")
+                        .WithMany()
+                        .HasForeignKey("UnitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_product_supplying_unit_unit_id");
+
+                    b.Navigation("Suppliers");
+
+                    b.Navigation("Units");
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Tariffs.ServicePriceTariffHistory", b =>
+                {
+                    b.HasOne("Domain.Aggregates.Services.Service", "Service")
+                        .WithMany("ServicePriceTariffHistories")
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_service_price_tariff_history_service_service_id");
+
+                    b.HasOne("Domain.Aggregates.Tariffs.Tariff", "Tariff")
+                        .WithMany("ServicePriceTariffHistories")
+                        .HasForeignKey("TariffId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_service_price_tariff_history_tariff_tariff_id");
+
+                    b.Navigation("Service");
+
+                    b.Navigation("Tariff");
+                });
+
             modelBuilder.Entity("Domain.Aggregates.Tariffs.ServiceTariff", b =>
                 {
                     b.HasOne("Domain.Aggregates.Services.Service", "Service")
@@ -953,6 +1408,8 @@ namespace Infrastructure.Data.Migrations
 
                     b.Navigation("OrderItems");
 
+                    b.Navigation("ServicePriceTariffHistories");
+
                     b.Navigation("UnitRelations");
                 });
 
@@ -968,8 +1425,15 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("OrderItems");
                 });
 
+            modelBuilder.Entity("Domain.Aggregates.Suppliers.Supplier", b =>
+                {
+                    b.Navigation("ProductSupplyings");
+                });
+
             modelBuilder.Entity("Domain.Aggregates.Tariffs.Tariff", b =>
                 {
+                    b.Navigation("ServicePriceTariffHistories");
+
                     b.Navigation("ServiceTariffs");
                 });
 #pragma warning restore 612, 618

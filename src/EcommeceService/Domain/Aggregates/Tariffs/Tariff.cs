@@ -8,6 +8,11 @@ namespace Domain.Aggregates.Tariffs
         public string Name { get; set; } = default!;
         public bool Disable { get; set; } = default!;
         public ICollection<ServiceTariff> ServiceTariffs { get; set; } = [];
+
+        public ICollection<ServicePriceTariffHistory> ServicePriceTariffHistories { get; set; } = [];
+
+        public long BranchId { get; set; } = default!;
+
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
             throw new NotImplementedException();

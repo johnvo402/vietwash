@@ -1,5 +1,6 @@
 ﻿using Domain.Aggregates.Orders;
 using Domain.Aggregates.Services.Enums;
+using Domain.Aggregates.Tariffs;
 using JohnChum.SharedKernel.Domain.Common;
 using Mediator;
 
@@ -11,12 +12,13 @@ namespace Domain.Aggregates.Services
         public string? Description { get; set; }
         public string? Image { get; set; }
         public bool Disable { get; set; } = default!;
-        public Ulid CategoryId { get; set; } = default!;
+        public long CategoryId { get; set; } = default!;
         public ServiceStatus Status { get; set; } = default!;
         public Category Category { get; set; } = default!;
         public ICollection<OrderItem> OrderItems { get; set; } = [];
         public ICollection<UnitRelation> UnitRelations { get; set; } = [];
         public ICollection<GroupService> GroupServices { get; set; } = [];
+        public ICollection<ServicePriceTariffHistory> ServicePriceTariffHistories { get; set; } = [];
 
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
