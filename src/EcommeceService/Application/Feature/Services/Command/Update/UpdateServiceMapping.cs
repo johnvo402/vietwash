@@ -14,7 +14,6 @@ namespace Application.Feature.Services.Command.Update
                 .ForMember(dest => dest.UnitRelations, opt => opt.Ignore());
 
             CreateMap<UnitRelationModel, UnitRelation>()
-                .ForMember(dest => dest.UnitId, opt => opt.MapFrom(src => Ulid.Parse(src.UnitId)))
                 .ForMember(dest => dest.BaseUnit, opt => opt.MapFrom(src => src.BaseUnit))
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price));
 

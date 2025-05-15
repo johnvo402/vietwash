@@ -14,8 +14,7 @@ public class ListServiceMapping : Profile
 
         CreateMap<Service, ListServiceResponse>().IncludeBase<Service, ServiceProjection>();
 
-        CreateMap<UnitRelation, UnitRelationProjection>()
-            .ForMember(dest => dest.Unit, opt => opt.MapFrom(src => src.Unit));
+        CreateMap<UnitRelation, UnitRelationProjection>();
 
         CreateMap<Unit, UnitProjection>();
     }
