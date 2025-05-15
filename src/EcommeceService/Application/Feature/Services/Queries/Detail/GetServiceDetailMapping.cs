@@ -15,8 +15,8 @@ namespace Application.Feature.Services.Queries.Detail
                 .IncludeBase<Service, ServiceProjection>()
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category)); // 🔹 Map Category
 
-            CreateMap<UnitRelation, UnitRelationProjection>()
-                .ForMember(dest => dest.Unit, opt => opt.MapFrom(src => src.Unit));
+            CreateMap<UnitRelation, UnitRelationProjection>();
+                //.ForMember(dest => dest.Unit, opt => opt.MapFrom(src => src.Unit));
 
             CreateMap<Unit, UnitProjection>();
 

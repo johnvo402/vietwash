@@ -7,8 +7,6 @@ namespace Domain.Aggregates.Services
     {
         public string Name { get; set; } = default!;
 		public string Path { get; set; } = default!;	
-
-		public ICollection<UnitRelation> UnitRelations { get; set; } = [];
 		public ICollection<ProductSupplying> ProductSupplyings { get; set; } = [];
 
 	}

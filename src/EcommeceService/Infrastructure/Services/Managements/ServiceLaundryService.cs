@@ -84,7 +84,7 @@ namespace Infrastructure.Services.Managements
                 var newUnitRelations = unitRelations.ToList();
                 foreach (var unitRelation in newUnitRelations)
                 {
-                    unitRelation.ServiceId = service.Id; // Liên kết với Service
+                    unitRelation.ReferenceId = service.Id; // Liên kết với Service
                     _unitRelationContext.Add(unitRelation); // Thêm mới
                 }
                 service.UnitRelations = newUnitRelations; // Gán danh sách mới
@@ -281,14 +281,14 @@ namespace Infrastructure.Services.Managements
                 foreach (var relation in unitRelations)
                 {
                     // Make sure relation has both IDs
-                    Guard.Against.Default(relation.UnitId, nameof(relation.UnitId));
-                    Guard.Against.Default(relation.ServiceId, nameof(relation.ServiceId));
+                    //Guard.Against.Default(relation.UnitId, nameof(relation.UnitId));
+                    Guard.Against.Default(relation.ReferenceId, nameof(relation.ReferenceId));
 
                     // Check if relation already exists
                     var existingRelation = await _unitRelationContext
                         .FirstOrDefaultAsync(ur =>
-                            ur.UnitId == relation.UnitId &&
-                            ur.ServiceId == relation.ServiceId);
+                            //ur.UnitId == relation.UnitId &&
+                            ur.ReferenceId == relation.ReferenceId);
 
                     if (existingRelation == null)
                     {
@@ -351,12 +351,12 @@ namespace Infrastructure.Services.Managements
         }
 
         // Helper methods
-        public async Task<List<Service>> GetServicesByGroupIdAsync(long groupId)
-        {
-            return await _serviceContext
-                .Where(s => s.GroupServices.Any(gs => gs.GroupId == groupId))
-                .ToListAsync();
-        }
+        //public async Task<List<Service>> GetServicesByGroupIdAsync(long groupId)
+        //{
+        //    return await _serviceContext
+        //        .Where(s => s.GroupServices.Any(gs => gs.GroupId == groupId))
+        //        .ToListAsync();
+        //}
 
         public async Task<List<Group>> GetGroupsByServiceIdAsync(long serviceId)
         {
