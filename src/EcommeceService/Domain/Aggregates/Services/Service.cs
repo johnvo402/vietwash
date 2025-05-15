@@ -14,14 +14,12 @@ namespace Domain.Aggregates.Services
         public string? Description { get; set; }
         public string? Image { get; set; }
         public bool Disable { get; set; } = default!;
-		public short Type { get; set; }
-		public string? Slug { get; set; }
-		public ServiceStatus Status { get; set; } = default!;
         public Category Category { get; set; } = default!;
 		public ICollection<OrderItem> OrderItems { get; set; } = [];
         public ICollection<UnitRelation> UnitRelations { get; set; } = [];
-		public ICollection<ServiceTariff> ServiceTariffs { get; set; } = [];
-		public ICollection<ServicePriceTariffHistory> ServicePriceTariffHistories { get; set; } = [];
+        public ICollection<GroupService> GroupServices { get; set; } = [];
+        public ICollection<ServicePriceTariffHistory> ServicePriceTariffHistories { get; set; } = [];
+
 
 		protected override bool TryApplyDomainEvent(INotification domainEvent)
         {

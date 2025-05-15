@@ -3,7 +3,7 @@ using JohnChum.SharedKernel.Domain.Common;
 
 namespace Domain.Aggregates.Tariffs
 {
-    public class ServiceTariff : DefaultEntity
+    public class ServiceTariff : BaseEntity<long>
     {
         public long TariffId { get; set; } = default!;
         public long ServiceId = default!;
