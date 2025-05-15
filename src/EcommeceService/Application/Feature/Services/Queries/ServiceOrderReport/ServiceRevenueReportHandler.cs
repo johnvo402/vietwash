@@ -34,10 +34,10 @@ namespace Application.Feature.Services.Queries.ServiceOrderReport
 
 				// Nhóm OrderItem theo UnitId (từ UnitRelation) và ServiceId
 				var serviceOrderItems = orderItems
-					.GroupBy(oi => new { oi.UnitRelation.UnitId, oi.ServiceId })
+					.GroupBy(oi => new { oi.UnitRelation.ReferenceId, oi.ServiceId })
 					.Select(g => new
 					{
-						UnitId = g.Key.UnitId,
+						UnitId = g.Key.ReferenceId,
 						ServiceId = g.Key.ServiceId,
 						OrderItems = g.ToList(),
 						Orders = orders.Where(o => g.Select(oi => oi.OrderId).Distinct().Contains(o.Id)).ToList()
@@ -60,7 +60,7 @@ namespace Application.Feature.Services.Queries.ServiceOrderReport
 					var firstOrderItem = serviceOrderItem.OrderItems.First();
 					var service = firstOrderItem.Service;
 					var unitRelation = firstOrderItem.UnitRelation;
-					var unit = unitRelation?.Unit;
+					var unit = unitRelation?.ReferenceId;
 
 					// Tính các giá trị
 					// Doanh thu trước giảm giá của từng item trong order
@@ -76,7 +76,7 @@ namespace Application.Feature.Services.Queries.ServiceOrderReport
 							continue;
 
 						// Tính số tiền giảm giá của Order
-						var orderDiscount = order.DiscountType
+						var orderDiscount = order.DiscountFixed
 							? (orderGrossRevenue * order.DiscountValue) / 100 // Giảm giá theo %
 							: order.DiscountValue; // Giảm giá theo số tiền cố định
 
@@ -105,8 +105,8 @@ namespace Application.Feature.Services.Queries.ServiceOrderReport
 					{
 						ServiceId = service.Id,
 						ServiceName = service.Name,
-						UnitId = unit.Id,
-						UnitName = unit.Name,
+						//UnitId = unit.Id,
+						//UnitName = unit.Name,
 						TotalOrderCount = relatedOrders.Count,
 						TotalNetRevenue = orderitemGrossRevenue,
 						TotalDiscount = totalDiscount,
