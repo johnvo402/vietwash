@@ -1,5 +1,4 @@
 ﻿using Domain.Aggregates.Orders;
-using Domain.Aggregates.Warehouses;
 using JohnChum.SharedKernel.Domain.Common;
 
 namespace Domain.Aggregates.Services
@@ -15,7 +14,7 @@ namespace Domain.Aggregates.Services
         public decimal ProcessingTime { get; set; } = default!;
 
 		public Service Service { get; set; } = default!;
-		public Product Product { get; set; } = default!;
+		//public Product Product { get; set; } = default!;
 		public ICollection<OrderItem> OrderItems { get; set; } = [];
 
 

@@ -1,5 +1,4 @@
-﻿using Domain.Aggregates.Warehouses;
-using JohnChum.SharedKernel.Domain.Common;
+﻿using JohnChum.SharedKernel.Domain.Common;
 
 namespace Domain.Aggregates.Services
 {
@@ -7,7 +6,7 @@ namespace Domain.Aggregates.Services
     {
         public string Name { get; set; } = default!;
 		public string Path { get; set; } = default!;	
-		public ICollection<ProductSupplying> ProductSupplyings { get; set; } = [];
+		//public ICollection<ProductSupplying> ProductSupplyings { get; set; } = [];
 
 	}
 }
