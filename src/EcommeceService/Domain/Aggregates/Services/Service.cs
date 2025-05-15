@@ -11,7 +11,7 @@ namespace Domain.Aggregates.Services
         public string? Description { get; set; }
         public string? Image { get; set; }
         public bool Disable { get; set; } = default!;
-        public Ulid CategoryId { get; set; } = default!;
+        public long? CategoryId { get; set; } = default!;
         public ServiceStatus Status { get; set; } = default!;
         public Category Category { get; set; } = default!;
         public ICollection<OrderItem> OrderItems { get; set; } = [];
