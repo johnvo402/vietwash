@@ -4,7 +4,7 @@ using Serilog;
 
 namespace Application.Common.Behaviors;
 
-public class LoggingBehavior<TMessage, TResponse>(ILogger logger, ICurrentUser currentUser)
+public class LoggingBehavior<TMessage, TResponse>(ILogger logger, ICurrentAccount currentUser)
     : MessagePreProcessor<TMessage, TResponse>
     where TMessage : notnull, IMessage
 {

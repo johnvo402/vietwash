@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Infrastructure.Services;
 
-public class CurrentUserService : ICurrentUser
+public class CurrentUserService : ICurrentAccount
 {
     public long? Id { get; private set; }
 

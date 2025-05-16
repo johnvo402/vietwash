@@ -89,7 +89,7 @@ public static class DependencyInjection
 
         services
             .AddAmazonS3(configuration)
-            .AddSingleton<ICurrentUser, CurrentUserService>()
+            .AddSingleton<ICurrentAccount, CurrentUserService>()
             .AddSingleton(typeof(IMediaUpdateService<>), typeof(MediaUpdateService<>))
             .AddTransient<KitMailService>()
             .AddTransient<IMailService, KitMailService>(provider =>

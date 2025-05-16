@@ -1,6 +1,6 @@
 ﻿using Application.Common.Auth;
 using Application.Features.Media;
-using Application.Features.Users.Commands.Create;
+using Application.Features.Accounts.Commands.Create;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;

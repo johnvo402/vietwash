@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Application.Common.Interfaces.Services;
 
-public interface ICurrentUser
+public interface ICurrentAccount
 {
     public long? Id { get; }
 

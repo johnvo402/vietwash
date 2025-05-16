@@ -11,7 +11,4 @@
     <PackageReference Include="NewId" />
     <PackageReference Include="CSharpFunctionalExtensions" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Aggregates\Users\ValueObjects\" />
-  </ItemGroup>
 </Project>

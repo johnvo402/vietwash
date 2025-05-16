@@ -15,7 +15,7 @@ using JohnChum.SharedKernel.Domain.Common;
 
 namespace Infrastructure.Data.Interceptors;
 
-public class UpdateAuditableEntityInterceptor(ElasticsearchClient elasticsearchClient, ICurrentUser currentUser) : SaveChangesInterceptor
+public class UpdateAuditableEntityInterceptor(ElasticsearchClient elasticsearchClient, ICurrentAccount currentUser) : SaveChangesInterceptor
 {
     private const string ANONYMOUS_CREATED_BY = "SYSTEM";
 
