@@ -40,3 +40,10 @@ services:
       - "8080"
     restart: always
 
+  finance:
+    container_name: finance
+    image: finance
+    ports:
+      - "8080"
+    restart: always
+

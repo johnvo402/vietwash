@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.Aggregates.Equipments;
 using Domain.Aggregates.Inventories.Enums;
 using JohnChum.SharedKernel.Domain.Common;
 using Mediator;
@@ -24,10 +25,13 @@ namespace Domain.Aggregates.Inventories
         public Status Status { get; set; }
         public Enums.Type Type { get; set; }
         public string? Note { get; set; }
+
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
             throw new NotImplementedException();
         }
+
         public ICollection<InventoryRelation> InventoryRelationships = [];
+        public ICollection<EquipmentSupplying> EquipmentSupplyings = [];
     }
 }

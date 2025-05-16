@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Domain.Aggregates.Equipments;
 using Domain.Aggregates.Suppliers;
 using JohnChum.SharedKernel.Domain.Common;
 
@@ -18,8 +19,9 @@ namespace Domain.Aggregates.Suppliers
         public short Status { get; set; } = default!;
         public long BranchId { get; set; } = default!;
         public ICollection<ProductSupplying> ProductSupplyings { get; set; } = [];
+
         //public ICollection<InventoryRequest> InventoryRequests { get; set; } = [];
         //public ICollection<InventoryInvoke> InventoryInvokes { get; set; } = [];
-        //public ICollection<EquipmentSupplying> EquipmentSupplyings { get; set; } = [];
+        public ICollection<EquipmentSupplying> EquipmentSupplyings { get; set; } = [];
     }
 }

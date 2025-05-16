@@ -40,6 +40,9 @@ services:
   ecommerce:
     depends_on:
       - "database"
+  finance:
+    depends_on:
+      - "database"
       
 volumes:
   db_data:
