@@ -1,6 +1,6 @@
 ﻿using Application.Common.Interfaces.UnitOfWorks;
-using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.Enums;
+using Domain.Aggregates.Accounts;
+using Domain.Aggregates.Accounts.Enums;
 using Infrastructure.Constants;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -20,17 +20,17 @@ public class DbInitializer
         {
             string[] roles = ["ADMIN", "MANAGER", "STAFF", "CUSTOMER"];
             // Lưu Role vào DB (update nếu đã tồn tại, insert nếu chưa)
-            
-            if (!await unitOfWork.Repository<User>().AnyAsync())
+
+            if (!await unitOfWork.Repository<Account>().AnyAsync())
             {
                 logger.Information("Seeding user data is starting.............");
 
-                List<User> users = await InitializeUserDataAsync(unitOfWork, roles);
+                List<Account> users = InitializeUserData(roles);
 
                 foreach (var user in users)
                 {
-                    user.CreateUser();
-                    await unitOfWork.Repository<User>().AddAsync(user);
+                    user.CreateAccount();
+                    await unitOfWork.Repository<Account>().AddAsync(user);
                     await unitOfWork.SaveAsync();
                 }
 
@@ -46,334 +46,308 @@ public class DbInitializer
         }
     }
 
-    private static async Task<List<User>> InitializeUserDataAsync(
-        IUnitOfWork unitOfWork,
-        string[] roles
-    )
+    private static List<Account> InitializeUserData(string[] roles)
     {
-        string sg = "79";
-        string hn = "01";
-        string dn = "48";
-
-        User user = new(
-            "Chloe",
-            "Kim",
-            "chloe.kim",
+        Account user = new(
+            "Chloe Kim",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "chloe.kim@gmail.com",
             "0925123123",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000001"
         )
         {
-            DayOfBirth = new DateTime(1990, 10, 1),
-            Status = UserStatus.Active,
+            BirthDay = new DateOnly(1990, 10, 1),
+            Status = AccountStatus.Active,
             Gender = Gender.Female,
             Id = Credential.UserIds.CHLOE_KIM_ID,
         };
 
-        User johnDoe = new(
-            "John",
-            "Doe",
-            "john.doe",
+        Account johnDoe = new(
+            "John Doe",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "john.doe@example.com",
             "0803456789",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000002"
         )
         {
-            DayOfBirth = new DateTime(1985, 4, 23),
-            Status = UserStatus.Active,
+            BirthDay = new DateOnly(1985, 4, 23),
+            Status = AccountStatus.Active,
             Gender = (Gender)new Random().Next(1, 3),
             Id = Credential.UserIds.JOHN_DOE_ID,
         };
 
-        User aliceSmith = new(
-            "Alice",
-            "Smith",
-            "alice.smith",
+        Account aliceSmith = new(
+            "Alice Smith",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "alice.smith@example.com",
             "0912345678",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000003"
         )
         {
-            DayOfBirth = new DateTime(1992, 7, 19),
-            Status = UserStatus.Inactive,
+            BirthDay = new DateOnly(1992, 7, 19),
+            Status = AccountStatus.Inactive,
             Gender = (Gender)new Random().Next(1, 3),
             Id = Credential.UserIds.ALICE_SMITH_ID,
         };
 
-        User bobJohnson = new(
-            "Bob",
-            "Johnson",
-            "bob.johnson",
+        Account bobJohnson = new(
+            "Bob Johnson",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "bob.johnson@example.com",
             "0934567890",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000004"
         )
         {
-            DayOfBirth = new DateTime(1980, 3, 15),
-            Status = UserStatus.Active,
+            BirthDay = new DateOnly(1980, 3, 15),
+            Status = AccountStatus.Active,
             Gender = (Gender)new Random().Next(1, 3),
             Id = Credential.UserIds.BOB_JOHNSON_ID,
         };
 
-        User emilyBrown = new(
-            "Emily",
-            "Brown",
-            "emily.brown",
+        Account emilyBrown = new(
+            "Emily Brown",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "emily.brown@example.com",
             "0945678901",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000005"
         )
         {
-            DayOfBirth = new DateTime(1995, 5, 5),
-            Status = UserStatus.Active,
+            BirthDay = new DateOnly(1995, 5, 5),
+            Status = AccountStatus.Active,
             Gender = (Gender)new Random().Next(1, 3),
             Id = Credential.UserIds.EMILY_BROWN_ID,
         };
 
-        User jamesWilliams = new(
-            "James",
-            "Williams",
-            "james.williams",
+        Account jamesWilliams = new(
+            "James Williams",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "james.williams@example.com",
             "0978901234",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000006"
         )
         {
-            DayOfBirth = new DateTime(1983, 11, 9),
-            Status = UserStatus.Active,
+            BirthDay = new DateOnly(1983, 11, 9),
+            Status = AccountStatus.Active,
             Gender = (Gender)new Random().Next(1, 3),
             Id = Credential.UserIds.JAMES_WILLIAMS_ID,
         };
 
-        User oliviaTaylor = new(
-            "Olivia",
-            "Taylor",
-            "olivia.taylor",
+        Account oliviaTaylor = new(
+            "Olivia Taylor",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "olivia.taylor@example.com",
             "0989012345",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000007"
         )
         {
-            DayOfBirth = new DateTime(1998, 2, 18),
-            Status = UserStatus.Active,
+            BirthDay = new DateOnly(1998, 2, 18),
+            Status = AccountStatus.Active,
             Gender = (Gender)new Random().Next(1, 3),
             Id = Credential.UserIds.OLIVIA_TAYLOR_ID,
         };
 
-        User danielLee = new(
-            "Daniel",
-            "Lee",
-            "daniel.lee",
+        Account danielLee = new(
+            "Daniel Lee",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "daniel.lee@example.com",
             "0901234567",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000008"
         )
         {
-            DayOfBirth = new DateTime(1987, 9, 21),
-            Status = UserStatus.Inactive,
+            BirthDay = new DateOnly(1987, 9, 21),
+            Status = AccountStatus.Inactive,
             Gender = (Gender)new Random().Next(1, 3),
             Id = Credential.UserIds.DANIEL_LEE_ID,
         };
 
-        User sophiaGarcia = new(
-            "Sophia",
-            "Garcia",
-            "sophia.garcia",
+        Account sophiaGarcia = new(
+            "Sophia Garcia",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "sophia.garcia@example.com",
             "0912345679",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000009"
         )
         {
-            DayOfBirth = new DateTime(1994, 12, 12),
-            Status = UserStatus.Active,
+            BirthDay = new DateOnly(1994, 12, 12),
+            Status = AccountStatus.Active,
             Gender = (Gender)new Random().Next(1, 3),
             Id = Credential.UserIds.SHOPHIA_GARCIA_ID,
         };
 
-        User michaelMartinez = new(
-            "Michael",
-            "Martinez",
-            "michael.martinez",
+        Account michaelMartinez = new(
+            "Michael Martinez",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "michael.martinez@example.com",
             "0913456789",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000010"
         )
         {
-            DayOfBirth = new DateTime(1978, 8, 8),
-            Status = UserStatus.Inactive,
+            BirthDay = new DateOnly(1978, 8, 8),
+            Status = AccountStatus.Inactive,
             Gender = (Gender)new Random().Next(1, 3),
             Id = Credential.UserIds.MICHAEL_MARTINEZ_ID,
         };
 
-        User isabellaHarris = new(
-            "Isabella",
-            "Harris",
-            "isabella.harris",
+        Account isabellaHarris = new(
+            "Isabella Harris",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "isabella.harris@example.com",
             "0945678902",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000011"
         )
         {
-            DayOfBirth = new DateTime(1991, 1, 1),
-            Status = UserStatus.Active,
+            BirthDay = new DateOnly(1991, 1, 1),
+            Status = AccountStatus.Active,
             Gender = (Gender)new Random().Next(1, 3),
             Id = Credential.UserIds.ISABELLA_HARRIS_ID,
         };
 
-        User davidClark = new(
-            "David",
-            "Clark",
-            "david.clark",
+        Account davidClark = new(
+            "David Clark",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "david.clark@example.com",
             "0934567891",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000012"
         )
         {
-            DayOfBirth = new DateTime(1984, 6, 6),
-            Status = UserStatus.Active,
+            BirthDay = new DateOnly(1984, 6, 6),
+            Status = AccountStatus.Active,
             Gender = (Gender)new Random().Next(1, 3),
             Id = Credential.UserIds.DAVID_CLARK_ID,
         };
 
-        User emmaRodriguez = new(
-            "Emma",
-            "Rodriguez",
-            "emma.rodriguez",
+        Account emmaRodriguez = new(
+            "Emma Rodriguez",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "emma.rodriguez@example.com",
             "0956789012",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000013"
         )
         {
-            DayOfBirth = new DateTime(1993, 3, 3),
-            Status = UserStatus.Active,
+            BirthDay = new DateOnly(1993, 3, 3),
+            Status = AccountStatus.Active,
             Gender = (Gender)new Random().Next(1, 3),
             Id = Credential.UserIds.EMMA_RODRIGUEZ_ID,
         };
 
-        User andrewMoore = new(
-            "Andrew",
-            "Moore",
-            "andrew.moore",
+        Account andrewMoore = new(
+            "Andrew Moore",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "andrew.moore@example.com",
             "0923456789",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000014"
         )
         {
-            DayOfBirth = new DateTime(1981, 10, 30),
-            Status = UserStatus.Inactive,
+            BirthDay = new DateOnly(1981, 10, 30),
+            Status = AccountStatus.Inactive,
             Gender = (Gender)new Random().Next(1, 3),
             Id = Credential.UserIds.ANDREW_MOORE_ID,
         };
 
-        User avaJackson = new(
-            "Ava",
-            "Jackson",
-            "ava.jackson",
+        Account avaJackson = new(
+            "Ava Jackson",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "ava.jackson@example.com",
             "0935678903",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000015"
         )
         {
-            DayOfBirth = new DateTime(2000, 4, 14),
-            Status = UserStatus.Active,
+            BirthDay = new DateOnly(2000, 4, 14),
+            Status = AccountStatus.Active,
             Gender = (Gender)new Random().Next(1, 3),
             Id = Credential.UserIds.AVA_JACKSON_ID,
         };
 
-        User joshuaWhite = new(
-            "Joshua",
-            "White",
-            "joshua.white",
+        Account joshuaWhite = new(
+            "Joshua White",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "joshua.white@example.com",
             "0914567890",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000016"
         )
         {
-            DayOfBirth = new DateTime(1986, 11, 17),
-            Status = UserStatus.Inactive,
+            BirthDay = new DateOnly(1986, 11, 17),
+            Status = AccountStatus.Inactive,
             Gender = (Gender)new Random().Next(1, 3),
             Id = Credential.UserIds.JOSHUA_WHITE_ID,
         };
 
-        User charlotteThomas = new(
-            "Charlotte",
-            "Thomas",
-            "charlotte.thomas",
+        Account charlotteThomas = new(
+            "Charlotte Thomas",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "charlotte.thomas@example.com",
             "0934567892",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000017"
         )
         {
-            DayOfBirth = new DateTime(1997, 7, 7),
-            Status = UserStatus.Active,
+            BirthDay = new DateOnly(1997, 7, 7),
+            Status = AccountStatus.Active,
             Gender = (Gender)new Random().Next(1, 3),
             Id = Credential.UserIds.CHARLOTTE_THOMAS_ID,
         };
 
-        User ethanKing = new(
-            "Ethan",
-            "King",
-            "ethan.king",
+        Account ethanKing = new(
+            "Ethan King",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "ethan.king@example.com",
             "0923456781",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000018"
         )
         {
-            DayOfBirth = new DateTime(1999, 9, 9),
-            Status = UserStatus.Active,
+            BirthDay = new DateOnly(1999, 9, 9),
+            Status = AccountStatus.Active,
             Gender = (Gender)new Random().Next(1, 3),
             Id = Credential.UserIds.ETHAN_KING_ID,
         };
 
-        User abigailScott = new(
-            "Abigail",
-            "Scott",
-            "abigail.scott",
+        Account abigailScott = new(
+            "Abigail Scott",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "abigail.scott@example.com",
             "0916789013",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000019"
         )
         {
-            DayOfBirth = new DateTime(1989, 2, 2),
-            Status = UserStatus.Active,
+            BirthDay = new DateOnly(1989, 2, 2),
+            Status = AccountStatus.Active,
             Gender = (Gender)new Random().Next(1, 3),
             Id = Credential.UserIds.ABIGAIL_SCOTT_ID,
         };
 
-        User liamPerez = new(
-            "Liam",
-            "Perez",
-            "liam.perez",
+        Account liamPerez = new(
+            "Liam Perez",
             HashPassword(Credential.USER_DEFAULT_PASSWORD),
             "liam.perez@example.com",
             "0909876543",
-            roles[new Random().Next(0, 3)]
+            roles[new Random().Next(0, 3)],
+            "000020"
         )
         {
-            DayOfBirth = new DateTime(1988, 12, 25),
-            Status = UserStatus.Inactive,
+            BirthDay = new DateOnly(1988, 12, 25),
+            Status = AccountStatus.Inactive,
             Gender = (Gender)new Random().Next(1, 3),
             Id = Credential.UserIds.LIAM_PEREZ_ID,
         };
+
         return
         [
             user,

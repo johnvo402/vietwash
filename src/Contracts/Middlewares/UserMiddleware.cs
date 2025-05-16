@@ -5,7 +5,7 @@ namespace Contracts.Middlewares;
 
 public class UserMiddleware(RequestDelegate next)
 {
-    public async Task Invoke(HttpContext context, ICurrentUser currentUser)
+    public async Task Invoke(HttpContext context, ICurrentAccount currentUser)
     {
         if (context.User?.Identity?.IsAuthenticated == true)
         {

@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
-using Domain.Aggregates.Users;
-using static Application.Common.DomainEventHandlers.UserCreateEventHandler;
+using Domain.Aggregates.Accounts;
+using static Application.Common.DomainEventHandlers.AccountCreateEventHandler;
 
 namespace Application.Common.DomainEventHandlers
 {
-    internal class UserCreateEventMapping : Profile
+    internal class AccountCreateEventMapping : Profile
     {
-        public UserCreateEventMapping()
+        public AccountCreateEventMapping()
         {
-            CreateMap<User, CreateUserEvent>();
+            CreateMap<Account, CreateAccountEvent>();
         }
     }
 }
