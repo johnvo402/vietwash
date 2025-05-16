@@ -20,8 +20,7 @@ namespace Application.Feature.Services.Command.Create
                     src => src.UnitRelations
                 ));
 
-            CreateMap<UnitRelationModel, UnitRelation>()
-                .ForMember(dest => dest.UnitId, opt => opt.MapFrom(src => Ulid.Parse(src.UnitId)));
+            CreateMap<UnitRelationModel, UnitRelation>();
 
         }
     }

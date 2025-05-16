@@ -52,4 +52,12 @@ services:
       context: .
       dockerfile: ./src/ApiGateway/Dockerfile
 
+  finance:
+    <<: *common_config
+    image: finance
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+    build:
+      context: .
+      dockerfile: ./src/FinanceService/Dockerfile
   
