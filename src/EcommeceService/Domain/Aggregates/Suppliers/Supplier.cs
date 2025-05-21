@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Domain.Aggregates.Equipments;
-using Domain.Aggregates.Suppliers;
+using Domain.Aggregates.Inventories;
 using JohnChum.SharedKernel.Domain.Common;
 
 namespace Domain.Aggregates.Suppliers

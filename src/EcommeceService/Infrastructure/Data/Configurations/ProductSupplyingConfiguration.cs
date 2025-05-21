@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Domain.Aggregates.Suppliers;
+using Domain.Aggregates.Inventories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,12 +11,12 @@ namespace Infrastructure.Data.Configurations
             builder.HasKey(x => x.Id);
             builder.HasIndex(x => x.Id);
             builder
-                .HasOne(x => x.Units)
-                .WithMany()
-                .HasForeignKey(x => x.UnitId);
+                .HasOne(x => x.UnitRelation)
+                .WithMany(x => x.ProductSupplyings)
+                .HasForeignKey(x => x.UnitRelationId);
             builder
                 .HasOne(x => x.Suppliers)
-                .WithMany()
+                .WithMany(x => x.ProductSupplyings)
                 .HasForeignKey(x => x.SupplierId);
         }
     }

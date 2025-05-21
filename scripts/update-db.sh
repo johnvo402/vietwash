@@ -26,6 +26,7 @@ run_update() {
 run_update "AuthService" "src/AuthService/Infrastructure"
 run_update "EcommeceService" "src/EcommeceService/Infrastructure"
 run_update "ProjectService" "src/ProjectService/Infrastructure"
+run_update "Finance" "src/FinanceService/Infrastructure"
 
 echo "--------------------------------------"
 echo "🎉 All migrations completed successfully!"

@@ -26,12 +26,12 @@ namespace Domain.Aggregates.Inventories
         public Enums.Type Type { get; set; }
         public string? Note { get; set; }
 
+        public ICollection<InventoryRelation> InventoryRelationships { get; set; } = [];
+        public ICollection<EquipmentSupplying> EquipmentSupplyings { get; set; } = [];
+
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
             throw new NotImplementedException();
         }
-
-        public ICollection<InventoryRelation> InventoryRelationships = [];
-        public ICollection<EquipmentSupplying> EquipmentSupplyings = [];
     }
 }

@@ -34,7 +34,8 @@ public class Account : AggregateRoot
         string email,
         string phoneNumber,
         string role,
-        string code
+        string code,
+        AccountLanguages language = AccountLanguages.Vi
     )
     {
         DisplayName = Guard.Against.Null(displayName, nameof(DisplayName));
@@ -43,6 +44,7 @@ public class Account : AggregateRoot
         PhoneNumber = Guard.Against.Null(phoneNumber, nameof(PhoneNumber));
         Role = Guard.Against.NullOrEmpty(role, nameof(Role));
         Code = Guard.Against.NullOrEmpty(code, nameof(Code));
+        Language = Guard.Against.Null(language, nameof(Language));
     }
 
     private Account()

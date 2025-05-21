@@ -9,3 +9,6 @@ CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
 
 \connect ecommerce_service
 CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+
+\connect finance_service
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
