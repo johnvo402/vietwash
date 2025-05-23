@@ -76,21 +76,35 @@ namespace Infrastructure.Services.Managements
                 if (!hasExternalTransaction)
                     await _context.DatabaseFacade.BeginTransactionAsync();
 
-                // Xóa toàn bộ UnitRelation cũ
-                _unitRelationContext.RemoveRange(service.UnitRelations);
-                service.UnitRelations.Clear(); // Xóa trong bộ nhớ
+				// Lấy danh sách UnitRelation hiện tại
+				var existingUnitRelations = service.UnitRelations.ToList();
 
-                // Thêm tất cả UnitRelation mới
-                var newUnitRelations = unitRelations.ToList();
-                foreach (var unitRelation in newUnitRelations)
-                {
-                    unitRelation.ReferenceId = service.Id; // Liên kết với Service
-                    _unitRelationContext.Add(unitRelation); // Thêm mới
-                }
-                service.UnitRelations = newUnitRelations; // Gán danh sách mới
+				// Xác định UnitRelation cần xóa (không còn trong danh sách mới)
+				var unitRelationIdsToKeep = unitRelations.Select(ur => ur.Id).Where(id => id > 0).ToList();
+				var unitRelationsToRemove = existingUnitRelations
+					.Where(ur => !unitRelationIdsToKeep.Contains(ur.Id))
+					.ToList();
 
-                // Cập nhật Service
-                _serviceContext.Update(service);
+				// Xóa UnitRelation không còn trong danh sách mới
+				_unitRelationContext.RemoveRange(unitRelationsToRemove);
+
+				// Cập nhật hoặc thêm mới UnitRelation
+				foreach (var unitRelation in unitRelations)
+				{
+					unitRelation.ReferenceId = service.Id;
+					var existingUnitRelation = existingUnitRelations.FirstOrDefault(ur => ur.Id == unitRelation.Id);
+					if (existingUnitRelation != null)
+					{
+						_unitRelationContext.Update(unitRelation); // Cập nhật
+					}
+					else if (unitRelation.Id == 0 || unitRelation.Id == null)
+					{
+						unitRelation.Id = 0; // Đảm bảo DB tự tăng
+						_unitRelationContext.Add(unitRelation); // Thêm mới
+					}
+				}
+				// Cập nhật Service
+				_serviceContext.Update(service);
 
                 await _context.SaveChangesAsync();
 

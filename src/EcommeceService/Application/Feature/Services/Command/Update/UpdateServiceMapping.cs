@@ -9,15 +9,20 @@ namespace Application.Feature.Services.Command.Update
     {
         public UpdateServiceMapping()
         {
-            CreateMap<ServiceModel, Service>()
-                .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => Ulid.Parse(src.CategoryId)))
-                .ForMember(dest => dest.UnitRelations, opt => opt.Ignore());
+            CreateMap<UpdateServiceModel, Service>()
+				.ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryId))
+				.ForMember(dest => dest.UnitRelations, opt => opt.Ignore())
+                .ForMember(dest => dest.Category, opt => opt.Ignore())
+				.ForMember(dest => dest.OrderItems, opt => opt.Ignore())
+				.ForMember(dest => dest.GroupServices, opt => opt.Ignore())
+				.ForMember(dest => dest.ServicePriceTariffHistories, opt => opt.Ignore());
 
-            CreateMap<UnitRelationModel, UnitRelation>()
-                .ForMember(dest => dest.BaseUnit, opt => opt.MapFrom(src => src.BaseUnit))
-                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price));
+			CreateMap<UpdateUnitRelationModel, UnitRelation>()
+				.ForMember(dest => dest.ReferenceId, opt => opt.Ignore())
+				.ForMember(dest => dest.Service, opt => opt.Ignore())
+				.ForMember(dest => dest.OrderItems, opt => opt.Ignore());
 
-            CreateMap<Service, UpdateServiceResponse>()
+			CreateMap<Service, UpdateServiceResponse>()
                 .IncludeBase<Service, ServiceDetailProjection>();
         }
     }

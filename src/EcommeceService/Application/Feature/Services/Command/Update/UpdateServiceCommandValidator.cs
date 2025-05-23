@@ -2,6 +2,7 @@
 using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Aggregates.Services;
 using FluentValidation;
+using Infrastructure.UnitOfWorks;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 
 namespace Application.Feature.Services.Command.Update
@@ -23,7 +24,13 @@ namespace Application.Feature.Services.Command.Update
 
         private void ApplyRules()
         {
-            RuleFor(x => x.Service.Name)
+			RuleFor(x => x.ServiceId)
+				.GreaterThan(0).WithMessage("Id must be a positive number.")
+				.MustAsync(async (id, cancellation) =>
+				{
+					return await unitOfWork.Repository<Service>().AnyAsync(s => s.Id == id, cancellation);
+				}).WithMessage("Service does not exist.");
+			RuleFor(x => x.Service.Name)
                 .NotEmpty()
                 .WithState(x =>
                     Messager
@@ -41,6 +48,14 @@ namespace Application.Feature.Services.Command.Update
                         .Message(MessageType.MaximumLength)
                         .Build()
                 );
-        }
+			RuleFor(x => x.Service.CategoryId)
+			.NotEmpty()
+			.GreaterThan(0).WithMessage("CategoryId must be a positive number.")
+			.MustAsync(async (categoryId, cancellation) =>
+			{
+				var categoryExists = await unitOfWork.Repository<Category>().AnyAsync(c => c.Id == categoryId, cancellation);
+				return categoryExists;
+			}).WithMessage("CategoryId does not exist.");
+		}
     }
 }

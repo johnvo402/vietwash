@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
@@ -26,7 +25,7 @@ public class GetServiceDetailHandler(IUnitOfWork unitOfWork, IMapper mapper)
             await unitOfWork
                 .Repository<Service>()
                 .FindByConditionAsync(
-                    new GetServiceWithIncludeByIdSpecification(long.Parse(command.ServiceId)),
+                    new GetServiceWithIncludeByIdSpecification(command.ServiceId),
                     cancellationToken
                 )
             ?? throw new NotFoundException(
@@ -41,7 +40,7 @@ public class GetServiceDetailHandler(IUnitOfWork unitOfWork, IMapper mapper)
                    new GetUserByIdWithoutIncludeSpecification(long.Parse(service.CreatedBy)),
                    cancellationToken
                );
-        }
+		}
         if (service.UpdatedBy != null)
         {
             updatedByUser = !string.IsNullOrEmpty(service.UpdatedBy)

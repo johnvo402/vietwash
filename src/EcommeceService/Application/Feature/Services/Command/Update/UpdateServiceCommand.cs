@@ -1,15 +1,18 @@
 using Application.Feature.Common.Projections.Services;
 using Contracts.Routers;
+using Domain.Aggregates.Orders.Enums;
+using Domain.Aggregates.Services.Enums;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Application.Feature.Services.Command.Update;
 
 public class UpdateServiceCommand : IRequest<UpdateServiceResponse>
 {
     [FromRoute(Name = RouterBase.Id)]
-    public string ServiceId { get; set; } = string.Empty;
-
-    [FromBody]
-    public ServiceModel Service { get; set; } = default!;
+    public long ServiceId { get; set; } = default!;
+	public ServiceStatus? Status { get; set; }
+	[FromBody]
+    public UpdateServiceModel Service { get; set; } = default!;
 }

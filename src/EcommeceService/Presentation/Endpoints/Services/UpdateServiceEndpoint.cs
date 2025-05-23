@@ -18,9 +18,9 @@ public class UpdateServiceEndpoint(ISender sender)
 {
     [HttpPut(Router.ServiceRoute.GetUpdateDelete)]
     [SwaggerOperation(Tags = [Router.ServiceRoute.Tags], Summary = "Update service")]
-    [AuthorizeBy(permissions: $"{ActionPermission.update}:{ObjectPermission.service}")]
+    //[AuthorizeBy(permissions: $"{ActionPermission.update}:{ObjectPermission.service}")]
     public override async Task<ActionResult<ApiResponse<Mediator.Unit>>> HandleAsync(
-        [FromForm] UpdateServiceCommand request,
+        UpdateServiceCommand request,
         CancellationToken cancellationToken = default
     )
     {

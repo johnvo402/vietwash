@@ -10,13 +10,15 @@ namespace Application.Feature.Common.Projections.Services
     {
         public string Name { get; set; } = default!;
         public string? Description { get; set; }
+		public TypeStatus Type { get; set; } = default!;
+		public string? Slug { get; set; }
 
-        [File]
+		[File]
         public string? Image { get; set; }
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public ServiceStatus? Status { get; set; }
-        public Ulid CategoryId { get; set; } = default!;
+        public long CategoryId { get; set; } = default!;
 
         public List<UnitRelationProjection> UnitRelations { get; set; } = new();
     }
