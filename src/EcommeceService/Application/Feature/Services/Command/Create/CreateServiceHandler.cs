@@ -34,13 +34,6 @@ namespace Application.Feature.Services.Command.Create
                 DbTransaction transaction = await unitOfWork.CreateTransactionAsync(
                     cancellationToken
                 );
-                // Gán các giá trị bắt buộc cho Service
-                var currentUserId = accessorService.Id;
-				mappingService.CreatedBy = currentUserId;
-				mappingService.UpdatedBy = currentUserId;
-				mappingService.CreatedAt = DateTime.UtcNow;
-				mappingService.UpdatedAt = DateTime.UtcNow;
-
 				if (string.IsNullOrEmpty(mappingService.Slug))
 				{
 					mappingService.Slug = GenerateSlug(mappingService.Name);
@@ -62,10 +55,6 @@ namespace Application.Feature.Services.Command.Create
 				foreach (var unitRelation in unitRelations)
 				{
 					unitRelation.ReferenceId = service.Id;
-					unitRelation.CreatedBy = currentUserId;
-					unitRelation.UpdatedBy = currentUserId;
-					unitRelation.CreatedAt = DateTime.UtcNow;
-					unitRelation.UpdatedAt = DateTime.UtcNow;
 					await unitOfWork.Repository<UnitRelation>().AddAsync(unitRelation, cancellationToken);
 				}
 

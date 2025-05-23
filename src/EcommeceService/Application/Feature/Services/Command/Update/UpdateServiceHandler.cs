@@ -70,17 +70,12 @@ public class UpdateServiceHandler(
             {
                 // Cập nhật UnitRelation cũ
                 mapper.Map(updatedUnitRelation, existingUnitRelation);
-                existingUnitRelation.UpdatedBy = currentUserId;
-                existingUnitRelation.UpdatedAt = DateTime.UtcNow;
                 unitRelationsToProcess.Add(existingUnitRelation);
             }
             else
             {
                 // Thêm mới UnitRelation
                 updatedUnitRelation.CreatedBy = currentUserId;
-                updatedUnitRelation.CreatedAt = DateTime.UtcNow;
-                updatedUnitRelation.UpdatedBy = currentUserId;
-                updatedUnitRelation.UpdatedAt = DateTime.UtcNow;
                 unitRelationsToProcess.Add(updatedUnitRelation);
             }
         }

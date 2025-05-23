@@ -17,10 +17,6 @@ public class DeleteServiceHandler(IUnitOfWork unitOfWork) : IRequestHandler<Dele
         CancellationToken cancellationToken
     )
     {
-		if (command.ServiceId < 0)
-		{
-			throw new ArgumentException("ServiceId must be a positive number", nameof(command.ServiceId));
-		}
 		Service existingService =
             await unitOfWork.Repository<Service>().FindByIdAsync(command.ServiceId)
             ?? throw new NotFoundException(

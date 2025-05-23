@@ -25,7 +25,15 @@ namespace Application.Feature.Services.Command.Update
         private void ApplyRules()
         {
 			RuleFor(x => x.ServiceId)
-				.GreaterThan(0).WithMessage("Id must be a positive number.")
+				.NotEmpty()
+				.WithState(x =>
+						Messager
+							.Create<Service>()
+							.Property(x => x.CategoryId)
+							.Message(MessageType.Null)
+							.Negative()
+							.Build()
+				)
 				.MustAsync(async (id, cancellation) =>
 				{
 					return await unitOfWork.Repository<Service>().AnyAsync(s => s.Id == id, cancellation);
@@ -49,13 +57,28 @@ namespace Application.Feature.Services.Command.Update
                         .Build()
                 );
 			RuleFor(x => x.Service.CategoryId)
-			.NotEmpty()
-			.GreaterThan(0).WithMessage("CategoryId must be a positive number.")
-			.MustAsync(async (categoryId, cancellation) =>
-			{
-				var categoryExists = await unitOfWork.Repository<Category>().AnyAsync(c => c.Id == categoryId, cancellation);
-				return categoryExists;
-			}).WithMessage("CategoryId does not exist.");
+			    .NotEmpty()
+			    .WithState(x =>
+					    Messager
+						    .Create<Service>()
+						    .Property(x => x.CategoryId)
+						    .Message(MessageType.Null)
+						    .Negative()
+						    .Build()
+			    )
+			    .MustAsync(async (categoryId, cancellation) =>
+			    {
+				    var categoryExists = await unitOfWork.Repository<Category>().AnyAsync(c => c.Id == categoryId, cancellation);
+				    return categoryExists;
+			    })
+			    .WithState(_ =>
+					    Messager
+						    .Create<Service>()
+						    .Property(x => x.CategoryId)
+						    .Message(MessageType.Found)
+						    .Negative()
+						    .Build()
+			    );
 		}
     }
 }

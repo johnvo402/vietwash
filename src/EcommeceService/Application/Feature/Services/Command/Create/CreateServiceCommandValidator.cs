@@ -3,6 +3,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Common.Validators.Services;
 using Domain.Aggregates.Services;
 using FluentValidation;
+using Infrastructure.UnitOfWorks;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 
 
@@ -46,13 +47,28 @@ public class CreateServiceCommandValidator : AbstractValidator<CreateServiceComm
 						.Build()
 				);
 		RuleFor(x => x.CategoryId)
-			.NotEmpty()
-			.GreaterThan(0).WithMessage("CategoryId must be a positive number.")
-			.MustAsync(async (categoryId, cancellation) =>
-			{
-				var categoryExists = await _unitOfWork.Repository<Category>().AnyAsync(c => c.Id == categoryId, cancellation);
-				return categoryExists;
-			}).WithMessage("CategoryId does not exist.");
+				.NotEmpty()
+				.WithState(x =>
+						Messager
+							.Create<Service>()
+							.Property(x => x.CategoryId)
+							.Message(MessageType.Null)
+							.Negative()
+							.Build()
+				)
+				.MustAsync(async (categoryId, cancellation) =>
+				{
+					var categoryExists = await _unitOfWork.Repository<Category>().AnyAsync(c => c.Id == categoryId, cancellation);
+					return categoryExists;
+				})
+				.WithState(_ =>
+						Messager
+							.Create<Service>()
+							.Property(x => x.CategoryId)
+							.Message(MessageType.Found)
+							.Negative()
+							.Build()
+				);
 		//RuleFor(x => x.BranchId)
 		//		.GreaterThan(0).WithMessage("BranchId must be a positive number.")
 		//		.MustAsync(async (branchId, cancellation) =>
