@@ -1,4 +1,4 @@
-using Domain.Aggregates.Equipments;
+using Domain.Aggregates.Inventories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -22,6 +22,9 @@ public class EquipmentSupplyingConfiguration : IEntityTypeConfiguration<Equipmen
             .WithMany(x => x.EquipmentSupplyings)
             .HasForeignKey(x => x.InventoryDocumentId);
 
-        builder.HasOne(x => x.Unit).WithMany(x => x.EquipmentSupplyings).HasForeignKey(x => x.UnitId);
+        builder
+            .HasOne(x => x.UnitRelation)
+            .WithMany(x => x.EquipmentSupplyings)
+            .HasForeignKey(x => x.UnitRelationId);
     }
 }

@@ -27,7 +27,6 @@ public class CurrentUserService : ICurrentAccount
         }
     }
 
-
     public void SetClientIp(HttpContext httpContext)
     {
         ClientIp = httpContext.Connection.RemoteIpAddress?.ToString();

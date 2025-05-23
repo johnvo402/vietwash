@@ -14,7 +14,7 @@ public static class Results
     public static ActionResult<ApiResponse<T>> Ok200<T>(this ControllerBase controller, T data) =>
         controller.ToActionResult(new Result<ApiResponse<T>>(new ApiResponse<T>(data, Message.SUCCESS, StatusCodes.Status200OK)));
 
-    public static ActionResult<ApiResponse<T>> Created201<T>(this ControllerBase controller, string routeName, Ulid id, T? data = default) =>
+    public static ActionResult<ApiResponse<T>> Created201<T>(this ControllerBase controller, string routeName, long id, T? data = default) =>
         controller.CreatedAtRoute(routeName, new { id }, data);
     public static ActionResult<ApiResponse<T>> Created201<T>(this ControllerBase controller, T data)
     {

@@ -27,7 +27,6 @@ public class CreateAccountHandler(
         string? userAvatar = null;
         try
         {
-            
             DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
 
             Account user = await unitOfWork

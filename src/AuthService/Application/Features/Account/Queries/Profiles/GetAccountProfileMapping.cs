@@ -8,6 +8,7 @@ public class GetAccountProfileMapping : Profile
 {
     public GetAccountProfileMapping()
     {
-        CreateMap<Account, GetAccountProfileResponse>().IncludeBase<Account, AccountDetailProjection>();
+        CreateMap<Account, GetAccountProfileResponse>()
+            .IncludeBase<Account, AccountDetailProjection>();
     }
 }
