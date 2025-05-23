@@ -1,14 +1,7 @@
 ﻿using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Validator.Funds;
-using Application.Features.Funds.Command.Create;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Application.Features.FundBehaviors.Command
 {
     public class CreateFundBehaviorCommandValidator : AbstractValidator<CreateFundBehaviorCommand>

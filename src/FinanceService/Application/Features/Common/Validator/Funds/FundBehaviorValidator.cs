@@ -28,9 +28,9 @@ namespace Application.Features.Common.Validator.Funds
         {
             RuleFor(x => x.Name)
                 .NotEmpty()
-                .WithMessage("Fund name must not be empty.")
+                .WithMessage("Fund behavior name must not be empty.")
                 .MaximumLength(200)
-                .WithMessage("Fund name must not exceed 200 characters.");
+                .WithMessage("Fund behavior name must not exceed 200 characters.");
 
             RuleFor(x => x.Type)
                 .IsInEnum()

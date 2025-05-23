@@ -1,4 +1,5 @@
-﻿using Application.Common.Interfaces.Services;
+﻿
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Validator.Funds;
 using FluentValidation;

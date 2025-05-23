@@ -1,5 +1,4 @@
 ﻿using Application.Features.FundBehaviors.Command;
-using Application.Features.Funds.Command.Create;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;

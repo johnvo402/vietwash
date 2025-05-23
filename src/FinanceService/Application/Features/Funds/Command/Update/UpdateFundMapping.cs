@@ -1,6 +1,4 @@
-﻿
-
-using Application.Features.Common.Projections.Funds;
+﻿using Application.Features.Common.Projections.Funds;
 using AutoMapper;
 using Domain.Aggregates.Funds;
 

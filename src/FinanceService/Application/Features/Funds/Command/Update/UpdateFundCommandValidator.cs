@@ -1,10 +1,8 @@
 ﻿using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using FluentValidation;
-using System.Threading.Tasks;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Domain.Aggregates.Funds;
-using Domain.Aggregates.Funds.Enums;
 
 namespace Application.Features.Funds.Command.Update
 {

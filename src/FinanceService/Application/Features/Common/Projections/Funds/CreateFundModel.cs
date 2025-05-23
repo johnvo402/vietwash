@@ -17,6 +17,7 @@ namespace Application.Features.Common.Projections.Funds
         public long FundBehaviorId { get; set; }
         public long ObjectId { get; set; }
         public string Note { get; set; } = default!;
+        public FundStatus Status { get; set; } = default!;
         public PaymentMethod PaymentMethod { get; set; } = default!;
         public long BranchId { get; set; } = default!;
     }

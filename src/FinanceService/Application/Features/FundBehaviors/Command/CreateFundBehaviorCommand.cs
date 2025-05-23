@@ -1,7 +1,4 @@
-﻿using Application.Common.Interfaces.UnitOfWorks;
-using Application.Features.Common.Projections.FundBehaviors;
-using AutoMapper;
-using Domain.Aggregates.Funds;
+﻿using Application.Features.Common.Projections.FundBehaviors;
 using Mediator;
 
 namespace Application.Features.FundBehaviors.Command
