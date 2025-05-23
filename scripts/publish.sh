@@ -34,6 +34,8 @@ for db in "$@"; do
        publish_service "EcommerceService" "src/EcommeceService/Presentation"
     elif [ "$db" == "project" ]; then
         publish_service "ProjectService" "src/ProjectService/Presentation"
+    elif [ "$db" == "finance" ]; then
+        publish_service "FinanceService" "src/FinanceService/Presentation"
     else
         echo "Unknown database: $db"
         exit 1

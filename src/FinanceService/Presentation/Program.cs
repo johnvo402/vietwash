@@ -1,4 +1,5 @@
 using Application;
+using Application.Jobs;
 using Contracts.Converters;
 using Contracts.Extensions;
 using HealthChecks.UI.Client;
@@ -28,6 +29,8 @@ builder
             new Cysharp.Serialization.Json.UlidJsonConverter()
         );
     });
+services.AddScoped<CheckCustomerLoyal>();
+
 services.AddSwagger(configuration);
 builder.AddOpenTelemetryTracing(configuration);
 services.AddHealthChecks();
