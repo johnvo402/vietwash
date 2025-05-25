@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ImportService.Models;
 
-namespace ImportService
+namespace ImportService.Service
 {
     public interface IExcelImportService
     {

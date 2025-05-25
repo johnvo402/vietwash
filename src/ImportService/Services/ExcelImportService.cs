@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using ImportService.Models;
 using OfficeOpenXml;
 
-namespace ImportService
+namespace ImportService.Service
 {
     public class ExcelImportService : IExcelImportService
     {

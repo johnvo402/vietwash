@@ -1,4 +1,4 @@
-using ImportService;
+using ImportService.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
