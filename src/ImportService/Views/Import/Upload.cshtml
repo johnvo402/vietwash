@@ -1,0 +1,67 @@
+<style>
+    .import-form {
+        max-width: 500px;
+        margin: 100px auto;
+        padding: 30px;
+        background: #f9f9f9;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        font-family: 'Segoe UI', sans-serif;
+        text-align: center;
+    }
+
+    .import-form h2 {
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .import-form input[type="file"] {
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 6px;
+        background-color: #fff;
+        width: 100%;
+    }
+
+    .import-form button {
+        padding: 12px 25px;
+        background-color: #28a745;
+        border: none;
+        color: white;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .import-form button:hover {
+        background-color: #218838;
+    }
+
+    .result-message {
+        margin-top: 20px;
+        font-size: 16px;
+        color: #155724;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #c3e6cb;
+    }
+</style>
+
+<div class="import-form">
+    <h2>Import Excel</h2>
+    <form asp-action="Upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" required />
+        <br />
+        <button type="submit">Import Excel</button>
+    </form>
+
+    @if (ViewBag.Result != null)
+    {
+        <div class="result-message">
+            Import thành công: @ViewBag.Result.SuccessCount bản ghi.
+        </div>
+    }
+</div>
