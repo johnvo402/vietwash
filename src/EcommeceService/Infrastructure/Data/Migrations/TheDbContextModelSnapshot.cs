@@ -2030,60 +2030,6 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("voucher_customer", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Warehouses.Warehouse", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("BranchId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("branch_id");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("citext")
-                        .HasColumnName("code");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
-
-                    b.Property<int>("ReorderLevel")
-                        .HasColumnType("integer")
-                        .HasColumnName("reorder_level");
-
-                    b.Property<short>("Status")
-                        .HasColumnType("smallint")
-                        .HasColumnName("status");
-
-                    b.HasKey("Id")
-                        .HasName("pk_warehouse");
-
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_warehouse_id");
-
-                    b.ToTable("warehouse", (string)null);
-                });
-
             modelBuilder.Entity("Domain.Aggregates.Equipments.MaintenanceDetail", b =>
                 {
                     b.HasOne("Domain.Aggregates.Equipments.MaintenanceHistory", "MaintenanceHistory")
