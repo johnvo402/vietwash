@@ -34,16 +34,16 @@ namespace Application.Feature.Services.Command.Create
                 DbTransaction transaction = await unitOfWork.CreateTransactionAsync(
                     cancellationToken
                 );
-				if (string.IsNullOrEmpty(mappingService.Slug))
-				{
-					mappingService.Slug = GenerateSlug(mappingService.Name);
-					bool slugExists = await unitOfWork.Repository<Service>()
-				.AnyAsync(s => s.Slug == mappingService.Slug, cancellationToken);
-					if (slugExists)
-					{
-						throw new InvalidOperationException($"Slug '{mappingService.Slug}' already exists.");
-					}
-				}
+				//if (string.IsNullOrEmpty(mappingService.Slug))
+				//{
+				//	mappingService.Slug = GenerateSlug(mappingService.Name);
+				//	bool slugExists = await unitOfWork.Repository<Service>()
+				//.AnyAsync(s => s.Slug == mappingService.Slug, cancellationToken);
+				//	if (slugExists)
+				//	{
+				//		throw new InvalidOperationException($"Slug '{mappingService.Slug}' already exists.");
+				//	}
+				//}
 
 				Service service = await unitOfWork
                     .Repository<Service>()

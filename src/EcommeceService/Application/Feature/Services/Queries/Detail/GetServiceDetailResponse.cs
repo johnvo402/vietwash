@@ -4,8 +4,8 @@ namespace Application.Feature.Services.Queries.Detail
 {
     public class GetServiceDetailResponse : ServiceDetailProjection
     {
-        public UserDTO? CreatedByUser { get; set; }
-        public UserDTO? UpdatedByUser { get; set; }
+        //public UserDTO? CreatedByUser { get; set; }
+        //public UserDTO? UpdatedByUser { get; set; }
         public CategoryModel? Category { get; set; }
     }
 

@@ -41,17 +41,17 @@ public class UpdateServiceHandler(
 		existingService.UpdatedAt = DateTime.UtcNow;
 
 		// Kiểm tra và tạo Slug nếu name thay đổi
-		if (existingService.Name != command.Service.Name)
-		{
-			existingService.Slug = GenerateSlug(command.Service.Name);
+		//if (existingService.Name != command.Service.Name)
+		//{
+		//	existingService.Slug = GenerateSlug(command.Service.Name);
 
-			bool slugExists = await unitOfWork.Repository<Service>()
-				.AnyAsync(s => s.Id != existingService.Id && s.Slug == existingService.Slug, cancellationToken);
-			if (slugExists)
-			{
-				throw new InvalidOperationException($"Slug '{existingService.Slug}' already exists.");
-			}
-		}
+		//	bool slugExists = await unitOfWork.Repository<Service>()
+		//		.AnyAsync(s => s.Id != existingService.Id && s.Slug == existingService.Slug, cancellationToken);
+		//	if (slugExists)
+		//	{
+		//		throw new InvalidOperationException($"Slug '{existingService.Slug}' already exists.");
+		//	}
+		//}
 
 		// Lấy danh sách UnitRelation cũ
         var existingUnitRelations = existingService.UnitRelations.ToList();
