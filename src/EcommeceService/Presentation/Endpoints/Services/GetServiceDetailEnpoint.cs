@@ -14,7 +14,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Presentation.Endpoints.Services
 {
     public class GetServiceDetailEnpoint(ISender sender)
-        : EndpointBaseAsync.WithRequest<string>.WithActionResult<
+        : EndpointBaseAsync.WithRequest<long>.WithActionResult<
             ApiResponse<GetServiceDetailResponse>
         >
     {
@@ -23,9 +23,9 @@ namespace Presentation.Endpoints.Services
             Tags = [Presentation.Routes.Router.ServiceRoute.Tags],
             Summary = "Detail service"
         )]
-         [AuthorizeBy(permissions: $"{ActionPermission.detail}:{ObjectPermission.service}")]
+        //[AuthorizeBy(permissions: $"{ActionPermission.detail}:{ObjectPermission.service}")]
         public override async Task<ActionResult<ApiResponse<GetServiceDetailResponse>>> HandleAsync(
-            [FromRoute(Name = RouterBase.Id)] string serviceId,
+            [FromRoute(Name = RouterBase.Id)] long serviceId,
             CancellationToken cancellationToken = default
         ) => this.Ok200(await sender.Send(new GetServiceDetailQuery(serviceId), cancellationToken));
     }

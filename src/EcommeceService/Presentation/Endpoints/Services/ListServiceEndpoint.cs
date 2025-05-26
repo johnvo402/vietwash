@@ -19,7 +19,7 @@ public class ListServiceEndpoint(ISender sender)
 {
     [HttpGet(Router.ServiceRoute.Services)]
     [SwaggerOperation(Tags = [Router.ServiceRoute.Tags], Summary = "Service list")]
-    [AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.service}")]
+    //[AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.service}")]
     public override async Task<
         ActionResult<ApiResponse<PaginationResponse<ListServiceResponse>>>
     > HandleAsync(ListServiceQuery request, CancellationToken cancellationToken = default) =>

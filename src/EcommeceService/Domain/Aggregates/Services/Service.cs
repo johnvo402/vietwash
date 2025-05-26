@@ -14,7 +14,10 @@ namespace Domain.Aggregates.Services
         public string? Description { get; set; }
         public string? Image { get; set; }
         public bool Disable { get; set; } = default!;
-        public Category Category { get; set; } = default!;
+		public string? Slug { get; set; }
+        public TypeStatus Type { get; set; } = default!; // combo hay service thường
+		public ServiceStatus Status { get; set; } = default!;
+		public Category Category { get; set; } = default!;
 		public ICollection<OrderItem> OrderItems { get; set; } = [];
         public ICollection<UnitRelation> UnitRelations { get; set; } = [];
         public ICollection<GroupService> GroupServices { get; set; } = [];

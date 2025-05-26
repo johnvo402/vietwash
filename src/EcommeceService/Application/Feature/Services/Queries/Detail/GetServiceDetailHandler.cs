@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
@@ -20,46 +19,46 @@ public class GetServiceDetailHandler(IUnitOfWork unitOfWork, IMapper mapper)
     )
     {
 
-        User? createdByUser = null;
-        User? updatedByUser = null;
+        //User? createdByUser = null;
+        //User? updatedByUser = null;
         var service =
             await unitOfWork
                 .Repository<Service>()
                 .FindByConditionAsync(
-                    new GetServiceWithIncludeByIdSpecification(long.Parse(command.ServiceId)),
+                    new GetServiceWithIncludeByIdSpecification(command.ServiceId),
                     cancellationToken
                 )
             ?? throw new NotFoundException(
                 [Messager.Create<Service>().Message(MessageType.Found).Negative().BuildMessage()]
             );
 
-        if (service.CreatedBy != null)
-        {
-            createdByUser = await unitOfWork
-               .Repository<User>()
-               .FindByConditionAsync(
-                   new GetUserByIdWithoutIncludeSpecification(long.Parse(service.CreatedBy)),
-                   cancellationToken
-               );
-        }
-        if (service.UpdatedBy != null)
-        {
-            updatedByUser = !string.IsNullOrEmpty(service.UpdatedBy)
-           ? await unitOfWork
-               .Repository<User>()
-               .FindByConditionAsync(
-                   new GetUserByIdWithoutIncludeSpecification(long.Parse(service.UpdatedBy)),
-                   cancellationToken
-               )
-           : null;
-        }
+  //      if (service.CreatedBy != null)
+  //      {
+  //          createdByUser = await unitOfWork
+  //             .Repository<User>()
+  //             .FindByConditionAsync(
+  //                 new GetUserByIdWithoutIncludeSpecification(long.Parse(service.CreatedBy)),
+  //                 cancellationToken
+  //             );
+		//}
+  //      if (service.UpdatedBy != null)
+  //      {
+  //          updatedByUser = !string.IsNullOrEmpty(service.UpdatedBy)
+  //         ? await unitOfWork
+  //             .Repository<User>()
+  //             .FindByConditionAsync(
+  //                 new GetUserByIdWithoutIncludeSpecification(long.Parse(service.UpdatedBy)),
+  //                 cancellationToken
+  //             )
+  //         : null;
+  //      }
 
         var response = mapper.Map<GetServiceDetailResponse>(service);
 
-        if (createdByUser != null)
-            response.CreatedByUser = createdByUser != null ? mapper.Map<UserDTO>(createdByUser) : null;
-        if (updatedByUser != null)
-            response.UpdatedByUser = updatedByUser != null ? mapper.Map<UserDTO>(updatedByUser) : null;
+        //if (createdByUser != null)
+        //    response.CreatedByUser = createdByUser != null ? mapper.Map<UserDTO>(createdByUser) : null;
+        //if (updatedByUser != null)
+        //    response.UpdatedByUser = updatedByUser != null ? mapper.Map<UserDTO>(updatedByUser) : null;
 
         return response;
     }
