@@ -11,23 +11,23 @@ namespace Application.Feature.Services.Command.Create;
 
 public class CreateServiceCommandValidator : AbstractValidator<CreateServiceCommand>
 {
-    private readonly IUnitOfWork _unitOfWork;
+	private readonly IUnitOfWork _unitOfWork;
 
-    private readonly IActionAccessorService _accessorService;
+	private readonly IActionAccessorService _accessorService;
 
-    public CreateServiceCommandValidator(
-        IUnitOfWork unitOfWork,
-        IActionAccessorService accessorService
-    )
-    {
-        _unitOfWork = unitOfWork;
-        _accessorService = accessorService;
-        ApplyRules();
-    }
+	public CreateServiceCommandValidator(
+		IUnitOfWork unitOfWork,
+		IActionAccessorService accessorService
+	)
+	{
+		_unitOfWork = unitOfWork;
+		_accessorService = accessorService;
+		ApplyRules();
+	}
 
-    private void ApplyRules()
-    {
-        Include(new ServiceValidator(_unitOfWork, _accessorService));
+	private void ApplyRules()
+	{
+		Include(new ServiceValidator(_unitOfWork, _accessorService));
 		RuleFor(x => x.Name)
 				.NotEmpty()
 				.WithState(x =>
@@ -56,11 +56,7 @@ public class CreateServiceCommandValidator : AbstractValidator<CreateServiceComm
 							.Negative()
 							.Build()
 				)
-				.MustAsync(async (categoryId, cancellation) =>
-				{
-					var categoryExists = await _unitOfWork.Repository<Category>().AnyAsync(c => c.Id == categoryId, cancellation);
-					return categoryExists;
-				})
+				.MustAsync(IsCategoryExistsAsync)
 				.WithState(_ =>
 						Messager
 							.Create<Service>()
@@ -69,13 +65,10 @@ public class CreateServiceCommandValidator : AbstractValidator<CreateServiceComm
 							.Negative()
 							.Build()
 				);
-		//RuleFor(x => x.BranchId)
-		//		.GreaterThan(0).WithMessage("BranchId must be a positive number.")
-		//		.MustAsync(async (branchId, cancellation) =>
-		//		{
-		//			// Assuming a repository method to check if BranchId exists
-		//			var branchExists = await _unitOfWork.Repository<Branch>().AnyAsync(b => b.Id == branchId, cancellation);
-		//			return branchExists;
-		//		}).WithMessage("BranchId does not exist.");
+	}
+
+		private async Task<bool> IsCategoryExistsAsync(long categoryId, CancellationToken cancellation)
+	{
+		return await _unitOfWork.Repository<Category>().AnyAsync(c => c.Id == categoryId, cancellation);
 	}
 }
