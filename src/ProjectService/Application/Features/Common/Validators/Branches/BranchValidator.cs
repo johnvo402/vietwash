@@ -60,6 +60,16 @@ namespace Application.Features.Common.Validators.Branches
                         .Property(x => x.Code)
                         .Message(MessageType.MaximumLength)
                         .Build()
+                )
+                .MustAsync(
+                    (code, cancellationToken) => IsCodeAvaiableAsync(code, cancellationToken)
+                )
+                .WithState(x =>
+                    Messager
+                        .Create<Branch>()
+                        .Property(x => x.Code)
+                        .Message(MessageType.Existence)
+                        .Build()
                 );
 
             RuleFor(b => b.Email)
@@ -84,16 +94,6 @@ namespace Application.Features.Common.Validators.Branches
                         .Message(MessageType.Valid)
                         .Negative()
                         .Build()
-                )
-                .MustAsync(
-                    async (email, cancellationToken) => !await unitOfWork.Repository<Branch>().AnyAsync( e => e.Email == email, cancellationToken )
-                )
-                .WithState(x =>
-                    Messager
-                        .Create<Branch>()
-                        .Property(x => x.Email)
-                        .Message(MessageType.Existence)
-                        .Build()
                 );
 
             RuleFor(b => b.PhoneNumber)
@@ -115,7 +115,7 @@ namespace Application.Features.Common.Validators.Branches
                         .Message(MessageType.MaximumLength)
                         .Build()
                 );
-
+                
             RuleFor(b => b.AddressName)
                 .MaximumLength(256)
                 .WithState(x =>
@@ -210,5 +210,8 @@ namespace Application.Features.Common.Validators.Branches
 
         [GeneratedRegex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$")]
         private static partial Regex EmailValidationRegex();
+
+        private async Task<bool> IsCodeAvaiableAsync(string code, CancellationToken cancellationToken)
+        => !await unitOfWork.Repository<Branch>().AnyAsync(c => c.Code == code, cancellationToken);
     }
 }

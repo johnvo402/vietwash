@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.Aggregates.Warehouses.Enums;
 using JohnChum.SharedKernel.Domain.Common;
 using Mediator;
 
@@ -15,7 +16,7 @@ namespace Domain.Aggregates.Warehouses
         public string Description { get; set; } = default!;
         public int ReorderLevel { get; set; } = default!;
         public long BranchId { get; set; } = default!;
-        public short Status { get; set; } = default!;
+        public WarehouseStatus Status { get; set; } = default!;
 
 
         //public ICollection<InventoryRequest> InventoryRequests { get; set; } = [];

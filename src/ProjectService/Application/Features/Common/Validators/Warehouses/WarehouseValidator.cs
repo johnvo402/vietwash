@@ -5,6 +5,7 @@ using Domain.Aggregates.Branches;
 using Domain.Aggregates.Warehouses;
 using Domain.Aggregates.Warehouses.Enums;
 using FluentValidation;
+using Infrastructure.UnitOfWorks;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 
 namespace Application.Features.Common.Validators.Warehouses
@@ -100,7 +101,7 @@ namespace Application.Features.Common.Validators.Warehouses
                         .Build()
                 )
                 .MustAsync(
-                async (id, cancellationToken) => await _unitOfWork.Repository<Branch>().AnyAsync(i => i.Id == id, cancellationToken)
+                    (id, cancellationToken) => IsBranchIdAvaiableAsync(id, cancellationToken)
                 )
                 .WithState(x =>
                     Messager
@@ -120,5 +121,10 @@ namespace Application.Features.Common.Validators.Warehouses
                         .Build()
                 );
         }
+        private async Task<bool> IsCodeAvaiableAsync(string code, CancellationToken cancellationToken)
+        => !await _unitOfWork.Repository<Warehouse>().AnyAsync(c => c.Code == code, cancellationToken);
+
+        private async Task<bool> IsBranchIdAvaiableAsync(long branchId, CancellationToken cancellationToken)
+        => await _unitOfWork.Repository<Warehouse>().AnyAsync(c => c.BranchId == branchId, cancellationToken);
     }
 }
