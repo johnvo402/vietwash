@@ -55,7 +55,9 @@ public static class DependencyInjection
             .AddScoped<IDbContext, TheDbContext>()
             .AddScoped<IUnitOfWork, UnitOfWork>()
             .AddSingleton<UpdateAuditableEntityInterceptor>()
-            .AddSingleton<DispatchDomainEventInterceptor>();
+            .AddSingleton<DispatchDomainEventInterceptor>()
+            .AddScoped<IActionAccessorService, ActionAccessorService>();
+        ;
 
         if (
             environmentName!.CompareTo("Staging") == 0
