@@ -14,7 +14,7 @@ namespace Application.Features.Funds.Command.Update
     {
         public async ValueTask<Unit> Handle(UpdateFundCommand command, CancellationToken cancellationToken)
         {
-    
+
             Fund fund =
                 await unitOfWork
                     .Repository<Fund>()
@@ -22,10 +22,13 @@ namespace Application.Features.Funds.Command.Update
                         new GetFundByIdSpecification(long.Parse(command.FundId)),
                         cancellationToken
                     )
-                ?? throw new  Application.Common.Exceptions.NotFoundException(
+                ?? throw new Application.Common.Exceptions.NotFoundException(
                     [Messager.Create<Fund>().Message(MessageType.Found).Negative().BuildMessage()]
                 );
-
+            if (fund.Status.Equals("PendingConfirmation") && command.updateFundModel!.Status.Equals("Confirmed"))
+            {
+                command.updateFundModel.TransactionDate = DateTimeOffset.UtcNow;
+            }
             mapper.Map(command.updateFundModel, fund);
 
             try

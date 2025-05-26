@@ -1,11 +1,9 @@
 ﻿using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
-using FluentValidation;
-using Domain.Aggregates.Funds.Enums;
-using System;
-using System.Threading.Tasks;
 using Application.Features.Common.Projections.Funds;
 using Domain.Aggregates.Funds;
+using FluentValidation;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 
 namespace Application.Features.Common.Validator.Funds
 {
@@ -18,7 +16,6 @@ namespace Application.Features.Common.Validator.Funds
         {
             _unitOfWork = unitOfWork;
             _accessorService = accessorService;
-
             ApplyRules();
         }
 
@@ -26,34 +23,78 @@ namespace Application.Features.Common.Validator.Funds
         {
             RuleFor(x => x.Name)
                 .NotEmpty()
-                .WithMessage("Fund name must not be empty.")
-                .MaximumLength(200)
-                .WithMessage("Fund name must not exceed 200 characters.");
+                .WithState(x =>
+                    Messager
+                        .Create<Fund>()
+                        .Property(x => x.Name)
+                        .Message(MessageType.Null)
+                        .Negative()
+                        .Build()
+                )
+                .MaximumLength(256)
+                .WithState(x =>
+                    Messager
+                        .Create<Fund>()
+                        .Property(x => x.Name)
+                        .Message(MessageType.MaximumLength)
+                        .Build()
+                );
 
             RuleFor(x => x.Type)
                 .IsInEnum()
-                .WithMessage("Invalid fund type.");
+                .WithState(x =>
+                    Messager
+                        .Create<Fund>()
+                        .Property(x => x.Type)
+                        .Message(MessageType.Valid)
+                        .Build()
+                );
 
             RuleFor(x => x.Amount)
                 .GreaterThan(0)
-                .WithMessage("Amount must be greater than 0.");
+                .WithState(x =>
+                    Messager
+                        .Create<Fund>()
+                        .Property(x => x.Name)
+                        .Message(MessageType.GreaterThan)
+                        .Build()
+                );
 
             RuleFor(x => x.FundBehaviorId)
-                             .MustAsync(async (id, ct) =>
-                    await _unitOfWork.Repository<FundBehavior>().AnyAsync(fb => fb.Id == id, ct))
-                .WithMessage("Fund behavior does not exist.");
-
-
+                .MustAsync(FundBehaviorExists)
+                .WithState(x =>
+                    Messager
+                        .Create<Fund>()
+                        .Property(x => x.FundBehaviorId)
+                        .Message(MessageType.Existence)
+                        .Build()
+                );
 
             RuleFor(x => x.Note)
                 .MaximumLength(500)
-                .WithMessage("Note must not exceed 500 characters.");
+                .WithState(x =>
+                    Messager
+                        .Create<Fund>()
+                        .Property(x => x.Name)
+                        .Message(MessageType.MaximumLength)
+                        .Build()
+                );
 
             RuleFor(x => x.PaymentMethod)
                 .IsInEnum()
-                .WithMessage("Invalid payment method.");
+                .WithState(x =>
+                    Messager
+                        .Create<Fund>()
+                        .Property(x => x.PaymentMethod)
+                        .Message(MessageType.Valid)
+                        .Build()
+                );
+        }
 
-
+        private async Task<bool> FundBehaviorExists(long id, CancellationToken ct)
+        {
+            return await _unitOfWork.Repository<FundBehavior>().AnyAsync(fb => fb.Id == id, ct);
         }
     }
+
 }

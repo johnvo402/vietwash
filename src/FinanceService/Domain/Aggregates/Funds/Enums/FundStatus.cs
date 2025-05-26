@@ -8,8 +8,10 @@ namespace Domain.Aggregates.Funds.Enums
 {
     public enum FundStatus : byte
     {
-        Processing = 1,
-        Completed = 2,
-        Cancelled = 3,
+        PendingConfirmation = 1,
+        Confirmed = 2,
+        Cancelled = 3
+
+
     }
 }

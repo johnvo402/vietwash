@@ -1,13 +1,9 @@
 ﻿using Domain.Aggregates.Funds.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using JohnChum.SharedKernel.Application.Common;
 
 namespace Application.Features.Common.Projections.FundBehaviors
 {
-    public class FundBehaviorProjection
+    public class FundBehaviorProjection : BaseResponse<long>
     {
         public string Name { get; set; } = default!;
 

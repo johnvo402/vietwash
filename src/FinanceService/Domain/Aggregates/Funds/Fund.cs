@@ -1,4 +1,5 @@
 ﻿using Domain.Aggregates.Funds.Enums;
+using Domain.Aggregates.Users;
 using JohnChum.SharedKernel.Domain.Common;
 using Mediator;
 
@@ -14,11 +15,12 @@ namespace Domain.Aggregates.Funds
         public long ObjectId { get; set; }
         public long FundBehaviorId { get; set; }
         public string? Note { get; set; }
-        public DateTimeOffset TransactionDate { get; set; } = default!;
+        public DateTimeOffset? TransactionDate { get; set; }
         public PaymentMethod PaymentMethod { get; set; } = default!;
         public long ReferenceId { get; set; } = default!;
         public long BranchId { get; set; } = default!;
         public FundBehavior FundBehavior { get; set; } = default!;
+        public User User { get; set; } = default!;
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
             throw new NotImplementedException();

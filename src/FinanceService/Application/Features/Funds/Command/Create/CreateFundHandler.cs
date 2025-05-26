@@ -18,25 +18,25 @@ namespace Application.Features.Funds.Command.Create
             }
 
             fund.Code = $"FU-{DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()[^6..]}";
-            fund.TransactionDate = DateTimeOffset.UtcNow;
+            if (fund.Status.Equals("Confirmed")) { fund.TransactionDate = DateTimeOffset.UtcNow; } else { fund.TransactionDate = null; }
 
             try
             {
-                 
+
                 DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
 
-            
+
                 await unitOfWork.Repository<Fund>().AddAsync(fund, cancellationToken);
 
-               
+
                 await unitOfWork.SaveAsync(cancellationToken);
 
-               
+
                 await unitOfWork.CommitAsync(cancellationToken);
             }
             catch
             {
-          
+
                 await unitOfWork.RollbackAsync(cancellationToken);
                 throw;
             }

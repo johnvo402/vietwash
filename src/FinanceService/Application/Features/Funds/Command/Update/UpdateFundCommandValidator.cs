@@ -19,21 +19,75 @@ namespace Application.Features.Funds.Command.Update
             ApplyRules();
         }
 
+
         private void ApplyRules()
         {
-            RuleFor(x => x.FundId)
+            RuleFor(x => x.updateFundModel!.Name!)
                 .NotEmpty()
-                .WithState(x => Messager.Create<UpdateFundCommand>(nameof(Fund)).Property(x => x.FundId).Message(MessageType.Null).Negative().Build())
-                .Must(id => long.TryParse(id, out _))
-                .WithState(x => Messager.Create<UpdateFundCommand>(nameof(Fund)).Property(x => x.FundId).Message(MessageType.Valid).Negative().Build())
-                .MustAsync(async (id, ct) =>
-                    await _unitOfWork.Repository<Fund>().AnyAsync(f => f.Id == long.Parse(id), ct))
-                .WithState(x => Messager.Create<UpdateFundCommand>(nameof(Fund)).Property(x => x.FundId).Message(MessageType.Existence).Negative().Build());
+                .WithState(x =>
+                    Messager
+                        .Create<UpdateFundCommand>()
+                        .Property(x => x.updateFundModel!.Name!)
+                        .Message(MessageType.Null)
+                        .Negative()
+                        .Build()
+                )
+                .MaximumLength(256)
+                .WithState(x =>
+                    Messager
+                        .Create<UpdateFundCommand>()
+                        .Property(x => x.updateFundModel!.Name!)
+                        .Message(MessageType.MaximumLength)
+                        .Build()
+                );
 
-            RuleFor(x => x.updateFundModel)
-                .NotNull()
-                .WithState(x => Messager.Create<UpdateFundCommand>(nameof(Fund)).Property(x => x.updateFundModel).Message(MessageType.Null).Negative().Build());
 
+
+            RuleFor(x => x.updateFundModel!.Amount!)
+                .GreaterThan(0)
+                .WithState(x =>
+                    Messager
+                        .Create<UpdateFundCommand>()
+                        .Property(x => x.updateFundModel!.Amount!)
+                        .Message(MessageType.GreaterThan)
+                        .Build()
+                );
+            ;
+
+            RuleFor(x => x.updateFundModel!.BehaviorId!)
+                .MustAsync(FundBehaviorExists)
+                  .WithState(x =>
+                    Messager
+                        .Create<Fund>()
+                        .Property(x => x.FundBehaviorId)
+                        .Message(MessageType.Existence)
+                        .Build()
+                );
+
+            RuleFor(x => x.updateFundModel!.Note)
+                .MaximumLength(500)
+                .WithState(x =>
+                    Messager
+                        .Create<UpdateFundCommand>()
+                        .Property(x => x.updateFundModel!.Note!)
+                        .Message(MessageType.MaximumLength)
+                        .Build()
+                );
+            ;
+
+            RuleFor(x => x.updateFundModel!.PaymentMethod).IsInEnum().WithState(x =>
+                    Messager
+                        .Create<UpdateFundCommand>()
+                        .Property(x => x.updateFundModel!.PaymentMethod)
+                        .Message(MessageType.Valid)
+                        .Build()
+                ); ;
+        }
+
+
+        private async Task<bool> FundBehaviorExists(long id, CancellationToken ct)
+        {
+            return await _unitOfWork.Repository<FundBehavior>().AnyAsync(fb => fb.Id == id, ct);
         }
     }
 }

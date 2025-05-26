@@ -1,9 +1,9 @@
-﻿using Domain.Aggregates.Funds.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.Aggregates.Funds.Enums;
 
 namespace Application.Features.Common.Projections.Funds
 {

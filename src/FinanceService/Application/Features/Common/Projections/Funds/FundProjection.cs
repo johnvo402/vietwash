@@ -1,10 +1,10 @@
-﻿using Domain.Aggregates.Funds.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Domain.Aggregates.Funds.Enums;
 
 namespace Application.Features.Common.Projections.Funds
 {
@@ -18,6 +18,7 @@ namespace Application.Features.Common.Projections.Funds
         public string? Note { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
         public DateTimeOffset TransactionDate { get; set; }
+
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public PaymentMethod PaymentMethod { get; set; }
         public long ReferenceId { get; set; }

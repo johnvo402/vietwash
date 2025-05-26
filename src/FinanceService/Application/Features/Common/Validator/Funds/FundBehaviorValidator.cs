@@ -1,16 +1,13 @@
 ﻿using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Projections.FundBehaviors;
-using Application.Features.Common.Projections.Funds;
+using Domain.Aggregates.Funds;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 
 namespace Application.Features.Common.Validator.Funds
 {
+
     public class FundBehaviorValidator : AbstractValidator<CreateFundBehaviorModel>
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -20,23 +17,39 @@ namespace Application.Features.Common.Validator.Funds
         {
             _unitOfWork = unitOfWork;
             _accessorService = accessorService;
-
             ApplyRules();
         }
 
         private void ApplyRules()
         {
             RuleFor(x => x.Name)
-                .NotEmpty()
-                .WithMessage("Fund behavior name must not be empty.")
-                .MaximumLength(200)
-                .WithMessage("Fund behavior name must not exceed 200 characters.");
+               .NotEmpty()
+               .WithState(x =>
+                   Messager
+                       .Create<FundBehavior>()
+                       .Property(x => x.Name)
+                       .Message(MessageType.Null)
+                       .Negative()
+                       .Build()
+               )
+               .MaximumLength(256)
+               .WithState(x =>
+                   Messager
+                       .Create<FundBehavior>()
+                       .Property(x => x.Name)
+                       .Message(MessageType.MaximumLength)
+                       .Build()
+               );
 
-            RuleFor(x => x.Type)
-                .IsInEnum()
-                .WithMessage("Invalid fund type.");
-
-
+            RuleFor(x => x.Type).IsInEnum().WithState(x =>
+                    Messager
+                        .Create<FundBehavior>()
+                        .Property(x => x.Type)
+                        .Message(MessageType.Valid)
+                        .Build()
+                );
         }
+
+
     }
 }

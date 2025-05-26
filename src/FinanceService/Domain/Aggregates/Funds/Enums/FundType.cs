@@ -2,7 +2,7 @@
 {
     public enum FundType : byte
     {
-        income = 1,
-        spend = 2,
+        Income = 1,
+        Spend = 2,
     }
 }

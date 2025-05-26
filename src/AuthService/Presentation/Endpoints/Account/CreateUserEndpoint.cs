@@ -17,7 +17,7 @@ public class CreateAccountEndpoint(ISender sender)
 {
     [HttpPost(Router.AccountRoute.Accounts)]
     [SwaggerOperation(Tags = [Router.AccountRoute.Tags], Summary = "create Account")]
-    [AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.user}")]
+    //[AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.user}")]
     public override async Task<ActionResult<ApiResponse<CreateAccountResponse>>> HandleAsync(
         [FromForm] CreateAccountCommand request,
         CancellationToken cancellationToken = default
