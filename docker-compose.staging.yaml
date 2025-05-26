@@ -1,10 +1,10 @@
 # yaml refs
-x-refs:
-  common_config: &common_config
-    logging:
-      driver: gelf
-      options:
-        gelf-address: "udp://localhost:12201"
+# x-refs:
+#   common_config: &common_config
+#     logging:
+#       driver: gelf
+#       options:
+#         gelf-address: "udp://localhost:12201"
 
 services:
   nginx-api:
@@ -19,7 +19,7 @@ services:
       - gateway
 
   authen:
-    <<: *common_config
+    # <<: *common_config
     image: authen
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
@@ -27,7 +27,7 @@ services:
       context: .
       dockerfile: ./src/AuthService/Dockerfile
   ecommerce:
-    <<: *common_config
+    # <<: *common_config
     image: ecommerce
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
@@ -35,7 +35,7 @@ services:
       context: .
       dockerfile: ./src/EcommeceService/Dockerfile
   project:
-    <<: *common_config
+    # <<: *common_config
     image: project
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
@@ -44,7 +44,7 @@ services:
       dockerfile: ./src/ProjectService/Dockerfile
       
   gateway:
-    <<: *common_config
+    # <<: *common_config
     image: gateway
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
@@ -53,7 +53,7 @@ services:
       dockerfile: ./src/ApiGateway/Dockerfile
 
   finance:
-    <<: *common_config
+    # <<: *common_config
     image: finance
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging

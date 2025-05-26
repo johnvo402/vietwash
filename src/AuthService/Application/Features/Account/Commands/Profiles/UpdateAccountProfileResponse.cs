@@ -1,5 +1,8 @@
-using Application.Features.Common.Projections.Accounts;
+
 
 namespace Application.Features.Accounts.Commands.Profiles;
 
-public class UpdateAccountProfileResponse : AccountDetailProjection;
+public class UpdateAccountProfileResponse
+{
+    public string Message { get; set; } = default!;
+};

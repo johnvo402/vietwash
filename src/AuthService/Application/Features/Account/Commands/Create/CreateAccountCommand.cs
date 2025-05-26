@@ -6,6 +6,8 @@ namespace Application.Features.Accounts.Commands.Create;
 
 public class CreateAccountCommand : AccountModel, IRequest<CreateAccountResponse>
 {
+    public string? Email { get; set; }
+
     public string? Password { get; set; }
 
     public Gender? Gender { get; set; }

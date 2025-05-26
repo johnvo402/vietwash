@@ -11,5 +11,8 @@ public class AccountMapping : Profile
         CreateMap<Account, AccountProjection>();
 
         CreateMap<Account, AccountDetailProjection>();
+        CreateMap<AccountModel, Account>();
+        CreateMap<AccountContact, AccountContactProjection>();
+        CreateMap<AccountContactProjection, AccountContact>();
     }
 }

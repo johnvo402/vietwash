@@ -29,6 +29,59 @@ public partial class CreateAccountCommandValidator : AbstractValidator<CreateAcc
     private void ApplyRules()
     {
         Include(new AccountValidator(unitOfWork, accessorService));
+        _ = long.TryParse(accessorService.Id, out long id);
+        RuleFor(x => x.Email)
+            .NotEmpty()
+            .WithState(x =>
+                Messager
+                    .Create<Account>()
+                    .Property(x => x.Email)
+                    .Message(MessageType.Null)
+                    .Negative()
+                    .Build()
+            )
+            .Must(x =>
+            {
+                Regex regex = EmailValidationRegex();
+                return regex.IsMatch(x!);
+            })
+            .WithState(x =>
+                Messager
+                    .Create<Account>()
+                    .Property(x => x.Email)
+                    .Message(MessageType.Valid)
+                    .Negative()
+                    .Build()
+            )
+            .MustAsync(
+                (email, cancellationToken) => IsEmailAvailableAsync(email!, id, cancellationToken)
+            )
+            .When(
+                _ => accessorService.GetHttpMethod() == HttpMethod.Put.ToString(),
+                ApplyConditionTo.CurrentValidator
+            )
+            .WithState(x =>
+                Messager
+                    .Create<Account>()
+                    .Property(x => x.Email)
+                    .Message(MessageType.Existence)
+                    .Build()
+            )
+            .MustAsync(
+                (email, cancellationToken) =>
+                    IsEmailAvailableAsync(email!, cancellationToken: cancellationToken)
+            )
+            .When(
+                _ => accessorService.GetHttpMethod() == HttpMethod.Post.ToString(),
+                ApplyConditionTo.CurrentValidator
+            )
+            .WithState(x =>
+                Messager
+                    .Create<Account>()
+                    .Property(x => x.Email)
+                    .Message(MessageType.Existence)
+                    .Build()
+            );
 
         RuleFor(x => x.Password)
             .Must(
@@ -101,6 +154,23 @@ public partial class CreateAccountCommandValidator : AbstractValidator<CreateAcc
     {
         return new List<string> { "ADMIN", "MANAGER", "STAFF", "CUSTOMER" }.Contains(roles);
     }
+
+    private async Task<bool> IsEmailAvailableAsync(
+    string email,
+    long? id = null,
+    CancellationToken cancellationToken = default
+) =>
+    !await unitOfWork
+        .Repository<Account>()
+        .AnyAsync(
+            x =>
+                (!id.HasValue && EF.Functions.ILike(x.Email, email))
+                || (x.Id != id && EF.Functions.ILike(x.Email, email)),
+            cancellationToken
+        );
+
+    [GeneratedRegex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$")]
+    private static partial Regex EmailValidationRegex();
 
     [GeneratedRegex(@"^((?=\S*?[A-Z])(?=\S*?[a-z])(?=\S*?[0-9]).{8,})\S$")]
     private static partial Regex PasswordValidationRegex();

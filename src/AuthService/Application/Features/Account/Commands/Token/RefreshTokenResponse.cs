@@ -1,8 +1,5 @@
+using Application.Features.Common.Projections.Accounts;
+
 namespace Application.Features.Accounts.Commands.Token;
 
-public class RefreshTokenResponse
-{
-    public string? RefreshToken { get; set; }
-
-    public string? Token { get; set; }
-}
+public class RefreshTokenResponse : AccountTokenProjection;

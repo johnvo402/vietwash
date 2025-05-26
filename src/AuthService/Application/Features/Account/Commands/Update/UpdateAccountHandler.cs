@@ -34,14 +34,11 @@ public class UpdateAccountHandler(
                 [Messager.Create<Account>().Message(MessageType.Found).Negative().BuildMessage()]
             );
 
-        IFormFile? avatar = command.Account!.Avatar;
         string? oldAvatar = user.AvtUrl;
 
         mapper.Map(command.Account, user);
 
-
-        string? key = mediaUpdateService.GetKey(avatar);
-        user.AvtUrl = await mediaUpdateService.UploadAvatarAsync(avatar, key);
+        user.AvtUrl = command.Account!.AvtUrl;
         // update default claim
 
         try
