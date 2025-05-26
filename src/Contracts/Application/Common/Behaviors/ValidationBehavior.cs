@@ -30,9 +30,10 @@ public sealed class ValidationBehavior<TMessage, TResponse>(
                 .SelectMany(r => r.Errors)
                 .ToList();
 
-            if (failures.Count != 0)
+            if (failures.Any())
             {
-                throw new Exceptions.ValidationException(failures);
+                var errors = string.Join("\n", failures.Select(x => $"Property: {x.PropertyName}, Error: {x.ErrorMessage}"));
+                throw new ValidationException($"Validation failed:\n{errors}");
             }
         }
 

@@ -43,7 +43,7 @@ namespace Application.Feature.Common.Validators.Orders
 					.Negative()
 					.Build());
 			RuleFor(x => x.CustomerId)
-				//Customer không rong
+				//Customer không rỗng
 				.NotEmpty()
 				.WithState(x => Messager
 					.Create<CreateOrderModel>(nameof(Order))

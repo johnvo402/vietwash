@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using JohnChum.SharedKernel.Domain.Common;
 
-namespace Domain.Warehouses
+namespace Application.Features.Common.Projections.Warehouses
 {
-    public class Warehouse : DefaultEntity
+    public class WarehouseModel
     {
         public string Name { get; set; } = default!;
         public string Code { get; set; } = default!;
@@ -14,8 +14,5 @@ namespace Domain.Warehouses
         public int ReorderLevel { get; set; } = default!;
         public long BranchId { get; set; } = default!;
         public short Status { get; set; } = default!;
-
-        //public ICollection<InventoryRequest> InventoryRequests { get; set; } = [];
-        //public ICollection<InventoryDocument> InventoryDocuments { get; set; } = [];
     }
 }
