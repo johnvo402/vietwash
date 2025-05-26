@@ -7,7 +7,10 @@ public class UpdateAccountProfileMapping : Profile
 {
     public UpdateAccountProfileMapping()
     {
-        CreateMap<UpdateAccountProfileCommand, Account>();
-        CreateMap<Account, UpdateAccountProfileResponse>();
+        CreateMap<UpdateAccountProfileCommand, Account>()
+    .ForMember(dest => dest.BirthDay, opt =>
+        opt.MapFrom(src => src.Birthday.HasValue
+            ? DateOnly.FromDateTime(src.Birthday.Value)
+            : (DateOnly?)null));
     }
 }

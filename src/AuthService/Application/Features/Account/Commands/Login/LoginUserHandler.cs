@@ -131,8 +131,7 @@ public class LoginAccountHandler(
         {
             Token = accessToken,
             Refresh = refreshToken,
-            AccessTokenExpiredIn = (long)
-                Math.Ceiling((accesstokenExpiredTime - DateTime.UtcNow).TotalSeconds),
+            AccessTokenExpiredIn = new DateTimeOffset(accesstokenExpiredTime).ToUnixTimeMilliseconds(),
             TokenType = JwtBearerDefaults.AuthenticationScheme,
         };
     }

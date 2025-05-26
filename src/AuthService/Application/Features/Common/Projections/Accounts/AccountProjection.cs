@@ -20,10 +20,8 @@ public class AccountProjection : BaseResponse
 
     [File]
     public string? AvtUrl { get; set; }
-
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public AccountStatus Status { get; set; }
     public string? Role { get; set; }
+
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public AccountLanguages? Language { get; set; }
 }

@@ -21,8 +21,8 @@ public class CreateAccountHandler(
     {
         Account mappingAccount = mapper.Map<Account>(command);
 
-        string? key = mediaUpdateService.GetKey(command.Avatar);
-        mappingAccount.AvtUrl = await mediaUpdateService.UploadAvatarAsync(command.Avatar, key);
+
+        mappingAccount.AvtUrl = command.AvtUrl;
 
         string? userAvatar = null;
         try

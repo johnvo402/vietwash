@@ -17,7 +17,7 @@ public class UpdateAccountProfileEndpoint(ISender sender)
     [SwaggerOperation(Tags = [Router.AccountRoute.Tags], Summary = "Update Profile Account")]
     [AuthorizeBy]
     public override async Task<ActionResult<ApiResponse<UpdateAccountProfileResponse>>> HandleAsync(
-        [FromForm] UpdateAccountProfileCommand request,
+         UpdateAccountProfileCommand request,
         CancellationToken cancellationToken = default
     ) => this.Ok200(await sender.Send(request, cancellationToken));
 }

@@ -11,6 +11,7 @@ using Domain.Aggregates.Accounts.Specifications;
 using Mediator;
 using Wangkanai.Detection.Services;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace Application.Features.Accounts.Commands.Token;
 
@@ -108,6 +109,6 @@ public class LogoutHandler(
         await unitOfWork.Repository<AccountToken>().AddAsync(userToken, cancellationToken);
         await unitOfWork.SaveAsync(cancellationToken);
 
-        return new() { Token = accessToken, RefreshToken = refreshToken };
+        return new() { Token = accessToken, Refresh = refreshToken, AccessTokenExpiredIn = new DateTimeOffset(accesstokenExpiredTime).ToUnixTimeMilliseconds(), TokenType = JwtBearerDefaults.AuthenticationScheme };
     }
 }

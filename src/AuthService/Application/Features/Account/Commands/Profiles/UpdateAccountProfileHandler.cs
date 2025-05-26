@@ -7,7 +7,7 @@ using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Domain.Aggregates.Accounts;
 using Domain.Aggregates.Accounts.Specifications;
 using Mediator;
-using Microsoft.AspNetCore.Http;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
 
 namespace Application.Features.Accounts.Commands.Profiles;
 
@@ -27,24 +27,23 @@ public class UpdateAccountProfileHandler(
             await unitOfWork
                 .Repository<Account>()
                 .FindByConditionAsync(
-new GetAccountByIdWithoutIncludeSpecification(currentAccount.Id!.Value),
+new GetAccountByIdSpecification(currentAccount.Id!.Value),
                     cancellationToken
                 )
             ?? throw new NotFoundException(
                 [Messager.Create<Account>().Message(MessageType.Found).Negative().BuildMessage()]
             );
 
-        IFormFile? avatar = command.Avatar;
         string? oldAvatar = user.AvtUrl;
 
         mapper.Map(command, user);
 
-        string? key = avatarUpdate.GetKey(avatar);
-        user.AvtUrl = await avatarUpdate.UploadAvatarAsync(avatar, key);
+        user.AvtUrl = command.AvtUrl;
 
         try
         {
             await unitOfWork.Repository<Account>().UpdateAsync(user);
+           
             await unitOfWork.SaveAsync(cancellationToken);
             await avatarUpdate.DeleteAvatarAsync(oldAvatar);
         }
@@ -54,13 +53,9 @@ new GetAccountByIdWithoutIncludeSpecification(currentAccount.Id!.Value),
             throw;
         }
 
-        return (
-            await unitOfWork
-                .Repository<Account>()
-                .FindByConditionAsync<UpdateAccountProfileResponse>(
-                    new GetAccountByIdSpecification(user.Id),
-                    cancellationToken
-                )
-        )!;
+        return new UpdateAccountProfileResponse
+        {
+            Message= "Success",
+        };
     }
 }
