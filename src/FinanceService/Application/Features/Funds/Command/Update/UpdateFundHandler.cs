@@ -1,20 +1,22 @@
-﻿using Application.Common.Interfaces.UnitOfWorks;
-using Ardalis.GuardClauses;
+﻿using System.Data.Common;
+using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
 using Domain.Aggregates.Funds;
 using Domain.Aggregates.Funds.Specifications;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Mediator;
-using System.Data.Common;
 
 namespace Application.Features.Funds.Command.Update
 {
-    public class UpdateFundHandler(IUnitOfWork unitOfWork, IMapper mapper) :
-         IRequestHandler<UpdateFundCommand>
+    public class UpdateFundHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        : IRequestHandler<UpdateFundCommand>
     {
-        public async ValueTask<Unit> Handle(UpdateFundCommand command, CancellationToken cancellationToken)
+        public async ValueTask<Unit> Handle(
+            UpdateFundCommand command,
+            CancellationToken cancellationToken
+        )
         {
-
             Fund fund =
                 await unitOfWork
                     .Repository<Fund>()
@@ -22,10 +24,13 @@ namespace Application.Features.Funds.Command.Update
                         new GetFundByIdSpecification(long.Parse(command.FundId)),
                         cancellationToken
                     )
-                ?? throw new Application.Common.Exceptions.NotFoundException(
+                ?? throw new NotFoundException(
                     [Messager.Create<Fund>().Message(MessageType.Found).Negative().BuildMessage()]
                 );
-            if (fund.Status.Equals("PendingConfirmation") && command.updateFundModel!.Status.Equals("Confirmed"))
+            if (
+                fund.Status.Equals("PendingConfirmation")
+                && command.updateFundModel!.Status.Equals("Confirmed")
+            )
             {
                 command.updateFundModel.TransactionDate = DateTimeOffset.UtcNow;
             }
@@ -33,8 +38,9 @@ namespace Application.Features.Funds.Command.Update
 
             try
             {
-                DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
-
+                DbTransaction transaction = await unitOfWork.CreateTransactionAsync(
+                    cancellationToken
+                );
 
                 await unitOfWork.Repository<Fund>().UpdateAsync(fund);
                 await unitOfWork.SaveAsync(cancellationToken);
@@ -42,10 +48,8 @@ namespace Application.Features.Funds.Command.Update
 
                 return Unit.Value;
             }
-
             catch
             {
-
                 await unitOfWork.RollbackAsync(cancellationToken);
                 throw;
             }

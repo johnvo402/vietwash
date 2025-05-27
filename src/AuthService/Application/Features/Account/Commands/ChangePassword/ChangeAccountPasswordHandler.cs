@@ -1,15 +1,15 @@
-using Application.Common.Exceptions;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Domain.Aggregates.Accounts;
 using Domain.Aggregates.Accounts.Specifications;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Mediator;
 
 namespace Application.Features.Accounts.Commands.ChangePassword;
 
 public class ChangeAccountPasswordHandler(IUnitOfWork unitOfWork, ICurrentAccount currentAccount)
-   : IRequestHandler<ChangeAccountPasswordCommand>
+    : IRequestHandler<ChangeAccountPasswordCommand>
 {
     public async ValueTask<Unit> Handle(
         ChangeAccountPasswordCommand request,
@@ -41,12 +41,12 @@ public class ChangeAccountPasswordHandler(IUnitOfWork unitOfWork, ICurrentAccoun
             throw new BadRequestException(
                 [
                     Messager
-                       .Create<ChangeAccountPasswordCommand>(nameof(Account))
-                       .Property(x => x.OldPassword!)
-                       .Message(MessageType.Correct)
-                       .Negative()
-                       .Build(),
-               ]
+                        .Create<ChangeAccountPasswordCommand>(nameof(Account))
+                        .Property(x => x.OldPassword!)
+                        .Message(MessageType.Correct)
+                        .Negative()
+                        .Build(),
+                ]
             );
         }
 

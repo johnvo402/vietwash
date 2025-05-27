@@ -2,7 +2,7 @@ using Application.Common.Auth;
 using Application.Features.Accounts.Commands.Create;
 using Ardalis.ApiEndpoints;
 using CaseConverter;
-using Contracts.ApiWrapper;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Contracts.RouteResults;
 using Presentation.Routes;
 using Infrastructure.Constants;

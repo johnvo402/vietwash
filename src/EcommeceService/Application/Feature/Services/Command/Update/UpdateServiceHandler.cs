@@ -3,7 +3,7 @@ using System.Data.Common;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Text;
-using Application.Common.Exceptions;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;

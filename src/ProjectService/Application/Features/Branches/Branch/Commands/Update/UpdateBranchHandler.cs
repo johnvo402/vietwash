@@ -3,7 +3,7 @@ using AutoMapper;
 using Mediator;
 using Domain.Aggregates.Branches.Specifications;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
-using Application.Common.Exceptions;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
 using System.Data.Common;
 
 namespace Application.Features.Branches.Branch.Commands.Update

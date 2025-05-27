@@ -10,7 +10,7 @@ using Domain.Aggregates.Services.Specifications;
 using Domain.Aggregates.Services;
 using Mediator;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
-using Application.Common.QueryStringProcessing;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.QueryStringProcessing;
 using AutoMapper;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
 using Domain.Aggregates.Orders.Enums;

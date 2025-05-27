@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Application.Common.Auth;
 using Application.Feature.Tariffs.Queries;
 using Ardalis.ApiEndpoints;
-using Contracts.ApiWrapper;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Contracts.RouteResults;
 using Infrastructure.Constants;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;

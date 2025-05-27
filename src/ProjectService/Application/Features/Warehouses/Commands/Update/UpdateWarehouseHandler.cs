@@ -4,7 +4,7 @@ using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Application.Common.Exceptions;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
 using Domain.Aggregates.Warehouses;

@@ -7,7 +7,7 @@ using Application.Feature.Tariffs.Commands.Create;
 using Application.Feature.Tariffs.Commands.Delete;
 using Application.Feature.Tariffs.Commands.Update;
 using Ardalis.ApiEndpoints;
-using Contracts.ApiWrapper;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Contracts.RouteResults;
 using Infrastructure.Constants;
 using Mediator;

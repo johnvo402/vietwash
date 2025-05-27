@@ -1,6 +1,6 @@
 ﻿using Application.Features.Funds.Command.Create;
 using Ardalis.ApiEndpoints;
-using Contracts.ApiWrapper;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Contracts.RouteResults;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;

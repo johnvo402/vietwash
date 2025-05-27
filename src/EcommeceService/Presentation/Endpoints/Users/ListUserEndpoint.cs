@@ -1,7 +1,7 @@
 using Application.Common.Auth;
 using Application.Features.Users.Queries.List;
 using Ardalis.ApiEndpoints;
-using Contracts.ApiWrapper;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Contracts.RouteResults;
 using Presentation.Routes;
 using Infrastructure.Constants;

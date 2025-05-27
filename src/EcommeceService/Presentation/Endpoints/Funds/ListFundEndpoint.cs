@@ -2,7 +2,7 @@
 using Application.Feature.Funds.Queries.List;
 using Application.Feature.Orders.Queries.List;
 using Ardalis.ApiEndpoints;
-using Contracts.ApiWrapper;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Contracts.RouteResults;
 using Infrastructure.Constants;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;

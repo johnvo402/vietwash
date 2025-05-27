@@ -11,10 +11,10 @@ public class DispatchDomainEventInterceptor(IServiceScopeFactory serviceScopeFac
     : SaveChangesInterceptor
 {
     public override async ValueTask<int> SavedChangesAsync(
-    SaveChangesCompletedEventData eventData,
-    int result,
-    CancellationToken cancellationToken = default
-)
+        SaveChangesCompletedEventData eventData,
+        int result,
+        CancellationToken cancellationToken = default
+    )
     {
         await DispatchDomainEvents(eventData.Context);
         return await base.SavedChangesAsync(eventData, result, cancellationToken);

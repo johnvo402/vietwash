@@ -1,6 +1,6 @@
 using Application.Features.Accounts.Commands.Login;
 using Ardalis.ApiEndpoints;
-using Contracts.ApiWrapper;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Contracts.RouteResults;
 using Presentation.Routes;
 using Mediator;

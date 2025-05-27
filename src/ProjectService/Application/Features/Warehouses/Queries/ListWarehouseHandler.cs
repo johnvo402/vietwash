@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Common.QueryStringProcessing;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.QueryStringProcessing;
 using Domain.Aggregates.Warehouses;
 using Domain.Aggregates.Warehouses.Specifications;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;

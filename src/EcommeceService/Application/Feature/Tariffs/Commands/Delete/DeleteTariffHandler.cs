@@ -1,4 +1,4 @@
-using Application.Common.Exceptions;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
 using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Aggregates.Tariffs;
 using Domain.Aggregates.Tariffs.Specifications;
