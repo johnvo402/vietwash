@@ -2,7 +2,7 @@ using Application.Common.Auth;
 using Application.Features.Accounts.Commands.Create;
 using Ardalis.ApiEndpoints;
 using CaseConverter;
-using Contracts.ApiWrapper;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Contracts.RouteResults;
 using Presentation.Routes;
 using Infrastructure.Constants;
@@ -17,9 +17,9 @@ public class CreateAccountEndpoint(ISender sender)
 {
     [HttpPost(Router.AccountRoute.Accounts)]
     [SwaggerOperation(Tags = [Router.AccountRoute.Tags], Summary = "create Account")]
-    [AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.user}")]
+    [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
     public override async Task<ActionResult<ApiResponse<CreateAccountResponse>>> HandleAsync(
-        [FromForm] CreateAccountCommand request,
+         CreateAccountCommand request,
         CancellationToken cancellationToken = default
     )
     {

@@ -7,6 +7,6 @@ public class GetAccountByEmailSpecification : Specification<Account>
 {
     public GetAccountByEmailSpecification(string email)
     {
-        Query.Where(x => EF.Functions.ILike(x.Email, email) && !x.Disabled).AsNoTracking();
+        Query.Where(x => EF.Functions.ILike(x.Email, email) && !x.Disabled).Include(x=>x.BranchAccounts).AsNoTracking();
     }
 }

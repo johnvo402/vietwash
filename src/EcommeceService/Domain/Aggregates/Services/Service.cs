@@ -8,7 +8,7 @@ namespace Domain.Aggregates.Services
 {
     public class Service : AggregateRoot
     {
-        public long CategoryId { get; set; } = default!;
+        public string CategoryId { get; set; } = default!;
 		public long BranchId { get; set; } = default!;
 		public string Name { get; set; } = default!;
         public string? Description { get; set; }

@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Services.DistributedCache;
 using Application.Features.QueueLogs;
+using Application.Features.Users.Commands.Create;
 using Contracts.Application.Common.Interfaces.Services.Queue;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.QueueLogs;
@@ -27,38 +28,63 @@ public class DeadletterQueueBackgroundService(
         ISender sender = scope.ServiceProvider.GetRequiredService<ISender>();
         ILogger logger = scope.ServiceProvider.GetRequiredService<ILogger>();
 
+        List<Task> runningTasks = new();
+
         while (!stoppingToken.IsCancellationRequested)
         {
-            // IQueueService deadLetterQueue = factory.GetQueue(QueueType.DeadLetterQueue);
+            IQueueService originQueue = factory.GetQueue(Domain.Aggregates.QueueLogs.QueueType.DeadLetterQueue);
 
-            // if (!await deadLetterQueue.PingAsync())
-            // {
-            //     logger.Warning("Redis server has shut down");
-            //     continue;
-            // }
-            // var request = await deadLetterQueue.DequeueAsync<PayCartPayload, PayCartPayload>();
+            if (!await originQueue.PingAsync())
+            {
+                logger.Warning("Redis server has shut down");
+                continue;
+            }
+            bool hasWork = false;
 
-            // if (request != null)
-            // {
-            //     await ProcessWithRetryAsync<PayCartPayload, PayCartResponse>(
-            //         request,
-            //         sender,
-            //         logger,
-            //         stoppingToken
-            //     );
-            // }
-            await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
+            for (int i = 0; i < 5; i++)
+            {
+                CreateUserCommand? request = await originQueue
+                    .DequeueAsync<CreateUserCommand, CreateUserCommand>();
+
+                if (request != null)
+                {
+                    hasWork = true;
+                    var task = Task.Run(async () =>
+                    {
+                        using var taskScope = serviceProvider.CreateScope();
+                        var taskSender = taskScope.ServiceProvider.GetRequiredService<ISender>();
+                        var taskLogger = taskScope.ServiceProvider.GetRequiredService<ILogger>();
+                        var taskGrpcClient = taskScope.ServiceProvider.GetRequiredService<IQueueLogService>();
+
+
+                        await ProcessWithRetryAsync<CreateUserCommand, CreateUserCommand>(
+                            request, taskSender, taskLogger, stoppingToken);
+                    }, stoppingToken);
+                    runningTasks.Add(task);
+                }
+            }
+
+
+            if (!hasWork)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+            }
+
+            runningTasks.RemoveAll(t => t.IsCompleted || t.IsFaulted || t.IsCanceled);
         }
+
+        await Task.WhenAll(runningTasks);
     }
 
+
     private async Task ProcessWithRetryAsync<TRequest, TResponse>(
-        TRequest request,
-        ISender sender,
-        ILogger logger,
-        CancellationToken cancellationToken
-    )
-        where TRequest : class
-        where TResponse : class
+    TRequest request,
+    ISender sender,
+    ILogger logger,
+    CancellationToken cancellationToken
+)
+    where TRequest : class
+    where TResponse : class
     {
         QueueResponse<TResponse>? queueResponse = new();
         int attempt = 0;

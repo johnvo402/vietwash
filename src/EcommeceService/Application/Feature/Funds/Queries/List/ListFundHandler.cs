@@ -1,5 +1,5 @@
 ﻿using Application.Common.Interfaces.UnitOfWorks;
-using Application.Common.QueryStringProcessing;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.QueryStringProcessing;
 using Application.Feature.Orders.Queries.List;
 using Domain.Aggregates.Funds;
 using Domain.Aggregates.Funds.Specifications;

@@ -4,7 +4,7 @@ using JohnChum.SharedKernel.Domain.Common;
 
 namespace Domain.Aggregates.Inventories
 {
-    public class ProductSupplying : BaseEntity<long>
+    public class ProductSupplying : DefaultEntity<long>
     {
         public long ProductId { get; set; } = default!;
         public long SupplierId { get; set; } = default!;

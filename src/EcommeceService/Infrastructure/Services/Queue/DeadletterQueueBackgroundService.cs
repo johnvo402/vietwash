@@ -42,8 +42,8 @@ public class DeadletterQueueBackgroundService(
 
             for (int i = 0; i < 5; i++)
             {
-                CreateUserCommand? request = await originQueue
-                    .DequeueAsync<CreateUserCommand, CreateUserCommand>();
+                CreateAccountCommand? request = await originQueue
+                    .DequeueAsync<CreateAccountCommand, CreateAccountCommand>();
 
                 if (request != null)
                 {
@@ -56,7 +56,7 @@ public class DeadletterQueueBackgroundService(
                         var taskGrpcClient = taskScope.ServiceProvider.GetRequiredService<IQueueLogService>();
 
 
-                        await ProcessWithRetryAsync<CreateUserCommand, CreateUserCommand>(
+                        await ProcessWithRetryAsync<CreateAccountCommand, CreateAccountCommand>(
                             request, taskSender, taskGrpcClient, taskLogger, stoppingToken);
                     }, stoppingToken);
                     runningTasks.Add(task);

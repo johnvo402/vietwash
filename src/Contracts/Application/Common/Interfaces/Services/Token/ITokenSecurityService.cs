@@ -1,9 +1,9 @@
-﻿using Contracts.Dtos.Models;
+﻿using Application.Common.Interfaces.Registers;
 using Contracts.Dtos.Responses;
 
 namespace Contracts.Application.Common.Interfaces.Services.Token
 {
-    public interface ITokenSecurityService
+    public interface ITokenSecurityService : ISingleton
     {
         Task AddToBlacklistAsync(string token, TimeSpan expiry);
         Task AddSessionUserAsync(string userId,string userData, TimeSpan expiry);

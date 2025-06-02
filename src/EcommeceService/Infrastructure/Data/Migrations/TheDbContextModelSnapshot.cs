@@ -503,11 +503,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("price");
 
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
-
                     b.Property<string>("Sku")
                         .IsRequired()
                         .HasColumnType("text")
@@ -706,11 +701,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("created_by");
-
                     b.Property<long?>("InventoryDocumentId")
                         .HasColumnType("bigint")
                         .HasColumnName("inventory_document_id");
@@ -718,19 +708,6 @@ namespace Infrastructure.Data.Migrations
                     b.Property<long?>("InventoryInvoiceId")
                         .HasColumnType("bigint")
                         .HasColumnName("inventory_invoice_id");
-
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by");
 
                     b.HasKey("Id")
                         .HasName("pk_inventory_relation");
@@ -842,11 +819,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("created_by");
-
                     b.Property<DateTimeOffset>("ExperyDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("expery_date");
@@ -888,14 +860,6 @@ namespace Infrastructure.Data.Migrations
                     b.Property<long>("UnitRelationId")
                         .HasColumnType("bigint")
                         .HasColumnName("unit_relation_id");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by");
 
                     b.HasKey("Id")
                         .HasName("pk_product_supplying");
@@ -1033,11 +997,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("price");
 
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
-
                     b.Property<int>("Quantity")
                         .HasColumnType("integer")
                         .HasColumnName("quantity");
@@ -1096,11 +1055,6 @@ namespace Infrastructure.Data.Migrations
                     b.Property<byte>("PaymentMethod")
                         .HasColumnType("smallint")
                         .HasColumnName("payment_method");
-
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
 
                     b.HasKey("Id")
                         .HasName("pk_order_payment");
@@ -1237,12 +1191,9 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Services.Category", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                    b.Property<string>("Id")
+                        .HasColumnType("text")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1253,15 +1204,29 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
+                    b.Property<bool>("Disabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("disabled");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("citext")
                         .HasColumnName("name");
 
-                    b.Property<string>("PublicId")
+                    b.Property<string>("ParentId")
+                        .HasColumnType("text")
+                        .HasColumnName("parent_id");
+
+                    b.Property<string>("Path")
                         .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
+                        .HasColumnType("text")
+                        .HasColumnName("path");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1270,10 +1235,6 @@ namespace Infrastructure.Data.Migrations
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
-
-                    b.Property<short>("status")
-                        .HasColumnType("smallint")
-                        .HasColumnName("status");
 
                     b.HasKey("Id")
                         .HasName("pk_category");
@@ -1399,8 +1360,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("branch_id");
 
-                    b.Property<long>("CategoryId")
-                        .HasColumnType("bigint")
+                    b.Property<string>("CategoryId")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("category_id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
@@ -1433,6 +1395,18 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("character varying(26)")
                         .HasColumnName("public_id");
+
+                    b.Property<string>("Slug")
+                        .HasColumnType("text")
+                        .HasColumnName("slug");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1481,15 +1455,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("citext")
                         .HasColumnName("name");
 
-                    b.Property<string>("Path")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("path");
-
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1521,13 +1489,14 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("base_unit");
 
-                    b.Property<long>("BranchId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("branch_id");
-
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
 
                     b.Property<int>("Multiple")
                         .HasColumnType("integer")
@@ -1554,6 +1523,18 @@ namespace Infrastructure.Data.Migrations
                     b.Property<long>("ReferenceId")
                         .HasColumnType("bigint")
                         .HasColumnName("reference_id");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
 
                     b.HasKey("Id")
                         .HasName("pk_unit_relation");
@@ -1819,9 +1800,18 @@ namespace Infrastructure.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Avatar")
+                    b.Property<string>("AvtUrl")
                         .HasColumnType("text")
-                        .HasColumnName("avatar");
+                        .HasColumnName("avt_url");
+
+                    b.Property<DateOnly>("BirthDay")
+                        .HasColumnType("date")
+                        .HasColumnName("birth_day");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1832,32 +1822,35 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
-                    b.Property<byte?>("CustomerType")
-                        .HasColumnType("smallint")
-                        .HasColumnName("customer_type");
+                    b.Property<bool>("Disabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("disabled");
 
-                    b.Property<DateTime?>("DayOfBirth")
-                        .HasColumnType("date")
-                        .HasColumnName("day_of_birth");
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("display_name");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("citext")
                         .HasColumnName("email");
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("first_name");
+                    b.Property<bool>("EmailEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("email_enabled");
 
                     b.Property<int?>("Gender")
                         .HasColumnType("integer")
                         .HasColumnName("gender");
 
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("last_name");
+                    b.Property<byte>("Language")
+                        .HasColumnType("smallint")
+                        .HasColumnName("language");
+
+                    b.Property<bool>("PhoneEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("phone_enabled");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
@@ -1869,10 +1862,10 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("character varying(26)")
                         .HasColumnName("public_id");
 
-                    b.Property<string>("RoleId")
+                    b.Property<string>("Role")
                         .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("role_id");
+                        .HasColumnType("text")
+                        .HasColumnName("role");
 
                     b.Property<byte>("Status")
                         .HasColumnType("smallint")
@@ -1886,11 +1879,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("citext")
-                        .HasColumnName("username");
-
                     b.HasKey("Id")
                         .HasName("pk_user");
 
@@ -1900,10 +1888,6 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("Id")
                         .HasDatabaseName("ix_user_id");
-
-                    b.HasIndex("Username")
-                        .IsUnique()
-                        .HasDatabaseName("ix_user_username");
 
                     b.ToTable("user", (string)null);
                 });
@@ -2028,60 +2012,6 @@ namespace Infrastructure.Data.Migrations
                         .HasDatabaseName("ix_voucher_customer_voucher_id");
 
                     b.ToTable("voucher_customer", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Warehouses.Warehouse", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("BranchId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("branch_id");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("citext")
-                        .HasColumnName("code");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
-
-                    b.Property<int>("ReorderLevel")
-                        .HasColumnType("integer")
-                        .HasColumnName("reorder_level");
-
-                    b.Property<short>("Status")
-                        .HasColumnType("smallint")
-                        .HasColumnName("status");
-
-                    b.HasKey("Id")
-                        .HasName("pk_warehouse");
-
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_warehouse_id");
-
-                    b.ToTable("warehouse", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Equipments.MaintenanceDetail", b =>

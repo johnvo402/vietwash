@@ -24,6 +24,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Npgsql;
+using SpeedSMS.PinService;
 
 namespace Infrastructure;
 
@@ -41,6 +42,7 @@ public static class DependencyInjection
         services.Configure<DatabaseSettings>(options =>
             configuration.GetSection(nameof(DatabaseSettings)).Bind(options)
         );
+
         services.TryAddSingleton<IValidateOptions<DatabaseSettings>, ValidateDatabaseSetting>();
 
         services.AddSingleton(sp =>
@@ -56,7 +58,7 @@ public static class DependencyInjection
             .AddSingleton<UpdateAuditableEntityInterceptor>()
             .AddSingleton<DispatchDomainEventInterceptor>();
 
-        if (environmentName!.CompareTo("Staging") == 0 || environmentName!.CompareTo("Development") == 0)
+        if (environmentName!.CompareTo("Development") == 0)
         {
             services.AddDbContext<TheDbContext>(
                 (sp, options) =>
@@ -86,7 +88,8 @@ public static class DependencyInjection
                 }
             );
         }
-
+        var section = configuration.GetSection(nameof(SpeedSmsOptions));
+        services.AddSpeedSmsPinClient(section.Bind);
         services
             .AddAmazonS3(configuration)
             .AddSingleton<ICurrentAccount, CurrentUserService>()
@@ -98,7 +101,8 @@ public static class DependencyInjection
             .AddTransient<FluentMailService>()
             .AddTransient<IMailService, FluentMailService>(provider =>
                 provider.GetService<FluentMailService>()!
-            ).AddTransient<IMailer, Mailer>()
+            )
+            .AddTransient<IMailer, Mailer>()
             .AddFluentMail(configuration)
             .Scan(scan =>
                 scan.FromCallingAssembly()
@@ -125,7 +129,6 @@ public static class DependencyInjection
             .AddHangfireConfiguration(configuration)
             .AddElasticSearch(configuration)
             .AddScoped<JobScheduler>();
-
 
         return services;
     }

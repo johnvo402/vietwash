@@ -42,9 +42,9 @@ public class QueueBackgroundService(
 
             for (int i = 0; i < 5; i++)
             {
-                CreateUserCommand? request = await queueFactory
+                CreateAccountCommand? request = await queueFactory
                     .GetQueue(QueueType.OriginQueue)
-                    .DequeueAsync<CreateUserCommand, CreateUserEvent>();
+                    .DequeueAsync<CreateAccountCommand, CreateAccountEvent>();
 
                 if (request != null)
                 {
@@ -57,7 +57,7 @@ public class QueueBackgroundService(
                         var taskGrpcClient = taskScope.ServiceProvider.GetRequiredService<IQueueLogService>();
                         var taskQueue = queueFactory.GetQueue(QueueType.DeadLetterQueue);
 
-                        await ProcessWithRetryAsync<CreateUserCommand, CreateUserCommand>(
+                        await ProcessWithRetryAsync<CreateAccountCommand, CreateAccountCommand>(
                             request, taskSender, taskGrpcClient, taskLogger, taskQueue, stoppingToken);
                     }, stoppingToken);
                     runningTasks.Add(task);

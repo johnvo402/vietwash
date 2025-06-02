@@ -6,7 +6,7 @@ public class ListCategorySpecification : Specification<Category>
 {
     public ListCategorySpecification()
     {
-        Query.AsNoTracking().AsSplitQuery();
+        Query.Where(x => !x.Disabled).AsNoTracking().AsSplitQuery();
         string key = GetUniqueCachedKey();
         Query.EnableCache(key);
     }

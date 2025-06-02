@@ -6,12 +6,10 @@ using JohnChum.SharedKernel.Domain.Common;
 
 namespace Domain.Aggregates.Services
 {
-    public class Unit : DefaultEntity<long>
+    public class Unit : BaseEntity<long>
     {
         public string Name { get; set; } = default!;
         public ActivationStatus Status { get; set; } = default!;
 
-		//public ICollection<ProductSupplying> ProductSupplyings { get; set; } = [];
-		public ICollection<EquipmentSupplying> EquipmentSupplyings { get; set; } = [];
     }
 }

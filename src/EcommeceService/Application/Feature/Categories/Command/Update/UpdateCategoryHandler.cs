@@ -1,5 +1,5 @@
 using System.Data.Common;
-using Application.Common.Exceptions;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
 using Domain.Aggregates.Services;
@@ -17,11 +17,18 @@ public class UpdateCategoryHandler(IUnitOfWork unitOfWork, IMapper mapper)
     )
     {
         Category? getCategory =
-            await unitOfWork.Repository<Category>().FindByIdAsync(Ulid.Parse(command.CategoryId))
+            await unitOfWork.Repository<Category>().FindByIdAsync(command.CategoryId)
             ?? throw new NotFoundException(
                 [Messager.Create<Category>().Message(MessageType.Found).Negative().BuildMessage()]
             );
+
         mapper.Map(command.Category, getCategory);
+
+        getCategory.Path = await GenerateCategoryPathAsync(
+    getCategory.Id,
+    command.Category.ParentId,
+    cancellationToken
+    );
 
         try
         {
@@ -40,5 +47,22 @@ public class UpdateCategoryHandler(IUnitOfWork unitOfWork, IMapper mapper)
             await unitOfWork.RollbackAsync(cancellationToken);
             throw;
         }
+    }
+
+    private async Task<string> GenerateCategoryPathAsync(string id, string? parentId, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(parentId))
+        {
+            return id;
+        }
+
+        var parent = await unitOfWork.Repository<Category>().FindByIdAsync(parentId, cancellationToken);
+
+        if (parent == null)
+            throw new NotFoundException(
+               [Messager.Create<Category>().Message(MessageType.Found).Negative().BuildMessage()]
+           );
+
+        return $"{parent.Path}.{id.ToLower()}";
     }
 }

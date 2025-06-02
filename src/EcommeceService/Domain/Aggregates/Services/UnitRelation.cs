@@ -8,7 +8,6 @@ namespace Domain.Aggregates.Services
     public class UnitRelation : BaseEntity
 	{
         public long ReferenceId { get; set; } = default!;
-        public long BranchId { get; set; } = default!;
         public string Name { get; set; } = default!;
         public bool BaseUnit { get; set; } = default!;
         public decimal Price { get; set; } = default!;

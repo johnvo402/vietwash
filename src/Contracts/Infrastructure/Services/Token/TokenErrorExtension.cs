@@ -1,5 +1,5 @@
 using Application.Common.Exceptions;
-using Contracts.ApiWrapper;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 
@@ -15,8 +15,11 @@ public class TokenErrorExtension
         int statusCode = exception.HttpStatusCode;
         httpContext.Response.StatusCode = statusCode;
 
-        ErrorResponse error =
-            new(exception.Message, nameof(ForbiddenException), statusCode: statusCode);
+        ErrorResponse error = new(
+            exception.Message,
+            nameof(ForbiddenException),
+            statusCode: statusCode
+        );
 
         await httpContext.Response.WriteAsJsonAsync(error, error.GetOptions());
     }
@@ -29,8 +32,11 @@ public class TokenErrorExtension
         int statusCode = exception.HttpStatusCode;
         httpContext.Response.StatusCode = statusCode;
 
-        ErrorResponse error =
-            new(exception.Message, nameof(UnauthorizedException), statusCode: statusCode);
+        ErrorResponse error = new(
+            exception.Message,
+            nameof(UnauthorizedException),
+            statusCode: statusCode
+        );
 
         await httpContext.Response.WriteAsJsonAsync(error, error.GetOptions());
     }

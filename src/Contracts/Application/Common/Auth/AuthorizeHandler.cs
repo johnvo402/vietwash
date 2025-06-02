@@ -32,7 +32,7 @@ public class AuthorizeHandler(IServiceProvider serviceProvider, IHttpContextAcce
             var decodeToken = tokenSecurity.DecodeToken(token);
             if (decodeToken == null || decodeToken.ExpiredTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds() || decodeToken.TokenType != "access")
             {
-                context.Fail(new AuthorizationFailureReason(this, "Refresh token invalid or expired."));
+                context.Fail(new AuthorizationFailureReason(this, "Token invalid or expired."));
                 return;
             }
             userId = decodeToken.Sub;

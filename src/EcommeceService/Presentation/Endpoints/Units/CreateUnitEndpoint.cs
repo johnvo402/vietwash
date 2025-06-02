@@ -2,7 +2,7 @@
 using Application.Feature.Services.Command.Create;
 using Application.Feature.Units.Command.Create;
 using Ardalis.ApiEndpoints;
-using Contracts.ApiWrapper;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;

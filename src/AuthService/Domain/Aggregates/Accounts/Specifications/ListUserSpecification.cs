@@ -6,7 +6,7 @@ public class ListAccountSpecification : Specification<Account>
 {
     public ListAccountSpecification()
     {
-        Query.AsNoTracking().AsSplitQuery();
+        Query.Where(x=>!x.Disabled).AsNoTracking().AsSplitQuery();
         string key = GetUniqueCachedKey();
         Query.EnableCache(key);
     }

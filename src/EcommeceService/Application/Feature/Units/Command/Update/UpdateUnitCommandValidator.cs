@@ -40,16 +40,8 @@ namespace Application.Feature.Units.Command.Update
 						.Message(MessageType.Null)
 						.Negative()
 						.Build()
-				)
-				.Must(x => Ulid.TryParse(x, out _))
-				.WithState(x =>
-					Messager
-						.Create<UpdateUnitCommand>()
-						.Property(x => x.UnitId)
-						.Message(MessageType.Valid)
-						.Negative()
-						.Build()
 				);
+				
 
 			
 		}

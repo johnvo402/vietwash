@@ -10,6 +10,21 @@ namespace Presentation.Routes
             public const string AuditLog = $"{Project}/{RouterBase.prefix}{nameof(AuditLog)}";
             public const string Tags = $"{nameof(AuditLog)} endpoint";
         }
+        public static class BranchRoute
+        {
+            public const string Tags = $"{nameof(BranchRoute)} endpoint";
+            public const string Branches = $"{Project}/{RouterBase.prefix}{nameof(Branches)}";
+            public const string GetUpdateDelete =
+                $"{Project}/{RouterBase.prefix}{nameof(Branches)}/" + "{" + RouterBase.Id + "}";
+        }
+
+        public static class WarehouseRoute
+        {
+            public const string Tags = $"{nameof(WarehouseRoute)} endpoint";
+            public const string Warehouses = $"{Project}/{RouterBase.prefix}{nameof(Warehouses)}";
+            public const string GetUpdateDelete =
+                $"{Project}/{RouterBase.prefix}{nameof(Warehouses)}/" + "{" + RouterBase.Id + "}";
+        }
 
     }
 }

@@ -1,21 +1,19 @@
 ﻿using Application.Common.Interfaces.Services;
-using Domain.Aggregates.AuditLogs.Enums;
 using Domain.Aggregates.AuditLogs;
-using Domain.Common;
+using Domain.Common.ElasticConfigurations;
+using Elastic.Clients.Elasticsearch;
+using JohnChum.SharedKernel.Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using static Grpc.Core.Metadata;
-using System.Text.Json;
-using Domain.Common.ElasticConfigurations;
-using Elastic.Clients.Elasticsearch;
-using System.Security.AccessControl;
 using Serilog;
-using JohnChum.SharedKernel.Domain.Common;
 
 namespace Infrastructure.Data.Interceptors;
 
-public class UpdateAuditableEntityInterceptor(ElasticsearchClient elasticsearchClient, ICurrentAccount currentUser) : SaveChangesInterceptor
+public class UpdateAuditableEntityInterceptor(
+    ElasticsearchClient elasticsearchClient,
+    ICurrentAccount currentUser
+) : SaveChangesInterceptor
 {
     private const string ANONYMOUS_CREATED_BY = "SYSTEM";
 
@@ -33,12 +31,18 @@ public class UpdateAuditableEntityInterceptor(ElasticsearchClient elasticsearchC
         return base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
-    private async void UpdateAuditableEntities(ElasticsearchClient elasticsearchClient, DbContext context)
+    private async void UpdateAuditableEntities(
+        ElasticsearchClient elasticsearchClient,
+        DbContext context
+    )
     {
         DateTimeOffset currentTime = DateTimeOffset.UtcNow;
-        var entities = context.ChangeTracker.Entries()
-            .Where(e => e.Entity is BaseEntity || e.Entity is AggregateRoot).ToList();
-
+        var entities = context
+            .ChangeTracker.Entries()
+            .Where(e =>
+                e.Entity is BaseEntity || e.Entity is AggregateRoot || e.Entity is IBaseAuditable
+            )
+            .ToList();
 
         foreach (EntityEntry entry in entities)
         {
@@ -46,12 +50,12 @@ public class UpdateAuditableEntityInterceptor(ElasticsearchClient elasticsearchC
             {
                 Entity = entry.Entity.GetType().Name,
                 ActionPerformBy = currentUser.Id?.ToString() ?? ANONYMOUS_CREATED_BY,
-                CreatedAt = currentTime
+                CreatedAt = currentTime,
             };
             switch (entry.State)
             {
                 case EntityState.Added:
-                   
+
                     entry.Property(nameof(IAuditable.CreatedBy)).CurrentValue =
                         currentUser.Id?.ToString() ?? ANONYMOUS_CREATED_BY;
 
@@ -88,15 +92,17 @@ public class UpdateAuditableEntityInterceptor(ElasticsearchClient elasticsearchC
                 {
                     continue;
                 }
-                var response = await elasticsearchClient.IndexAsync(auditLog, index: ElsIndexExtension.GetName<AuditLog>());
+                var response = await elasticsearchClient.IndexAsync(
+                    auditLog,
+                    index: ElsIndexExtension.GetName<AuditLog>()
+                );
 
                 if (!response.IsSuccess())
                 {
-
                     Log.Information(
-                "Elasticsearch has been failed in index audit with {debug}",
-                response.DebugInformation
-            );
+                        "Elasticsearch has been failed in index audit with {debug}",
+                        response.DebugInformation
+                    );
                 }
             }
             catch (Exception ex)
@@ -104,7 +110,5 @@ public class UpdateAuditableEntityInterceptor(ElasticsearchClient elasticsearchC
                 Log.Information($"Elasticsearch error: {ex.Message}");
             }
         }
-
     }
 }
-

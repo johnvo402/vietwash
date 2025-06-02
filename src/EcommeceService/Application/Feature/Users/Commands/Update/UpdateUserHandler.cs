@@ -1,5 +1,5 @@
 using System.Data.Common;
-using Application.Common.Exceptions;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
@@ -33,7 +33,7 @@ public class UpdateUserHandler(
                 [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
             );
 
-        string? oldAvatar = user.Avatar;
+        string? oldAvatar = user.AvtUrl;
 
         mapper.Map(command.User, user);
 
@@ -57,7 +57,7 @@ public class UpdateUserHandler(
         }
         catch (Exception)
         {
-            await mediaUpdateService.DeleteAvatarAsync(user.Avatar);
+            await mediaUpdateService.DeleteAvatarAsync(user.AvtUrl);
             await unitOfWork.RollbackAsync(cancellationToken);
             throw;
         }

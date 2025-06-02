@@ -3,7 +3,7 @@ using JohnChum.SharedKernel.Domain.Common;
 
 namespace Domain.Aggregates.Orders
 {
-    public class OrderItem : DefaultEntity
+    public class OrderItem : DefaultEntity<long>
     {
 
         public long OrderId { get; set; }

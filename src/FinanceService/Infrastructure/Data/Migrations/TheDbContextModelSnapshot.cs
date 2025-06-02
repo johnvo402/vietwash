@@ -36,10 +36,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("amount");
 
-                    b.Property<long>("BehaviorId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("behavior_id");
-
                     b.Property<long>("BranchId")
                         .HasColumnType("bigint")
                         .HasColumnName("branch_id");
@@ -58,13 +54,16 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
+                    b.Property<long>("FundBehaviorId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("fund_behavior_id");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
 
                     b.Property<string>("Note")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("note");
 
@@ -85,13 +84,16 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("reference_id");
 
-                    b.Property<DateTimeOffset>("TransactionDate")
+                    b.Property<byte>("Status")
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset?>("TransactionDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("transaction_date");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<byte>("Type")
+                        .HasColumnType("smallint")
                         .HasColumnName("type");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
@@ -109,23 +111,54 @@ namespace Infrastructure.Data.Migrations
                     b.HasKey("Id")
                         .HasName("pk_fund");
 
+                    b.HasIndex("FundBehaviorId")
+                        .HasDatabaseName("ix_fund_fund_behavior_id");
+
+                    b.HasIndex("ObjectId")
+                        .HasDatabaseName("ix_fund_object_id");
+
                     b.ToTable("fund", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Funds.FundBehavior", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("text")
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
+
+                    b.Property<byte>("Type")
+                        .HasColumnType("smallint")
+                        .HasColumnName("type");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
 
                     b.HasKey("Id")
                         .HasName("pk_fund_behavior");
@@ -188,6 +221,125 @@ namespace Infrastructure.Data.Migrations
                         .HasName("pk_transaction");
 
                     b.ToTable("transaction", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Avatar")
+                        .HasColumnType("text")
+                        .HasColumnName("avatar");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<byte?>("CustomerType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("customer_type");
+
+                    b.Property<DateTime?>("DayOfBirth")
+                        .HasColumnType("date")
+                        .HasColumnName("day_of_birth");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("citext")
+                        .HasColumnName("email");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("first_name");
+
+                    b.Property<int?>("Gender")
+                        .HasColumnType("integer")
+                        .HasColumnName("gender");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("last_name");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("phone_number");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("role_id");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("citext")
+                        .HasColumnName("username");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user");
+
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasDatabaseName("ix_user_email");
+
+                    b.HasIndex("Id")
+                        .HasDatabaseName("ix_user_id");
+
+                    b.HasIndex("Username")
+                        .IsUnique()
+                        .HasDatabaseName("ix_user_username");
+
+                    b.ToTable("user", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Funds.Fund", b =>
+                {
+                    b.HasOne("Domain.Aggregates.Funds.FundBehavior", "FundBehavior")
+                        .WithMany()
+                        .HasForeignKey("FundBehaviorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_fund_fund_behavior_fund_behavior_id");
+
+                    b.HasOne("Domain.Aggregates.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("ObjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_fund_user_object_id");
+
+                    b.Navigation("FundBehavior");
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,8 +1,8 @@
 ﻿using Application.Common.Auth;
-using Application.Features.Media;
 using Application.Features.Accounts.Commands.Create;
+using Application.Features.Media;
 using Ardalis.ApiEndpoints;
-using Contracts.ApiWrapper;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Contracts.RouteResults;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +12,9 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Presentation.Endpoints.Medias
 {
     public class UploadMediaEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<UploadMediaCommand>.WithActionResult<ApiResponse<UploadMediaResponse>>
+        : EndpointBaseAsync.WithRequest<UploadMediaCommand>.WithActionResult<
+            ApiResponse<UploadMediaResponse>
+        >
     {
         [HttpPost(Router.MediaRoute.Media)]
         [SwaggerOperation(Tags = [Router.MediaRoute.Tags], Summary = "Upload Media")]

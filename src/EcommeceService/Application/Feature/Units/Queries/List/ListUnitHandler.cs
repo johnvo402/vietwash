@@ -1,7 +1,7 @@
 ﻿
 
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Common.QueryStringProcessing;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.QueryStringProcessing;
 using AutoMapper;
 using Domain.Aggregates.Services;
 using Domain.Aggregates.Services.Specifications;

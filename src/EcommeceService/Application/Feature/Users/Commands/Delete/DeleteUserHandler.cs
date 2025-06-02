@@ -1,4 +1,4 @@
-using Application.Common.Exceptions;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
@@ -26,7 +26,7 @@ public class DeleteUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService<User>
             ?? throw new NotFoundException(
                 [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
             );
-        string? avatar = user.Avatar;
+        string? avatar = user.AvtUrl;
         await unitOfWork.Repository<User>().DeleteAsync(user);
         await unitOfWork.SaveAsync(cancellationToken);
 

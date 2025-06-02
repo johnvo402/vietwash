@@ -1,6 +1,6 @@
 using Application.Feature.Categories.Queries.List;
 using Ardalis.ApiEndpoints;
-using Contracts.ApiWrapper;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Contracts.RouteResults;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
 using Mediator;
@@ -12,13 +12,13 @@ namespace Presentation.Endpoints.Categories;
 
 public class ListCategoryEndpoint(ISender sender)
     : EndpointBaseAsync.WithRequest<ListCategoryQuery>.WithActionResult<
-        ApiResponse<IEnumerable<ListCategoryResponse>>
+        ApiResponse<PaginationResponse<ListCategoryResponse>>
     >
 {
     [HttpGet(Router.CategoryRoute.Categories)]
     [SwaggerOperation(Tags = [Router.CategoryRoute.Tags], Summary = "Category list")]
     public override async Task<
-        ActionResult<ApiResponse<IEnumerable<ListCategoryResponse>>>
+        ActionResult<ApiResponse<PaginationResponse<ListCategoryResponse>>>
     > HandleAsync(ListCategoryQuery request, CancellationToken cancellationToken = default) =>
         this.Ok200(await sender.Send(request, cancellationToken));
 }

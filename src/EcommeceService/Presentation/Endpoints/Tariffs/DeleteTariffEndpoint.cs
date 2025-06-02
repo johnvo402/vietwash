@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Application.Common.Auth;
 using Application.Feature.Tariffs.Commands.Delete;
 using Ardalis.ApiEndpoints;
-using Contracts.ApiWrapper;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Contracts.RouteResults;
 using Contracts.Routers;
 using Infrastructure.Constants;

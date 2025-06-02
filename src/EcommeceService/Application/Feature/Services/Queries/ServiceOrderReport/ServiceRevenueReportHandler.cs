@@ -1,6 +1,6 @@
-﻿using Application.Common.Exceptions;
+﻿using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Common.QueryStringProcessing;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.QueryStringProcessing;
 using Application.Feature.Orders.Queries.List;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Specifications;

@@ -25,7 +25,7 @@ public class DbInitializer
             {
                 logger.Information("Seeding user data is starting.............");
 
-                List<Account> users = InitializeUserData(roles);
+                List<Account> users = InitializeUserData();
 
                 foreach (var user in users)
                 {
@@ -46,330 +46,265 @@ public class DbInitializer
         }
     }
 
-    private static List<Account> InitializeUserData(string[] roles)
+    private static List<Account> InitializeUserData()
     {
-        Account user = new(
-            "Chloe Kim",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "chloe.kim@gmail.com",
-            "0925123123",
-            roles[new Random().Next(0, 3)],
-            "000001"
-        )
+        List<Account> users = new()
         {
-            BirthDay = new DateOnly(1990, 10, 1),
-            Status = AccountStatus.Active,
-            Gender = Gender.Female,
-            Id = Credential.UserIds.CHLOE_KIM_ID,
+            new Account(
+                "Nguyễn Hửu Cảnh",
+                HashPassword("Nguyencanh421510"),
+                "nguyenhuucanh20032003@gmail.com",
+                "0354841363",
+                "CUSTOMER",
+                "NV00001"
+            )
+            {
+                BirthDay = new DateOnly(2003, 6, 15),
+                Gender = Gender.Male,
+            },
+            new Account(
+                "Võ Thanh Thư",
+                HashPassword("Thư@123456"),
+                "thanhthu040202@gmail.com",
+                "0383395692",
+                "CUSTOMER",
+                "CUS000022"
+            )
+            {
+                BirthDay = new DateOnly(2002, 2, 4),
+                Gender = Gender.Male,
+            },
+            new Account(
+                "Nguyễn Hửu Cảnh",
+                HashPassword("Canh123123@"),
+                "canhnhce171635@fpt.edu.vn",
+                "0354841364",
+                "STAFF",
+                "NV00002"
+            )
+            {
+                BirthDay = new DateOnly(2003, 10, 15),
+                Gender = Gender.Female,
+            },
+            new Account(
+                "Trần Thị Thùy Dung",
+                HashPassword("thuydung123@"),
+                "tranthithuydung2003@gmail.com",
+                "0865125413",
+                "STAFF",
+                "NV00003"
+            )
+            {
+                BirthDay = new DateOnly(2003, 6, 19),
+                Gender = Gender.Female,
+            },
+            new Account(
+                "Lê Văn Tâm",
+                HashPassword("vantam1996"),
+                "levantam1996@gmail.com",
+                "0916558465",
+                "MANAGER",
+                "NV00004"
+            )
+            {
+                BirthDay = new DateOnly(1996, 6, 5),
+                Gender = Gender.Male,
+            },
+            new Account(
+                "Trần Văn An",
+                HashPassword("password1234"),
+                "tranvanan2000@gmail.com",
+                "0354813634",
+                "CUSTOMER",
+                "NV00005"
+            )
+            {
+                BirthDay = new DateOnly(2000, 7, 15),
+                Gender = Gender.Male,
+            },
+            new Account(
+                "Nguyễn Thị Thủy",
+                HashPassword("thuy1999"),
+                "nguyenthithuy1999@gmail.com",
+                "0987654321",
+                "STAFF",
+                "NV00006"
+            )
+            {
+                BirthDay = new DateOnly(1999, 8, 20),
+                Gender = Gender.Female,
+            },
+            new Account(
+                "Lê Văn Hải",
+                HashPassword("hai2001"),
+                "levanhai2001@gmail.com",
+                "0912345678",
+                "MANAGER",
+                "NV00007"
+            )
+            {
+                BirthDay = new DateOnly(2001, 3, 10),
+                Gender = Gender.Male,
+            },
+            new Account(
+                "Phạm Thị Hồng",
+                HashPassword("hong1998"),
+                "phamthihong1998@gmail.com",
+                "0934567890",
+                "CUSTOMER",
+                "NV00008"
+            )
+            {
+                BirthDay = new DateOnly(1998, 12, 5),
+                Gender = Gender.Female,
+            },
+            new Account(
+                "Hoàng Văn Nam",
+                HashPassword("nam2002"),
+                "hoangvannam2002@gmail.com",
+                "0976543210",
+                "STAFF",
+                "NV00009"
+            )
+            {
+                BirthDay = new DateOnly(2002, 9, 15),
+                Gender = Gender.Male,
+            },
+            new Account(
+                "Đặng Thị Thảo",
+                HashPassword("thao1997"),
+                "dangthithao1997@gmail.com",
+                "0945678901",
+                "MANAGER",
+                "NV00010"
+            )
+            {
+                BirthDay = new DateOnly(1997, 4, 22),
+                Gender = Gender.Female,
+            },
+            new Account(
+                "Bùi Văn Cường",
+                HashPassword("cuong2000"),
+                "buivancuong2000@gmail.com",
+                "0967890123",
+                "CUSTOMER",
+                "NV00011"
+            )
+            {
+                BirthDay = new DateOnly(2000, 11, 30),
+                Gender = Gender.Male,
+            },
+            new Account(
+                "Nguyễn Minh Tâm",
+                HashPassword("tam1999"),
+                "nguyenminhtam1999@gmail.com",
+                "0923456789",
+                "STAFF",
+                "NV00012"
+            )
+            {
+                BirthDay = new DateOnly(1999, 6, 14),
+                Gender = Gender.Male,
+            },
+            new Account(
+                "Phạm Văn Kiệt",
+                HashPassword("kiet2001"),
+                "phamvankiet2001@gmail.com",
+                "0989012345",
+                "CUSTOMER",
+                "NV00013"
+            )
+            {
+                BirthDay = new DateOnly(2001, 1, 25),
+                Gender = Gender.Male,
+            },
+            new Account(
+                "Trịnh Thị Hạnh",
+                HashPassword("hanh1996"),
+                "trinhthihanh1996@gmail.com",
+                "0956789012",
+                "CUSTOMER",
+                "NV00014"
+            )
+            {
+                BirthDay = new DateOnly(1996, 7, 8),
+                Gender = Gender.Female,
+            },
+            new Account(
+                "Nguyễn Quang Duy",
+                HashPassword("duy2002"),
+                "nguyenquangduy2002@gmail.com",
+                "0932109876",
+                "STAFF",
+                "NV00015"
+            )
+            {
+                BirthDay = new DateOnly(2002, 10, 3),
+                Gender = Gender.Male,
+            },
+            new Account(
+                "Lê Thị Thùy Trang",
+                HashPassword("trang1998"),
+                "lethithuytrang1998@gmail.com",
+                "0978901234",
+                "CUSTOMER",
+                "NV00016"
+            )
+            {
+                BirthDay = new DateOnly(1998, 5, 17),
+                Gender = Gender.Female,
+            },
+            new Account(
+                "Hoàng Minh Quân",
+                HashPassword("quan2000"),
+                "hoangminhquan2000@gmail.com",
+                "0943210987",
+                "CUSTOMER",
+                "NV00017"
+            )
+            {
+                BirthDay = new DateOnly(2000, 8, 9),
+                Gender = Gender.Male,
+            },
+            new Account(
+                "Vũ Phi Hùng",
+                HashPassword("hung1999"),
+                "vuphihung1999@gmail.com",
+                "0965432109",
+                "CUSTOMER",
+                "NV00018"
+            )
+            {
+                BirthDay = new DateOnly(1999, 2, 28),
+                Gender = Gender.Male,
+            },
+            new Account(
+                "Trần Thị Quyên",
+                HashPassword("quyen2001"),
+                "tranthiquyen2001@gmail.com",
+                "0921098765",
+                "STAFF",
+                "NV00019"
+            )
+            {
+                BirthDay = new DateOnly(2001, 12, 12),
+                Gender = Gender.Female,
+            },
+            new Account(
+                "Nguyễn Hoàng Long",
+                HashPassword("long1997"),
+                "nguyenhoanglong1997@gmail.com",
+                "0954321098",
+                "ADMIN",
+                "NV00020"
+            )
+            {
+                BirthDay = new DateOnly(1997, 3, 15),
+                Gender = Gender.Male,
+            },
         };
 
-        Account johnDoe = new(
-            "John Doe",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "john.doe@example.com",
-            "0803456789",
-            roles[new Random().Next(0, 3)],
-            "000002"
-        )
-        {
-            BirthDay = new DateOnly(1985, 4, 23),
-            Status = AccountStatus.Active,
-            Gender = (Gender)new Random().Next(1, 3),
-            Id = Credential.UserIds.JOHN_DOE_ID,
-        };
-
-        Account aliceSmith = new(
-            "Alice Smith",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "alice.smith@example.com",
-            "0912345678",
-            roles[new Random().Next(0, 3)],
-            "000003"
-        )
-        {
-            BirthDay = new DateOnly(1992, 7, 19),
-            Status = AccountStatus.Inactive,
-            Gender = (Gender)new Random().Next(1, 3),
-            Id = Credential.UserIds.ALICE_SMITH_ID,
-        };
-
-        Account bobJohnson = new(
-            "Bob Johnson",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "bob.johnson@example.com",
-            "0934567890",
-            roles[new Random().Next(0, 3)],
-            "000004"
-        )
-        {
-            BirthDay = new DateOnly(1980, 3, 15),
-            Status = AccountStatus.Active,
-            Gender = (Gender)new Random().Next(1, 3),
-            Id = Credential.UserIds.BOB_JOHNSON_ID,
-        };
-
-        Account emilyBrown = new(
-            "Emily Brown",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "emily.brown@example.com",
-            "0945678901",
-            roles[new Random().Next(0, 3)],
-            "000005"
-        )
-        {
-            BirthDay = new DateOnly(1995, 5, 5),
-            Status = AccountStatus.Active,
-            Gender = (Gender)new Random().Next(1, 3),
-            Id = Credential.UserIds.EMILY_BROWN_ID,
-        };
-
-        Account jamesWilliams = new(
-            "James Williams",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "james.williams@example.com",
-            "0978901234",
-            roles[new Random().Next(0, 3)],
-            "000006"
-        )
-        {
-            BirthDay = new DateOnly(1983, 11, 9),
-            Status = AccountStatus.Active,
-            Gender = (Gender)new Random().Next(1, 3),
-            Id = Credential.UserIds.JAMES_WILLIAMS_ID,
-        };
-
-        Account oliviaTaylor = new(
-            "Olivia Taylor",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "olivia.taylor@example.com",
-            "0989012345",
-            roles[new Random().Next(0, 3)],
-            "000007"
-        )
-        {
-            BirthDay = new DateOnly(1998, 2, 18),
-            Status = AccountStatus.Active,
-            Gender = (Gender)new Random().Next(1, 3),
-            Id = Credential.UserIds.OLIVIA_TAYLOR_ID,
-        };
-
-        Account danielLee = new(
-            "Daniel Lee",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "daniel.lee@example.com",
-            "0901234567",
-            roles[new Random().Next(0, 3)],
-            "000008"
-        )
-        {
-            BirthDay = new DateOnly(1987, 9, 21),
-            Status = AccountStatus.Inactive,
-            Gender = (Gender)new Random().Next(1, 3),
-            Id = Credential.UserIds.DANIEL_LEE_ID,
-        };
-
-        Account sophiaGarcia = new(
-            "Sophia Garcia",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "sophia.garcia@example.com",
-            "0912345679",
-            roles[new Random().Next(0, 3)],
-            "000009"
-        )
-        {
-            BirthDay = new DateOnly(1994, 12, 12),
-            Status = AccountStatus.Active,
-            Gender = (Gender)new Random().Next(1, 3),
-            Id = Credential.UserIds.SHOPHIA_GARCIA_ID,
-        };
-
-        Account michaelMartinez = new(
-            "Michael Martinez",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "michael.martinez@example.com",
-            "0913456789",
-            roles[new Random().Next(0, 3)],
-            "000010"
-        )
-        {
-            BirthDay = new DateOnly(1978, 8, 8),
-            Status = AccountStatus.Inactive,
-            Gender = (Gender)new Random().Next(1, 3),
-            Id = Credential.UserIds.MICHAEL_MARTINEZ_ID,
-        };
-
-        Account isabellaHarris = new(
-            "Isabella Harris",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "isabella.harris@example.com",
-            "0945678902",
-            roles[new Random().Next(0, 3)],
-            "000011"
-        )
-        {
-            BirthDay = new DateOnly(1991, 1, 1),
-            Status = AccountStatus.Active,
-            Gender = (Gender)new Random().Next(1, 3),
-            Id = Credential.UserIds.ISABELLA_HARRIS_ID,
-        };
-
-        Account davidClark = new(
-            "David Clark",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "david.clark@example.com",
-            "0934567891",
-            roles[new Random().Next(0, 3)],
-            "000012"
-        )
-        {
-            BirthDay = new DateOnly(1984, 6, 6),
-            Status = AccountStatus.Active,
-            Gender = (Gender)new Random().Next(1, 3),
-            Id = Credential.UserIds.DAVID_CLARK_ID,
-        };
-
-        Account emmaRodriguez = new(
-            "Emma Rodriguez",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "emma.rodriguez@example.com",
-            "0956789012",
-            roles[new Random().Next(0, 3)],
-            "000013"
-        )
-        {
-            BirthDay = new DateOnly(1993, 3, 3),
-            Status = AccountStatus.Active,
-            Gender = (Gender)new Random().Next(1, 3),
-            Id = Credential.UserIds.EMMA_RODRIGUEZ_ID,
-        };
-
-        Account andrewMoore = new(
-            "Andrew Moore",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "andrew.moore@example.com",
-            "0923456789",
-            roles[new Random().Next(0, 3)],
-            "000014"
-        )
-        {
-            BirthDay = new DateOnly(1981, 10, 30),
-            Status = AccountStatus.Inactive,
-            Gender = (Gender)new Random().Next(1, 3),
-            Id = Credential.UserIds.ANDREW_MOORE_ID,
-        };
-
-        Account avaJackson = new(
-            "Ava Jackson",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "ava.jackson@example.com",
-            "0935678903",
-            roles[new Random().Next(0, 3)],
-            "000015"
-        )
-        {
-            BirthDay = new DateOnly(2000, 4, 14),
-            Status = AccountStatus.Active,
-            Gender = (Gender)new Random().Next(1, 3),
-            Id = Credential.UserIds.AVA_JACKSON_ID,
-        };
-
-        Account joshuaWhite = new(
-            "Joshua White",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "joshua.white@example.com",
-            "0914567890",
-            roles[new Random().Next(0, 3)],
-            "000016"
-        )
-        {
-            BirthDay = new DateOnly(1986, 11, 17),
-            Status = AccountStatus.Inactive,
-            Gender = (Gender)new Random().Next(1, 3),
-            Id = Credential.UserIds.JOSHUA_WHITE_ID,
-        };
-
-        Account charlotteThomas = new(
-            "Charlotte Thomas",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "charlotte.thomas@example.com",
-            "0934567892",
-            roles[new Random().Next(0, 3)],
-            "000017"
-        )
-        {
-            BirthDay = new DateOnly(1997, 7, 7),
-            Status = AccountStatus.Active,
-            Gender = (Gender)new Random().Next(1, 3),
-            Id = Credential.UserIds.CHARLOTTE_THOMAS_ID,
-        };
-
-        Account ethanKing = new(
-            "Ethan King",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "ethan.king@example.com",
-            "0923456781",
-            roles[new Random().Next(0, 3)],
-            "000018"
-        )
-        {
-            BirthDay = new DateOnly(1999, 9, 9),
-            Status = AccountStatus.Active,
-            Gender = (Gender)new Random().Next(1, 3),
-            Id = Credential.UserIds.ETHAN_KING_ID,
-        };
-
-        Account abigailScott = new(
-            "Abigail Scott",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "abigail.scott@example.com",
-            "0916789013",
-            roles[new Random().Next(0, 3)],
-            "000019"
-        )
-        {
-            BirthDay = new DateOnly(1989, 2, 2),
-            Status = AccountStatus.Active,
-            Gender = (Gender)new Random().Next(1, 3),
-            Id = Credential.UserIds.ABIGAIL_SCOTT_ID,
-        };
-
-        Account liamPerez = new(
-            "Liam Perez",
-            HashPassword(Credential.USER_DEFAULT_PASSWORD),
-            "liam.perez@example.com",
-            "0909876543",
-            roles[new Random().Next(0, 3)],
-            "000020"
-        )
-        {
-            BirthDay = new DateOnly(1988, 12, 25),
-            Status = AccountStatus.Inactive,
-            Gender = (Gender)new Random().Next(1, 3),
-            Id = Credential.UserIds.LIAM_PEREZ_ID,
-        };
-
-        return
-        [
-            user,
-            johnDoe,
-            aliceSmith,
-            bobJohnson,
-            emilyBrown,
-            jamesWilliams,
-            oliviaTaylor,
-            danielLee,
-            sophiaGarcia,
-            michaelMartinez,
-            isabellaHarris,
-            davidClark,
-            emmaRodriguez,
-            andrewMoore,
-            avaJackson,
-            joshuaWhite,
-            charlotteThomas,
-            ethanKing,
-            abigailScott,
-            liamPerez,
-        ];
+        users.ForEach(u => u.Status = AccountStatus.Active);
+        return users;
     }
 }

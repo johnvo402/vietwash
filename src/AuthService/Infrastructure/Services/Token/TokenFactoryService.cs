@@ -17,9 +17,8 @@ public class TokenFactoryService(IOptions<JwtSettings> jwtSettings) : ITokenFact
 
     public DateTime RefreshtokenExpiredTime => GetRefreshtokenExpiredTime();
 
-    public string CreateToken(IEnumerable<Claim> claims, DateTime expirationTime)
+    public string CreateToken(IEnumerable<KeyValuePair<string, object>> claimList, DateTime expirationTime)
     {
-        var claimList = claims.Select(x => new KeyValuePair<string, object>(x.Type, x.Value));
         return JwtBuilder
             .Create()
             .WithAlgorithm(new HMACSHA256Algorithm())

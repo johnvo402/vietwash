@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Application.Common.Exceptions;
-using Contracts.ApiWrapper;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Microsoft.AspNetCore.Http;
 
 namespace Contracts.Middlewares.GlobalExceptionHandlers;

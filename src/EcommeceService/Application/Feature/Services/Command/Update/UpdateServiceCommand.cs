@@ -10,7 +10,6 @@ public class UpdateServiceCommand : IRequest<UpdateServiceResponse>
 {
     [FromRoute(Name = RouterBase.Id)]
     public long ServiceId { get; set; } = default!;
-	public ServiceStatus? Status { get; set; }
 	[FromBody]
-    public UpdateServiceModel Service { get; set; } = default!;
+    public ServiceModel Service { get; set; } = default!;
 }

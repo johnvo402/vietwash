@@ -40,7 +40,6 @@ namespace Application.Jobs
                     if (totalOrder >= 5 || totalRevenue > 500000)
                     {
                         var user = await _unitOfWork.Repository<User>().FindByConditionAsync(new GetUserByIdWithoutIncludeSpecification(userId));
-                        user.CustomerType = CustomerType.loyal;
                         try
                         {
                             DbTransaction transaction = await _unitOfWork.CreateTransactionAsync();

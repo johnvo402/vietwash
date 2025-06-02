@@ -118,5 +118,4 @@ public class ElasticsearchRegisterHelper
         var builderType = typeof(ElasticsearchConfigBuilder<>).MakeGenericType(documentType);
         return Activator.CreateInstance(builderType)!;
     }
-
 }

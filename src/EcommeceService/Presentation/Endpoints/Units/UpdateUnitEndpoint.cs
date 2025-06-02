@@ -3,7 +3,7 @@ using Application.Feature.Units.Command.Create;
 using Application.Feature.Units.Command.Update;
 using Ardalis.ApiEndpoints;
 using AutoMapper;
-using Contracts.ApiWrapper;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Contracts.RouteResults;
 using Infrastructure.Constants;
 using Mediator;

@@ -391,6 +391,43 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("account_token", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Aggregates.Accounts.BranchAccount", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_id");
+
+                    b.Property<long>("BranchId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("branch_id");
+
+                    b.Property<string>("BranchName")
+                        .HasColumnType("text")
+                        .HasColumnName("branch_name");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_branch_account");
+
+                    b.HasIndex("AccountId")
+                        .HasDatabaseName("ix_branch_account_account_id");
+
+                    b.HasIndex("Id")
+                        .HasDatabaseName("ix_branch_account_id");
+
+                    b.ToTable("branch_account", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Aggregates.Accounts.AccountActivity", b =>
                 {
                     b.HasOne("Domain.Aggregates.Accounts.Account", "Account")
@@ -439,6 +476,16 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Account");
                 });
 
+            modelBuilder.Entity("Domain.Aggregates.Accounts.BranchAccount", b =>
+                {
+                    b.HasOne("Domain.Aggregates.Accounts.Account", null)
+                        .WithMany("BranchAccounts")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_branch_account_account_account_id");
+                });
+
             modelBuilder.Entity("Domain.Aggregates.Accounts.Account", b =>
                 {
                     b.Navigation("AccountActivities");
@@ -448,6 +495,8 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("AccountResetPasswords");
 
                     b.Navigation("AccountTokens");
+
+                    b.Navigation("BranchAccounts");
                 });
 #pragma warning restore 612, 618
         }

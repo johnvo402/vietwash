@@ -1,4 +1,4 @@
-using Application.Common.Exceptions;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
 using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Aggregates.Services;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
@@ -18,8 +18,8 @@ public class DeleteCategoryHandler(IUnitOfWork unitOfWork) : IRequestHandler<Del
             ?? throw new NotFoundException(
                 [Messager.Create<Category>().Message(MessageType.Found).Negative().BuildMessage()]
             );
-
-        await unitOfWork.Repository<Category>().DeleteAsync(getCategory);
+        getCategory.Disabled = true;
+        await unitOfWork.Repository<Category>().UpdateAsync(getCategory);
         await unitOfWork.SaveAsync(cancellationToken);
 
         return Mediator.Unit.Value;

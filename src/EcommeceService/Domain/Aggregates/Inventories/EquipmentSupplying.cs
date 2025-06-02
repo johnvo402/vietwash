@@ -5,7 +5,7 @@ using JohnChum.SharedKernel.Domain.Common;
 
 namespace Domain.Aggregates.Inventories;
 
-public class EquipmentSupplying : DefaultEntity
+public class EquipmentSupplying : DefaultEntity<long>
 {
     public string Name { get; set; } = default!;
     public string Code { get; set; } = default!;

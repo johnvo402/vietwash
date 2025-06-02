@@ -1,7 +1,7 @@
 using Application.Common.Auth;
 using Application.Features.Accounts.Queries.Detail;
 using Ardalis.ApiEndpoints;
-using Contracts.ApiWrapper;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Contracts.RouteResults;
 using Presentation.Routes;
 using Infrastructure.Constants;
@@ -17,7 +17,7 @@ public class GetAccountDetailEndpoint(ISender sender)
 {
     [HttpGet(Router.AccountRoute.GetUpdateDelete, Name = Router.AccountRoute.GetRouteName)]
     [SwaggerOperation(Tags = [Router.AccountRoute.Tags], Summary = "Detail Account")]
-    [AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.user}")]
+    [AuthorizeBy]
     public override async Task<ActionResult<ApiResponse<GetAccountDetailResponse>>> HandleAsync(
         [FromRoute(Name = RouterBase.Id)] long userId,
         CancellationToken cancellationToken = default

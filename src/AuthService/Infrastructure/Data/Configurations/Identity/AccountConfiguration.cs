@@ -16,5 +16,9 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.HasIndex(x => x.Email).IsUnique();
         builder.Property(x => x.Status).HasDefaultValue(AccountStatus.Active);
         builder.Property(x => x.Disabled).HasDefaultValue(false);
+        builder.HasMany(x => x.BranchAccounts)
+            .WithOne()
+            .HasForeignKey(x => x.AccountId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
