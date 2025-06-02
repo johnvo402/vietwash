@@ -53,8 +53,9 @@ down:
 stop:
 	@echo "Stopping Docker containers..."
 	docker-compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml -f docker-compose.s3.yaml -f docker-compose.elastic.yaml stop
+ssh:
+	ssh -p $(REMOTE_SERVER_PORT) $(REMOTE_SERVER_USER)@$(REMOTE_SERVER_IP)
 .PHONY: backup
-
 backup: 
 	@echo "Backup database..."
 	./scripts/pgdump.sh backup

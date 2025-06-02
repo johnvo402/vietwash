@@ -44,8 +44,6 @@ public partial class AccountValidator : AbstractValidator<AccountModel>
                     .Build()
             );
 
-        
-
         RuleFor(x => x.PhoneNumber)
             .NotEmpty()
             .WithState(x =>
@@ -70,7 +68,6 @@ public partial class AccountValidator : AbstractValidator<AccountModel>
                     .Build()
             );
     }
-
 
     [GeneratedRegex(@"^\+?\d{7,15}$")]
     private static partial Regex PhoneValidationRegex();

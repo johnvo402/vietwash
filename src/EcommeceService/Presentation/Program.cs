@@ -69,7 +69,11 @@ try
 			x.ConfigObject.PersistAuthorization = true;
 		});
 	}
-	app.UseAuthentication();
+    if (isDevelopment)
+    {
+        app.UseDeveloperExceptionPage();
+    }
+    app.UseAuthentication();
 	app.CurrentUser();
 	app.UseAuthorization();
 	app.UseDetection();

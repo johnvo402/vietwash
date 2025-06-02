@@ -7,7 +7,7 @@ using JohnChum.SharedKernel.Domain.Common;
 
 namespace Domain.Aggregates.Inventories
 {
-    public class InventoryRelation : BaseEntity
+    public class InventoryRelation : DefaultEntity<long>
     {
         public long? InventoryDocumentId { get; set; }
         public long? InventoryInvoiceId { get; set; }

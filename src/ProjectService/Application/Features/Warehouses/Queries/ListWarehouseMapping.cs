@@ -11,8 +11,9 @@ namespace Application.Features.Warehouses.Queries
 {
     public class ListWarehouseMapping : Profile
     {
-        public ListWarehouseMapping() { 
-        CreateMap<Warehouse, WarehouseProjection>();
+        public ListWarehouseMapping()
+        {
+            CreateMap<Warehouse, WarehouseProjection>();
             CreateMap<Warehouse, ListWarehouseResponse>().IncludeBase<Warehouse, WarehouseProjection>();
         }
     }

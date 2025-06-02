@@ -1,6 +1,5 @@
 ﻿using Application.Common.Interfaces.Services.DistributedCache;
 using Contracts.Application.Common.Interfaces.Services.Token;
-using Contracts.Dtos.Models;
 using Contracts.Dtos.Responses;
 using Infrastructure.Services.Token;
 using JohnChum.SharedKernel.Extensions;

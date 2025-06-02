@@ -15,7 +15,7 @@ namespace Application.Features.Warehouses.Queries
     public class ListWarehouseHandler(IUnitOfWork unitOfWork) : IRequestHandler<ListWarehouseQuery, PaginationResponse<ListWarehouseResponse>>
     {
         public async ValueTask<PaginationResponse<ListWarehouseResponse>> Handle(ListWarehouseQuery request, CancellationToken cancellationToken)
-        => await unitOfWork.CachedRepository<Warehouse>()
+        => await unitOfWork.Repository<Warehouse>()
                             .PagedListAsync<ListWarehouseResponse>
                                 (
                                 new ListWarehouseSpecification(),

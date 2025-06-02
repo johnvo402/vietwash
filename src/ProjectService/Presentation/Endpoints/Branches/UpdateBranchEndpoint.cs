@@ -13,7 +13,7 @@ namespace Presentation.Endpoints.Branches
     {
         [HttpPut(Router.BranchRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.BranchRoute.Tags], Summary = "Update Branch")]
-        public override async Task<ActionResult<ApiResponse<UpdateBranchResponse>>> HandleAsync([FromBody]UpdateBranchCommand request, CancellationToken cancellationToken = default)
+        public override async Task<ActionResult<ApiResponse<UpdateBranchResponse>>> HandleAsync(UpdateBranchCommand request, CancellationToken cancellationToken = default)
         {
             var response = await sender.Send(request, cancellationToken);
             return this.Ok200(response);

@@ -1,7 +1,5 @@
-﻿using Application.Common.Exceptions;
-using Application.Common.Interfaces.UnitOfWorks;
+﻿using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
-using FluentValidation.Results;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Mediator;
@@ -19,21 +17,9 @@ namespace Application.Feature.Units.Command.Update
         {
             try
             {
-                // Chuyển đổi UnitId thành Ulid
-                if (!Ulid.TryParse(request.UnitId, out var parsedUnitId))
-                {
-                    throw new ValidationException(
-                        new List<ValidationFailure>
-                        {
-                            new("UnitId", "Unit ID must be a valid Ulid."),
-                        }
-                    );
-                }
-
-                // Tìm Unit theo ID (sử dụng Ulid)
                 var unit = await unitOfWork
                     .Repository<Unit>()
-                    .FindByIdAsync(parsedUnitId, cancellationToken);
+                    .FindByIdAsync(request.UnitId, cancellationToken);
 
                 if (unit == null)
                 {

@@ -1,3 +1,4 @@
+using Application.Feature.Common.Projections.Categories;
 using Application.Feature.Common.Projections.Services;
 using Application.Feature.Common.Projections.Units;
 using AutoMapper;
@@ -9,13 +10,11 @@ public class ListServiceMapping : Profile
 {
     public ListServiceMapping()
     {
-        CreateMap<Service, ServiceProjection>()
-            .ForMember(dest => dest.UnitRelations, opt => opt.MapFrom(src => src.UnitRelations));
 
         CreateMap<Service, ListServiceResponse>().IncludeBase<Service, ServiceProjection>();
 
-        CreateMap<UnitRelation, UnitRelationProjection>();
+        CreateMap<UnitRelation, UnitRelationService>();
 
-        CreateMap<Unit, UnitProjection>();
+        CreateMap<Category, CategoryService>();
     }
 }

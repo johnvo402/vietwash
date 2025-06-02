@@ -8,10 +8,10 @@ using Microsoft.AspNetCore.Http;
 namespace Application.Features.Users.Commands.Create;
 
 public class CreateUserCommand
-    : QueueBasePayload<CreateUserEvent>,
+    : QueueBasePayload<CreateAccountEvent>,
         IRequest<QueueResponse<CreateUserCommand>>;
 
-public class CreateUserEvent
+public class CreateAccountEvent
 {
     public Ulid Id { get; set; }
     public string? Username { get; set; }

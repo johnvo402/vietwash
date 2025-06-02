@@ -16,7 +16,7 @@ public class UpdateAccountEndpoint(ISender sender)
 {
     [HttpPut(Router.AccountRoute.GetUpdateDelete)]
     [SwaggerOperation(Tags = [Router.AccountRoute.Tags], Summary = "Update Account")]
-    [AuthorizeBy(permissions: $"{ActionPermission.update}:{ObjectPermission.user}")]
+    [AuthorizeBy]
     public override async Task<ActionResult<ApiResponse<UpdateAccountResponse>>> HandleAsync(
         UpdateAccountCommand command,
         CancellationToken cancellationToken = default

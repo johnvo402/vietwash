@@ -9,7 +9,7 @@ namespace Application.Features.Common.Projections.Branches.Branch
     public class BranchModel
     {
         public string Name { get; set; } = default!;
-        public string Code { get; set; } = default!;
+        public string? Code { get; set; }
         public bool Main { get; set; } = default!;
         public string? Email { get; set; }
         public string? PhoneCode { get; set; }
@@ -22,6 +22,5 @@ namespace Application.Features.Common.Projections.Branches.Branch
         public string? ProvinceName { get; set; }
         public string? ProvinceCode { get; set; }
         public string? Street { get; set; }
-        public string? Slug { get; set; }
     }
 }

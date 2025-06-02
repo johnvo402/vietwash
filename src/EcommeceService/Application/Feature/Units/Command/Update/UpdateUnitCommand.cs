@@ -9,7 +9,7 @@ namespace Application.Feature.Units.Command.Update
 	public class UpdateUnitCommand : IRequest<UpdateUnitResponse>
 	{
 		[FromRoute(Name = RouterBase.Id)]
-		public string UnitId { get; set; } = string.Empty;
+		public long UnitId { get; set; }
 		[FromBody]
 		public UnitModel Unit { get; set; } = new UnitModel();
 	}

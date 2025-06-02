@@ -63,6 +63,18 @@ public class DbInitializer
                 Gender = Gender.Male,
             },
             new Account(
+                "Võ Thanh Thư",
+                HashPassword("Thư@123456"),
+                "thanhthu040202@gmail.com",
+                "0383395692",
+                "CUSTOMER",
+                "CUS000022"
+            )
+            {
+                BirthDay = new DateOnly(2002, 2, 4),
+                Gender = Gender.Male,
+            },
+            new Account(
                 "Nguyễn Hửu Cảnh",
                 HashPassword("Canh123123@"),
                 "canhnhce171635@fpt.edu.vn",

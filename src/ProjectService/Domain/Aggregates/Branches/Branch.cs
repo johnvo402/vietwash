@@ -1,4 +1,5 @@
 ﻿using Domain.Aggregates.Branches.Enums;
+using Domain.Aggregates.Warehouses;
 using JohnChum.SharedKernel.Domain.Common;
 using Mediator;
 using System;
@@ -30,7 +31,8 @@ namespace Domain.Aggregates.Branches
 		public string? Slug { get; set; }
 		public ICollection<BranchUser> BranchUsers { get; set; } = [];
 		public ICollection<BranchProduct> BranchProducts { get; set; } = [];
-		protected override bool TryApplyDomainEvent(INotification domainEvent)
+        public ICollection<Warehouse> Warehouses { get; set; } = [];
+        protected override bool TryApplyDomainEvent(INotification domainEvent)
 		{
 			throw new NotImplementedException();
 		}

@@ -26,7 +26,7 @@ public class DeleteUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService<User>
             ?? throw new NotFoundException(
                 [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
             );
-        string? avatar = user.Avatar;
+        string? avatar = user.AvtUrl;
         await unitOfWork.Repository<User>().DeleteAsync(user);
         await unitOfWork.SaveAsync(cancellationToken);
 

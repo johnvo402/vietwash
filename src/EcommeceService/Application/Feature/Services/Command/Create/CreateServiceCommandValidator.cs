@@ -67,7 +67,7 @@ public class CreateServiceCommandValidator : AbstractValidator<CreateServiceComm
 				);
 	}
 
-		private async Task<bool> IsCategoryExistsAsync(long categoryId, CancellationToken cancellation)
+		private async Task<bool> IsCategoryExistsAsync(string categoryId, CancellationToken cancellation)
 	{
 		return await _unitOfWork.Repository<Category>().AnyAsync(c => c.Id == categoryId, cancellation);
 	}

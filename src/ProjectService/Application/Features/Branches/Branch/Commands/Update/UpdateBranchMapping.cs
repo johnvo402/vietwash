@@ -13,7 +13,7 @@ namespace Application.Features.Branches.Branch.Commands.Update
     {
         public UpdateBranchMapping()
         {
-            CreateMap<UpdateBranch, Domain.Aggregates.Branches.Branch>();
+            CreateMap<BranchModel, Domain.Aggregates.Branches.Branch>();
             CreateMap<Domain.Aggregates.Branches.Branch, UpdateBranchResponse>().IncludeBase<Domain.Aggregates.Branches.Branch, BranchDetailProjection>();
         }
     }

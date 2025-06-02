@@ -13,11 +13,21 @@ public class ListServiceHandler(IUnitOfWork unitOfWork)
     public async ValueTask<PaginationResponse<ListServiceResponse>> Handle(
         ListServiceQuery query,
         CancellationToken cancellationToken
-    ) =>
-        await unitOfWork.Repository<Service>().
-               PagedListAsync<ListServiceResponse>(
-            new ListServiceSpecification(),
-            query.ValidateQuery().ValidateFilter(typeof(ListServiceResponse))
-            
-        );
+    )
+    {
+        try
+        {
+           return await unitOfWork.Repository<Service>().
+       PagedListAsync<ListServiceResponse>(
+    new ListServiceSpecification(),
+    query.ValidateQuery().ValidateFilter(typeof(ListServiceResponse))
+
+);
+        }
+        catch(Exception ex)
+        {
+            throw new Exception("Exception", ex) ;
+        }
+    }
+
 }

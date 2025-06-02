@@ -11,6 +11,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="SpeedSMS.PinService" />
+    <PackageReference Include="Twilio" />
     <PackageReference Include="Wangkanai.Detection" />
     <Using Include="BCrypt.Net.BCrypt" Static="True" />
   </ItemGroup>

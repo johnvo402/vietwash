@@ -18,7 +18,7 @@ public class DeleteCategoryEndpoint(ISender sender)
         CancellationToken cancellationToken = default
     )
     {
-        await sender.Send(new DeleteCategoryCommand(Ulid.Parse(categoryId)), cancellationToken);
+        await sender.Send(new DeleteCategoryCommand(categoryId), cancellationToken);
         return NoContent();
     }
 }

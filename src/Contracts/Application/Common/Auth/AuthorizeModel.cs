@@ -12,5 +12,6 @@ public class UserAuth
 
     public string? Role { get; set; } = null;
 
+    public IEnumerable<string>? Branches { get; set; } = [];
 
 }

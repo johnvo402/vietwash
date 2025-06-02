@@ -1,7 +1,9 @@
 ﻿using System.Data.Common;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
+using Contracts.Utils;
 using Domain.Aggregates.Warehouses;
+using Domain.Aggregates.Warehouses.Enums;
 using Mediator;
 
 namespace Application.Features.Branches.Branch.Commands.Create
@@ -17,21 +19,21 @@ namespace Application.Features.Branches.Branch.Commands.Create
                 DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
                 Domain.Aggregates.Branches.Branch branch = await unitOfWork.Repository<Domain.Aggregates.Branches.Branch>().AddAsync(mappingBranch, cancellationToken);
 
-                await unitOfWork.SaveAsync(cancellationToken);
-
-                //await unitOfWork.CommitAsync(cancellationToken);
+                if (string.IsNullOrEmpty(branch.Code))
+                {
+                    branch.Code = Generator.GenerateCode("BR", 6);
+                }
                 //auto add warehouse
                 var warehouse = new Warehouse
                 {
-                    Name = $"Kho của {branch.Name}",
+                    Name = $"{branch.Name} kho",
                     Code = $"WH-{branch.Code}",
-                    Description = "Kho mặc định được tạo cùng chi nhánh.",
+                    Description = $"Kho mặc định được tạo cùng chi nhánh {branch.Name}.",
                     BranchId = branch.Id,
                     ReorderLevel = 0,
-                    Status = 0,
+                    Status = WarehouseStatus.Active,
                 };
-                await unitOfWork.Repository<Warehouse>().AddAsync(warehouse, cancellationToken);
-
+                branch.Warehouses.Add(warehouse);
                 await unitOfWork.SaveAsync(cancellationToken);
 
                 await unitOfWork.CommitAsync(cancellationToken);

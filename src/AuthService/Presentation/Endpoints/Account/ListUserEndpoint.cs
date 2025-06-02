@@ -19,7 +19,7 @@ public class ListAccountEndpoint(ISender sender)
 {
     [HttpGet(Router.AccountRoute.Accounts)]
     [SwaggerOperation(Tags = [Router.AccountRoute.Tags], Summary = "list Account")]
-    [AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.user}")]
+    [AuthorizeBy]
     public override async Task<ActionResult<ApiResponse<PaginationResponse<ListAccountResponse>>>> HandleAsync(
         [FromQuery] ListAccountQuery request,
         CancellationToken cancellationToken = default

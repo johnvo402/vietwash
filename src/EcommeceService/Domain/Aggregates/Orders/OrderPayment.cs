@@ -4,7 +4,7 @@ using JohnChum.SharedKernel.Domain.Common;
 
 namespace Domain.Aggregates.Orders
 {
-    public class OrderPayment : DefaultEntity
+    public class OrderPayment : DefaultEntity<long>
     {
         public long OrderId { get; set; } = default!;
 		public PaymentMethod PaymentMethod { get; set; }

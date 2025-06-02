@@ -28,6 +28,8 @@ public class Account : AggregateRoot
     public ICollection<AccountContact>? AccountContacts { get; set; } = [];
     public ICollection<AccountActivity>? AccountActivities { get; set; } = [];
 
+    public ICollection<BranchAccount>? BranchAccounts { get; set; } = [];
+
     public Account(
         string displayName,
         string password,

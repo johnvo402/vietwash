@@ -14,15 +14,14 @@ using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Application.Common.Interfaces.Services;
+using Contracts.Utils;
 
 namespace Application.Feature.Services.Command.Update;
 
 public class UpdateServiceHandler(
 	IUnitOfWork unitOfWork,
 	IMapper mapper,
-	IMediaUpdateService<Service> mediaUpdateService,
-	IServiceLaundryService serviceLaundryService,
-	IActionAccessorService accessorService
+	IMediaUpdateService<Service> mediaUpdateService
 ) : IRequestHandler<UpdateServiceCommand, UpdateServiceResponse>
 {
 	public async ValueTask<UpdateServiceResponse> Handle(UpdateServiceCommand command, CancellationToken cancellationToken)
@@ -36,57 +35,16 @@ public class UpdateServiceHandler(
 
 		mapper.Map(command.Service, existingService);
 
-		var currentUserId = accessorService.Id;
-		existingService.UpdatedBy = currentUserId;
-		existingService.UpdatedAt = DateTime.UtcNow;
+		existingService.Slug = Generator.GenerateSlug(existingService.Name);
 
-		// Kiểm tra và tạo Slug nếu name thay đổi
-		//if (existingService.Name != command.Service.Name)
-		//{
-		//	existingService.Slug = GenerateSlug(command.Service.Name);
-
-		//	bool slugExists = await unitOfWork.Repository<Service>()
-		//		.AnyAsync(s => s.Id != existingService.Id && s.Slug == existingService.Slug, cancellationToken);
-		//	if (slugExists)
-		//	{
-		//		throw new InvalidOperationException($"Slug '{existingService.Slug}' already exists.");
-		//	}
-		//}
-
-		// Lấy danh sách UnitRelation cũ
-        var existingUnitRelations = existingService.UnitRelations.ToList();
-        // Ánh xạ UnitRelations từ request
-        var updatedUnitRelations = mapper.Map<List<UnitRelation>>(command.Service.UnitRelations);
-        // Danh sách để lưu các UnitRelation sẽ được cập nhật hoặc thêm mới
-        var unitRelationsToProcess = new List<UnitRelation>();
-
-        foreach (var updatedUnitRelation in updatedUnitRelations)
-        {
-            // Đảm bảo ReferenceId đúng
-            updatedUnitRelation.ReferenceId = existingService.Id;
-            // Tìm UnitRelation cũ khớp với Id (nếu có)
-            var existingUnitRelation = existingUnitRelations.FirstOrDefault(ur => ur.Id == updatedUnitRelation.Id);
-            if (existingUnitRelation != null)
-            {
-                // Cập nhật UnitRelation cũ
-                mapper.Map(updatedUnitRelation, existingUnitRelation);
-                unitRelationsToProcess.Add(existingUnitRelation);
-            }
-            else
-            {
-                // Thêm mới UnitRelation
-                updatedUnitRelation.CreatedBy = currentUserId;
-                unitRelationsToProcess.Add(updatedUnitRelation);
-            }
-        }
-		string? newServiceImage = existingService.Image;
+        string? newServiceImage = command.Service.Image;
 		try
 		{
 			DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
 
-			await serviceLaundryService.UpdateServiceAsync(existingService, unitRelationsToProcess, transaction);
+			await unitOfWork.Repository<Service>().UpdateAsync(existingService);
 
-			await unitOfWork.SaveAsync(cancellationToken);
+            await unitOfWork.SaveAsync(cancellationToken);
 			await unitOfWork.CommitAsync(cancellationToken);
 
 			if (!string.IsNullOrEmpty(oldServiceImage))
@@ -99,30 +57,15 @@ public class UpdateServiceHandler(
 
 		catch
 		{
-			if (!string.IsNullOrEmpty(existingService.Image))
+			if (!string.IsNullOrEmpty(newServiceImage))
 			{
-				await mediaUpdateService.DeleteAvatarAsync(existingService.Image);
+				await mediaUpdateService.DeleteAvatarAsync(newServiceImage);
 			}
 			await unitOfWork.RollbackAsync(cancellationToken);
 			throw;
 		}
 	}
 
-	public string GenerateSlug(string input)
-	{
-		string slug = input.ToLowerInvariant()
-			.Normalize(NormalizationForm.FormD);
-
-		var sb = new StringBuilder();
-		foreach (var c in slug)
-			if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
-				sb.Append(c);
-
-		slug = Regex.Replace(sb.ToString(), @"[^a-z0-9\s-]", "");
-		slug = Regex.Replace(slug, @"[\s-]+", "-").Trim('-');
-
-		return slug;
-	}
 }
 
 

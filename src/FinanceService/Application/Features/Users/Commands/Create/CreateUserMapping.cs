@@ -9,7 +9,7 @@ public class CreateUserMapping : Profile
     public CreateUserMapping()
     {
         CreateMap<UserModel, User>();
-        CreateMap<CreateUserEvent, User>();
+        CreateMap<CreateAccountEvent, User>();
         CreateMap<User, UserModel>();
         CreateMap<User, UserProjection>();
         CreateMap<UserProjection, CreateUserCommand>();

@@ -9,14 +9,14 @@ using AutoMapper;
 using Domain.Aggregates.Services;
 using Infrastructure.UnitOfWorks;
 using Mediator;
+using Contracts.Utils;
 
 namespace Application.Feature.Services.Command.Create
 {
     public class CreateServiceHandler(
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        IMediaUpdateService<Service> mediaUpdateService,
-        IActionAccessorService accessorService // Thêm để lấy currentUserId
+        IMediaUpdateService<Service> mediaUpdateService
 	) : IRequestHandler<CreateServiceCommand>
     {
         public async ValueTask<Mediator.Unit> Handle(
@@ -26,37 +26,18 @@ namespace Application.Feature.Services.Command.Create
 		)
         {
             Service mappingService = mapper.Map<Service>(request);
-			mappingService.UnitRelations = new List<UnitRelation>();
-
+            mappingService.Slug = Generator.GenerateSlug(mappingService.Name);
 			string? serviceImage = null;
             try
             {
                 DbTransaction transaction = await unitOfWork.CreateTransactionAsync(
                     cancellationToken
                 );
-				//if (string.IsNullOrEmpty(mappingService.Slug))
-				//{
-				//	mappingService.Slug = GenerateSlug(mappingService.Name);
-				//	bool slugExists = await unitOfWork.Repository<Service>()
-				//.AnyAsync(s => s.Slug == mappingService.Slug, cancellationToken);
-				//	if (slugExists)
-				//	{
-				//		throw new InvalidOperationException($"Slug '{mappingService.Slug}' already exists.");
-				//	}
-				//}
 
 				Service service = await unitOfWork
                     .Repository<Service>()
                     .AddAsync(mappingService, cancellationToken);
                 serviceImage = service.Image;
-				await unitOfWork.SaveAsync(cancellationToken);
-
-				var unitRelations = mapper.Map<List<UnitRelation>>(request.UnitRelations);
-				foreach (var unitRelation in unitRelations)
-				{
-					unitRelation.ReferenceId = service.Id;
-					await unitOfWork.Repository<UnitRelation>().AddAsync(unitRelation, cancellationToken);
-				}
 
 				await unitOfWork.SaveAsync(cancellationToken);
                 await unitOfWork.CommitAsync(cancellationToken);
@@ -72,21 +53,7 @@ namespace Application.Feature.Services.Command.Create
                 throw;
             }
         }
-		public string GenerateSlug(string input)
-		{
-			string slug = input.ToLowerInvariant()
-				.Normalize(NormalizationForm.FormD);
-
-			var sb = new StringBuilder();
-			foreach (var c in slug)
-				if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
-					sb.Append(c);
-
-			slug = Regex.Replace(sb.ToString(), @"[^a-z0-9\s-]", "");
-			slug = Regex.Replace(slug, @"[\s-]+", "-").Trim('-');
-
-			return slug;
-		}
+		
 
 
 	}

@@ -44,13 +44,12 @@ namespace Application.Features.Common.Validators.Branches
                 );
 
             RuleFor(b => b.Code)
-                .NotEmpty()
+                .MustAsync(IsCodeAvaiableAsync)
                 .WithState(x =>
                     Messager
                         .Create<Branch>()
                         .Property(x => x.Code)
-                        .Message(MessageType.Null)
-                        .Negative()
+                        .Message(MessageType.Existence)
                         .Build()
                 )
                 .MaximumLength(50)
@@ -61,31 +60,13 @@ namespace Application.Features.Common.Validators.Branches
                         .Message(MessageType.MaximumLength)
                         .Build()
                 )
-                .MustAsync(
-                    (code, cancellationToken) => IsCodeAvaiableAsync(code, cancellationToken)
-                )
-                .WithState(x =>
-                    Messager
-                        .Create<Branch>()
-                        .Property(x => x.Code)
-                        .Message(MessageType.Existence)
-                        .Build()
-                );
+               ;
 
             RuleFor(b => b.Email)
-                .NotEmpty()
-                .WithState(x =>
-                    Messager
-                        .Create<Branch>()
-                        .Property(x => x.Email)
-                        .Message(MessageType.Null)
-                        .Negative()
-                        .Build()
-                )
                 .Must(x =>
                 {
                     Regex regex = EmailValidationRegex();
-                    return regex.IsMatch(x!);
+                    return string.IsNullOrEmpty(x)|| regex.IsMatch(x!);
                 })
                 .WithState(x =>
                     Messager
@@ -115,7 +96,7 @@ namespace Application.Features.Common.Validators.Branches
                         .Message(MessageType.MaximumLength)
                         .Build()
                 );
-                
+
             RuleFor(b => b.AddressName)
                 .MaximumLength(256)
                 .WithState(x =>
@@ -196,22 +177,19 @@ namespace Application.Features.Common.Validators.Branches
                         .Build()
                 );
 
-            RuleFor(b => b.Slug)
-                .MaximumLength(128)
-                .WithState(x =>
-                    Messager
-                        .Create<Branch>()
-                        .Property(x => x.Slug)
-                        .Message(MessageType.MaximumLength)
-                        .Build()
-                );
-
         }
 
         [GeneratedRegex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$")]
         private static partial Regex EmailValidationRegex();
 
-        private async Task<bool> IsCodeAvaiableAsync(string code, CancellationToken cancellationToken)
-        => !await unitOfWork.Repository<Branch>().AnyAsync(c => c.Code == code, cancellationToken);
+        private async Task<bool> IsCodeAvaiableAsync(string? code, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrEmpty(code))
+            {
+                Console.WriteLine("Code is null or empty, allowing validation to pass.");
+                return true; // Allow null or empty Code
+            }
+            return !await unitOfWork.Repository<Branch>().AnyAsync(c => c.Code == code, cancellationToken);
+        }
     }
 }

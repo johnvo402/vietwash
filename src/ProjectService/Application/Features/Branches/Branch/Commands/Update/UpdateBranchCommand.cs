@@ -11,8 +11,7 @@ namespace Application.Features.Branches.Branch.Commands.Update
         [FromRoute( Name = RouterBase.Id)]
         public long BranchId { get; set; }
         [FromBody]
-        public UpdateBranch? Branch { get; set; }
-        public class UpdateBranch : BranchModel { }
+        public BranchModel? Branch { get; set; }
        
     }
 }
