@@ -4,6 +4,7 @@ using AutoMapper;
 using Domain.Aggregates.Services;
 using Domain.Aggregates.Suppliers;
 using Domain.Aggregates.Suppliers.Specifications;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Mediator;
 
