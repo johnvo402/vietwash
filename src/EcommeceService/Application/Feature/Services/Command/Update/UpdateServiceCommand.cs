@@ -1,10 +1,8 @@
 using Application.Feature.Common.Projections.Services;
 using Contracts.Routers;
-using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Services.Enums;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 namespace Application.Feature.Services.Command.Update;
 

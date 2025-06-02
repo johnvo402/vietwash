@@ -54,31 +54,31 @@ public class UpdateServiceHandler(
 		//}
 
 		// Lấy danh sách UnitRelation cũ
-        var existingUnitRelations = existingService.UnitRelations.ToList();
-        // Ánh xạ UnitRelations từ request
-        var updatedUnitRelations = mapper.Map<List<UnitRelation>>(command.Service.UnitRelations);
-        // Danh sách để lưu các UnitRelation sẽ được cập nhật hoặc thêm mới
-        var unitRelationsToProcess = new List<UnitRelation>();
+		var existingUnitRelations = existingService.UnitRelations.ToList();
+		// Ánh xạ UnitRelations từ request
+		var updatedUnitRelations = mapper.Map<List<UnitRelation>>(command.Service.UnitRelations);
+		// Danh sách để lưu các UnitRelation sẽ được cập nhật hoặc thêm mới
+		var unitRelationsToProcess = new List<UnitRelation>();
 
-        foreach (var updatedUnitRelation in updatedUnitRelations)
-        {
-            // Đảm bảo ReferenceId đúng
-            updatedUnitRelation.ReferenceId = existingService.Id;
-            // Tìm UnitRelation cũ khớp với Id (nếu có)
-            var existingUnitRelation = existingUnitRelations.FirstOrDefault(ur => ur.Id == updatedUnitRelation.Id);
-            if (existingUnitRelation != null)
-            {
-                // Cập nhật UnitRelation cũ
-                mapper.Map(updatedUnitRelation, existingUnitRelation);
-                unitRelationsToProcess.Add(existingUnitRelation);
-            }
-            else
-            {
-                // Thêm mới UnitRelation
-                updatedUnitRelation.CreatedBy = currentUserId;
-                unitRelationsToProcess.Add(updatedUnitRelation);
-            }
-        }
+		foreach (var updatedUnitRelation in updatedUnitRelations)
+		{
+			// Đảm bảo ReferenceId đúng
+			updatedUnitRelation.ReferenceId = existingService.Id;
+			// Tìm UnitRelation cũ khớp với Id (nếu có)
+			var existingUnitRelation = existingUnitRelations.FirstOrDefault(ur => ur.Id == updatedUnitRelation.Id);
+			if (existingUnitRelation != null)
+			{
+				// Cập nhật UnitRelation cũ
+				mapper.Map(updatedUnitRelation, existingUnitRelation);
+				unitRelationsToProcess.Add(existingUnitRelation);
+			}
+			else
+			{
+				// Thêm mới UnitRelation
+				updatedUnitRelation.CreatedBy = currentUserId;
+				unitRelationsToProcess.Add(updatedUnitRelation);
+			}
+		}
 		string? newServiceImage = existingService.Image;
 		try
 		{

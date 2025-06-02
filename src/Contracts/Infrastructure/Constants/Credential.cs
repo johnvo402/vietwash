@@ -22,5 +22,7 @@ public static class ObjectPermission
     public const string reportservice = nameof(reportservice);
     public const string dashboard = nameof(dashboard);
     public const string customer = nameof(customer);
+	public const string supplier = nameof(supplier);
+
 
 }
