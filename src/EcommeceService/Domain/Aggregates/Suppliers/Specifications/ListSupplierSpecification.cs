@@ -7,7 +7,7 @@ namespace Domain.Aggregates.Suppliers.Specifications
 	{
 		public ListSupplierSpecification()
 		{
-			Query.AsNoTracking().AsSplitQuery();
+			Query.Where(x => !x.Disable).AsNoTracking().AsSplitQuery();
 			string key = GetUniqueCachedKey();
 			Query.EnableCache(key);
 		}

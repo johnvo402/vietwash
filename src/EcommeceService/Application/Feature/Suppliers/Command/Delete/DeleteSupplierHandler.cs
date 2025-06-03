@@ -13,16 +13,18 @@ namespace Application.Feature.Suppliers.Command.Delete
 		public async ValueTask<Unit> Handle(DeleteSupplierCommand request, CancellationToken cancellationToken)
 		{
 			Supplier existingSupplier = await unitOfWork.Repository<Supplier>()
-			.FindByConditionAsync(s => s.Id == request.SupplierId, cancellationToken)
+			.FindByConditionAsync(s => s.Id == request.SupplierId && !s.Disable, cancellationToken)
 			?? throw new NotFoundException(
 				[Messager.Create<Supplier>().Message(MessageType.Found).Negative().BuildMessage()]
 			);
-		
+
+			existingSupplier.Disable = true;
+
 			try
 			{
 				DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
 
-				await unitOfWork.Repository<Supplier>().DeleteAsync(existingSupplier);
+				await unitOfWork.Repository<Supplier>().UpdateAsync(existingSupplier);
 				await unitOfWork.SaveAsync(cancellationToken);
 				await unitOfWork.CommitAsync(cancellationToken);
 				return Unit.Value;

@@ -15,7 +15,7 @@ namespace Domain.Aggregates.Suppliers.Specifications
 		public GetSupplierWithIncludeByIdSpecification(long id)
 		{
 			Query
-				.Where(x => x.Id == id && x.Status == SupplierStatus.Active)
+				.Where(x => x.Id == id && !x.Disable)
 				.AsNoTracking();
 		}
 	}

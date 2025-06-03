@@ -16,7 +16,7 @@ namespace Application.Feature.Suppliers.Command.Update
 	{
 		public async ValueTask<UpdateSupplierResponse> Handle(UpdateSupplierCommand request, CancellationToken cancellationToken)
 		{
-			Supplier? existingSupplier = await unitOfWork.Repository<Supplier>().FindByIdAsync(request.SupplierId, cancellationToken)
+			Supplier? existingSupplier = await unitOfWork.Repository<Supplier>().FindByConditionAsync(s => s.Id == request.SupplierId && !s.Disable, cancellationToken)
 
 						?? throw new NotFoundException(
 				 [Messager.Create<Supplier>().Message(MessageType.Found).Negative().BuildMessage()]
@@ -25,7 +25,7 @@ namespace Application.Feature.Suppliers.Command.Update
 			{
 				existingSupplier.Status = request.Body.Status.Value;
 			}
-			mapper.Map(request, existingSupplier);
+			mapper.Map(request.Body.Supplier, existingSupplier);
 			try
 			{
 				DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
