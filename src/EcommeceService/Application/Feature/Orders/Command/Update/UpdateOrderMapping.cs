@@ -1,11 +1,6 @@
 ﻿using Application.Feature.Common.Projections.Orders;
-using Application.Feature.Common.Projections.Services;
-using Application.Feature.Common.Projections.Units;
-using Application.Feature.Orders.Command.Create;
-using Application.Feature.Services.Command.Update;
 using AutoMapper;
 using Domain.Aggregates.Orders;
-using Domain.Aggregates.Services;
 
 
 namespace Application.Feature.Orders.Command.Update
