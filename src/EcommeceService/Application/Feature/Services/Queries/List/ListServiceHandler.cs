@@ -8,7 +8,7 @@ using Mediator;
 namespace Application.Feature.Services.Queries.List;
 
 public class ListServiceHandler(IUnitOfWork unitOfWork)
-    : IRequestHandler<ListServiceQuery, PaginationResponse<ListServiceResponse>>
+	: IRequestHandler<ListServiceQuery, PaginationResponse<ListServiceResponse>>
 {
     public async ValueTask<PaginationResponse<ListServiceResponse>> Handle(
         ListServiceQuery query,

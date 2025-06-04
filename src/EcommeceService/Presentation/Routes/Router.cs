@@ -77,6 +77,19 @@ namespace Presentation.Routes
 			public const string Tags = $"{nameof(ReportRoute)} endpoint";
 			public const string ReportServiceOrder = $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportServiceOrder)}";
 		}
+
+		public static class SupplierRoute
+		{
+			public const string Tags = $"{nameof(SupplierRoute)} endpoint";
+			public const string Suppliers = $"{Ecommerce}/{RouterBase.prefix}{nameof(Suppliers)}";
+			public const string GetUpdateDelete =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(Suppliers)}/" + "{" + RouterBase.Id + "}";
+			public const string GetDetail =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(Suppliers)}/detail/"
+				+ "{"
+				+ RouterBase.Id
+				+ "}";
+		}
 	}
 }
 
