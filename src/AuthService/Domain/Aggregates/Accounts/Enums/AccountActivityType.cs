@@ -11,6 +11,7 @@ namespace Domain.Aggregates.Accounts.Enums
         Login = 1,
         Logout = 2,
         ResetPassword = 3,
-        ChangePassword = 4
+        ChangePassword = 4,
+        ChangePhoneNumber = 5,
     }
 }

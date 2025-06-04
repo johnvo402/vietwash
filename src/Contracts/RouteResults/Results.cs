@@ -29,6 +29,10 @@ public static class Results
     {
         return controller.Created(string.Empty, data);
     }
+    public static ActionResult Created201(this ControllerBase controller, object data)
+    {
+        return controller.Created(string.Empty, data);
+    }
 
     public static ActionResult<ApiResponse<Unit>> Created201(this ControllerBase controller) =>
         controller.ToActionResult(

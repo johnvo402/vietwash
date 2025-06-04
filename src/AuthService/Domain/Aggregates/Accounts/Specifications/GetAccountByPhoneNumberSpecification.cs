@@ -10,7 +10,7 @@ public class GetAccountByPhoneNumberSpecification : Specification<Account>
     {
         Query
             .Where(x =>
-                x.PhoneNumber == phone && !x.Disabled && x.PhoneEnabled && x.Role == "CUSTOMER"
+                x.PhoneNumber == phone && !x.Disabled && x.Role == "CUSTOMER"
             )
             .AsNoTracking();
     }

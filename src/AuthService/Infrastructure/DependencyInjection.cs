@@ -4,6 +4,7 @@ using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Infrastructure.Queue;
+using Domain.Otp;
 using Infrastructure.Common;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
@@ -24,7 +25,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Npgsql;
-using SpeedSMS.PinService;
 
 namespace Infrastructure;
 
@@ -88,8 +88,9 @@ public static class DependencyInjection
                 }
             );
         }
-        var section = configuration.GetSection(nameof(SpeedSmsOptions));
-        services.AddSpeedSmsPinClient(section.Bind);
+        services.Configure<OtpOption>(
+            configuration.GetSection(nameof(OtpOption))
+        );
         services
             .AddAmazonS3(configuration)
             .AddSingleton<ICurrentAccount, CurrentUserService>()
@@ -128,7 +129,8 @@ public static class DependencyInjection
             )
             .AddHangfireConfiguration(configuration)
             .AddElasticSearch(configuration)
-            .AddScoped<JobScheduler>();
+            .AddScoped<JobScheduler>()
+            .AddScoped<ISmsOtpClient, SmsOtpClient>();
 
         return services;
     }

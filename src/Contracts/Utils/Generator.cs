@@ -37,7 +37,7 @@ public static class Generator
         int minValue = (int)Math.Pow(10, numberLength - 1);
 
         int number = _random.Next(minValue, maxValue + 1);
-        return $"{prefix}{number}";
+        return ($"{prefix}{number}").Trim();
     }
 
     public static string GenerateSlug(string input)

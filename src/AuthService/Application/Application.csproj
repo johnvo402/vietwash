@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\..\Contracts\Contracts.csproj" />
     <ProjectReference Include="..\Domain\Domain.csproj" />
@@ -11,8 +11,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="SpeedSMS.PinService" />
-    <PackageReference Include="Twilio" />
     <PackageReference Include="Wangkanai.Detection" />
     <Using Include="BCrypt.Net.BCrypt" Static="True" />
   </ItemGroup>

@@ -25,7 +25,7 @@ namespace Presentation.Endpoints.Medias
         )
         {
             UploadMediaResponse media = await sender.Send(request, cancellationToken);
-            return this.Created201(media);
+            return this.Ok200(media);
         }
     }
 }
