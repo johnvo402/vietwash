@@ -10,5 +10,5 @@ public class UpdateSupplierCommand : IRequest<UpdateSupplierResponse>
 	[FromRoute(Name = RouterBase.Id)]
 	public long SupplierId { get; set; } = default!;
 	[FromBody]
-	public SupplierUpdateModel Body { get; set; } = default!;
+	public SupplierModel Supplier { get; set; } = default!;
 }

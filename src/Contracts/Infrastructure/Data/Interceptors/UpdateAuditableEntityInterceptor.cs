@@ -99,7 +99,7 @@ public class UpdateAuditableEntityInterceptor(
 
                 if (!response.IsSuccess())
                 {
-                    Log.Information(
+                    Log.Error(
                         "Elasticsearch has been failed in index audit with {debug}",
                         response.DebugInformation
                     );
@@ -107,7 +107,7 @@ public class UpdateAuditableEntityInterceptor(
             }
             catch (Exception ex)
             {
-                Log.Information($"Elasticsearch error: {ex.Message}");
+                Log.Error($"Elasticsearch error: {ex.Message}");
             }
         }
     }

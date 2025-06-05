@@ -25,7 +25,7 @@ namespace Application.Feature.Suppliers.Command.Update
 		}
 		private void ApplyRules()
 		{
-			RuleFor(x => x.Body.Supplier)
+			RuleFor(x => x.Supplier)
 				.SetValidator(new SupplierValidator(_unitOfWork, _accessorService));
 			RuleFor(x => x.SupplierId)
 				.NotEmpty()

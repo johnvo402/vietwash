@@ -121,7 +121,12 @@ public class LoginAccountHandler(
         await unitOfWork.SaveAsync(cancellationToken);
 
         var branches = user.BranchAccounts?.Select(x => x.BranchId.ToString()) ?? [];
-        UserAuth value = new UserAuth() { Id = user.Id, Role = user.Role, Branches = branches };
+        UserAuth value = new UserAuth()
+        {
+            Id = user.Id,
+            Role = user.Role,
+            Branches = branches,
+        };
         var result = SerializerExtension.Serialize(value!);
         await securityService.AddSessionUserAsync(
             user.Id.ToString(),

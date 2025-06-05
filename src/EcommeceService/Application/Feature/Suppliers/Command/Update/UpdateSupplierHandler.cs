@@ -21,11 +21,8 @@ namespace Application.Feature.Suppliers.Command.Update
 						?? throw new NotFoundException(
 				 [Messager.Create<Supplier>().Message(MessageType.Found).Negative().BuildMessage()]
 			 );
-			if (request.Body.Status.HasValue)
-			{
-				existingSupplier.Status = request.Body.Status.Value;
-			}
-			mapper.Map(request.Body.Supplier, existingSupplier);
+			
+			mapper.Map(request.Supplier, existingSupplier);
 			try
 			{
 				DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);

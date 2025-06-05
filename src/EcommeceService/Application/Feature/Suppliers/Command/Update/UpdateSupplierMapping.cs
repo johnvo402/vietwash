@@ -9,8 +9,6 @@ namespace Application.Feature.Suppliers.Command.Update
 	{
 		public UpdateSupplierMapping()
 		{
-			CreateMap<UpdateSupplierCommand, Supplier>();
-			CreateMap<SupplierModel, Supplier>();
 			CreateMap<Supplier, UpdateSupplierResponse>();
 		}
 	}

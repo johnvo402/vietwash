@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    partial class TheDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250605182102_20250606012032_Ecommerce_Migration")]
+    partial class _20250606012032_Ecommerce_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -888,6 +891,10 @@ namespace Infrastructure.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_id");
+
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric")
                         .HasColumnName("amount");
@@ -909,10 +916,6 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("created_by");
-
-                    b.Property<long>("CustomerId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("customer_id");
 
                     b.Property<DateTimeOffset>("DeliveryTime")
                         .HasColumnType("timestamp with time zone")
@@ -967,8 +970,8 @@ namespace Infrastructure.Data.Migrations
                     b.HasKey("Id")
                         .HasName("pk_order");
 
-                    b.HasIndex("CustomerId")
-                        .HasDatabaseName("ix_order_customer_id");
+                    b.HasIndex("AccountId")
+                        .HasDatabaseName("ix_order_account_id");
 
                     b.HasIndex("Id")
                         .HasDatabaseName("ix_order_id");
@@ -1994,7 +1997,7 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("voucher", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Vouchers.VoucherCustomer", b =>
+            modelBuilder.Entity("Domain.Aggregates.Vouchers.VoucherAccount", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2003,13 +2006,13 @@ namespace Infrastructure.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_id");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
-
-                    b.Property<long>("CustomerId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("customer_id");
 
                     b.Property<bool>("IsUsed")
                         .HasColumnType("boolean")
@@ -2020,15 +2023,15 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnName("voucher_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_voucher_customer");
+                        .HasName("pk_voucher_account");
 
-                    b.HasIndex("CustomerId")
-                        .HasDatabaseName("ix_voucher_customer_customer_id");
+                    b.HasIndex("AccountId")
+                        .HasDatabaseName("ix_voucher_account_account_id");
 
                     b.HasIndex("VoucherId")
-                        .HasDatabaseName("ix_voucher_customer_voucher_id");
+                        .HasDatabaseName("ix_voucher_account_voucher_id");
 
-                    b.ToTable("voucher_customer", (string)null);
+                    b.ToTable("voucher_account", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Equipments.MaintenanceDetail", b =>
@@ -2184,14 +2187,14 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Orders.Order", b =>
                 {
-                    b.HasOne("Domain.Aggregates.Users.User", "Customer")
+                    b.HasOne("Domain.Aggregates.Users.User", "Account")
                         .WithMany()
-                        .HasForeignKey("CustomerId")
+                        .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_order_user_customer_id");
+                        .HasConstraintName("fk_order_user_account_id");
 
-                    b.Navigation("Customer");
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Orders.OrderItem", b =>
@@ -2341,23 +2344,23 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("UnitRelation");
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Vouchers.VoucherCustomer", b =>
+            modelBuilder.Entity("Domain.Aggregates.Vouchers.VoucherAccount", b =>
                 {
-                    b.HasOne("Domain.Aggregates.Users.User", "Customer")
+                    b.HasOne("Domain.Aggregates.Users.User", "Account")
                         .WithMany()
-                        .HasForeignKey("CustomerId")
+                        .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_voucher_customer_user_customer_id");
+                        .HasConstraintName("fk_voucher_account_user_account_id");
 
                     b.HasOne("Domain.Aggregates.Vouchers.Voucher", "Voucher")
-                        .WithMany("VoucherCustomers")
+                        .WithMany("VoucherAccounts")
                         .HasForeignKey("VoucherId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_voucher_customer_voucher_voucher_id");
+                        .HasConstraintName("fk_voucher_account_voucher_voucher_id");
 
-                    b.Navigation("Customer");
+                    b.Navigation("Account");
 
                     b.Navigation("Voucher");
                 });
@@ -2456,7 +2459,7 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Vouchers.Voucher", b =>
                 {
-                    b.Navigation("VoucherCustomers");
+                    b.Navigation("VoucherAccounts");
                 });
 #pragma warning restore 612, 618
         }

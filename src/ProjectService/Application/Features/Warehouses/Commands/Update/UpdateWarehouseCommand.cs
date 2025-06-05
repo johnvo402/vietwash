@@ -7,12 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Features.Warehouses.Commands.Update
 {
-    public class UpdateWarehouseCommand : IRequest<UpdateWarehouseResponse>
+    public class UpdateWarehouseCommand : IRequest<string>
     {
         [FromRoute(Name = RouterBase.Id)]
         public long WarehouseId { get; set; }
         [FromBody]
-        public UpdateWarehouse? Warehouse { get; set; }
-        public class UpdateWarehouse : WarehouseModel { }
+        public WarehouseModel? Warehouse { get; set; }
     }
 }

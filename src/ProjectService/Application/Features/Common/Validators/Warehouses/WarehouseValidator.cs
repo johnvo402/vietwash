@@ -80,37 +80,7 @@ namespace Application.Features.Common.Validators.Warehouses
                         .Build()
                 );
 
-            RuleFor(x => x.ReorderLevel)
-                .GreaterThanOrEqualTo(0)
-                .WithState(x =>
-                    Messager
-                        .Create<Warehouse>()
-                        .Property(x => x.ReorderLevel)
-                        .Message(MessageType.GreaterThanEqual)
-                        .Build()
-                );
-
-            RuleFor(x => x.BranchId)
-                .NotEmpty()
-                .WithState(x =>
-                    Messager
-                        .Create<Warehouse>()
-                        .Property(x => x.BranchId)
-                        .Message(MessageType.Null)
-                        .Negative()
-                        .Build()
-                )
-                .MustAsync(
-                    (id, cancellationToken) => IsBranchIdAvaiableAsync(id, cancellationToken)
-                )
-                .WithState(x =>
-                    Messager
-                        .Create<Warehouse>()
-                        .Property(x => x.BranchId)
-                        .Message(MessageType.Existence)
-                        .Build()
-                        );
-
+           
             RuleFor(x => x.Status)
                 .Must(status => Enum.IsDefined(typeof(WarehouseStatus), (WarehouseStatus)status))
                 .WithState(x =>
