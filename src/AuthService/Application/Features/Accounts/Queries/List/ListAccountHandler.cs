@@ -12,7 +12,7 @@ using Application.Features.Common.Helpers;
 
 namespace Application.Features.Accounts.Queries.List;
 
-public class ListAccountHandler(IUnitOfWork unitOfWork, IRedisCacheService cache, ICurrentAccount currentAccount)
+public class ListAccountHandler(IUnitOfWork unitOfWork, ICurrentAccount currentAccount)
     : IRequestHandler<ListAccountQuery, PaginationResponse<ListAccountResponse>>
 {
     public async ValueTask<PaginationResponse<ListAccountResponse>> Handle(
@@ -20,9 +20,8 @@ public class ListAccountHandler(IUnitOfWork unitOfWork, IRedisCacheService cache
         CancellationToken cancellationToken
     )
     {
-        var user = await cache.Database.StringGetAsync(currentAccount.Id.ToString());
-        var result = SerializerExtension.Deserialize<UserAuth>(user!);
-        string[] roles = AccountHelper.GetRolesByRole(result.Object?.Role!);
+       
+        string[] roles = AccountHelper.GetRolesByRole(currentAccount.Session!.Role!);
         return await unitOfWork
             .Repository<Account>()
             .PagedListAsync<ListAccountResponse>(

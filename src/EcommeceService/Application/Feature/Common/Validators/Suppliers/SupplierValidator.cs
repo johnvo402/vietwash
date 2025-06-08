@@ -49,6 +49,16 @@ namespace Application.Feature.Common.Validators.Suppliers
 					.Message(MessageType.Existence)
 					.Negative()
 					.Build());
+
+			RuleFor(x => x.Code)
+				.MustAsync(CodeExists)
+				.When(x => !string.IsNullOrEmpty(x.Code))
+                .WithState(x => Messager.Create<Supplier>()
+					.Property(x => x.Code)
+					.Message(MessageType.Existence)
+					.Negative()
+					.Build());
+
 			RuleFor(x => x.Phone)
 				.Matches(@"^\+?[0-9]{7,15}$") // cho phép định dạng: +84xxx, 0123..., không chứa ký tự đặc biệt
 				.When(x => !string.IsNullOrWhiteSpace(x.Phone))
@@ -68,5 +78,15 @@ namespace Application.Feature.Common.Validators.Suppliers
 
             return existingSupplier == null;
         }
-	}
+        private async Task<bool> CodeExists(string code, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrEmpty(code))
+                return true;
+
+            var existingSupplier = await _unitOfWork.Repository<Supplier>()
+                .FindByConditionAsync(s => s.Code == code, cancellationToken);
+
+            return existingSupplier == null;
+        }
+    }
 }

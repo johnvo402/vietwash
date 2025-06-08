@@ -13,9 +13,12 @@ namespace Application.Feature.Suppliers.Command.Create
 		public async ValueTask<Unit> Handle(CreateSupplierCommand request, CancellationToken cancellationToken)
 		{
 			var supplier = mapper.Map<Supplier>(request);
-			supplier.Code = $"SUP-{DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()[^6..]}";
+			if (string.IsNullOrEmpty(supplier.Code))
+            {
+                supplier.Code = $"SUP-{DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()[^6..]}";
+            }
 
-			try
+            try
 			{
 				DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
 

@@ -15,8 +15,6 @@ namespace Domain.Aggregates.Suppliers
         public string Description { get; set; } = default!;
         public SupplierStatus Status { get; set; } = default!;
 		public bool Disable { get; set; } = default!;
-		public long BranchId { get; set; } = default!;
-        public string? Image { get; set; }
         public ICollection<ProductSupplying> ProductSupplyings { get; set; } = [];
 
         //public ICollection<InventoryRequest> InventoryRequests { get; set; } = [];

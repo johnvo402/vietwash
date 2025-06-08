@@ -20,6 +20,7 @@ public class Account : AggregateRoot
     public bool EmailEnabled { get; private set; }
     public string Role { get; private set; }
     public AccountLanguages Language { get; private set; }
+    public CustomerGroup? CustomerGroup { get; set; }
     public bool Disabled { get; set; }
     public AccountStatus Status { get; set; }
     public ICollection<AccountToken>? AccountTokens { get; set; } = [];
