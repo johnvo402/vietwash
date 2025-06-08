@@ -1,4 +1,5 @@
-﻿using Application.Common.Interfaces.UnitOfWorks;
+﻿using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Specifications;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
@@ -6,7 +7,7 @@ using Mediator;
 
 namespace Application.Feature.Statistics.Queries.BranchNetRevenue
 {
-    public class GetNetRevenueBranchHandler(IUnitOfWork unitOfWork)
+    public class GetNetRevenueBranchHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
         : IRequestHandler<GetNetRevenueBranchQuery, IEnumerable<GetNetRevenueBranchResponse>>
     {
         public async ValueTask<IEnumerable<GetNetRevenueBranchResponse>> Handle(
@@ -15,11 +16,11 @@ namespace Application.Feature.Statistics.Queries.BranchNetRevenue
         )
         {
             var queryParamRequest = new QueryParamRequest();
-
+            var listBranchUser = currentUser.Session!.Branches!.ToList();
             var orders = await unitOfWork
                 .Repository<Order>()
                 .ListAsync(
-                    new ListOrderSpecification(request.From, request.To, null),
+                    new ListOrderSpecification(request.From, request.To, null, listBranchUser),
                     queryParamRequest,
                     cancellationToken
                 );

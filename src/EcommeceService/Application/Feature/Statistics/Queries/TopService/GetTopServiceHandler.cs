@@ -1,4 +1,5 @@
-﻿using Application.Common.Interfaces.UnitOfWorks;
+﻿using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Statistics.Queries.TopService;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Specifications;
@@ -7,7 +8,7 @@ using Domain.Aggregates.Services.Specifications;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
 using Mediator;
 
-public class GetTopServiceHandler(IUnitOfWork unitOfWork)
+public class GetTopServiceHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
     : IRequestHandler<GetTopServiceQuery, IEnumerable<GetTopServiceResponse>>
 {
     public async ValueTask<IEnumerable<GetTopServiceResponse>> Handle(
@@ -17,6 +18,7 @@ public class GetTopServiceHandler(IUnitOfWork unitOfWork)
     {
         try
         {
+            var listBranchUser = currentUser.Session!.Branches!.ToList();
             var queryParamRequest = new QueryParamRequest();
 
             var orders = await unitOfWork
@@ -25,7 +27,8 @@ public class GetTopServiceHandler(IUnitOfWork unitOfWork)
                     new GetOrderItemSpecification(
                         DateTime.Parse(query.From),
                         DateTime.Parse(query.To),
-                        Int32.Parse(query.BranchId)
+                        Int32.Parse(query.BranchId),
+                        listBranchUser
                     ),
                     queryParamRequest,
                     cancellationToken

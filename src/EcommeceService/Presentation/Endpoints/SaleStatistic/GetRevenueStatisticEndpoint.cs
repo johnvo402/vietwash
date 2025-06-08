@@ -2,7 +2,6 @@
 using Application.Feature.Statistics.Queries.RevenueStatistic;
 using Ardalis.ApiEndpoints;
 using Contracts.RouteResults;
-using Infrastructure.Constants;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +19,7 @@ namespace Presentation.Endpoints.SaleStatistic
             Tags = [Presentation.Routes.Router.SaleResultRoute.Tags],
             Summary = "Get revenue statistics by date"
         )]
-        //[AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.dashboard}")]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<
             ActionResult<ApiResponse<IEnumerable<GetRevenueStatisticResponse>>>
         > HandleAsync(

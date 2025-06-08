@@ -21,7 +21,7 @@ namespace Presentation.Endpoints.SaleStatistic
             Tags = [Presentation.Routes.Router.SaleResultRoute.Tags],
             Summary = "Dashboard card"
         )]
-        [AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.dashboard}")]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<
             ActionResult<ApiResponse<IEnumerable<GetDashboardCardResponse>>>
         > HandleAsync(

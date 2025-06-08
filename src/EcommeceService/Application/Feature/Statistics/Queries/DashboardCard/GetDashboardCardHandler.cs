@@ -1,4 +1,5 @@
-﻿using Application.Common.Interfaces.UnitOfWorks;
+﻿using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Orders.Queries.List;
 using Application.Feature.Statistics.Queries.RevenueStatistic;
 using Application.Feature.Statistics.Queries.SaleResult;
@@ -8,7 +9,7 @@ using Domain.Aggregates.Orders.Specifications;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
 using Mediator;
 
-public class GetDashboardCardHandler(IUnitOfWork unitOfWork)
+public class GetDashboardCardHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
     : IRequestHandler<GetDashboardCardQuery, IEnumerable<GetDashboardCardResponse>>
 {
     public async ValueTask<IEnumerable<GetDashboardCardResponse>> Handle(
@@ -16,15 +17,15 @@ public class GetDashboardCardHandler(IUnitOfWork unitOfWork)
         CancellationToken cancellationToken
     )
     {
+        var listBranchUser = currentUser.Session!.Branches!.ToList();
         var queryParamRequest = new QueryParamRequest();
         var orderList = await unitOfWork
-        .Repository<Order>()
+            .Repository<Order>()
             .ListAsync(
-            new ListOrderSpecification(null, null, request.BranchId),
-            queryParamRequest,
-             cancellationToken);
-
-
+                new ListOrderSpecification(null, null, request.BranchId, listBranchUser),
+                queryParamRequest,
+                cancellationToken
+            );
 
         if (orderList == null || !orderList.Any())
         {
@@ -36,7 +37,7 @@ public class GetDashboardCardHandler(IUnitOfWork unitOfWork)
                 (o.Status == OrderStatus.Completed) && (o.OrderDate.Date == DateTime.UtcNow.Date)
             )
             .Count();
-    
+
         decimal revenue = orderList
             .Where(o =>
                 (o.Status == OrderStatus.Completed) && (o.OrderDate.Date == DateTime.UtcNow.Date)

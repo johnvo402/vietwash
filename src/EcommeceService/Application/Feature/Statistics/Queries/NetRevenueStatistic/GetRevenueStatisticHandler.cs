@@ -1,8 +1,9 @@
-﻿using Application.Common.Interfaces.UnitOfWorks;
+﻿using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Statistics.Queries.RevenueStatistic;
 using Mediator;
 
-public class GetRevenueStatisticHandler(IUnitOfWork unitOfWork)
+public class GetRevenueStatisticHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
     : IRequestHandler<GetRevenueStatisticQuery, IEnumerable<GetRevenueStatisticResponse>>
 {
     public async ValueTask<IEnumerable<GetRevenueStatisticResponse>> Handle(
@@ -12,11 +13,11 @@ public class GetRevenueStatisticHandler(IUnitOfWork unitOfWork)
     {
         var from = DateTime.Parse(request.From).ToString("yyyy-MM-dd");
         var to = DateTime.Parse(request.To).ToString("yyyy-MM-dd");
-        var query = $@"
+        var query =
+            $@"
     SELECT revenue_date AS ""Date"", total_revenue AS ""Revenue""
     FROM get_revenue_statistics('{request.BranchId}', '{from}', '{to}');
 ";
-
 
         var result = await unitOfWork.ExecuteSqlQueryAsync<GetRevenueStatisticResponse>(
             query,

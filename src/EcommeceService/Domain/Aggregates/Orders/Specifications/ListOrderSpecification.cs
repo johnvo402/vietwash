@@ -5,32 +5,29 @@ namespace Domain.Aggregates.Orders.Specifications
 {
     public class ListOrderSpecification : Specification<Order>
     {
-        public ListOrderSpecification(string? from, string? to, string? branchId)
+        public ListOrderSpecification(
+            string? from,
+            string? to,
+            string? branchId,
+            List<string> branchs
+        )
         {
             Query
-                .Where(x =>
-                        x.Status.Equals("Completed")
-
-                                            )
-                    .Include(x => x.OrderItems)
-                    .Include(x => x.OrderPayments)
-            .AsNoTracking()
-                    .AsSplitQuery();
+                .Where(x => x.Status.Equals("Completed") && branchs.Contains(x.BranchId + ""))
+                .Include(x => x.OrderItems)
+                .Include(x => x.OrderPayments)
+                .AsNoTracking()
+                .AsSplitQuery();
 
             if (!string.IsNullOrEmpty(from) || !string.IsNullOrEmpty(to))
             {
-                Query
-                    .Where(x =>
-                        x.OrderDate >= DateTime.Parse(from)
-                        && x.OrderDate < DateTime.Parse(to)
-                                            );
-
+                Query.Where(x =>
+                    x.OrderDate >= DateTime.Parse(from) && x.OrderDate < DateTime.Parse(to)
+                );
             }
             else if (!string.IsNullOrEmpty(branchId))
             {
-                Query
-                    .Where(x => x.BranchId == Int32.Parse(branchId));
-
+                Query.Where(x => x.BranchId == Int32.Parse(branchId));
             }
         }
     }
