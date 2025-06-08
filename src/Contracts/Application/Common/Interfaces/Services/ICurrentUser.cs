@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Application.Common.Auth;
 using Microsoft.AspNetCore.Http;
 
 namespace Application.Common.Interfaces.Services;
@@ -9,7 +10,8 @@ public interface ICurrentAccount
 
     public string? ClientIp { get; }
 
-    void SetClientIp(HttpContext httpContext);
+    public UserAuth? Session { get; }
 
-    void SetClaimPrinciple(ClaimsPrincipal user);
+    void SetClientIp(HttpContext httpContext);
+    Task SetClaimPrinciple(ClaimsPrincipal user);
 }

@@ -8,9 +8,8 @@ namespace Application.Features.Common.Helpers
         {
             return role switch
             {
-                "ADMIN" => new[] { "STAFF", "CUSTOMER", "MANAGER" },
-                "MANAGER" => new[] { "STAFF",  "CUSTOMER" },
-                "STAFF" => new[] { "STAFF"},
+                "ADMIN" => new[] { "STAFF",  "MANAGER" },
+                "MANAGER" => new[] { "STAFF" },
                 _ => Array.Empty<string>()
             };
         }
