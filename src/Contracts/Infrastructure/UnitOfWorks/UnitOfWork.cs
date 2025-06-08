@@ -1,4 +1,5 @@
 using System.Data.Common;
+using System.Runtime.CompilerServices;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
 using Infrastructure.UnitOfWorks.CachedRepositories;
@@ -157,5 +158,17 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache
             await CurrentTransaction.DisposeAsync();
             CurrentTransaction = null;
         }
+    }
+
+    public async Task<List<T>> ExecuteSqlQueryAsync<T>(
+        string sql,
+        CancellationToken cancellationToken = default
+    )
+        where T : class
+    {
+        var formatString = FormattableStringFactory.Create(sql);
+        return await dbContext
+            .DatabaseFacade.SqlQuery<T>(formatString)
+            .ToListAsync(cancellationToken);
     }
 }

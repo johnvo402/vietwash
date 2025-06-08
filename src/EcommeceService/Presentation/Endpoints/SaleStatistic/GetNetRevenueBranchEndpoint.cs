@@ -1,4 +1,5 @@
 ﻿using Application.Common.Auth;
+using Application.Feature.Statistics.Queries.BranchNetRevenue;
 using Application.Feature.Statistics.Queries.RevenueStatistic;
 using Ardalis.ApiEndpoints;
 using Contracts.RouteResults;
@@ -10,21 +11,21 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Presentation.Endpoints.SaleStatistic
 {
-    public class GetRevenueStatisticEndpoint(ISender sender)
-        : EndpointBaseAsync.WithRequest<GetRevenueStatisticQuery>.WithActionResult<
-            ApiResponse<IEnumerable<GetRevenueStatisticResponse>>
+    public class GetNetRevenueBranchEndpoint(ISender sender)
+        : EndpointBaseAsync.WithRequest<GetNetRevenueBranchQuery>.WithActionResult<
+            ApiResponse<IEnumerable<GetNetRevenueBranchResponse>>
         >
     {
-        [HttpGet(Presentation.Routes.Router.SaleResultRoute.RevenueStatistic)]
+        [HttpGet(Presentation.Routes.Router.SaleResultRoute.NetRevenueBranch)]
         [SwaggerOperation(
             Tags = [Presentation.Routes.Router.SaleResultRoute.Tags],
-            Summary = "Get revenue statistics by date"
+            Summary = "Get net revenue branch by date"
         )]
         //[AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.dashboard}")]
         public override async Task<
-            ActionResult<ApiResponse<IEnumerable<GetRevenueStatisticResponse>>>
+            ActionResult<ApiResponse<IEnumerable<GetNetRevenueBranchResponse>>>
         > HandleAsync(
-            [FromQuery] GetRevenueStatisticQuery request,
+            [FromQuery] GetNetRevenueBranchQuery request,
             CancellationToken cancellationToken = default
         )
         {

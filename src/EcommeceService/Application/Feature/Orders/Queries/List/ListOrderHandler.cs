@@ -1,7 +1,7 @@
 ﻿using Application.Common.Interfaces.UnitOfWorks;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.QueryStringProcessing;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Specifications;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.QueryStringProcessing;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
 using Mediator;
 
@@ -15,15 +15,10 @@ namespace Application.Feature.Orders.Queries.List
             CancellationToken cancellationToken
         )
         {
-
-
             return await unitOfWork
                 .Repository<Order>()
                 .PagedListAsync<ListOrderResponse>(
-                    new ListOrderSpecification(
-                      query.From,
-                       query.To
-                    ),
+                    new ListOrderSpecification(query.From, query.To, query.BranchId),
                     query.ValidateQuery().ValidateFilter(typeof(ListOrderResponse))
                 );
         }

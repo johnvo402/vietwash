@@ -15,6 +15,10 @@ namespace Application.Feature.Statistics.Queries.TopService
         [FromQuery]
         public string To { get; set; }
 
+        [FromQuery]
+        public string BranchId { get; set; }
+
+
         //public string From { get; }
         //public string To { get; }
 

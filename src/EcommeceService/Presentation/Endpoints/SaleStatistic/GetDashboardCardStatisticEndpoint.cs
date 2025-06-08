@@ -2,9 +2,9 @@
 using Application.Feature.Statistics.Queries.RevenueStatistic;
 using Application.Feature.Statistics.Queries.SaleResult;
 using Ardalis.ApiEndpoints;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Contracts.RouteResults;
 using Infrastructure.Constants;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -12,19 +12,21 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Presentation.Endpoints.SaleStatistic
 {
     public class GetSaleStatisticEndpoint(ISender sender)
-        : EndpointBaseAsync.WithoutRequest.WithActionResult<
-            ApiResponse<IEnumerable<GetSaleResultResponse>>
+        : EndpointBaseAsync.WithRequest<GetDashboardCardQuery>.WithActionResult<
+            ApiResponse<IEnumerable<GetDashboardCardResponse>>
         >
     {
-        [HttpGet(Presentation.Routes.Router.SaleResultRoute.SaleResult)]
+        [HttpGet(Presentation.Routes.Router.SaleResultRoute.DashboardCard)]
         [SwaggerOperation(
             Tags = [Presentation.Routes.Router.SaleResultRoute.Tags],
-            Summary = "statistic result"
+            Summary = "Dashboard card"
         )]
         [AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.dashboard}")]
         public override async Task<
-            ActionResult<ApiResponse<IEnumerable<GetSaleResultResponse>>>
-        > HandleAsync(CancellationToken cancellationToken = default) =>
-            this.Ok200(await sender.Send(new GetSaleResultQuery(), cancellationToken));
+            ActionResult<ApiResponse<IEnumerable<GetDashboardCardResponse>>>
+        > HandleAsync(
+            [FromQuery] GetDashboardCardQuery request,
+            CancellationToken cancellationToken = default
+        ) => this.Ok200(await sender.Send(request, cancellationToken));
     }
 }
