@@ -15,7 +15,7 @@ namespace Domain.Aggregates.Orders.Specifications
                 order.OrderDate < to &&
                 order.Status == OrderStatus.Completed &&
                 order.BranchId == branchId &&
-                  branchs.Contains(order.BranchId + "")
+                  branchs.Contains(order.BranchId.ToString())
                 )
             .Include(order => order.OrderItems)
             .AsNoTracking();

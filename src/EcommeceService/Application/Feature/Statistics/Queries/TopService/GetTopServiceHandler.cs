@@ -38,28 +38,15 @@ public class GetTopServiceHandler(IUnitOfWork unitOfWork, ICurrentAccount curren
 
             var groupedOrderItems = orderItems.GroupBy(oi => oi.ServiceId).ToList();
 
-            var serviceIds = groupedOrderItems.Select(g => g.Key).Distinct().ToList();
-
-            var services = await unitOfWork
-                .Repository<Service>()
-                .ListAsync(
-                    new GetServiceByIdsSpecification(serviceIds),
-                    queryParamRequest,
-                    cancellationToken
-                );
-
-            var serviceDict = services.ToDictionary(s => s.Id, s => s);
+            var serviceDict = orderItems.ToDictionary(s => s.Id, s => s);
 
             var result = groupedOrderItems
                 .Select(g => new GetTopServiceResponse
                 {
                     ServiceId = g.Key.ToString(),
                     ServiceName = serviceDict.ContainsKey(g.Key)
-                        ? serviceDict[g.Key].Name
+                        ? serviceDict[g.Key].ServiceName
                         : "Unknown",
-                    Description = serviceDict.ContainsKey(g.Key)
-                        ? serviceDict[g.Key].Description
-                        : "No description",
                     UsageCount = g.Count(),
                     TotalRevenue = g.Sum(oi => oi.Price * oi.Quantity),
                 })
