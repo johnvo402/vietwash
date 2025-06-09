@@ -21,4 +21,7 @@ public interface IUnitOfWork : IDisposable
     int ExecuteSqlCommand(string sql, params object[] parameters);
 
     Task SaveAsync(CancellationToken cancellationToken = default);
+
+    Task<List<T>> ExecuteSqlQueryAsync<T>(string sql, CancellationToken cancellationToken = default)
+        where T : class;
 }

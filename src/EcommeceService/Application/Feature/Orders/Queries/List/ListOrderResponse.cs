@@ -2,7 +2,5 @@
 
 namespace Application.Feature.Orders.Queries.List
 {
-	public class ListOrderResponse : OrderProjection
-	{
-	}
+    public class ListOrderResponse : OrderProjection { }
 }

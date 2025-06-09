@@ -5,9 +5,9 @@ using Domain.Aggregates.Orders;
 
 namespace Application.Feature.Statistics.Queries.SaleResult;
 
-public class GetSaleResultMapping : Profile
+public class GetDashboardCardMapping : Profile
 {
-    public GetSaleResultMapping()
+    public GetDashboardCardMapping()
     {
         CreateMap<Order, ListOrderResponse>().IncludeBase<Order, OrderProjection>();
     }

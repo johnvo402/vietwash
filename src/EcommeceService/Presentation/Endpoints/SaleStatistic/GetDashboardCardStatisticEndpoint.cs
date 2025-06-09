@@ -1,7 +1,9 @@
 ﻿using Application.Common.Auth;
 using Application.Feature.Statistics.Queries.RevenueStatistic;
+using Application.Feature.Statistics.Queries.SaleResult;
 using Ardalis.ApiEndpoints;
 using Contracts.RouteResults;
+using Infrastructure.Constants;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
@@ -9,25 +11,22 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Presentation.Endpoints.SaleStatistic
 {
-    public class GetRevenueStatisticEndpoint(ISender sender)
-        : EndpointBaseAsync.WithRequest<GetRevenueStatisticQuery>.WithActionResult<
-            ApiResponse<IEnumerable<GetRevenueStatisticResponse>>
+    public class GetSaleStatisticEndpoint(ISender sender)
+        : EndpointBaseAsync.WithRequest<GetDashboardCardQuery>.WithActionResult<
+            ApiResponse<IEnumerable<GetDashboardCardResponse>>
         >
     {
-        [HttpGet(Presentation.Routes.Router.SaleResultRoute.RevenueStatistic)]
+        [HttpGet(Presentation.Routes.Router.SaleResultRoute.DashboardCard)]
         [SwaggerOperation(
             Tags = [Presentation.Routes.Router.SaleResultRoute.Tags],
-            Summary = "Get revenue statistics by date"
+            Summary = "Dashboard card"
         )]
         [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<
-            ActionResult<ApiResponse<IEnumerable<GetRevenueStatisticResponse>>>
+            ActionResult<ApiResponse<IEnumerable<GetDashboardCardResponse>>>
         > HandleAsync(
-            [FromQuery] GetRevenueStatisticQuery request,
+            [FromQuery] GetDashboardCardQuery request,
             CancellationToken cancellationToken = default
-        )
-        {
-            return this.Ok200(await sender.Send(request, cancellationToken));
-        }
+        ) => this.Ok200(await sender.Send(request, cancellationToken));
     }
 }
