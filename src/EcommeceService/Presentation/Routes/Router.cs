@@ -104,5 +104,23 @@ namespace Presentation.Routes
                 + RouterBase.Id
                 + "}";
         }
-    }
+		public static class InventoryImportRoute
+		{
+			public const string Tags = $"{nameof(InventoryImportRoute)} endpoint";
+			public const string InventoryImports = $"{Ecommerce}/{RouterBase.prefix}{nameof(InventoryImports)}";
+			public const string GetUpdateDelete =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(InventoryImports)}/" + "{" + RouterBase.Id + "}";
+			public const string GetDetail =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(InventoryImports)}/detail/"
+				+ "{"
+				+ RouterBase.Id
+				+ "}";
+			public const string UpdateStatus =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(InventoryImports)}/{nameof(UpdateStatus)}"
+				+ "{"
+				+ RouterBase.Id
+				+ "}";
+		}
+
+	}
 }
