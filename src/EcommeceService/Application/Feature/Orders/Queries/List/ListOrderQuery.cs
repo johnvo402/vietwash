@@ -12,5 +12,8 @@ namespace Application.Feature.Orders.Queries.List
 
         [FromQuery]
         public string? To { get; set; }
+
+        [FromQuery]
+        public string? BranchId { get; set; }
     }
 }

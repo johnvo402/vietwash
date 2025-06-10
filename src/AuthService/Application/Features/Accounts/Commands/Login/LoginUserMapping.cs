@@ -9,7 +9,7 @@ public class LoginUserMapping : Profile
 {
     public LoginUserMapping()
     {
-        CreateMap<Account, GetAccountDetailResponse>().IncludeBase<Account, AccountDetailProjection>();
-
+        CreateMap<Account, GetAccountDetailResponse>()
+            .IncludeBase<Account, AccountDetailProjection>();
     }
 }

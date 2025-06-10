@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Linq;
-using System.Text;
+﻿using System.Data.Common;
 using System.Threading.Tasks;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -14,9 +10,9 @@ using Domain.Aggregates.Warehouses.Specifications;
 
 namespace Application.Features.Warehouses.Commands.Update
 {
-    public class UpdateWarehouseHandler(IUnitOfWork unitOfWork, IMapper mapper) : IRequestHandler<UpdateWarehouseCommand, UpdateWarehouseResponse>
+    public class UpdateWarehouseHandler(IUnitOfWork unitOfWork, IMapper mapper) : IRequestHandler<UpdateWarehouseCommand, string>
     {
-        public async ValueTask<UpdateWarehouseResponse> Handle(UpdateWarehouseCommand request, CancellationToken cancellationToken)
+        public async ValueTask<string> Handle(UpdateWarehouseCommand request, CancellationToken cancellationToken)
         {
             Warehouse warehouse = await unitOfWork.Repository<Warehouse>()
                                                         .FindByConditionAsync(
@@ -31,7 +27,7 @@ namespace Application.Features.Warehouses.Commands.Update
                 await unitOfWork.Repository<Warehouse>().UpdateAsync(warehouse);
                 await unitOfWork.SaveAsync(cancellationToken);
                 await unitOfWork.CommitAsync(cancellationToken);
-                return mapper.Map<UpdateWarehouseResponse>(warehouse);
+                return "Success";
             }
             catch (Exception ex)
             {

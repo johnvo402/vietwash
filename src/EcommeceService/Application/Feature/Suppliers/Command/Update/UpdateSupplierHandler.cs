@@ -18,17 +18,14 @@ namespace Application.Feature.Suppliers.Command.Update
         {
             Supplier? existingSupplier = await unitOfWork.Repository<Supplier>().FindByConditionAsync(s => s.Id == request.SupplierId && !s.Disable, cancellationToken)
 
-                        ?? throw new NotFoundException(
-                 [Messager.Create<Supplier>().Message(MessageType.Found).Negative().BuildMessage()]
-             );
-            if (request.Body.Status.HasValue)
-            {
-                existingSupplier.Status = request.Body.Status.Value;
-            }
-            mapper.Map(request.Body.Supplier, existingSupplier);
-            try
-            {
-                DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
+						?? throw new NotFoundException(
+				 [Messager.Create<Supplier>().Message(MessageType.Found).Negative().BuildMessage()]
+			 );
+			
+			mapper.Map(request.Supplier, existingSupplier);
+			try
+			{
+				DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
 
                 await unitOfWork.Repository<Supplier>().UpdateAsync(existingSupplier);
                 await unitOfWork.SaveAsync(cancellationToken);

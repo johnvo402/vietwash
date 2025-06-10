@@ -1,9 +1,8 @@
 ﻿using Application.Common.Auth;
 using Application.Feature.Statistics.Queries.RevenueStatistic;
 using Ardalis.ApiEndpoints;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Contracts.RouteResults;
-using Infrastructure.Constants;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -11,7 +10,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Presentation.Endpoints.SaleStatistic
 {
     public class GetRevenueStatisticEndpoint(ISender sender)
-        : EndpointBaseAsync.WithoutRequest.WithActionResult<
+        : EndpointBaseAsync.WithRequest<GetRevenueStatisticQuery>.WithActionResult<
             ApiResponse<IEnumerable<GetRevenueStatisticResponse>>
         >
     {
@@ -20,10 +19,15 @@ namespace Presentation.Endpoints.SaleStatistic
             Tags = [Presentation.Routes.Router.SaleResultRoute.Tags],
             Summary = "Get revenue statistics by date"
         )]
-        [AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.dashboard}")]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<
             ActionResult<ApiResponse<IEnumerable<GetRevenueStatisticResponse>>>
-        > HandleAsync(CancellationToken cancellationToken = default) =>
-            this.Ok200(await sender.Send(new GetRevenueStatisticQuery(), cancellationToken));
+        > HandleAsync(
+            [FromQuery] GetRevenueStatisticQuery request,
+            CancellationToken cancellationToken = default
+        )
+        {
+            return this.Ok200(await sender.Send(request, cancellationToken));
+        }
     }
 }

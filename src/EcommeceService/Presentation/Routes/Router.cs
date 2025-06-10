@@ -42,28 +42,39 @@ namespace Presentation.Routes
             public const string GetUpdateDelete =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Categories)}/" + "{" + RouterBase.Id + "}";
         }
+
         public static class OrderRoute
         {
             public const string Tags = $"{nameof(OrderRoute)} endpoint";
             public const string Orders = $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}";
-            public const string GetUpdateDelete = $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/" + "{" + RouterBase.Id + "}";
-            public const string UpdateStatus = $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(UpdateStatus)}" + "{" + RouterBase.Id + "}";
+            public const string GetUpdateDelete =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/" + "{" + RouterBase.Id + "}";
+            public const string UpdateStatus =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(UpdateStatus)}"
+                + "{"
+                + RouterBase.Id
+                + "}";
         }
-
 
         public static class SaleResultRoute
         {
             public const string Tags = $"{nameof(SaleResultRoute)} endpoint";
 
-            public const string SaleResult = $"{Ecommerce}/{RouterBase.prefix}{nameof(SaleResult)}";
-            public const string RevenueStatistic = $"{Ecommerce}/{RouterBase.prefix}{nameof(RevenueStatistic)}";
+            public const string DashboardCard =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(DashboardCard)}";
+            public const string RevenueStatistic =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(RevenueStatistic)}";
             public const string TopService = $"{Ecommerce}/{RouterBase.prefix}{nameof(TopService)}";
+            public const string NetRevenueBranch =
+                    $"{Ecommerce}/{RouterBase.prefix}{nameof(NetRevenueBranch)}";
         }
+
         public static class FundRoute
         {
             public const string Tags = $"{nameof(FundRoute)} endpoint";
             public const string Funds = $"{Ecommerce}/{RouterBase.prefix}{nameof(Funds)}";
-            public const string GetUpdateDelete = $"{Ecommerce}/{RouterBase.prefix}{nameof(Funds)}/" + "{" + RouterBase.Id + "}";
+            public const string GetUpdateDelete =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Funds)}/" + "{" + RouterBase.Id + "}";
         }
 
         public static class UserRoute
@@ -72,10 +83,13 @@ namespace Presentation.Routes
             public const string GetRouteName = $"{Users}DetailEndpoint";
             public const string Tags = $"{nameof(Users)} endpoint";
         }
+
+
         public static class ReportRoute
         {
             public const string Tags = $"{nameof(ReportRoute)} endpoint";
-            public const string ReportServiceOrder = $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportServiceOrder)}";
+            public const string ReportServiceOrder =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportServiceOrder)}";
         }
 
         public static class SupplierRoute
@@ -90,20 +104,5 @@ namespace Presentation.Routes
                 + RouterBase.Id
                 + "}";
         }
-        public static class InventoryImportRoute
-        {
-            public const string Tags = $"{nameof(InventoryImportRoute)} endpoint";
-            public const string InventoryImports = $"{Ecommerce}/{RouterBase.prefix}{nameof(InventoryImports)}";
-            public const string GetUpdateDelete =
-                $"{Ecommerce}/{RouterBase.prefix}{nameof(InventoryImports)}/" + "{" + RouterBase.Id + "}";
-            public const string GetDetail =
-                $"{Ecommerce}/{RouterBase.prefix}{nameof(InventoryImports)}/detail/"
-                + "{"
-                + RouterBase.Id
-                + "}";
-            public const string UpdateStatus = $"{Ecommerce}/{RouterBase.prefix}{nameof(InventoryImports)}/{nameof(UpdateStatus)}" + "{" + RouterBase.Id + "}";
-
-        }
     }
 }
-

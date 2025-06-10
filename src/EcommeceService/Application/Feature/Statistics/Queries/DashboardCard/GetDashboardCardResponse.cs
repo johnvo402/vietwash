@@ -1,6 +1,6 @@
 ﻿namespace Application.Feature.Statistics.Queries.SaleResult
 {
-    public class GetSaleResultResponse
+    public class GetDashboardCardResponse
     {
         public int NumberOrder { get; set; }
         public decimal Revenue { get; set; }

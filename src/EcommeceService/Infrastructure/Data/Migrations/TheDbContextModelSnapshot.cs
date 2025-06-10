@@ -1608,10 +1608,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("address");
 
-                    b.Property<long>("BranchId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("branch_id");
-
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasColumnType("citext")

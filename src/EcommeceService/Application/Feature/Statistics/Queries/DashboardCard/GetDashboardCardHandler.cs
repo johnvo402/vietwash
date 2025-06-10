@@ -1,26 +1,35 @@
-﻿using Application.Common.Interfaces.UnitOfWorks;
+﻿using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Orders.Queries.List;
 using Application.Feature.Statistics.Queries.RevenueStatistic;
 using Application.Feature.Statistics.Queries.SaleResult;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
+using Domain.Aggregates.Orders.Specifications;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
 using Mediator;
 
-public class GetSaleResultHandler(IUnitOfWork unitOfWork)
-    : IRequestHandler<GetSaleResultQuery, IEnumerable<GetSaleResultResponse>>
+public class GetDashboardCardHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
+    : IRequestHandler<GetDashboardCardQuery, IEnumerable<GetDashboardCardResponse>>
 {
-    public async ValueTask<IEnumerable<GetSaleResultResponse>> Handle(
-        GetSaleResultQuery request,
+    public async ValueTask<IEnumerable<GetDashboardCardResponse>> Handle(
+        GetDashboardCardQuery request,
         CancellationToken cancellationToken
     )
     {
+        var listBranchUser = currentUser.Session!.Branches!.ToList();
+        var queryParamRequest = new QueryParamRequest();
         var orderList = await unitOfWork
             .Repository<Order>()
-            .ListAsync<ListOrderResponse>(cancellationToken);
+            .ListAsync(
+                new ListOrderSpecification(null, null, request.BranchId, listBranchUser),
+                queryParamRequest,
+                cancellationToken
+            );
 
         if (orderList == null || !orderList.Any())
         {
-            return new List<GetSaleResultResponse>();
+            return new List<GetDashboardCardResponse>();
         }
 
         int numberOrder = orderList
@@ -57,9 +66,9 @@ public class GetSaleResultHandler(IUnitOfWork unitOfWork)
             )
             .Sum(o => o.Amount);
 
-        var saleResults = new List<GetSaleResultResponse>
+        var saleResults = new List<GetDashboardCardResponse>
         {
-            new GetSaleResultResponse
+            new GetDashboardCardResponse
             {
                 NumberOrder = numberOrder,
                 Revenue = revenue,

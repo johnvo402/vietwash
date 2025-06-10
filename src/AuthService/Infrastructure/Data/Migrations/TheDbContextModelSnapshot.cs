@@ -56,6 +56,10 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
+                    b.Property<short?>("CustomerGroup")
+                        .HasColumnType("smallint")
+                        .HasColumnName("customer_group");
+
                     b.Property<bool>("Disabled")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
