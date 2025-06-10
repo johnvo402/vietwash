@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Domain.Aggregates.Funds;
-using Domain.Aggregates.Orders.Enums;
+﻿using Domain.Aggregates.Orders.Enums;
 using Mediator;
 
 namespace Domain.Aggregates.Orders.Events
