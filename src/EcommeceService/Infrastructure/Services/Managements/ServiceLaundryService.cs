@@ -76,35 +76,35 @@ namespace Infrastructure.Services.Managements
                 if (!hasExternalTransaction)
                     await _context.DatabaseFacade.BeginTransactionAsync();
 
-				// Lấy danh sách UnitRelation hiện tại
-				var existingUnitRelations = service.UnitRelations.ToList();
+                // Lấy danh sách UnitRelation hiện tại
+                var existingUnitRelations = service.UnitRelations.ToList();
 
-				// Xác định UnitRelation cần xóa (không còn trong danh sách mới)
-				var unitRelationIdsToKeep = unitRelations.Select(ur => ur.Id).Where(id => id > 0).ToList();
-				var unitRelationsToRemove = existingUnitRelations
-					.Where(ur => !unitRelationIdsToKeep.Contains(ur.Id))
-					.ToList();
+                // Xác định UnitRelation cần xóa (không còn trong danh sách mới)
+                var unitRelationIdsToKeep = unitRelations.Select(ur => ur.Id).Where(id => id > 0).ToList();
+                var unitRelationsToRemove = existingUnitRelations
+                    .Where(ur => !unitRelationIdsToKeep.Contains(ur.Id))
+                    .ToList();
 
-				// Xóa UnitRelation không còn trong danh sách mới
-				_unitRelationContext.RemoveRange(unitRelationsToRemove);
+                // Xóa UnitRelation không còn trong danh sách mới
+                _unitRelationContext.RemoveRange(unitRelationsToRemove);
 
-				// Cập nhật hoặc thêm mới UnitRelation
-				foreach (var unitRelation in unitRelations)
-				{
-					unitRelation.ReferenceId = service.Id;
-					var existingUnitRelation = existingUnitRelations.FirstOrDefault(ur => ur.Id == unitRelation.Id);
-					if (existingUnitRelation != null)
-					{
-						_unitRelationContext.Update(unitRelation); // Cập nhật
-					}
-					else if (unitRelation.Id == 0 || unitRelation.Id == null)
-					{
-						unitRelation.Id = 0; // Đảm bảo DB tự tăng
-						_unitRelationContext.Add(unitRelation); // Thêm mới
-					}
-				}
-				// Cập nhật Service
-				_serviceContext.Update(service);
+                // Cập nhật hoặc thêm mới UnitRelation
+                foreach (var unitRelation in unitRelations)
+                {
+                    unitRelation.ReferenceId = service.Id;
+                    var existingUnitRelation = existingUnitRelations.FirstOrDefault(ur => ur.Id == unitRelation.Id);
+                    if (existingUnitRelation != null)
+                    {
+                        _unitRelationContext.Update(unitRelation); // Cập nhật
+                    }
+                    else if (unitRelation.Id == 0 || unitRelation.Id == null)
+                    {
+                        unitRelation.Id = 0; // Đảm bảo DB tự tăng
+                        _unitRelationContext.Add(unitRelation); // Thêm mới
+                    }
+                }
+                // Cập nhật Service
+                _serviceContext.Update(service);
 
                 await _context.SaveChangesAsync();
 

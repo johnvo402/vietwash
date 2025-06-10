@@ -10,29 +10,29 @@ using Domain.Aggregates.Services;
 
 namespace Application.Feature.Suppliers.Query.List
 {
-	public class ListSupplierHandler(IUnitOfWork unitOfWork)
-	: IRequestHandler<ListSupplierQuery, PaginationResponse<ListSupplierResponse>>
-	{
-		public async ValueTask<PaginationResponse<ListSupplierResponse>> Handle(
-			ListSupplierQuery query,
-			CancellationToken cancellationToken
-		)
-		{
-			try
-			{
-				return await unitOfWork.Repository<Supplier>().
-			   PagedListAsync<ListSupplierResponse>(
-			new ListSupplierSpecification(),
-			query.ValidateQuery().ValidateFilter(typeof(ListSupplierResponse))
+    public class ListSupplierHandler(IUnitOfWork unitOfWork)
+    : IRequestHandler<ListSupplierQuery, PaginationResponse<ListSupplierResponse>>
+    {
+        public async ValueTask<PaginationResponse<ListSupplierResponse>> Handle(
+            ListSupplierQuery query,
+            CancellationToken cancellationToken
+        )
+        {
+            try
+            {
+                return await unitOfWork.Repository<Supplier>().
+               PagedListAsync<ListSupplierResponse>(
+            new ListSupplierSpecification(),
+            query.ValidateQuery().ValidateFilter(typeof(ListSupplierResponse))
 
-		);
-			}
-			catch (Exception ex)
-			{
-				throw new Exception("Exception", ex);
-			}
-		}
+        );
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Exception", ex);
+            }
+        }
 
 
-	}
+    }
 }

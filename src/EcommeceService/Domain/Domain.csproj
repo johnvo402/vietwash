@@ -5,11 +5,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Aggregates\Inventories\NewFolder\**" />
-    <EmbeddedResource Remove="Aggregates\Inventories\NewFolder\**" />
-    <None Remove="Aggregates\Inventories\NewFolder\**" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="IdGen.DependencyInjection" />
     <PackageReference Include="JohnChum.SharedKernel" />
     <PackageReference Include="NEST" />

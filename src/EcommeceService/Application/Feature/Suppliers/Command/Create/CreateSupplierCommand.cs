@@ -8,5 +8,5 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Suppliers.Command.Create
 {
-	public class CreateSupplierCommand : SupplierModel, IRequest;
+    public class CreateSupplierCommand : SupplierModel, IRequest;
 }

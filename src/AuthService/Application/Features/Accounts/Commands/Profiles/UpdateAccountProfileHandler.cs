@@ -43,7 +43,7 @@ new GetAccountByIdSpecification(currentAccount.Id!.Value),
         try
         {
             await unitOfWork.Repository<Account>().UpdateAsync(user);
-           
+
             await unitOfWork.SaveAsync(cancellationToken);
             await avatarUpdate.DeleteAvatarAsync(oldAvatar);
         }
@@ -55,7 +55,7 @@ new GetAccountByIdSpecification(currentAccount.Id!.Value),
 
         return new UpdateAccountProfileResponse
         {
-            Message= "Success",
+            Message = "Success",
         };
     }
 }

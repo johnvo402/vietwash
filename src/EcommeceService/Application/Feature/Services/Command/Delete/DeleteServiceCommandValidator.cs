@@ -12,33 +12,33 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Services.Command.Delete
 {
-	public class DeleteServiceCommandValidator : AbstractValidator<DeleteServiceCommand>
-	{
-		private readonly IUnitOfWork unitOfWork;
-		private readonly IActionAccessorService accessorService;
+    public class DeleteServiceCommandValidator : AbstractValidator<DeleteServiceCommand>
+    {
+        private readonly IUnitOfWork unitOfWork;
+        private readonly IActionAccessorService accessorService;
 
-		public DeleteServiceCommandValidator(
-			IUnitOfWork unitOfWork,
-			IActionAccessorService accessorService
-		)
-		{
-			this.unitOfWork = unitOfWork;
-			this.accessorService = accessorService;
-			ApplyRules();
-		}
-		private void ApplyRules()
-		{
-			RuleFor(x => x.ServiceId)
-				.NotEmpty()
-				.WithState(x =>
-						Messager
-							.Create<Service>()
-							.Property(x => x.Id)
-							.Message(MessageType.Null)
-							.Negative()
-							.Build()
-				);
-				
-		}
-	}
+        public DeleteServiceCommandValidator(
+            IUnitOfWork unitOfWork,
+            IActionAccessorService accessorService
+        )
+        {
+            this.unitOfWork = unitOfWork;
+            this.accessorService = accessorService;
+            ApplyRules();
+        }
+        private void ApplyRules()
+        {
+            RuleFor(x => x.ServiceId)
+                .NotEmpty()
+                .WithState(x =>
+                        Messager
+                            .Create<Service>()
+                            .Property(x => x.Id)
+                            .Message(MessageType.Null)
+                            .Negative()
+                            .Build()
+                );
+
+        }
+    }
 }

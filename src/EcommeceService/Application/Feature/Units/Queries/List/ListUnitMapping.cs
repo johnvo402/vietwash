@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Units.Queries.List
 {
-	public class ListUnitMapping : Profile
-	{
-		public ListUnitMapping()
-		{
-			CreateMap<Unit, UnitProjection>(); 
-			CreateMap<Unit, ListUnitResponse>().IncludeBase<Unit, UnitProjection>();
-		}
-	}
+    public class ListUnitMapping : Profile
+    {
+        public ListUnitMapping()
+        {
+            CreateMap<Unit, UnitProjection>();
+            CreateMap<Unit, ListUnitResponse>().IncludeBase<Unit, UnitProjection>();
+        }
+    }
 }

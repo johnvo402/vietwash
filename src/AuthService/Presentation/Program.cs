@@ -25,7 +25,7 @@ builder
         option.JsonSerializerOptions.Converters.Add(
             new Cysharp.Serialization.Json.UlidJsonConverter()
         );
-       
+
     });
 services.AddSwagger(configuration);
 builder.AddOpenTelemetryTracing(configuration);

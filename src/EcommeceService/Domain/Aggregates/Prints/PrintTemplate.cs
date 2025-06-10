@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace Domain.Aggregates.Prints
 {
-	public class PrintTemplate : AggregateRoot
-	{
-		public string Name { get; set; } = string.Empty;
-		public string HtmlTemplate { get; set; } = string.Empty;
+    public class PrintTemplate : AggregateRoot
+    {
+        public string Name { get; set; } = string.Empty;
+        public string HtmlTemplate { get; set; } = string.Empty;
 
-		protected override bool TryApplyDomainEvent(INotification domainEvent)
-		{
-			throw new NotImplementedException();
-		}
-	}
+        protected override bool TryApplyDomainEvent(INotification domainEvent)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

@@ -7,5 +7,5 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Suppliers.Query.Detail
 {
-	public class GetSupplierDetailResponse : SupplierDetailProjection;
+    public class GetSupplierDetailResponse : SupplierDetailProjection;
 }

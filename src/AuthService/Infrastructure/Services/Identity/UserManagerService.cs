@@ -12,5 +12,5 @@ public class UserManagerService(IDbContext context) : IUserManagerService
 
     private readonly DbSet<Account> userContext = context.Set<Account>();
     public DbSet<Account> Accounts => userContext;
-   
+
 }

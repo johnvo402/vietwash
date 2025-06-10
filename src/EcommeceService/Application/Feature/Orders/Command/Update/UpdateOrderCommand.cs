@@ -12,12 +12,12 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Orders.Command.Update
 {
-	public class UpdateOrderCommand : IRequest<UpdateOrderResponse>
-	{
-		[FromRoute(Name = RouterBase.Id)]
-		public string OrderId { get; set; } = string.Empty;
-		public OrderStatus? Status { get; set; }
-		[FromBody]
-		public UpdateOrderModel Order { get; set; } = new UpdateOrderModel();
-	}
+    public class UpdateOrderCommand : IRequest<UpdateOrderResponse>
+    {
+        [FromRoute(Name = RouterBase.Id)]
+        public string OrderId { get; set; } = string.Empty;
+        public OrderStatus? Status { get; set; }
+        [FromBody]
+        public UpdateOrderModel Order { get; set; } = new UpdateOrderModel();
+    }
 }

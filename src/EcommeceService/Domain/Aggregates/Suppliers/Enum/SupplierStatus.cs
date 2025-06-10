@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Domain.Aggregates.Suppliers.Enum
 {
-	public enum SupplierStatus
-	{
-		Active = 0,
-		Inactive = 1,
-	}
+    public enum SupplierStatus
+    {
+        Active = 0,
+        Inactive = 1,
+    }
 }

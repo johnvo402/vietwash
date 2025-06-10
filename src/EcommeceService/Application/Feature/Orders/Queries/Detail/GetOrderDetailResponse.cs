@@ -3,7 +3,7 @@
 
 namespace Application.Feature.Orders.Queries.Detail
 {
-	public class GetOrderDetailResponse : OrderDetailProjection
-	{
-	}
+    public class GetOrderDetailResponse : OrderDetailProjection
+    {
+    }
 }

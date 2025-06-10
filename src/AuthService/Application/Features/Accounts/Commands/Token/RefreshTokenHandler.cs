@@ -30,7 +30,7 @@ public class RefreshTokenHandler(
     )
     {
         DecodeTokenResponse decodeToken = tokenFactory.DecodeToken(command.RefreshToken!);
- 
+
         AccountToken? refresh = await unitOfWork
             .Repository<AccountToken>()
             .FindByConditionAsync(
@@ -109,7 +109,7 @@ public class RefreshTokenHandler(
             ],
             accesstokenExpiredTime
         );
-       
+
         var refreshTokenExpiredTime = tokenFactory.RefreshtokenExpiredTime;
 
         string refreshToken = tokenFactory.CreateToken(

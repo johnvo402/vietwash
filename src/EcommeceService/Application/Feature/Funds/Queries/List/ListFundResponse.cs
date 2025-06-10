@@ -7,6 +7,6 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Funds.Queries.List
 {
-	public class ListFundResponse : FundProjection;
+    public class ListFundResponse : FundProjection;
 
 }

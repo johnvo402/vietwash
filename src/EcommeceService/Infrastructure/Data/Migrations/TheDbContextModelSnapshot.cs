@@ -58,6 +58,10 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
+                    b.Property<decimal>("Discount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("discount");
+
                     b.Property<DateTimeOffset?>("LastMaintenanceDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_maintenance_date");
@@ -468,9 +472,8 @@ namespace Infrastructure.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("ArrivedAt")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<DateTimeOffset>("ArrivedAt")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("arrived_at");
 
                     b.Property<decimal>("Capacity")
@@ -485,6 +488,19 @@ namespace Infrastructure.Data.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<decimal>("Discount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("discount");
+
+                    b.Property<long>("EquipmentId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("equipment_id");
 
                     b.Property<DateTimeOffset>("ExpiryDate")
                         .HasColumnType("timestamp with time zone")
@@ -512,13 +528,21 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("supplier_id");
 
-                    b.Property<short>("Type")
-                        .HasColumnType("smallint")
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
                         .HasColumnName("type");
 
                     b.Property<long>("UnitRelationId")
                         .HasColumnType("bigint")
                         .HasColumnName("unit_relation_id");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
 
                     b.HasKey("Id")
                         .HasName("pk_equipment_supplying");
@@ -819,6 +843,15 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<decimal>("Discount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("discount");
+
                     b.Property<DateTimeOffset>("ExperyDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("expery_date");
@@ -831,6 +864,11 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("lot_number");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric")
@@ -853,13 +891,21 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("supplier_id");
 
-                    b.Property<short>("Type")
-                        .HasColumnType("smallint")
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
                         .HasColumnName("type");
 
                     b.Property<long>("UnitRelationId")
                         .HasColumnType("bigint")
                         .HasColumnName("unit_relation_id");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
 
                     b.HasKey("Id")
                         .HasName("pk_product_supplying");
@@ -1585,6 +1631,10 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
+                    b.Property<bool>("Disable")
+                        .HasColumnType("boolean")
+                        .HasColumnName("disable");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1600,8 +1650,13 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("phone");
 
-                    b.Property<short>("Status")
-                        .HasColumnType("smallint")
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
                         .HasColumnName("status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
@@ -1611,6 +1666,10 @@ namespace Infrastructure.Data.Migrations
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
+
+                    b.Property<long>("Version")
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
 
                     b.HasKey("Id")
                         .HasName("pk_supplier");
@@ -2138,7 +2197,7 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Inventories.ProductSupplying", b =>
                 {
                     b.HasOne("Domain.Aggregates.Inventories.InventoryDocument", "InventoryDocuments")
-                        .WithMany()
+                        .WithMany("ProductSupplyings")
                         .HasForeignKey("InventoryDocumentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -2377,6 +2436,8 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("EquipmentSupplyings");
 
                     b.Navigation("InventoryRelationships");
+
+                    b.Navigation("ProductSupplyings");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Inventories.InventoryInvoice", b =>

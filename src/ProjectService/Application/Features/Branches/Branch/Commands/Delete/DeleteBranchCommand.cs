@@ -7,7 +7,7 @@ using Mediator;
 
 namespace Application.Features.Branches.Branch.Commands.Delete
 {
-    public record class DeleteBranchCommand(long  branchId) : IRequest
+    public record class DeleteBranchCommand(long branchId) : IRequest
     {
 
     }

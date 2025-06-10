@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 
 namespace Domain.Aggregates.Suppliers.Specifications
 {
-	public class GetSupplierWithIncludeByIdSpecification : Specification<Supplier>
-	{
-		public GetSupplierWithIncludeByIdSpecification(long id)
-		{
-			Query
-				.Where(x => x.Id == id && !x.Disable)
-				.AsNoTracking();
-		}
-	}
+    public class GetSupplierWithIncludeByIdSpecification : Specification<Supplier>
+    {
+        public GetSupplierWithIncludeByIdSpecification(long id)
+        {
+            Query
+                .Where(x => x.Id == id && !x.Disable)
+                .AsNoTracking();
+        }
+    }
 }

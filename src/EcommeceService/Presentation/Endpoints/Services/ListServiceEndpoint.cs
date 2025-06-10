@@ -27,7 +27,7 @@ public class ListServiceEndpoint(ISender sender)
     {
         try
         {
-           return this.Ok200(await sender.Send(request, cancellationToken));
+            return this.Ok200(await sender.Send(request, cancellationToken));
         }
         catch (Exception ex)
         {

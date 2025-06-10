@@ -11,7 +11,7 @@ namespace Application.Feature.Services.Command.Update
         {
             CreateMap<ServiceModel, Service>();
 
-			CreateMap<Service, UpdateServiceResponse>()
+            CreateMap<Service, UpdateServiceResponse>()
                 .IncludeBase<Service, ServiceDetailProjection>();
         }
     }

@@ -8,6 +8,6 @@ public class UpdateAccountProfileMapping : Profile
     public UpdateAccountProfileMapping()
     {
         CreateMap<UpdateAccountProfileCommand, Account>();
-   
+
     }
 }

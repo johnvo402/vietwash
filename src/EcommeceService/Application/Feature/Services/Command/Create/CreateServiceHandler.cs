@@ -17,29 +17,29 @@ namespace Application.Feature.Services.Command.Create
         IUnitOfWork unitOfWork,
         IMapper mapper,
         IMediaUpdateService<Service> mediaUpdateService
-	) : IRequestHandler<CreateServiceCommand>
+    ) : IRequestHandler<CreateServiceCommand>
     {
         public async ValueTask<Mediator.Unit> Handle(
             CreateServiceCommand request,
             CancellationToken cancellationToken
 
-		)
+        )
         {
             Service mappingService = mapper.Map<Service>(request);
             mappingService.Slug = Generator.GenerateSlug(mappingService.Name);
-			string? serviceImage = null;
+            string? serviceImage = null;
             try
             {
                 DbTransaction transaction = await unitOfWork.CreateTransactionAsync(
                     cancellationToken
                 );
 
-				Service service = await unitOfWork
+                Service service = await unitOfWork
                     .Repository<Service>()
                     .AddAsync(mappingService, cancellationToken);
                 serviceImage = service.Image;
 
-				await unitOfWork.SaveAsync(cancellationToken);
+                await unitOfWork.SaveAsync(cancellationToken);
                 await unitOfWork.CommitAsync(cancellationToken);
                 return Mediator.Unit.Value;
             }
@@ -53,8 +53,8 @@ namespace Application.Feature.Services.Command.Create
                 throw;
             }
         }
-		
 
 
-	}
+
+    }
 }

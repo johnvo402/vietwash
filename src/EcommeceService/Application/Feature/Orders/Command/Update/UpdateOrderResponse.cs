@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Orders.Command.Update
 {
-	public class UpdateOrderResponse : OrderProjection
-	{
-		public string Message { get; set; } = default!;
-	}
+    public class UpdateOrderResponse : OrderProjection
+    {
+        public string Message { get; set; } = default!;
+    }
 }

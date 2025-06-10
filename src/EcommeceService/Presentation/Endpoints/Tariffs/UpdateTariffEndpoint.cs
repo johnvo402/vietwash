@@ -28,6 +28,6 @@ namespace Presentation.Endpoints.Tariffs
             var response = await sender.Send(request, cancellationToken);
             return this.Ok200(response);
         }
-        
+
     }
 }

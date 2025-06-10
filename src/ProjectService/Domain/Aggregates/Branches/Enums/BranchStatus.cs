@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Domain.Aggregates.Branches.Enums
 {
-	public enum BranchStatus : byte
-	{
-		Active = 0,
-		Inactive = 1,
-	} 
+    public enum BranchStatus : byte
+    {
+        Active = 0,
+        Inactive = 1,
+    }
 }

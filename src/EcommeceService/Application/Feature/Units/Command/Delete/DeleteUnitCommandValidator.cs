@@ -11,52 +11,52 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Units.Command.Delete
 {
-	public class DeleteUnitCommandValidator : AbstractValidator<DeleteUnitCommand>
-	{
-		private readonly IUnitOfWork _unitOfWork;
-		private readonly IActionAccessorService _accessorService;
+    public class DeleteUnitCommandValidator : AbstractValidator<DeleteUnitCommand>
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IActionAccessorService _accessorService;
 
-		public DeleteUnitCommandValidator(
-			IUnitOfWork unitOfWork,
-			IActionAccessorService accessorService)
-		{
-			_unitOfWork = unitOfWork;
-			_accessorService = accessorService;
+        public DeleteUnitCommandValidator(
+            IUnitOfWork unitOfWork,
+            IActionAccessorService accessorService)
+        {
+            _unitOfWork = unitOfWork;
+            _accessorService = accessorService;
 
-			ApplyRules();
-		}
+            ApplyRules();
+        }
 
-		private void ApplyRules()
-		{
-			// Quy tắc cho UnitId
-			RuleFor(x => x.UnitId)
-				.NotEmpty()
-				.WithState(x =>
-					Messager
-						.Create<Unit>()
-						.Property(x => x.Id)
-						.Message(MessageType.Null)
-						.Negative()
-						.Build()
-				)
-				.WithMessage("UnitId cannot be empty.")
-				.MustAsync(IsUnitExistsAsync)
-				.WithState(x =>
-					Messager
-						.Create<Unit>()
-						.Property(x => x.Id)
-						.Message(MessageType.Existence)
-						.Negative()
-						.Build()
-				)
-				.WithMessage("Unit with the specified UnitId does not exist.");
-		}
+        private void ApplyRules()
+        {
+            // Quy tắc cho UnitId
+            RuleFor(x => x.UnitId)
+                .NotEmpty()
+                .WithState(x =>
+                    Messager
+                        .Create<Unit>()
+                        .Property(x => x.Id)
+                        .Message(MessageType.Null)
+                        .Negative()
+                        .Build()
+                )
+                .WithMessage("UnitId cannot be empty.")
+                .MustAsync(IsUnitExistsAsync)
+                .WithState(x =>
+                    Messager
+                        .Create<Unit>()
+                        .Property(x => x.Id)
+                        .Message(MessageType.Existence)
+                        .Negative()
+                        .Build()
+                )
+                .WithMessage("Unit with the specified UnitId does not exist.");
+        }
 
-		private async Task<bool> IsUnitExistsAsync(long unitId, CancellationToken cancellationToken)
-		{
-			return await _unitOfWork
-				.Repository<Unit>()
-				.AnyAsync(u => u.Id == unitId, cancellationToken);
-		}
-	}
+        private async Task<bool> IsUnitExistsAsync(long unitId, CancellationToken cancellationToken)
+        {
+            return await _unitOfWork
+                .Repository<Unit>()
+                .AnyAsync(u => u.Id == unitId, cancellationToken);
+        }
+    }
 }

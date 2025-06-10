@@ -14,6 +14,6 @@ public class ElasticsearchConfiguration<T> where T : class
     public Action<IndexSettingsDescriptor>? Settings { get; set; }
 
     public List<Expression<Func<T, object>>> IgnoreProperties { get; set; } = [];
-    
+
     public string? IndexName { get; set; }
 }

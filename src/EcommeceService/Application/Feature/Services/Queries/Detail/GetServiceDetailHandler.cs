@@ -30,7 +30,7 @@ public class GetServiceDetailHandler(IUnitOfWork unitOfWork, IMapper mapper)
 
         var response = mapper.Map<GetServiceDetailResponse>(service);
 
-   
+
 
         return response;
     }

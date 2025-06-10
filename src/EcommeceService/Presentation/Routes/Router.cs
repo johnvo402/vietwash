@@ -72,24 +72,38 @@ namespace Presentation.Routes
             public const string GetRouteName = $"{Users}DetailEndpoint";
             public const string Tags = $"{nameof(Users)} endpoint";
         }
-		public static class ReportRoute
-		{
-			public const string Tags = $"{nameof(ReportRoute)} endpoint";
-			public const string ReportServiceOrder = $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportServiceOrder)}";
-		}
+        public static class ReportRoute
+        {
+            public const string Tags = $"{nameof(ReportRoute)} endpoint";
+            public const string ReportServiceOrder = $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportServiceOrder)}";
+        }
 
-		public static class SupplierRoute
-		{
-			public const string Tags = $"{nameof(SupplierRoute)} endpoint";
-			public const string Suppliers = $"{Ecommerce}/{RouterBase.prefix}{nameof(Suppliers)}";
-			public const string GetUpdateDelete =
-				$"{Ecommerce}/{RouterBase.prefix}{nameof(Suppliers)}/" + "{" + RouterBase.Id + "}";
-			public const string GetDetail =
-				$"{Ecommerce}/{RouterBase.prefix}{nameof(Suppliers)}/detail/"
-				+ "{"
-				+ RouterBase.Id
-				+ "}";
-		}
-	}
+        public static class SupplierRoute
+        {
+            public const string Tags = $"{nameof(SupplierRoute)} endpoint";
+            public const string Suppliers = $"{Ecommerce}/{RouterBase.prefix}{nameof(Suppliers)}";
+            public const string GetUpdateDelete =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Suppliers)}/" + "{" + RouterBase.Id + "}";
+            public const string GetDetail =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Suppliers)}/detail/"
+                + "{"
+                + RouterBase.Id
+                + "}";
+        }
+        public static class InventoryImportRoute
+        {
+            public const string Tags = $"{nameof(InventoryImportRoute)} endpoint";
+            public const string InventoryImports = $"{Ecommerce}/{RouterBase.prefix}{nameof(InventoryImports)}";
+            public const string GetUpdateDelete =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(InventoryImports)}/" + "{" + RouterBase.Id + "}";
+            public const string GetDetail =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(InventoryImports)}/detail/"
+                + "{"
+                + RouterBase.Id
+                + "}";
+            public const string UpdateStatus = $"{Ecommerce}/{RouterBase.prefix}{nameof(InventoryImports)}/{nameof(UpdateStatus)}" + "{" + RouterBase.Id + "}";
+
+        }
+    }
 }
 

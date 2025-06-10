@@ -13,7 +13,7 @@ namespace Contracts.Infrastructure.Queue
             services.AddGrpcClient<QueueLogService.QueueLogServiceClient>(o =>
             {
                 o.Address = new Uri("http://localhost:8443");
-                
+
             })
             .ConfigurePrimaryHttpMessageHandler(() =>
             {

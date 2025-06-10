@@ -12,18 +12,18 @@ using Unit = Domain.Aggregates.Services.Unit;
 
 namespace Application.Feature.Units.Queries.List
 {
-	public class ListUnitHandler(IUnitOfWork unitOfWork, IMapper mapper)
-		: IRequestHandler<ListUnitQuery, PaginationResponse<ListUnitResponse>>
-	{
-		public async ValueTask<PaginationResponse<ListUnitResponse>> Handle(
-			ListUnitQuery query, CancellationToken cancellationToken
-			) =>
-			await unitOfWork
-				.Repository<Unit>()
-				.PagedListAsync<ListUnitResponse>(
-					new ListUnitSpecification(),
-					query.ValidateQuery().ValidateFilter(typeof(ListUnitResponse))
-				);
+    public class ListUnitHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        : IRequestHandler<ListUnitQuery, PaginationResponse<ListUnitResponse>>
+    {
+        public async ValueTask<PaginationResponse<ListUnitResponse>> Handle(
+            ListUnitQuery query, CancellationToken cancellationToken
+            ) =>
+            await unitOfWork
+                .Repository<Unit>()
+                .PagedListAsync<ListUnitResponse>(
+                    new ListUnitSpecification(),
+                    query.ValidateQuery().ValidateFilter(typeof(ListUnitResponse))
+                );
 
-	}
+    }
 }

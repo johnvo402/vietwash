@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Domain.Aggregates.Services.Enums
 {
-	public enum TypeStatus
-	{
-		SingleService = 0,
-		Combo = 1,
-	}
+    public enum TypeStatus
+    {
+        SingleService = 0,
+        Combo = 1,
+    }
 }

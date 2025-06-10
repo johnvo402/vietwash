@@ -9,14 +9,14 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Data.Configurations
 {
-	public class BranchProductConfiguration : IEntityTypeConfiguration<BranchProduct>
-	{
-		public void Configure(EntityTypeBuilder<BranchProduct> builder)
-		{
-			builder.HasKey(x => x.Id);
-			builder.HasIndex(x => x.Id);
-			builder.HasOne(x => x.Branch).WithMany(x => x.BranchProducts).HasForeignKey(x => x.BranchId);
+    public class BranchProductConfiguration : IEntityTypeConfiguration<BranchProduct>
+    {
+        public void Configure(EntityTypeBuilder<BranchProduct> builder)
+        {
+            builder.HasKey(x => x.Id);
+            builder.HasIndex(x => x.Id);
+            builder.HasOne(x => x.Branch).WithMany(x => x.BranchProducts).HasForeignKey(x => x.BranchId);
 
-		}
-	}
+        }
+    }
 }

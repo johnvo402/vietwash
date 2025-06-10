@@ -14,37 +14,37 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Units.Command.Update
 {
-	public class UpdateUnitCommandValidator : AbstractValidator<UpdateUnitCommand>
-	{
-		private readonly IUnitOfWork unitOfWork;
-		private readonly IActionAccessorService accessorService;
+    public class UpdateUnitCommandValidator : AbstractValidator<UpdateUnitCommand>
+    {
+        private readonly IUnitOfWork unitOfWork;
+        private readonly IActionAccessorService accessorService;
 
-		public UpdateUnitCommandValidator(IUnitOfWork unitOfWork, IActionAccessorService accessorService)
-		{
-			this.unitOfWork = unitOfWork;
-			this.accessorService = accessorService;
-			ApplyRules();
-		}
+        public UpdateUnitCommandValidator(IUnitOfWork unitOfWork, IActionAccessorService accessorService)
+        {
+            this.unitOfWork = unitOfWork;
+            this.accessorService = accessorService;
+            ApplyRules();
+        }
 
-		private void ApplyRules()
-		{
-			// Tái sử dụng các quy tắc từ UnitValidator
+        private void ApplyRules()
+        {
+            // Tái sử dụng các quy tắc từ UnitValidator
 
-			// Kiểm tra UnitId
-			RuleFor(x => x.UnitId)
-				.NotEmpty()
-				.WithState(x =>
-					Messager
-						.Create<UpdateUnitCommand>()
-						.Property(x => x.UnitId)
-						.Message(MessageType.Null)
-						.Negative()
-						.Build()
-				);
-				
+            // Kiểm tra UnitId
+            RuleFor(x => x.UnitId)
+                .NotEmpty()
+                .WithState(x =>
+                    Messager
+                        .Create<UpdateUnitCommand>()
+                        .Property(x => x.UnitId)
+                        .Message(MessageType.Null)
+                        .Negative()
+                        .Build()
+                );
 
-			
-		}
 
-	}
+
+        }
+
+    }
 }

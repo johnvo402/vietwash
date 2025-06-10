@@ -3,5 +3,5 @@
 
 namespace Application.Feature.Units.Queries.List
 {
-	public class ListUnitResponse : UnitProjection;
+    public class ListUnitResponse : UnitProjection;
 }

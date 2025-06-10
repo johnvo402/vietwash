@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Common.Projections.Suppliers
 {
-	public class SupplierDetailProjection : SupplierProjection;
+    public class SupplierDetailProjection : SupplierProjection;
 }

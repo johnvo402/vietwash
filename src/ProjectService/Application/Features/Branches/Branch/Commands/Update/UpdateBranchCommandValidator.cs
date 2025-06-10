@@ -15,7 +15,7 @@ namespace Application.Features.Branches.Branch.Commands.Update
     {
         public UpdateBranchCommandValidator(IUnitOfWork unitOfWork, IActionAccessorService actionAccessorService)
         {
-            
+
         }
     }
 }

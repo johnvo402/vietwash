@@ -66,7 +66,7 @@ namespace Application.Features.Common.Validators.Branches
                 .Must(x =>
                 {
                     Regex regex = EmailValidationRegex();
-                    return string.IsNullOrEmpty(x)|| regex.IsMatch(x!);
+                    return string.IsNullOrEmpty(x) || regex.IsMatch(x!);
                 })
                 .WithState(x =>
                     Messager

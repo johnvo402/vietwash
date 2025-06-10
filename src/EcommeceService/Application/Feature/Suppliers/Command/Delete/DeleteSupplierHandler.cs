@@ -8,32 +8,32 @@ using System.Data.Common;
 
 namespace Application.Feature.Suppliers.Command.Delete
 {
-	public class DeleteSupplierHandler(IUnitOfWork unitOfWork) : IRequestHandler<DeleteSupplierCommand>
-	{
-		public async ValueTask<Unit> Handle(DeleteSupplierCommand request, CancellationToken cancellationToken)
-		{
-			Supplier existingSupplier = await unitOfWork.Repository<Supplier>()
-			.FindByConditionAsync(s => s.Id == request.SupplierId && !s.Disable, cancellationToken)
-			?? throw new NotFoundException(
-				[Messager.Create<Supplier>().Message(MessageType.Found).Negative().BuildMessage()]
-			);
+    public class DeleteSupplierHandler(IUnitOfWork unitOfWork) : IRequestHandler<DeleteSupplierCommand>
+    {
+        public async ValueTask<Unit> Handle(DeleteSupplierCommand request, CancellationToken cancellationToken)
+        {
+            Supplier existingSupplier = await unitOfWork.Repository<Supplier>()
+            .FindByConditionAsync(s => s.Id == request.SupplierId && !s.Disable, cancellationToken)
+            ?? throw new NotFoundException(
+                [Messager.Create<Supplier>().Message(MessageType.Found).Negative().BuildMessage()]
+            );
 
-			existingSupplier.Disable = true;
+            existingSupplier.Disable = true;
 
-			try
-			{
-				DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
+            try
+            {
+                DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
 
-				await unitOfWork.Repository<Supplier>().UpdateAsync(existingSupplier);
-				await unitOfWork.SaveAsync(cancellationToken);
-				await unitOfWork.CommitAsync(cancellationToken);
-				return Unit.Value;
-			}
-			catch
-			{
-				await unitOfWork.RollbackAsync(cancellationToken);
-				throw;
-			}
-		}
-	}
+                await unitOfWork.Repository<Supplier>().UpdateAsync(existingSupplier);
+                await unitOfWork.SaveAsync(cancellationToken);
+                await unitOfWork.CommitAsync(cancellationToken);
+                return Unit.Value;
+            }
+            catch
+            {
+                await unitOfWork.RollbackAsync(cancellationToken);
+                throw;
+            }
+        }
+    }
 }

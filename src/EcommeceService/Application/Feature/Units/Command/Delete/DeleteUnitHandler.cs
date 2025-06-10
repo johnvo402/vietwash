@@ -9,24 +9,24 @@ using Unit = Domain.Aggregates.Services.Unit;
 
 namespace Application.Feature.Units.Command.Delete
 {
-	public class DeleteUnitHandler(IUnitOfWork unitOfWork)
-	: IRequestHandler<DeleteUnitCommand>
-	{ 
-		public async ValueTask<Mediator.Unit> Handle(DeleteUnitCommand command, CancellationToken cancellationToken)
-		{
-			var unit = await unitOfWork.Repository<Unit>()
-				.FindByConditionAsync(
-					new GetUnitByIdWithoutIncludeSpecification(command.UnitId),
-					cancellationToken
-				)
-			?? throw new NotFoundException(
-				[Messager.Create<Unit>().Message(MessageType.Found).Negative().BuildMessage()]
-			);
+    public class DeleteUnitHandler(IUnitOfWork unitOfWork)
+    : IRequestHandler<DeleteUnitCommand>
+    {
+        public async ValueTask<Mediator.Unit> Handle(DeleteUnitCommand command, CancellationToken cancellationToken)
+        {
+            var unit = await unitOfWork.Repository<Unit>()
+                .FindByConditionAsync(
+                    new GetUnitByIdWithoutIncludeSpecification(command.UnitId),
+                    cancellationToken
+                )
+            ?? throw new NotFoundException(
+                [Messager.Create<Unit>().Message(MessageType.Found).Negative().BuildMessage()]
+            );
 
-			await unitOfWork.Repository<Unit>().DeleteAsync(unit);
-			await unitOfWork.SaveAsync(cancellationToken);
+            await unitOfWork.Repository<Unit>().DeleteAsync(unit);
+            await unitOfWork.SaveAsync(cancellationToken);
 
-			return Mediator.Unit.Value;
-		}
-	}
+            return Mediator.Unit.Value;
+        }
+    }
 }

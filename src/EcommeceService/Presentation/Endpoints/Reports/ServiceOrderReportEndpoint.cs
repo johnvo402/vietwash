@@ -13,17 +13,17 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Presentation.Endpoints.Reports
 {
-	public class ServiceOrderReportEndpoint(ISender sender)
-		: EndpointBaseAsync.WithRequest<ServiceRevenueReportQuery>.WithActionResult<
-		ApiResponse<List<ServiceRevenueReportResponse>>
-	>
-	{
-		[HttpGet(Router.ReportRoute.ReportServiceOrder)]
-		[SwaggerOperation(Tags = [Router.ReportRoute.Tags], Summary = "Report service order")]
-		[AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.reportservice}")]
-		public override async Task<ActionResult<ApiResponse<List<ServiceRevenueReportResponse>>>> HandleAsync(
-			[FromQuery] ServiceRevenueReportQuery request, 
-			CancellationToken cancellationToken = default
-			) => this.Ok200(await sender.Send(request, cancellationToken));
-	}
+    public class ServiceOrderReportEndpoint(ISender sender)
+        : EndpointBaseAsync.WithRequest<ServiceRevenueReportQuery>.WithActionResult<
+        ApiResponse<List<ServiceRevenueReportResponse>>
+    >
+    {
+        [HttpGet(Router.ReportRoute.ReportServiceOrder)]
+        [SwaggerOperation(Tags = [Router.ReportRoute.Tags], Summary = "Report service order")]
+        [AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.reportservice}")]
+        public override async Task<ActionResult<ApiResponse<List<ServiceRevenueReportResponse>>>> HandleAsync(
+            [FromQuery] ServiceRevenueReportQuery request,
+            CancellationToken cancellationToken = default
+            ) => this.Ok200(await sender.Send(request, cancellationToken));
+    }
 }

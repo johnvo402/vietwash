@@ -16,7 +16,7 @@ namespace Application.Feature.Services.Queries.Detail
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category)); // 🔹 Map Category
 
             CreateMap<UnitRelation, UnitRelationProjection>();
-                //.ForMember(dest => dest.Unit, opt => opt.MapFrom(src => src.Unit));
+            //.ForMember(dest => dest.Unit, opt => opt.MapFrom(src => src.Unit));
 
             CreateMap<Unit, UnitProjection>();
 

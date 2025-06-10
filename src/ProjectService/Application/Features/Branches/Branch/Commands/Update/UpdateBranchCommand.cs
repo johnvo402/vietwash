@@ -8,10 +8,10 @@ namespace Application.Features.Branches.Branch.Commands.Update
 {
     public class UpdateBranchCommand : IRequest<UpdateBranchResponse>
     {
-        [FromRoute( Name = RouterBase.Id)]
+        [FromRoute(Name = RouterBase.Id)]
         public long BranchId { get; set; }
         [FromBody]
         public BranchModel? Branch { get; set; }
-       
+
     }
 }

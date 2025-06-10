@@ -8,5 +8,5 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Units.Command.Create
 {
-	public class CreateUnitCommand : UnitModel, IRequest<CreateUnitResponse>;
+    public class CreateUnitCommand : UnitModel, IRequest<CreateUnitResponse>;
 }

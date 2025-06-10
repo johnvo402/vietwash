@@ -17,13 +17,13 @@ public class DeleteServiceHandler(IUnitOfWork unitOfWork) : IRequestHandler<Dele
         CancellationToken cancellationToken
     )
     {
-		Service existingService =
+        Service existingService =
             await unitOfWork.Repository<Service>().FindByIdAsync(command.ServiceId)
             ?? throw new NotFoundException(
                 [Messager.Create<Service>().Message(MessageType.Found).Negative().BuildMessage()]
             );
 
-		existingService.Disable = true;
+        existingService.Disable = true;
 
         try
         {

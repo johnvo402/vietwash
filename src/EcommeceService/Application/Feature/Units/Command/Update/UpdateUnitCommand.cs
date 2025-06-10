@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Feature.Units.Command.Update
 {
-	public class UpdateUnitCommand : IRequest<UpdateUnitResponse>
-	{
-		[FromRoute(Name = RouterBase.Id)]
-		public long UnitId { get; set; }
-		[FromBody]
-		public UnitModel Unit { get; set; } = new UnitModel();
-	}
+    public class UpdateUnitCommand : IRequest<UpdateUnitResponse>
+    {
+        [FromRoute(Name = RouterBase.Id)]
+        public long UnitId { get; set; }
+        [FromBody]
+        public UnitModel Unit { get; set; } = new UnitModel();
+    }
 }

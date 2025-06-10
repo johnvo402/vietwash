@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Funds.Queries.List
 {
-	public class ListFundMapping : Profile
-	{
-		public ListFundMapping()
-		{
-			CreateMap<Fund, ListFundResponse>();
-		}
-	}
+    public class ListFundMapping : Profile
+    {
+        public ListFundMapping()
+        {
+            CreateMap<Fund, ListFundResponse>();
+        }
+    }
 }

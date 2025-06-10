@@ -11,7 +11,7 @@ namespace Domain.Aggregates.Inventories
     public class InventoryInvoice : BaseEntity
     {
         public long? SupplierId { get; set; }
-        public Status Status { get; set; }
+        public InventoryDocumentStatus Status { get; set; }
         public decimal Amount { get; set; }
         public ICollection<InventoryRelation> InventoryRelationships = [];
     }

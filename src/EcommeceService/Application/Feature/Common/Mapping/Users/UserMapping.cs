@@ -11,7 +11,7 @@ public class UserMapping : Profile
         CreateMap<User, UserProjection>();
 
         CreateMap<User, UserDetailProjection>();
-           
+
 
     }
 }

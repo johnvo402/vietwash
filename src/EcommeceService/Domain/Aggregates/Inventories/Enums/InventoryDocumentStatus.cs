@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace Domain.Aggregates.Inventories.Enums
 {
-    public enum Type
+    public enum InventoryDocumentStatus
     {
+        Pending = 1,
+        Completed = 2,
+        Cancelled = 3,
     }
 }

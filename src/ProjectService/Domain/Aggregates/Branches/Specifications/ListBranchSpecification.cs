@@ -6,7 +6,7 @@ namespace Domain.Aggregates.Branches.Specifications
     {
         public ListBranchSpecification()
         {
-            Query.Where(x=> !x.Disable).AsNoTracking().AsSplitQuery();
+            Query.Where(x => !x.Disable).AsNoTracking().AsSplitQuery();
             string key = GetUniqueCachedKey();
             Query.EnableCache(key);
         }

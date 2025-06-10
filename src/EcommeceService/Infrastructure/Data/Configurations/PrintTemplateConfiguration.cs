@@ -9,12 +9,12 @@ using Domain.Aggregates.Prints;
 
 namespace Infrastructure.Data.Configurations
 {
-	public class PrintTemplateConfiguration : IEntityTypeConfiguration<PrintTemplate>
-	{
-		public void Configure(EntityTypeBuilder<PrintTemplate> builder)
-		{
-			builder.HasKey(x => x.Id);
-			builder.HasIndex(x => x.Id);
-		}
-	}
+    public class PrintTemplateConfiguration : IEntityTypeConfiguration<PrintTemplate>
+    {
+        public void Configure(EntityTypeBuilder<PrintTemplate> builder)
+        {
+            builder.HasKey(x => x.Id);
+            builder.HasIndex(x => x.Id);
+        }
+    }
 }

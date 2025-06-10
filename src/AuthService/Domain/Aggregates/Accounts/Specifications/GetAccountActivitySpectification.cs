@@ -8,7 +8,7 @@ namespace Domain.Aggregates.Accounts.Specifications
     {
         public GetAccountActivitySpecification(long accountId, AccountActivityType type)
         {
-            Query.Where(x =>x.AccountId == accountId && x.Type == type)
+            Query.Where(x => x.AccountId == accountId && x.Type == type)
                 .AsNoTracking();
         }
     }

@@ -12,10 +12,10 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Orders.Command.UpdateStatus
 {
-	public class UpdateStatusCommand : IRequest<UpdateStatusResponse>
-	{
-		[FromRoute(Name = RouterBase.Id)]
-		public string OrderId { get; set; } = string.Empty;
-		public OrderStatus? Status { get; set; }
-	}
+    public class UpdateStatusCommand : IRequest<UpdateStatusResponse>
+    {
+        [FromRoute(Name = RouterBase.Id)]
+        public string OrderId { get; set; } = string.Empty;
+        public OrderStatus? Status { get; set; }
+    }
 }

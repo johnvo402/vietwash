@@ -24,12 +24,12 @@ namespace Application.Feature.Orders.Command.Create
                     opt =>
                         opt.MapFrom(src =>
                             src.OrderItems.Select(item => new OrderItem
-                                {
-                                    ServiceId = item.ServiceId,
-                                    UnitRelationId = item.UnitRelationId,
-                                    Quantity = item.Quantity,
-                                    Price = item.Price,
-                                })
+                            {
+                                ServiceId = item.ServiceId,
+                                UnitRelationId = item.UnitRelationId,
+                                Quantity = item.Quantity,
+                                Price = item.Price,
+                            })
                                 .ToList()
                         )
                 );

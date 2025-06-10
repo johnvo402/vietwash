@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Units.Command.Update
 {
-	public class UpdateUnitResponse : UnitProjection
-	{
-		public string Message { get; set; } = default!;
-	}
+    public class UpdateUnitResponse : UnitProjection
+    {
+        public string Message { get; set; } = default!;
+    }
 }

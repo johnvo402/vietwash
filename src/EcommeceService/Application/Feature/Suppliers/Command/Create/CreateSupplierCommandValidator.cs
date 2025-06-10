@@ -14,24 +14,24 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Suppliers.Command.Create
 {
-	public class CreateSupplierCommandValidator : AbstractValidator<CreateSupplierCommand>
-	{
-		private readonly IUnitOfWork _unitOfWork;
+    public class CreateSupplierCommandValidator : AbstractValidator<CreateSupplierCommand>
+    {
+        private readonly IUnitOfWork _unitOfWork;
 
-		private readonly IActionAccessorService _accessorService;
+        private readonly IActionAccessorService _accessorService;
 
-		public CreateSupplierCommandValidator(
-			IUnitOfWork unitOfWork,
-			IActionAccessorService accessorService
-		)
-		{
-			_unitOfWork = unitOfWork;
-			_accessorService = accessorService;
-			ApplyRules();
-		}
-		private void ApplyRules()
-		{
-			Include(new SupplierValidator(_unitOfWork, _accessorService));
-		}
-	}
+        public CreateSupplierCommandValidator(
+            IUnitOfWork unitOfWork,
+            IActionAccessorService accessorService
+        )
+        {
+            _unitOfWork = unitOfWork;
+            _accessorService = accessorService;
+            ApplyRules();
+        }
+        private void ApplyRules()
+        {
+            Include(new SupplierValidator(_unitOfWork, _accessorService));
+        }
+    }
 }

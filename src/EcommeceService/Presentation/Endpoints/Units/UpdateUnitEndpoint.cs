@@ -13,18 +13,18 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Presentation.Endpoints.Units
 {
-	public class UpdateUnitEndpoint(ISender sender, IMapper mapper)
-	: EndpointBaseAsync.WithRequest<UpdateUnitCommand>.WithActionResult<ApiResponse<UpdateUnitResponse>>
-	{
-		[HttpPut(Router.UnitRoute.GetUpdateDelete)]
-		[SwaggerOperation(Tags = [Router.UnitRoute.Tags], Summary = "Update Unit")]
-		//[AuthorizeBy(permissions: $"{ActionPermission.update}:{ObjectPermission.unit}")]
-		public override async Task<ActionResult<ApiResponse<UpdateUnitResponse>>> HandleAsync(
-			UpdateUnitCommand request, 
-			CancellationToken cancellationToken = default)
-		{
-			var response = await sender.Send(request, cancellationToken);
-			return this.Ok200(response);
-		}
-	}
+    public class UpdateUnitEndpoint(ISender sender, IMapper mapper)
+    : EndpointBaseAsync.WithRequest<UpdateUnitCommand>.WithActionResult<ApiResponse<UpdateUnitResponse>>
+    {
+        [HttpPut(Router.UnitRoute.GetUpdateDelete)]
+        [SwaggerOperation(Tags = [Router.UnitRoute.Tags], Summary = "Update Unit")]
+        //[AuthorizeBy(permissions: $"{ActionPermission.update}:{ObjectPermission.unit}")]
+        public override async Task<ActionResult<ApiResponse<UpdateUnitResponse>>> HandleAsync(
+            UpdateUnitCommand request,
+            CancellationToken cancellationToken = default)
+        {
+            var response = await sender.Send(request, cancellationToken);
+            return this.Ok200(response);
+        }
+    }
 }

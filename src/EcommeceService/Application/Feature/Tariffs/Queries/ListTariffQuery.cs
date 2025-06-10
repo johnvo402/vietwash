@@ -6,6 +6,6 @@ namespace Application.Feature.Tariffs.Queries
 {
     public class ListTariffQuery : QueryParamRequest, IRequest<PaginationResponse<ListTariffResponse>>
     {
-        
+
     }
 }

@@ -19,7 +19,7 @@ public class CreateCategoryHandler(IUnitOfWork unitOfWork, IMapper mapper)
     {
         if (string.IsNullOrEmpty(command.Id))
         {
-            command.Id = Generator.GenerateCode("CT-",6);
+            command.Id = Generator.GenerateCode("CT-", 6);
         }
         Category mappingCategory = mapper.Map<Category>(command);
         try
@@ -30,7 +30,7 @@ public class CreateCategoryHandler(IUnitOfWork unitOfWork, IMapper mapper)
             Category category = await unitOfWork
                 .Repository<Category>()
                 .AddAsync(mappingCategory, cancellationToken);
-            
+
             category.Path = await GenerateCategoryPathAsync(
                 category.Id,
                 command.ParentId,
@@ -61,9 +61,9 @@ public class CreateCategoryHandler(IUnitOfWork unitOfWork, IMapper mapper)
         var parent = await unitOfWork.Repository<Category>().FindByIdAsync(parentId, cancellationToken);
 
         if (parent == null)
-             throw new NotFoundException(
-                [Messager.Create<Category>().Message(MessageType.Found).Negative().BuildMessage()]
-            );
+            throw new NotFoundException(
+               [Messager.Create<Category>().Message(MessageType.Found).Negative().BuildMessage()]
+           );
 
         return $"{parent.Path}.{id.ToLower()}";
     }

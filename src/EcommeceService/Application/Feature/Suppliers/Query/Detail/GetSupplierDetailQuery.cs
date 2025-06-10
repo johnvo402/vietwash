@@ -8,5 +8,5 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Suppliers.Query.Detail
 {
-	public record GetSupplierDetailQuery(long SupplierId) : IRequest<GetSupplierDetailResponse>;
+    public record GetSupplierDetailQuery(long SupplierId) : IRequest<GetSupplierDetailResponse>;
 }

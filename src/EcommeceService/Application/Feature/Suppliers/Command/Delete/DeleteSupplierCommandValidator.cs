@@ -12,33 +12,33 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Suppliers.Command.Delete
 {
-	public class DeleteSupplierCommandValidator : AbstractValidator<DeleteSupplierCommand>
-	{
-		private readonly IUnitOfWork unitOfWork;
-		private readonly IActionAccessorService accessorService;
+    public class DeleteSupplierCommandValidator : AbstractValidator<DeleteSupplierCommand>
+    {
+        private readonly IUnitOfWork unitOfWork;
+        private readonly IActionAccessorService accessorService;
 
-		public DeleteSupplierCommandValidator(
-			IUnitOfWork unitOfWork,
-			IActionAccessorService accessorService
-		)
-		{
-			this.unitOfWork = unitOfWork;
-			this.accessorService = accessorService;
-			ApplyRules();
-		}
-		private void ApplyRules()
-		{
-			RuleFor(x => x.SupplierId)
-				.NotEmpty()
-				.WithState(x =>
-						Messager
-							.Create<Supplier>()
-							.Property(x => x.Id)
-							.Message(MessageType.Null)
-							.Negative()
-							.Build()
-				);
+        public DeleteSupplierCommandValidator(
+            IUnitOfWork unitOfWork,
+            IActionAccessorService accessorService
+        )
+        {
+            this.unitOfWork = unitOfWork;
+            this.accessorService = accessorService;
+            ApplyRules();
+        }
+        private void ApplyRules()
+        {
+            RuleFor(x => x.SupplierId)
+                .NotEmpty()
+                .WithState(x =>
+                        Messager
+                            .Create<Supplier>()
+                            .Property(x => x.Id)
+                            .Message(MessageType.Null)
+                            .Negative()
+                            .Build()
+                );
 
-		}
-	}
+        }
+    }
 }

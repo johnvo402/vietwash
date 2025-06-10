@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace Domain.Aggregates.Inventories.Enums
 {
-    public enum Status
+    public enum InventoryDocumentType
     {
+        Import = 1,
+        Export = 2,
     }
 }

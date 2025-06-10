@@ -9,6 +9,6 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Units.Queries.List
 {
-	public class ListUnitQuery : QueryParamRequest, IRequest<PaginationResponse<ListUnitResponse>>;
-	
+    public class ListUnitQuery : QueryParamRequest, IRequest<PaginationResponse<ListUnitResponse>>;
+
 }

@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Units.Command.Create
 {
-	public class CreateUnitResponse
-	{
-		public string? Message { get; set; }
-	}
+    public class CreateUnitResponse
+    {
+        public string? Message { get; set; }
+    }
 }

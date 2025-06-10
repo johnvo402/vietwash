@@ -7,5 +7,5 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Suppliers.Command.Update
 {
-	public class UpdateSupplierResponse : SupplierProjection;
+    public class UpdateSupplierResponse : SupplierProjection;
 }

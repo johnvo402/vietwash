@@ -21,6 +21,8 @@ namespace Domain.Aggregates.Equipments
 
         public decimal Price { get; set; } = default!;
 
+        public decimal Discount { get; set; } = default!;
+
         public decimal Capacity { get; set; } = default!;
 
         public DateTimeOffset? LastMaintenanceDate { get; set; }

@@ -21,7 +21,7 @@ public static class OpenTelemetryExtensions
             configuration.GetSection(nameof(OpenTelemetrySettings))
         );
 
-       
+
 
         var openTelemetrySettings = configuration.GetSection(nameof(OpenTelemetrySettings))
             .Get<OpenTelemetrySettings>() ?? new();

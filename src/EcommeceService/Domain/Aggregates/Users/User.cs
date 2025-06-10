@@ -1,6 +1,6 @@
 using Ardalis.GuardClauses;
-using Domain.Aggregates.Users.Enums; 
-using JohnChum.SharedKernel.Domain.Common; 
+using Domain.Aggregates.Users.Enums;
+using JohnChum.SharedKernel.Domain.Common;
 
 namespace Domain.Aggregates.Users;
 

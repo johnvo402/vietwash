@@ -8,6 +8,6 @@ namespace Application.Feature.Tariffs.Queries
 {
     public class ListTariffResponse : TariffProjection
     {
-        
+
     }
 }

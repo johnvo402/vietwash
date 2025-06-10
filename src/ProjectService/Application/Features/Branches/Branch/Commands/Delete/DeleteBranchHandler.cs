@@ -30,7 +30,7 @@ namespace Application.Features.Branches.Branch.Commands.Delete
                     await unitOfWork.CommitAsync(cancellationToken);
                 }
                 catch (Exception ex)
-                { 
+                {
                     await unitOfWork.RollbackAsync(cancellationToken);
                     throw;
                 }

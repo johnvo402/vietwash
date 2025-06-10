@@ -10,5 +10,5 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Suppliers.Query.List
 {
-	public class ListSupplierQuery : QueryParamRequest, IRequest<PaginationResponse<ListSupplierResponse>>;
+    public class ListSupplierQuery : QueryParamRequest, IRequest<PaginationResponse<ListSupplierResponse>>;
 }

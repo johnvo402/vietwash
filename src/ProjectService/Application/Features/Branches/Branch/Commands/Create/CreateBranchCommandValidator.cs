@@ -14,7 +14,7 @@ namespace Application.Features.Branches.Branch.Commands.Create
     {
         public CreateBranchCommandValidator(IUnitOfWork unitOfWork, IActionAccessorService actionAccessorService)
         {
-            Include( new BranchValidator(unitOfWork, actionAccessorService) );
+            Include(new BranchValidator(unitOfWork, actionAccessorService));
         }
 
     }

@@ -147,7 +147,7 @@ public class QueueBackgroundService(
                 ProcessedBy = ProjectService_gRPC.QueueType.OriginQueue,
                 RetryCount = queueResponse.RetryCount
             };
-   
+
             await queueService.EnqueueAsync(request);
             await _grpcClient.CreateLogAsync(requestLog, cancellationToken);
 

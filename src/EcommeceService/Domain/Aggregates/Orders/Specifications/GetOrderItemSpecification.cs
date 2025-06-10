@@ -11,8 +11,8 @@ namespace Domain.Aggregates.Orders.Specifications
         {
 
             Query.Where(order =>
-                order.OrderDate  >= from  &&
-                order.OrderDate  < to  &&
+                order.OrderDate >= from &&
+                order.OrderDate < to &&
                 order.Status == OrderStatus.Completed)
             .Include(order => order.OrderItems)
             .AsNoTracking();

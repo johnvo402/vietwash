@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Suppliers.Command.Create
 {
-	public class CreateSupplierMapping : Profile
-	{
-		public CreateSupplierMapping()
-		{
-			CreateMap<CreateSupplierCommand, Supplier>();
-		}
-	}
+    public class CreateSupplierMapping : Profile
+    {
+        public CreateSupplierMapping()
+        {
+            CreateMap<CreateSupplierCommand, Supplier>();
+        }
+    }
 }

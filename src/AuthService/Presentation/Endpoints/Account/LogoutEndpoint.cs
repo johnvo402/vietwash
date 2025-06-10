@@ -22,7 +22,7 @@ namespace Presentation.Endpoints.Account
         {
             var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var command = new LogoutCommand { Token = token };
-           return this.Ok200(await sender.Send(command, cancellationToken));
+            return this.Ok200(await sender.Send(command, cancellationToken));
         }
     }
 }

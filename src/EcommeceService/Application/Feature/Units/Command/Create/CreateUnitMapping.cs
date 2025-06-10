@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Units.Command.Create
 {
-	public class CreateUnitMapping : Profile
-	{
-		public CreateUnitMapping()
-		{
-			CreateMap<CreateUnitCommand, Unit>();
-		}
-	}
+    public class CreateUnitMapping : Profile
+    {
+        public CreateUnitMapping()
+        {
+            CreateMap<CreateUnitCommand, Unit>();
+        }
+    }
 }

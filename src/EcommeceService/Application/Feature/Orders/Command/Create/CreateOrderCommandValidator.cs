@@ -12,22 +12,22 @@ using System.Threading.Tasks;
 
 namespace Application.Feature.Orders.Command.Create
 {
-	public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
-	{
-		private readonly IUnitOfWork _unitOfWork;
-		private readonly IActionAccessorService _accessorService;
+    public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IActionAccessorService _accessorService;
 
-		public CreateOrderCommandValidator(IUnitOfWork unitOfWork, IActionAccessorService accessorService)
-		{
-			_unitOfWork = unitOfWork;
-			_accessorService = accessorService;
-			ApplyRules();
-		}
+        public CreateOrderCommandValidator(IUnitOfWork unitOfWork, IActionAccessorService accessorService)
+        {
+            _unitOfWork = unitOfWork;
+            _accessorService = accessorService;
+            ApplyRules();
+        }
 
-		private void ApplyRules()
-		{
-			Include(new OrderValidator(_unitOfWork, _accessorService));
-		}
+        private void ApplyRules()
+        {
+            Include(new OrderValidator(_unitOfWork, _accessorService));
+        }
 
-	}
+    }
 }

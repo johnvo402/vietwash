@@ -7,8 +7,8 @@ namespace Application.Feature.Suppliers.Command.Update;
 
 public class UpdateSupplierCommand : IRequest<UpdateSupplierResponse>
 {
-	[FromRoute(Name = RouterBase.Id)]
-	public long SupplierId { get; set; } = default!;
-	[FromBody]
-	public SupplierUpdateModel Body { get; set; } = default!;
+    [FromRoute(Name = RouterBase.Id)]
+    public long SupplierId { get; set; } = default!;
+    [FromBody]
+    public SupplierUpdateModel Body { get; set; } = default!;
 }

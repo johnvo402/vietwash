@@ -31,7 +31,7 @@ namespace Application.Features.Warehouses.Commands.Update
                 await unitOfWork.Repository<Warehouse>().UpdateAsync(warehouse);
                 await unitOfWork.SaveAsync(cancellationToken);
                 await unitOfWork.CommitAsync(cancellationToken);
-                return mapper.Map<UpdateWarehouseResponse>( warehouse );
+                return mapper.Map<UpdateWarehouseResponse>(warehouse);
             }
             catch (Exception ex)
             {

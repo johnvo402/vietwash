@@ -8,7 +8,7 @@ using Mediator;
 namespace Application.Feature.Services.Queries.List;
 
 public class ListServiceHandler(IUnitOfWork unitOfWork)
-	: IRequestHandler<ListServiceQuery, PaginationResponse<ListServiceResponse>>
+    : IRequestHandler<ListServiceQuery, PaginationResponse<ListServiceResponse>>
 {
     public async ValueTask<PaginationResponse<ListServiceResponse>> Handle(
         ListServiceQuery query,
@@ -17,16 +17,16 @@ public class ListServiceHandler(IUnitOfWork unitOfWork)
     {
         try
         {
-           return await unitOfWork.Repository<Service>().
-       PagedListAsync<ListServiceResponse>(
-    new ListServiceSpecification(),
-    query.ValidateQuery().ValidateFilter(typeof(ListServiceResponse))
+            return await unitOfWork.Repository<Service>().
+        PagedListAsync<ListServiceResponse>(
+     new ListServiceSpecification(),
+     query.ValidateQuery().ValidateFilter(typeof(ListServiceResponse))
 
-);
+ );
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            throw new Exception("Exception", ex) ;
+            throw new Exception("Exception", ex);
         }
     }
 

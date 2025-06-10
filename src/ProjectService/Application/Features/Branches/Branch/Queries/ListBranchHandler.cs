@@ -8,7 +8,7 @@ namespace Application.Features.Branches.Branch.Queries
 {
     public class ListBranchHandler(IUnitOfWork unitOfWork) : IRequestHandler<ListBranchQuery, PaginationResponse<ListBranchResponse>>
     {
-        public async ValueTask<PaginationResponse<ListBranchResponse>> Handle(ListBranchQuery request, 
+        public async ValueTask<PaginationResponse<ListBranchResponse>> Handle(ListBranchQuery request,
             CancellationToken cancellationToken) => await unitOfWork.Repository<Domain.Aggregates.Branches.Branch>()
                                                                     .PagedListAsync<ListBranchResponse>
                                                                     (

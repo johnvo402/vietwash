@@ -19,52 +19,52 @@ using Contracts.Utils;
 namespace Application.Feature.Services.Command.Update;
 
 public class UpdateServiceHandler(
-	IUnitOfWork unitOfWork,
-	IMapper mapper,
-	IMediaUpdateService<Service> mediaUpdateService
+    IUnitOfWork unitOfWork,
+    IMapper mapper,
+    IMediaUpdateService<Service> mediaUpdateService
 ) : IRequestHandler<UpdateServiceCommand, UpdateServiceResponse>
 {
-	public async ValueTask<UpdateServiceResponse> Handle(UpdateServiceCommand command, CancellationToken cancellationToken)
-	{
-		Service? existingService = await unitOfWork.Repository<Service>().FindByConditionAsync(new GetServiceWithIncludeByIdSpecification(command.ServiceId), cancellationToken)
-			?? throw new NotFoundException(
-	 [Messager.Create<Service>().Message(MessageType.Found).Negative().BuildMessage()]
+    public async ValueTask<UpdateServiceResponse> Handle(UpdateServiceCommand command, CancellationToken cancellationToken)
+    {
+        Service? existingService = await unitOfWork.Repository<Service>().FindByConditionAsync(new GetServiceWithIncludeByIdSpecification(command.ServiceId), cancellationToken)
+            ?? throw new NotFoundException(
+     [Messager.Create<Service>().Message(MessageType.Found).Negative().BuildMessage()]
  );
 
-		string? oldServiceImage = existingService.Image;
+        string? oldServiceImage = existingService.Image;
 
-		mapper.Map(command.Service, existingService);
+        mapper.Map(command.Service, existingService);
 
-		existingService.Slug = Generator.GenerateSlug(existingService.Name);
+        existingService.Slug = Generator.GenerateSlug(existingService.Name);
 
         string? newServiceImage = command.Service.Image;
-		try
-		{
-			DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
+        try
+        {
+            DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
 
-			await unitOfWork.Repository<Service>().UpdateAsync(existingService);
+            await unitOfWork.Repository<Service>().UpdateAsync(existingService);
 
             await unitOfWork.SaveAsync(cancellationToken);
-			await unitOfWork.CommitAsync(cancellationToken);
+            await unitOfWork.CommitAsync(cancellationToken);
 
-			if (!string.IsNullOrEmpty(oldServiceImage))
-			{
-				await mediaUpdateService.DeleteAvatarAsync(oldServiceImage);
-			}
+            if (!string.IsNullOrEmpty(oldServiceImage))
+            {
+                await mediaUpdateService.DeleteAvatarAsync(oldServiceImage);
+            }
 
-			return mapper.Map<UpdateServiceResponse>(existingService);
-		}
+            return mapper.Map<UpdateServiceResponse>(existingService);
+        }
 
-		catch
-		{
-			if (!string.IsNullOrEmpty(newServiceImage))
-			{
-				await mediaUpdateService.DeleteAvatarAsync(newServiceImage);
-			}
-			await unitOfWork.RollbackAsync(cancellationToken);
-			throw;
-		}
-	}
+        catch
+        {
+            if (!string.IsNullOrEmpty(newServiceImage))
+            {
+                await mediaUpdateService.DeleteAvatarAsync(newServiceImage);
+            }
+            await unitOfWork.RollbackAsync(cancellationToken);
+            throw;
+        }
+    }
 
 }
 

@@ -10,7 +10,8 @@ namespace Application.Features.Branches.Branch.Queries
 {
     public class ListBranchMapping : Profile
     {
-         public ListBranchMapping() {
+        public ListBranchMapping()
+        {
             CreateMap<Domain.Aggregates.Branches.Branch, BranchProjection>();
             CreateMap<Domain.Aggregates.Branches.Branch, ListBranchResponse>().IncludeBase<Domain.Aggregates.Branches.Branch, BranchProjection>();
         }

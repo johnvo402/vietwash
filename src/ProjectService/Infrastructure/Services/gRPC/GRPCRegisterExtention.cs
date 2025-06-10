@@ -20,7 +20,7 @@ public static class GRPCRegisterExtension
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapGrpcService<QueueLogServiceHandler>();
-            endpoints.MapGrpcReflectionService();        
+            endpoints.MapGrpcReflectionService();
 
         });
 

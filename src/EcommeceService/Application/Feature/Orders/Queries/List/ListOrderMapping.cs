@@ -7,11 +7,11 @@ using System.Collections.Generic;
 
 namespace Application.Feature.Orders.Queries.List
 {
-	public class ListOrderMapping : Profile
-	{
-		public ListOrderMapping()
-		{
-			CreateMap<Order, ListOrderResponse>().IncludeBase<Order, OrderProjection>();
-		}
-	}
+    public class ListOrderMapping : Profile
+    {
+        public ListOrderMapping()
+        {
+            CreateMap<Order, ListOrderResponse>().IncludeBase<Order, OrderProjection>();
+        }
+    }
 }

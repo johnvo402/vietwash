@@ -54,7 +54,7 @@ public static class HangfireRegisterExtension
                 }
             )
             .AddScoped(typeof(SerilogJobWrapper<>));
-            
+
         }
 
         return services;
