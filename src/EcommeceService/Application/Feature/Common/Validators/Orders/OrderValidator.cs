@@ -1,9 +1,6 @@
 ﻿using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Common.Projections.Orders;
-using Application.Feature.Orders.Command.Create;
-using Application.Feature.Orders.Command.Update;
-using Domain.Aggregates.Funds;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Services;
 using Domain.Aggregates.Users;
