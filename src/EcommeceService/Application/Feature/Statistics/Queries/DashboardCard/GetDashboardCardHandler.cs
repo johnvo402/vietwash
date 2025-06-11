@@ -10,86 +10,71 @@ using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
 using Mediator;
 
 public class GetDashboardCardHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
-    : IRequestHandler<GetDashboardCardQuery, IEnumerable<GetDashboardCardResponse>>
+    : IRequestHandler<GetDashboardCardQuery, GetDashboardCardResponse>
 {
-    public async ValueTask<IEnumerable<GetDashboardCardResponse>> Handle(
+    public async ValueTask<GetDashboardCardResponse> Handle(
         GetDashboardCardQuery request,
         CancellationToken cancellationToken
     )
     {
         var listBranchUser = currentUser.Session!.Branches!.ToList();
         var queryParamRequest = new QueryParamRequest();
+
+        // Lấy danh sách order đã filter theo Branch + các điều kiện cần thiết
         var orderList = await unitOfWork
             .Repository<Order>()
             .ListAsync(
-                new ListOrderSpecification(null, null, request.BranchId, listBranchUser),
+                new ListOrderSpecification(string.Empty, string.Empty, request.BranchId, listBranchUser),
                 queryParamRequest,
                 cancellationToken
             );
 
         if (orderList == null || !orderList.Any())
         {
-            return new List<GetDashboardCardResponse>();
+            return new GetDashboardCardResponse();
         }
 
-        int numberOrder = orderList
-            .Where(o =>
-                (o.Status == OrderStatus.Completed) && (o.OrderDate.Date == DateTime.UtcNow.Date)
-            )
-            .Count();
+        var today = DateTime.UtcNow.Date;
+        var yesterday = today.AddDays(-1);
+        var lastMonth = today.AddMonths(-1);
 
-        decimal revenue = orderList
-            .Where(o =>
-                (o.Status == OrderStatus.Completed) && (o.OrderDate.Date == DateTime.UtcNow.Date)
-            )
-            .Sum(o => o.Amount);
+        // Lọc những đơn hàng Completed hôm nay
+        var completedTodayOrders = orderList
+            .Where(o => o.Status == OrderStatus.Completed && o.OrderDate.Date == today)
+            .ToList();
 
-        decimal netRevenue = orderList
-            .Where(o =>
-                (o.Status == OrderStatus.Completed) && (o.OrderDate.Date == DateTime.UtcNow.Date)
-            )
-            .Sum(o => o.Amount);
+        int numberOrder = completedTodayOrders.Count;
 
+        decimal revenue = completedTodayOrders.Sum(o => o.Amount);
+
+        // Nếu netRevenue có công thức khác thì sửa ở đây, còn không thì giữ bằng revenue
+        decimal netRevenue = revenue;
+
+        // Tổng doanh thu hôm qua
         decimal revenueYesterday = orderList
-            .Where(o =>
-                (o.OrderDate.Date == DateTime.UtcNow.Date.AddDays(-1))
-                && (o.Status == OrderStatus.Completed)
-                && (o.OrderDate.Date == DateTime.UtcNow.Date)
-            )
+            .Where(o => o.Status == OrderStatus.Completed && o.OrderDate.Date == yesterday)
             .Sum(o => o.Amount);
 
+        // Tổng doanh thu tháng trước
         decimal revenueLastMonth = orderList
-            .Where(o =>
-                (o.OrderDate.Month == DateTime.UtcNow.AddMonths(-1).Month)
-                && (o.Status == OrderStatus.Completed)
-                && (o.OrderDate.Date == DateTime.UtcNow.Date)
-            )
+            .Where(o => o.Status == OrderStatus.Completed && o.OrderDate.Month == lastMonth.Month && o.OrderDate.Year == lastMonth.Year)
             .Sum(o => o.Amount);
 
-        var saleResults = new List<GetDashboardCardResponse>
-        {
-            new GetDashboardCardResponse
-            {
-                NumberOrder = numberOrder,
-                Revenue = revenue,
-                NetRevenue = netRevenue,
-                RevenueYesterday = revenueYesterday,
-                RevenueLastMonth = revenueLastMonth,
-                PercentageChangeDay = CaculatePercentageChange(
-                    (float)revenue,
-                    (float)revenueYesterday
-                ),
-                PercentageChangeMonth = CaculatePercentageChange(
-                    (float)revenue,
-                    (float)revenueLastMonth
-                ),
-            },
-        };
+       
 
-        return saleResults;
+        return new GetDashboardCardResponse
+        {
+            NumberOrder = numberOrder,
+            Revenue = revenue,
+            NetRevenue = netRevenue,
+            RevenueYesterday = revenueYesterday,
+            RevenueLastMonth = revenueLastMonth,
+            PercentageChangeDay = CalculatePercentageChange((float)revenue, (float)revenueYesterday),
+            PercentageChangeMonth = CalculatePercentageChange((float)revenue, (float)revenueLastMonth),
+        };
     }
 
-    public float CaculatePercentageChange(float today, float last)
+    public float CalculatePercentageChange(float today, float last)
     {
         if (last == 0)
         {

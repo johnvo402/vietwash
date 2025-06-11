@@ -1,12 +1,15 @@
 using System.Globalization;
-using System.Text.RegularExpressions;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Contracts.Utils;
 
 public static class Generator
 {
-    private static readonly Dictionary<string, string> _rolePrefixes = new Dictionary<string, string>
+    private static readonly Dictionary<string, string> _rolePrefixes = new Dictionary<
+        string,
+        string
+    >
     {
         { "ADMIN", "AD" },
         { "MANAGER", "MN" },
@@ -31,7 +34,10 @@ public static class Generator
     public static string GenerateCode(string prefix, int numberLength)
     {
         if (numberLength <= 0)
-            throw new ArgumentException("Number length must be greater than 0", nameof(numberLength));
+            throw new ArgumentException(
+                "Number length must be greater than 0",
+                nameof(numberLength)
+            );
 
         int maxValue = (int)Math.Pow(10, numberLength) - 1;
         int minValue = (int)Math.Pow(10, numberLength - 1);
@@ -42,8 +48,7 @@ public static class Generator
 
     public static string GenerateSlug(string input)
     {
-        string slug = input.ToLowerInvariant()
-            .Normalize(NormalizationForm.FormD);
+        string slug = input.ToLowerInvariant().Normalize(NormalizationForm.FormD);
 
         var sb = new StringBuilder();
         foreach (var c in slug)
@@ -54,5 +59,18 @@ public static class Generator
         slug = Regex.Replace(slug, @"[\s-]+", "-").Trim('-');
 
         return slug;
+    }
+
+    private const string Characters =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    public static string GenerateRandomString(int length)
+    {
+        if (length < 0)
+            throw new ArgumentException("Length must be non-negative.", nameof(length));
+
+        return new string(
+            Enumerable.Repeat(Characters, length).Select(s => s[_random.Next(s.Length)]).ToArray()
+        );
     }
 }

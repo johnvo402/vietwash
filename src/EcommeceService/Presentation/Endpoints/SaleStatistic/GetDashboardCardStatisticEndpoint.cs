@@ -3,7 +3,6 @@ using Application.Feature.Statistics.Queries.RevenueStatistic;
 using Application.Feature.Statistics.Queries.SaleResult;
 using Ardalis.ApiEndpoints;
 using Contracts.RouteResults;
-using Infrastructure.Constants;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +12,7 @@ namespace Presentation.Endpoints.SaleStatistic
 {
     public class GetSaleStatisticEndpoint(ISender sender)
         : EndpointBaseAsync.WithRequest<GetDashboardCardQuery>.WithActionResult<
-            ApiResponse<IEnumerable<GetDashboardCardResponse>>
+            ApiResponse<GetDashboardCardResponse>
         >
     {
         [HttpGet(Presentation.Routes.Router.SaleResultRoute.DashboardCard)]
@@ -23,9 +22,9 @@ namespace Presentation.Endpoints.SaleStatistic
         )]
         [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<
-            ActionResult<ApiResponse<IEnumerable<GetDashboardCardResponse>>>
+            ActionResult<ApiResponse<GetDashboardCardResponse>>
         > HandleAsync(
-            [FromQuery] GetDashboardCardQuery request,
+           GetDashboardCardQuery request,
             CancellationToken cancellationToken = default
         ) => this.Ok200(await sender.Send(request, cancellationToken));
     }

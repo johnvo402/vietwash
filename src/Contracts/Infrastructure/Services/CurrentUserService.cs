@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using Amazon.Runtime.Internal.Util;
 using Application.Common.Auth;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.DistributedCache;
@@ -19,6 +18,7 @@ public class CurrentUserService(IServiceProvider serviceProvider) : ICurrentAcco
 
     private ClaimsPrincipal user = null!;
     private readonly IServiceProvider serviceProvider = serviceProvider;
+
     public async Task SetClaimPrinciple(ClaimsPrincipal user)
     {
         this.user = user;
@@ -50,10 +50,8 @@ public class CurrentUserService(IServiceProvider serviceProvider) : ICurrentAcco
         }
     }
 
-
     public void SetClientIp(HttpContext httpContext)
     {
         ClientIp = httpContext.Connection.RemoteIpAddress?.ToString();
     }
-
 }

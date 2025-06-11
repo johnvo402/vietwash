@@ -31,8 +31,11 @@ namespace Presentation.Routes
                 $"{Auth}/{RouterBase.prefix}{nameof(Accounts)}/{nameof(Logout)}";
             public const string CustomerLogin =
                 $"{Auth}/{RouterBase.prefix}{nameof(Accounts)}/{nameof(CustomerLogin)}";
+            public const string CustomerLoginVerify =
+                $"{Auth}/{RouterBase.prefix}{nameof(Accounts)}/{nameof(CustomerLoginVerify)}";
             public const string Tags = $"{nameof(Accounts)} endpoint";
         }
+
         public static class Customer
         {
             public const string GetList = $"{Auth}/{RouterBase.prefix}{nameof(Customer)}";

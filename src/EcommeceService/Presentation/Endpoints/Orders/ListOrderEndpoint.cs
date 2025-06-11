@@ -20,7 +20,7 @@ namespace Presentation.Endpoints.Orders
     {
         [HttpGet(Router.OrderRoute.Orders)]
         [SwaggerOperation(Tags = [Router.OrderRoute.Tags], Summary = "list Order")]
-        [AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.order}")]
+        [AuthorizeBy]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<ListOrderResponse>>>
         > HandleAsync(

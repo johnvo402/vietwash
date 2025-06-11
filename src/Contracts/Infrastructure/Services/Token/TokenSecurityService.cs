@@ -1,4 +1,6 @@
-﻿using Application.Common.Interfaces.Services.DistributedCache;
+﻿using System.Security.Cryptography;
+using System.Text;
+using Application.Common.Interfaces.Services.DistributedCache;
 using Contracts.Application.Common.Interfaces.Services.Token;
 using Contracts.Dtos.Responses;
 using Infrastructure.Services.Token;
@@ -7,13 +9,11 @@ using JWT.Algorithms;
 using JWT.Builder;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
-using System.Security.Cryptography;
-using System.Text;
-
 
 namespace Contracts.Infrastructure.Services.Token
 {
-    public class TokenSecurityService(IOptions<JwtSettings> jwtSettings, IRedisCacheService _cache) : ITokenSecurityService
+    public class TokenSecurityService(IOptions<JwtSettings> jwtSettings, IRedisCacheService _cache)
+        : ITokenSecurityService
     {
         private readonly JwtSettings settings = jwtSettings.Value;
         private const string BlacklistPrefix = "blacklist_";
@@ -23,24 +23,27 @@ namespace Contracts.Infrastructure.Services.Token
             string key = $"{BlacklistPrefix}{token}";
             await _cache.Database.StringSetAsync(key, "blacklisted", expiry);
         }
+
         public DecodeTokenResponse DecodeToken(string token)
         {
             var json = JwtBuilder
                 .Create()
                 .WithAlgorithm(new HMACSHA256Algorithm())
-                .WithSecret(settings.SecretKey).Issuer(settings.Issuer).Audience(settings.Audience)
+                .WithSecret(settings.SecretKey)
+                .Issuer(settings.Issuer)
+                .Audience(settings.Audience)
                 .DoNotVerifySignature()
                 .Decode(token);
 
             return SerializerExtension.Deserialize<DecodeTokenResponse>(json).Object!;
         }
 
-
         public async Task<bool> ExistsNonceAsync(string nonce) =>
             (await _cache.Database.StringGetAsync(nonce)).HasValue;
 
         public async Task StoreNonceAsync(string nonce) =>
             await _cache.Database.StringSetAsync(nonce, "Nonce", TimeSpan.FromMinutes(5));
+
         public async Task<bool> IsTokenBlacklistedAsync(string token)
         {
             string key = $"{BlacklistPrefix}{token}";
@@ -70,13 +73,12 @@ namespace Contracts.Infrastructure.Services.Token
 
         public async Task AddSessionUserAsync(string userId, string userData, TimeSpan expiry)
         {
+            await _cache.Database.StringSetAsync(userId, userData, expiry, when: When.Always);
+        }
 
-            await _cache.Database.StringSetAsync(
-                userId,
-                userData,
-                expiry,
-                when: When.Always
-            );
+        public async Task<TimeSpan?> GetSessionExpiry(string userId)
+        {
+            return await _cache.Database.KeyTimeToLiveAsync(userId);
         }
     }
 }

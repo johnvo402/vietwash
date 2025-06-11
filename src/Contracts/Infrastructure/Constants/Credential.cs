@@ -1,4 +1,3 @@
-
 namespace Infrastructure.Constants;
 
 public static class ActionPermission
@@ -9,6 +8,14 @@ public static class ActionPermission
     public const string detail = nameof(detail);
     public const string list = nameof(list);
     public const string testa = nameof(testa);
+}
+
+public static class ROLE
+{
+    public const string CUSTOMER = nameof(CUSTOMER);
+    public const string ADMIN = nameof(ADMIN);
+    public const string MANAGER = nameof(MANAGER);
+    public const string STAFF = nameof(STAFF);
 }
 
 public static class ObjectPermission
@@ -22,7 +29,5 @@ public static class ObjectPermission
     public const string reportservice = nameof(reportservice);
     public const string dashboard = nameof(dashboard);
     public const string customer = nameof(customer);
-	public const string supplier = nameof(supplier);
-
-
+    public const string supplier = nameof(supplier);
 }

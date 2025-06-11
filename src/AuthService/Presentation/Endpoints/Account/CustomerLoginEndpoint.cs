@@ -1,5 +1,4 @@
 using Application.Features.Accounts.Commands.CustomerLogin;
-using Application.Features.Accounts.Commands.Login;
 using Ardalis.ApiEndpoints;
 using Contracts.RouteResults;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;

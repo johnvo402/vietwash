@@ -1,15 +1,17 @@
-﻿using Application.Common.Interfaces.Services.DistributedCache;
+﻿using System.Text.Json;
+using Application.Common.Interfaces.Services.DistributedCache;
 using Contracts.Application.Common.Interfaces.Services.Token;
 using JohnChum.SharedKernel.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using System.Text.Json;
 
 namespace Application.Common.Auth;
 
-public class AuthorizeHandler(IServiceProvider serviceProvider, IHttpContextAccessor _httpContextAccessor)
-    : AuthorizationHandler<AuthorizationRequirement>
+public class AuthorizeHandler(
+    IServiceProvider serviceProvider,
+    IHttpContextAccessor _httpContextAccessor
+) : AuthorizationHandler<AuthorizationRequirement>
 {
     private readonly IServiceProvider serviceProvider = serviceProvider;
 
@@ -19,18 +21,27 @@ public class AuthorizeHandler(IServiceProvider serviceProvider, IHttpContextAcce
     )
     {
         using var scope = serviceProvider.CreateScope();
-        IRedisCacheService cache =
-            scope.ServiceProvider.GetRequiredService<IRedisCacheService>();
-        ITokenSecurityService tokenSecurity = scope.ServiceProvider.GetRequiredService<ITokenSecurityService>();
+        IRedisCacheService cache = scope.ServiceProvider.GetRequiredService<IRedisCacheService>();
+        ITokenSecurityService tokenSecurity =
+            scope.ServiceProvider.GetRequiredService<ITokenSecurityService>();
 
         string? userId = null;
 
-        var authorizationHeader = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].FirstOrDefault();
-        if (!string.IsNullOrEmpty(authorizationHeader) && authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        var authorizationHeader = _httpContextAccessor
+            .HttpContext?.Request.Headers["Authorization"]
+            .FirstOrDefault();
+        if (
+            !string.IsNullOrEmpty(authorizationHeader)
+            && authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
+        )
         {
             var token = authorizationHeader["Bearer ".Length..].Trim();
             var decodeToken = tokenSecurity.DecodeToken(token);
-            if (decodeToken == null || decodeToken.ExpiredTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds() || decodeToken.TokenType != "access")
+            if (
+                decodeToken == null
+                || decodeToken.ExpiredTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                || decodeToken.TokenType != "access"
+            )
             {
                 context.Fail(new AuthorizationFailureReason(this, "Token invalid or expired."));
                 return;
@@ -43,7 +54,6 @@ public class AuthorizeHandler(IServiceProvider serviceProvider, IHttpContextAcce
             context.Fail(new AuthorizationFailureReason(this, "User is UnAuthenticated"));
             return;
         }
-
 
         try
         {
@@ -116,7 +126,9 @@ public class AuthorizeHandler(IServiceProvider serviceProvider, IHttpContextAcce
         catch (JsonException)
         {
             // Log error if needed
-            context.Fail(new AuthorizationFailureReason(this, "Invalid authorization requirement format"));
+            context.Fail(
+                new AuthorizationFailureReason(this, "Invalid authorization requirement format")
+            );
             return;
         }
 
@@ -138,10 +150,6 @@ public class AuthorizeHandler(IServiceProvider serviceProvider, IHttpContextAcce
         context.Succeed(requirement);
     }
 
-
     private async Task<bool> HasRolesInUserAsync(UserAuth user, IEnumerable<string> roleNames) =>
         await Task.FromResult(roleNames.Contains(user.Role!));
-
-
-
 }

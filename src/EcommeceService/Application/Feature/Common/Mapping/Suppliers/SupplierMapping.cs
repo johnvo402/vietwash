@@ -1,5 +1,6 @@
 ﻿using Application.Feature.Common.Projections.Suppliers;
 using AutoMapper;
+using Domain.Aggregates.Suppliers;
 
 
 namespace Application.Feature.Common.Mapping.Suppliers
@@ -8,7 +9,7 @@ namespace Application.Feature.Common.Mapping.Suppliers
     {
         public SupplierMapping()
         {
-            CreateMap<SupplierModel, SupplierMapping>();
+            CreateMap<SupplierModel, Supplier>();
 
         }
     }

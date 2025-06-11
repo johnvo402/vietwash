@@ -55,26 +55,13 @@ public class LoginAccountHandler(
                 ]
             );
         }
-        if ((user.Role == "CUSTOMER"))
-        {
-            throw new BadRequestException(
-                [
-                    Messager
-                        .Create<Account>()
-                        .Property(x => x.Role)
-                        .Message(MessageType.Valid)
-                        .Negative()
-                        .BuildMessage(),
-                ]
-            );
-        }
         if (!Verify(request.Password, user.Password))
         {
             throw new BadRequestException(
                 [
                     Messager
                         .Create<Account>()
-                        .Property(x => x.Password)
+                        .Property(x => x.Password!)
                         .Message(MessageType.Correct)
                         .Negative()
                         .BuildMessage(),
