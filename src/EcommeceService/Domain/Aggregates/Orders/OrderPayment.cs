@@ -1,5 +1,4 @@
-﻿using Domain.Aggregates.Funds;
-using Domain.Aggregates.Orders.Enums;
+﻿using Domain.Aggregates.Orders.Enums;
 using JohnChum.SharedKernel.Domain.Common;
 
 namespace Domain.Aggregates.Orders

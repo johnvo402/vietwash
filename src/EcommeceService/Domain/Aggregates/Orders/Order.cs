@@ -1,5 +1,4 @@
-﻿using Domain.Aggregates.Funds;
-using Domain.Aggregates.Orders.Enums;
+﻿using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Events;
 using Domain.Aggregates.Users;
 using JohnChum.SharedKernel.Domain.Common;
@@ -25,7 +24,6 @@ namespace Domain.Aggregates.Orders
         public User? Customer { get; set; }
 		public ICollection<OrderItem> OrderItems { get; set; } = [];
 		public ICollection<OrderPayment> OrderPayments { get; set; } = [];
-		public ICollection<Fund> Funds { get; set; } = [];
 
 		protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
