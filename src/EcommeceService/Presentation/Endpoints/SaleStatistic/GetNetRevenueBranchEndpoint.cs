@@ -16,9 +16,9 @@ namespace Presentation.Endpoints.SaleStatistic
             ApiResponse<IEnumerable<GetNetRevenueBranchResponse>>
         >
     {
-        [HttpGet(Presentation.Routes.Router.SaleResultRoute.NetRevenueBranch)]
+        [HttpGet(Routes.Router.SaleResultRoute.NetRevenueBranch)]
         [SwaggerOperation(
-            Tags = [Presentation.Routes.Router.SaleResultRoute.Tags],
+            Tags = [Routes.Router.SaleResultRoute.Tags],
             Summary = "Get net revenue branch by date"
         )]
         [AuthorizeBy(roles: "ADMIN, MANAGER")]

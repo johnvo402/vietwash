@@ -1,4 +1,5 @@
 using System.Data.Common;
+using Npgsql;
 
 namespace Application.Common.Interfaces.UnitOfWorks;
 
@@ -8,7 +9,8 @@ public interface IUnitOfWork : IDisposable
 
     IRepository<TEntity> Repository<TEntity>()
         where TEntity : class;
-
+    IRepositoryFunction<TEntity> RepositoryFunction<TEntity>()
+        where TEntity : new();
     IRepository<TEntity> CachedRepository<TEntity>()
         where TEntity : class;
 
@@ -22,6 +24,15 @@ public interface IUnitOfWork : IDisposable
 
     Task SaveAsync(CancellationToken cancellationToken = default);
 
-    Task<List<T>> ExecuteSqlQueryAsync<T>(string sql, CancellationToken cancellationToken = default)
-        where T : class;
+    Task<T> ExecuteScalarAsync<T>(
+        string sql,
+        IEnumerable<NpgsqlParameter> parameters,
+        CancellationToken cancellationToken = default
+    );
+    Task<List<T>> ExecuteSqlQueryAsync<T>(
+        string sql,
+        IEnumerable<NpgsqlParameter> parameters,
+        CancellationToken cancellationToken = default
+    )
+        where T : new();
 }

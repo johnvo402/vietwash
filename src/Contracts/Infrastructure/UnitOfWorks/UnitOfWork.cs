@@ -1,13 +1,15 @@
+using System.Data;
 using System.Data.Common;
-using System.Runtime.CompilerServices;
 using Application.Common.Interfaces.UnitOfWorks;
 using AutoMapper;
+using Contracts.Infrastructure.UnitOfWorks.Repositories;
 using Infrastructure.UnitOfWorks.CachedRepositories;
 using Infrastructure.UnitOfWorks.Repositories;
 using JohnChum.SharedKernel.Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Caching.Memory;
+using Npgsql;
 using Serilog;
 
 namespace Infrastructure.UnitOfWorks;
@@ -38,6 +40,25 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache
         }
 
         return (IRepository<TEntity>)value!;
+    }
+
+    public IRepositoryFunction<TEntity> RepositoryFunction<TEntity>()
+        where TEntity : new()
+    {
+        string type = typeof(TEntity).FullName!;
+
+        if (!repositories.TryGetValue(type, out object? value))
+        {
+            Type repositoryType = typeof(RepositoryFunction<>);
+            var repositoryInstance = Activator.CreateInstance(
+                repositoryType.MakeGenericType(typeof(TEntity)),
+                new object[] { this }
+            );
+            value = repositoryInstance;
+            repositories.Add(type, value);
+        }
+
+        return (IRepositoryFunction<TEntity>)value!;
     }
 
     public IRepository<TEntity> CachedRepository<TEntity>()
@@ -160,15 +181,55 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache
         }
     }
 
-    public async Task<List<T>> ExecuteSqlQueryAsync<T>(
+    public async Task<T> ExecuteScalarAsync<T>(
         string sql,
+        IEnumerable<NpgsqlParameter> parameters,
         CancellationToken cancellationToken = default
     )
-        where T : class
     {
-        var formatString = FormattableStringFactory.Create(sql);
-        return await dbContext
-            .DatabaseFacade.SqlQuery<T>(formatString)
-            .ToListAsync(cancellationToken);
+        var conn = dbContext.DatabaseFacade.GetDbConnection();
+        if (conn.State != ConnectionState.Open)
+            await conn.OpenAsync(cancellationToken);
+
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = sql;
+        cmd.CommandType = CommandType.Text;
+
+        foreach (var param in parameters)
+        {
+            cmd.Parameters.Add(param);
+        }
+
+        var result = await cmd.ExecuteScalarAsync(cancellationToken);
+        return (T)Convert.ChangeType(result, typeof(T));
+    }
+
+    public async Task<List<T>> ExecuteSqlQueryAsync<T>(
+        string sql,
+        IEnumerable<NpgsqlParameter> parameters,
+        CancellationToken cancellationToken = default
+    )
+        where T : new()
+    {
+        var conn = dbContext.DatabaseFacade.GetDbConnection();
+        if (conn.State != System.Data.ConnectionState.Open)
+            await conn.OpenAsync(cancellationToken);
+
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = sql;
+        cmd.CommandType = CommandType.Text;
+
+        foreach (var p in parameters)
+            cmd.Parameters.Add(p);
+
+        var results = new List<T>();
+
+        using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            results.Add(UniOfWorkExtension.MapReaderToObject<T>(reader));
+        }
+
+        return results;
     }
 }

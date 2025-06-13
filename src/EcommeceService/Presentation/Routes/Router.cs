@@ -66,13 +66,20 @@ namespace Presentation.Routes
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(RevenueStatistic)}";
             public const string TopService = $"{Ecommerce}/{RouterBase.prefix}{nameof(TopService)}";
             public const string NetRevenueBranch =
-                    $"{Ecommerce}/{RouterBase.prefix}{nameof(NetRevenueBranch)}";
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(NetRevenueBranch)}";
         }
+
         public static class UserRoute
         {
             public const string Users = $"{Ecommerce}/{RouterBase.prefix}{nameof(Users)}";
             public const string GetRouteName = $"{Users}DetailEndpoint";
             public const string Tags = $"{nameof(Users)} endpoint";
+        }
+
+        public static class Report
+        {
+            public const string Order = $"{nameof(Report)}/{RouterBase.prefix}{nameof(Order)}";
+            public const string Tags = $"{nameof(Report)} endpoint";
         }
 
         public static class ReportRoute

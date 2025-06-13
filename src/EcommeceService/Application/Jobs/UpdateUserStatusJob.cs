@@ -1,15 +1,15 @@
-﻿using Application.Common.Interfaces.UnitOfWorks;
-using Domain.Aggregates.Orders;
-using Domain.Aggregates.Orders.Specifications;
-using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.Enums;
-using Domain.Aggregates.Users.Specifications;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Application.Common.Interfaces.UnitOfWorks;
+using Domain.Aggregates.Orders;
+using Domain.Aggregates.Orders.Specifications;
+using Domain.Aggregates.Users;
+using Domain.Aggregates.Users.Enums;
+using Domain.Aggregates.Users.Specifications;
 
 namespace Application.Jobs
 {
@@ -32,14 +32,22 @@ namespace Application.Jobs
             }
             foreach (long userId in userIds)
             {
-                var order = await _unitOfWork.Repository<Order>().FindByConditionAsync<List<Order>>(new GetOrderByCustomerIdSpecification(userId));
+                var order = await _unitOfWork
+                    .Repository<Order>()
+                    .FindByConditionAsync<List<Order>>(
+                        new GetOrderByCustomerIdSpecification(userId)
+                    );
                 if (order != null || order?.Count() > 0)
                 {
                     var totalOrder = order.Count();
                     var totalRevenue = order.Sum(x => x.Total);
                     if (totalOrder >= 5 || totalRevenue > 500000)
                     {
-                        var user = await _unitOfWork.Repository<User>().FindByConditionAsync(new GetUserByIdWithoutIncludeSpecification(userId));
+                        var user = await _unitOfWork
+                            .Repository<User>()
+                            .FindByConditionAsync(
+                                new GetUserByIdWithoutIncludeSpecification(userId)
+                            );
                         try
                         {
                             DbTransaction transaction = await _unitOfWork.CreateTransactionAsync();

@@ -5,6 +5,11 @@
     <Using Include="BCrypt.Net.BCrypt" Static="True" />
   </ItemGroup>
   <ItemGroup>
+  <None Include="Data\Migrations\**\*.sql">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="EFCore.NamingConventions" />
     <PackageReference Include="Grpc.AspNetCore.Server.Reflection" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">

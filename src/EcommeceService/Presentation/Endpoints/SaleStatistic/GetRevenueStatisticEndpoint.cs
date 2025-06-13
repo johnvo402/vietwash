@@ -14,12 +14,12 @@ namespace Presentation.Endpoints.SaleStatistic
             ApiResponse<IEnumerable<GetRevenueStatisticResponse>>
         >
     {
-        [HttpGet(Presentation.Routes.Router.SaleResultRoute.RevenueStatistic)]
+        [HttpGet(Routes.Router.SaleResultRoute.RevenueStatistic)]
         [SwaggerOperation(
-            Tags = [Presentation.Routes.Router.SaleResultRoute.Tags],
+            Tags = [Routes.Router.SaleResultRoute.Tags],
             Summary = "Get revenue statistics by date"
         )]
-        [AuthorizeBy(roles: "ADMIN, MANAGER")]
+        // [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<
             ActionResult<ApiResponse<IEnumerable<GetRevenueStatisticResponse>>>
         > HandleAsync(
