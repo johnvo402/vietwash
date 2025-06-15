@@ -43,7 +43,7 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache
     }
 
     public IRepositoryFunction<TEntity> RepositoryFunction<TEntity>()
-        where TEntity : new()
+        where TEntity : class
     {
         string type = typeof(TEntity).FullName!;
 
@@ -181,55 +181,15 @@ public class UnitOfWork(IMapper mapper, IDbContext dbContext, IMemoryCache cache
         }
     }
 
-    public async Task<T> ExecuteScalarAsync<T>(
-        string sql,
-        IEnumerable<NpgsqlParameter> parameters,
-        CancellationToken cancellationToken = default
+    public IQueryable<TEntity> CallPostgreSqlFunction<TEntity>(
+        string functionName,
+        object[] parameters
     )
+        where TEntity : class
     {
-        var conn = dbContext.DatabaseFacade.GetDbConnection();
-        if (conn.State != ConnectionState.Open)
-            await conn.OpenAsync(cancellationToken);
+        var parameterPlaceholders = string.Join(", ", parameters.Select((_, i) => $"{{{i}}}"));
+        var sql = $"SELECT * FROM {functionName}({parameterPlaceholders})";
 
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = sql;
-        cmd.CommandType = CommandType.Text;
-
-        foreach (var param in parameters)
-        {
-            cmd.Parameters.Add(param);
-        }
-
-        var result = await cmd.ExecuteScalarAsync(cancellationToken);
-        return (T)Convert.ChangeType(result, typeof(T));
-    }
-
-    public async Task<List<T>> ExecuteSqlQueryAsync<T>(
-        string sql,
-        IEnumerable<NpgsqlParameter> parameters,
-        CancellationToken cancellationToken = default
-    )
-        where T : new()
-    {
-        var conn = dbContext.DatabaseFacade.GetDbConnection();
-        if (conn.State != System.Data.ConnectionState.Open)
-            await conn.OpenAsync(cancellationToken);
-
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = sql;
-        cmd.CommandType = CommandType.Text;
-
-        foreach (var p in parameters)
-            cmd.Parameters.Add(p);
-
-        var results = new List<T>();
-
-        using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
-        while (await reader.ReadAsync(cancellationToken))
-        {
-            results.Add(UniOfWorkExtension.MapReaderToObject<T>(reader));
-        }
-
-        return results;
+        return dbContext.Set<TEntity>().FromSqlRaw(sql, parameters);
     }
 }

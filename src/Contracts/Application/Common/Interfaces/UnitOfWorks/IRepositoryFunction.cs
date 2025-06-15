@@ -1,17 +1,16 @@
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
 
 namespace Application.Common.Interfaces.UnitOfWorks;
 
 public interface IRepositoryFunction<T>
-    where T : new()
+    where T : class
 {
-    Task<PaginationResponse<T>> ExecuteFunctionWithPagingAsync(
+    Task<PaginationResponse<T>> PagedListFunctionAsync(
         string functionName,
-        IDictionary<string, object?> parameters,
-        string? sort,
-        int page,
-        int pageSize,
+        object[] parameters,
         string defaultSort,
+        QueryParamRequest queryParam,
         CancellationToken cancellationToken = default
     );
 }

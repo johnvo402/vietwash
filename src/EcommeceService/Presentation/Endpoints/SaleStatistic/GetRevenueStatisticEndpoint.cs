@@ -1,7 +1,7 @@
-﻿using Application.Common.Auth;
-using Application.Feature.Statistics.Queries.RevenueStatistic;
+﻿using Application.Feature.Statistics.Queries.RevenueStatistic;
 using Ardalis.ApiEndpoints;
 using Contracts.RouteResults;
+using Domain.Functions;
 using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +11,7 @@ namespace Presentation.Endpoints.SaleStatistic
 {
     public class GetRevenueStatisticEndpoint(ISender sender)
         : EndpointBaseAsync.WithRequest<GetRevenueStatisticQuery>.WithActionResult<
-            ApiResponse<IEnumerable<GetRevenueStatisticResponse>>
+            ApiResponse<IEnumerable<GetRevenueStatistic>>
         >
     {
         [HttpGet(Routes.Router.SaleResultRoute.RevenueStatistic)]
@@ -21,7 +21,7 @@ namespace Presentation.Endpoints.SaleStatistic
         )]
         // [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<
-            ActionResult<ApiResponse<IEnumerable<GetRevenueStatisticResponse>>>
+            ActionResult<ApiResponse<IEnumerable<GetRevenueStatistic>>>
         > HandleAsync(
             [FromQuery] GetRevenueStatisticQuery request,
             CancellationToken cancellationToken = default

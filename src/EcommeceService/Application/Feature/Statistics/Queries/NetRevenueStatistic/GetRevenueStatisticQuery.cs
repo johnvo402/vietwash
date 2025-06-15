@@ -1,9 +1,10 @@
-﻿using Mediator;
+﻿using Domain.Functions;
+using Mediator;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Feature.Statistics.Queries.RevenueStatistic
 {
-    public class GetRevenueStatisticQuery : IRequest<IEnumerable<GetRevenueStatisticResponse>>
+    public class GetRevenueStatisticQuery : IRequest<IEnumerable<GetRevenueStatistic>>
     {
         [FromQuery]
         public string BranchId { get; set; }

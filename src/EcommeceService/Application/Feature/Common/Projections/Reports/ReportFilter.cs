@@ -1,13 +1,11 @@
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
+
 namespace Application.Feature.Common.Projections.Reports;
 
-public class ReportFilter
+public class ReportFilter : QueryParamRequest
 {
     public long From { get; set; }
     public long To { get; set; }
-    public int Page { get; set; }
-    public int PageSize { get; set; }
-
-    public string? Sort { get; set; }
     public List<long>? BranchIds { get; set; }
     public string? SearchKeywords { get; set; }
 }

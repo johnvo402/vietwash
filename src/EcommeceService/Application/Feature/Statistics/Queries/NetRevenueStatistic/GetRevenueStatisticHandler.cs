@@ -2,13 +2,14 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Statistics.Queries.RevenueStatistic;
+using Domain.Functions;
 using Mediator;
-using Npgsql;
+using Microsoft.EntityFrameworkCore;
 
 public class GetRevenueStatisticHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
-    : IRequestHandler<GetRevenueStatisticQuery, IEnumerable<GetRevenueStatisticResponse>>
+    : IRequestHandler<GetRevenueStatisticQuery, IEnumerable<GetRevenueStatistic>>
 {
-    public async ValueTask<IEnumerable<GetRevenueStatisticResponse>> Handle(
+    public async ValueTask<IEnumerable<GetRevenueStatistic>> Handle(
         GetRevenueStatisticQuery request,
         CancellationToken cancellationToken
     )
@@ -16,24 +17,19 @@ public class GetRevenueStatisticHandler(IUnitOfWork unitOfWork, ICurrentAccount 
         var from = DateTime.Parse(request.From).ToString("yyyy-MM-dd");
         var to = DateTime.Parse(request.To).ToString("yyyy-MM-dd");
 
-        string sql =
-            @"
-            SELECT revenue_date AS ""date"", total_revenue AS ""revenue""
-            FROM get_revenue_statistics(@branchId, @from, @to);
-        ";
-
-        var parameters = new List<NpgsqlParameter>
+        var parameters = new object[]
         {
-            new("@branchId", long.Parse(request.BranchId)),
-            new("@from", DateOnly.Parse(from)),
-            new("@to", DateOnly.Parse(to)),
+            long.Parse(request.BranchId),
+            DateOnly.Parse(from),
+            DateOnly.Parse(to),
         };
 
-        var result = await unitOfWork.ExecuteSqlQueryAsync<GetRevenueStatisticResponse>(
-            sql,
-            parameters,
-            cancellationToken
-        );
+        var result = await unitOfWork
+            .CallPostgreSqlFunction<GetRevenueStatistic>(
+                functionName: "get_revenue_statistics",
+                parameters
+            )
+            .ToListAsync(cancellationToken);
 
         return result;
     }

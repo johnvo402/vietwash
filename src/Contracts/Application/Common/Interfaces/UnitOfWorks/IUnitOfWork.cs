@@ -10,7 +10,7 @@ public interface IUnitOfWork : IDisposable
     IRepository<TEntity> Repository<TEntity>()
         where TEntity : class;
     IRepositoryFunction<TEntity> RepositoryFunction<TEntity>()
-        where TEntity : new();
+        where TEntity : class;
     IRepository<TEntity> CachedRepository<TEntity>()
         where TEntity : class;
 
@@ -24,15 +24,6 @@ public interface IUnitOfWork : IDisposable
 
     Task SaveAsync(CancellationToken cancellationToken = default);
 
-    Task<T> ExecuteScalarAsync<T>(
-        string sql,
-        IEnumerable<NpgsqlParameter> parameters,
-        CancellationToken cancellationToken = default
-    );
-    Task<List<T>> ExecuteSqlQueryAsync<T>(
-        string sql,
-        IEnumerable<NpgsqlParameter> parameters,
-        CancellationToken cancellationToken = default
-    )
-        where T : new();
+    IQueryable<T> CallPostgreSqlFunction<T>(string functionName, object[] parameters)
+        where T : class;
 }
