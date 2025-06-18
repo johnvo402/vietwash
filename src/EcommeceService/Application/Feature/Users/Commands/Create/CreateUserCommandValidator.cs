@@ -1,8 +1,8 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Domain.Aggregates.Users;
 using FluentValidation;
+using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Users.Commands.Create;
@@ -11,7 +11,6 @@ public partial class CreateAccountCommandValidator : AbstractValidator<CreateAcc
 {
     private readonly IUnitOfWork unitOfWork;
     private readonly IActionAccessorService accessorService;
-
 
     public CreateAccountCommandValidator(
         IUnitOfWork unitOfWork,
@@ -25,7 +24,6 @@ public partial class CreateAccountCommandValidator : AbstractValidator<CreateAcc
 
     private void ApplyRules()
     {
-
         RuleFor(x => x.Payload!.Gender)
             .IsInEnum()
             .WithState(x =>
@@ -58,5 +56,4 @@ public partial class CreateAccountCommandValidator : AbstractValidator<CreateAcc
                     .Build()
             );
     }
-
 }

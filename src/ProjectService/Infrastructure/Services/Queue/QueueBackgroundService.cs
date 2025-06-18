@@ -1,5 +1,5 @@
 using Application.Common.Interfaces.Services.DistributedCache;
-using Application.Features.QueueLogs;
+using Application.Features.PubSubLogs;
 using Contracts.Dtos.Responses;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,13 +9,13 @@ using Serilog;
 
 namespace Infrastructure.Services.DistributedCache;
 
-public class QueueBackgroundService(
-    IQueueFactory queueFactory,
+public class PubSubBackgroundService(
+    IPubSubFactory queueFactory,
     IServiceProvider serviceProvider,
-    IOptions<QueueSettings> options
+    IOptions<PubSubSettings> options
 ) : BackgroundService
 {
-    private readonly QueueSettings queueSettings = options.Value;
+    private readonly PubSubSettings queueSettings = options.Value;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -32,7 +32,7 @@ public class QueueBackgroundService(
             for (int i = 0; i < 5; i++)
             {
                 // PayCartPayload? request = await queueFactory
-                //     .GetQueue(QueueType.OriginQueue)
+                //     .GetPubSub(PubSubType.Origin)
                 //     .DequeueAsync<PayCartPayload, PayCartRequest>();
 
                 // if (request != null)
@@ -56,18 +56,17 @@ public class QueueBackgroundService(
         await Task.WhenAll(runningTasks);
     }
 
-
     private async Task ProcessWithRetryAsync<TRequest, TResponse>(
-     TRequest request,
-     ISender sender,
-     ILogger logger,
-     IQueueService queueService,
-     CancellationToken cancellationToken
- )
-     where TRequest : class
-     where TResponse : class
+        TRequest request,
+        ISender sender,
+        ILogger logger,
+        IPubSubService queueService,
+        CancellationToken cancellationToken
+    )
+        where TRequest : class
+        where TResponse : class
     {
-        QueueResponse<TResponse>? queueResponse = new();
+        PubSubResponse<TResponse>? queueResponse = new();
         int attempt = 0;
         int maximumRetryAttempt = queueSettings.MaxRetryAttempts;
         double maximumDelay = queueSettings.MaximumDelayInSec;
@@ -75,7 +74,7 @@ public class QueueBackgroundService(
         while (attempt <= maximumRetryAttempt)
         {
             queueResponse =
-                await sender.Send(request, cancellationToken) as QueueResponse<TResponse>;
+                await sender.Send(request, cancellationToken) as PubSubResponse<TResponse>;
 
             // sucess case
             if (queueResponse!.IsSuccess)
@@ -88,22 +87,21 @@ public class QueueBackgroundService(
             }
 
             // 500 or 400 error
-            if (queueResponse.ErrorType == QueueErrorType.Persistent)
+            if (queueResponse.ErrorType == PubSubErrorType.Persistent)
             {
-                CreateQueueLogCommand createQueueLogCommand =
-                    new()
-                    {
-                        RequestId = queueResponse.PayloadId!.Value,
-                        ErrorDetail = queueResponse.Error,
-                        Request = request,
-                        RetryCount = attempt,
-                    };
-                await sender.Send(createQueueLogCommand, cancellationToken);
+                CreatePubSubLogCommand createPubSubLogCommand = new()
+                {
+                    RequestId = queueResponse.PayloadId!.Value,
+                    ErrorDetail = queueResponse.Error,
+                    Request = request,
+                    RetryCount = attempt,
+                };
+                await sender.Send(createPubSubLogCommand, cancellationToken);
                 break;
             }
 
             // transient error retry but
-            if (queueResponse.ErrorType == QueueErrorType.Transient)
+            if (queueResponse.ErrorType == PubSubErrorType.Transient)
             {
                 attempt++;
                 if (attempt > maximumRetryAttempt)
@@ -115,8 +113,11 @@ public class QueueBackgroundService(
 
                 // Calculate delay time with exponential jitter backoff method
                 // 1st -> 2.1s; 2nd -> 4.2; 3rd -> 8.2; 4th -> 16.1
-                double backoff = Math.Pow(QueueExtention.INIT_DELAY, attempt); // Exponential backoff (2^attempt)
-                double jitter = QueueExtention.GenerateJitter(0, QueueExtention.MAXIMUM_JITTER); // Add jitter
+                double backoff = Math.Pow(PubSubExtension.InitialSubscribeDelayInSeconds, attempt); // Exponential backoff (2^attempt)
+                double jitter = PubSubExtension.GenerateJitter(
+                    0,
+                    PubSubExtension.MaximumJitterFactor
+                ); // Add jitter
                 double delay = Math.Min(backoff + jitter, maximumDelay);
 
                 TimeSpan delayTime = TimeSpan.FromSeconds(delay);
@@ -125,16 +126,15 @@ public class QueueBackgroundService(
             }
         }
 
-        if (!queueResponse.IsSuccess && queueResponse.ErrorType == QueueErrorType.Transient)
+        if (!queueResponse.IsSuccess && queueResponse.ErrorType == PubSubErrorType.Transient)
         {
-            // if it still fail after many attempts then push it into dead letter queue
             logger.Warning(
                 "Push request {payloadId} into dead letter queue for maximum attempts",
                 queueResponse.PayloadId
             );
-            await queueService.EnqueueAsync(request);
+            await queueService.PublishAsync(request);
             await sender.Send(
-                new CreateQueueLogCommand()
+                new CreatePubSubLogCommand()
                 {
                     RequestId = queueResponse.PayloadId!.Value,
                     ErrorDetail = new
@@ -150,5 +150,4 @@ public class QueueBackgroundService(
             );
         }
     }
-
 }

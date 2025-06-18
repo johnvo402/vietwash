@@ -21,8 +21,6 @@ namespace Application.Feature.Common.Projections.Orders
         public string Note { get; set; } = string.Empty;
         public DateTimeOffset OrderDate { get; set; }
         public DateTimeOffset ReceivedTime { get; set; }
-
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public OrderStatus Status { get; set; }
         public long BranchId { get; set; }
     }

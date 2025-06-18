@@ -1,6 +1,6 @@
 namespace Contracts.Dtos.Responses;
 
-public class QueueResponse<T>
+public class PubSubResponse<T>
 {
     public bool IsSuccess { get; set; } = true;
 
@@ -14,10 +14,10 @@ public class QueueResponse<T>
 
     public object? Error { get; set; }
 
-    public QueueErrorType? ErrorType { get; set; }
+    public PubSubErrorType? ErrorType { get; set; }
 }
 
-public enum QueueErrorType
+public enum PubSubErrorType
 {
      /// <summary>
     /// 3-party service error

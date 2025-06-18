@@ -1,13 +1,13 @@
-using Domain.Aggregates.QueueLogs;
+using Domain.Aggregates.PubSubLogs;
 using Mediator;
 
-namespace Application.Features.QueueLogs;
+namespace Application.Features.PubSubLogs;
 
-public class CreateQueueLogCommand : IRequest
+public class CreatePubSubLogCommand : IRequest
 {
     public Guid RequestId { get; set; }
     public object? Request { get; set; }
     public object? ErrorDetail { get; set; }
-    public QueueType ProcessedBy { get; set; } = QueueType.OriginQueue;
+    public PubSubType ProcessedBy { get; set; } = PubSubType.Origin;
     public int RetryCount { get; set; }
 }

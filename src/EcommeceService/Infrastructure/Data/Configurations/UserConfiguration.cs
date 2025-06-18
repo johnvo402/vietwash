@@ -13,6 +13,5 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.BirthDay).HasColumnType("date");
         builder.Property(x => x.Email).HasColumnType("citext");
         builder.HasIndex(x => x.Email).IsUnique();
-
     }
 }

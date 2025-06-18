@@ -232,9 +232,18 @@ namespace Infrastructure.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Avatar")
+                    b.Property<string>("AvtUrl")
                         .HasColumnType("text")
-                        .HasColumnName("avatar");
+                        .HasColumnName("avt_url");
+
+                    b.Property<DateOnly>("BirthDay")
+                        .HasColumnType("date")
+                        .HasColumnName("birth_day");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -245,32 +254,26 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
-                    b.Property<byte?>("CustomerType")
+                    b.Property<byte?>("CustomerGroup")
                         .HasColumnType("smallint")
-                        .HasColumnName("customer_type");
+                        .HasColumnName("customer_group");
 
-                    b.Property<DateTime?>("DayOfBirth")
-                        .HasColumnType("date")
-                        .HasColumnName("day_of_birth");
+                    b.Property<bool>("Disabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("disabled");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("citext")
-                        .HasColumnName("email");
-
-                    b.Property<string>("FirstName")
+                    b.Property<string>("DisplayName")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("first_name");
+                        .HasColumnName("display_name");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("citext")
+                        .HasColumnName("email");
 
                     b.Property<int?>("Gender")
                         .HasColumnType("integer")
                         .HasColumnName("gender");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("last_name");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
@@ -282,10 +285,10 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("character varying(26)")
                         .HasColumnName("public_id");
 
-                    b.Property<string>("RoleId")
+                    b.Property<string>("Role")
                         .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("role_id");
+                        .HasColumnType("text")
+                        .HasColumnName("role");
 
                     b.Property<byte>("Status")
                         .HasColumnType("smallint")
@@ -299,11 +302,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("citext")
-                        .HasColumnName("username");
-
                     b.HasKey("Id")
                         .HasName("pk_user");
 
@@ -313,10 +311,6 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("Id")
                         .HasDatabaseName("ix_user_id");
-
-                    b.HasIndex("Username")
-                        .IsUnique()
-                        .HasDatabaseName("ix_user_username");
 
                     b.ToTable("user", (string)null);
                 });

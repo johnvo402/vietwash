@@ -1,24 +1,27 @@
-﻿using Application.Features.QueueLogs;
+﻿using Application.Features.PubSubLogs;
 using Grpc.Core;
 using JohnChum.SharedKernel.Extensions;
 using Mediator;
 using ProjectService_gRPC;
 using Serilog;
 
-namespace Presentation.Services.gRPC.QueueLog
+namespace Presentation.Services.gRPC.PubSubLog
 {
-    public class QueueLogServiceHandler : QueueLogService.QueueLogServiceBase
+    public class PubSubLogServiceHandler : PubSubLogService.PubSubLogServiceBase
     {
         private readonly IMediator _mediator;
         private readonly ILogger _logger;
 
-        public QueueLogServiceHandler(IMediator mediator, ILogger logger)
+        public PubSubLogServiceHandler(IMediator mediator, ILogger logger)
         {
             _mediator = mediator;
             _logger = logger;
         }
 
-        public override async Task<CreateQueueLogResponse> CreateQueueLog(CreateQueueLogRequest request, ServerCallContext context)
+        public override async Task<CreatePubSubLogResponse> CreatePubSubLog(
+            CreatePubSubLogRequest request,
+            ServerCallContext context
+        )
         {
             try
             {
@@ -26,11 +29,12 @@ namespace Presentation.Services.gRPC.QueueLog
                 if (!Guid.TryParse(request.RequestId, out var requestId))
                 {
                     _logger.Warning("Invalid RequestId: {RequestId}", request.RequestId);
-                    return new CreateQueueLogResponse { Success = false };
+                    return new CreatePubSubLogResponse { Success = false };
                 }
 
                 // Kiểm tra deserialize dữ liệu
-                object? requestData = null, errorDetail = null;
+                object? requestData = null,
+                    errorDetail = null;
                 try
                 {
                     requestData = SerializerExtension.Deserialize<object>(request.RequestData);
@@ -38,26 +42,29 @@ namespace Presentation.Services.gRPC.QueueLog
                 }
                 catch (Exception ex)
                 {
-                    _logger.Warning("Failed to deserialize request data. Error: {Message}", ex.Message);
-                    return new CreateQueueLogResponse { Success = false };
+                    _logger.Warning(
+                        "Failed to deserialize request data. Error: {Message}",
+                        ex.Message
+                    );
+                    return new CreatePubSubLogResponse { Success = false };
                 }
 
-                var command = new CreateQueueLogCommand
+                var command = new CreatePubSubLogCommand
                 {
                     RequestId = requestId,
                     Request = requestData,
                     ErrorDetail = errorDetail,
-                    ProcessedBy = (Domain.Aggregates.QueueLogs.QueueType)request.ProcessedBy,
-                    RetryCount = request.RetryCount
+                    ProcessedBy = (Domain.Aggregates.PubSubLogs.PubSubType)request.ProcessedBy,
+                    RetryCount = request.RetryCount,
                 };
 
                 await _mediator.Send(command);
-                return new CreateQueueLogResponse { Success = true };
+                return new CreatePubSubLogResponse { Success = true };
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Failed queue log.");
-                return new CreateQueueLogResponse { Success = false };
+                return new CreatePubSubLogResponse { Success = false };
             }
         }
     }

@@ -1,8 +1,9 @@
 using Application.Common.Interfaces.Services.DistributedCache;
 using Application.Features.Users.Commands.Create;
-using Contracts.Application.Common.Interfaces.Services.Queue;
+using Contracts.Application.Common.Interfaces.Services.PubSub;
 using Contracts.Dtos.Responses;
-using Domain.Aggregates.QueueLogs;
+using Domain.Aggregates.PubSubLogs;
+using Infrastructure.Services.Queue;
 using JohnChum.SharedKernel.Extensions;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,159 +14,227 @@ using Serilog;
 
 namespace Infrastructure.Services.DistributedCache;
 
-public class DeadletterQueueBackgroundService(
-    IQueueFactory factory,
-    IServiceProvider serviceProvider,
-    IOptions<QueueSettings> options
-) : BackgroundService
+public class DeadletterPubSubBackgroundService : BackgroundService
 {
-    private readonly QueueSettings queueSettings = options.Value;
+    private readonly IPubSubFactory _factory;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly PubSubSettings _settings;
+    private readonly ILogger _logger;
+    private readonly List<Task> _runningTasks;
+
+    public DeadletterPubSubBackgroundService(
+        IPubSubFactory factory,
+        IServiceProvider serviceProvider,
+        IOptions<PubSubSettings> options,
+        ILogger logger
+    )
+    {
+        _factory = factory ?? throw new ArgumentNullException(nameof(factory));
+        _serviceProvider =
+            serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _settings = options?.Value ?? throw new ArgumentNullException(nameof(options));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _runningTasks = new List<Task>();
+    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using IServiceScope scope = serviceProvider.CreateScope();
-        ISender sender = scope.ServiceProvider.GetRequiredService<ISender>();
-        ILogger logger = scope.ServiceProvider.GetRequiredService<ILogger>();
-
-        List<Task> runningTasks = new();
-
-        while (!stoppingToken.IsCancellationRequested)
+        var pubSubService = _factory.GetPubSub(Domain.Aggregates.PubSubLogs.PubSubType.DeadLetter);
+        try
         {
-            IQueueService originQueue = factory.GetQueue(Domain.Aggregates.QueueLogs.QueueType.DeadLetterQueue);
-
-            if (!await originQueue.PingAsync())
+            if (!await pubSubService.PingAsync())
             {
-                logger.Warning("Redis server has shut down");
-                continue;
+                _logger.Error(
+                    "Redis connection failed for dead-letter queue. Service cannot start."
+                );
+                throw new InvalidOperationException("Redis connection failed.");
             }
-            bool hasWork = false;
-
-            for (int i = 0; i < 5; i++)
-            {
-                CreateAccountCommand? request = await originQueue
-                    .DequeueAsync<CreateAccountCommand, CreateAccountCommand>();
-
-                if (request != null)
-                {
-                    hasWork = true;
-                    var task = Task.Run(async () =>
-                    {
-                        using var taskScope = serviceProvider.CreateScope();
-                        var taskSender = taskScope.ServiceProvider.GetRequiredService<ISender>();
-                        var taskLogger = taskScope.ServiceProvider.GetRequiredService<ILogger>();
-                        var taskGrpcClient = taskScope.ServiceProvider.GetRequiredService<IQueueLogService>();
-
-
-                        await ProcessWithRetryAsync<CreateAccountCommand, CreateAccountCommand>(
-                            request, taskSender, taskGrpcClient, taskLogger, stoppingToken);
-                    }, stoppingToken);
-                    runningTasks.Add(task);
-                }
-            }
-
-
-            if (!hasWork)
-            {
-                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
-            }
-
-            runningTasks.RemoveAll(t => t.IsCompleted || t.IsFaulted || t.IsCanceled);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Error checking Redis connection for dead-letter queue.");
+            throw;
         }
 
-        await Task.WhenAll(runningTasks);
+        _logger.Information(
+            "DeadletterPubSubBackgroundService started, subscribing to dead-letter queue."
+        );
+
+        pubSubService.Subscribe<CreateAccountEvent>(async message =>
+        {
+            // Limit concurrent tasks
+            if (_runningTasks.Count >= _settings.DeadLetterMaxRetryAttempts)
+            {
+                _logger.Warning(
+                    "Max concurrent tasks reached ({MaxTasks}). Waiting for tasks to complete.",
+                    _settings.DeadLetterMaxRetryAttempts
+                );
+                await Task.WhenAny(_runningTasks);
+                _runningTasks.RemoveAll(t => t.IsCompleted || t.IsFaulted || t.IsCanceled);
+            }
+
+            var task = Task.Run(
+                async () =>
+                {
+                    using var scope = _serviceProvider.CreateScope();
+                    var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+                    var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
+                    var pubSubLogService =
+                        scope.ServiceProvider.GetRequiredService<IPubSubLogService>();
+                    var request = new CreateAccountCommand { Payload = message };
+                    await ProcessMessageAsync<
+                        CreateAccountCommand,
+                        PubSubResponse<CreateAccountCommand>
+                    >(request, sender, pubSubLogService, logger, stoppingToken);
+                },
+                stoppingToken
+            );
+
+            lock (_runningTasks)
+            {
+                _runningTasks.Add(task);
+            }
+
+            // Clean up completed tasks
+            try
+            {
+                await Task.WhenAny(_runningTasks);
+                lock (_runningTasks)
+                {
+                    foreach (var failedTask in _runningTasks.FindAll(t => t.IsFaulted))
+                    {
+                        _logger.Error(
+                            failedTask.Exception,
+                            "Task processing dead-letter message failed."
+                        );
+                    }
+                    _runningTasks.RemoveAll(t => t.IsCompleted || t.IsFaulted || t.IsCanceled);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error cleaning up tasks.");
+            }
+        });
+
+        // Keep service running until cancellation
+        await Task.Delay(Timeout.Infinite, stoppingToken);
     }
 
-
-    private async Task ProcessWithRetryAsync<TRequest, TResponse>(
+    private async Task ProcessMessageAsync<TRequest, TResponse>(
         TRequest request,
         ISender sender,
-        IQueueLogService _grpcClient,
+        IPubSubLogService pubSubLogService,
         ILogger logger,
         CancellationToken cancellationToken
     )
         where TRequest : class
-        where TResponse : class
+        where TResponse : PubSubResponse<TRequest>
     {
-        QueueResponse<TResponse>? queueResponse = new();
-        int attempt = 0;
-        int maximumRetryAttempt = queueSettings.DeadLetterMaxRetryAttempts;
-        double maximumDelay = queueSettings.MaximumDelayInSec;
+        var retryPolicy = new RetryPolicy(_settings, logger, isDeadLetter: true);
+        TResponse response;
 
-        while (attempt <= maximumRetryAttempt)
+        try
         {
-            queueResponse =
-                await sender.Send(request, cancellationToken) as QueueResponse<TResponse>;
-
-            // sucess case
-            if (queueResponse!.IsSuccess)
-            {
-                logger.Information(
-                    "excuting request {payloadId} has been success!",
-                    queueResponse.PayloadId
-                );
-                break;
-            }
-
-            // 500 or 400 error
-            if (queueResponse.ErrorType == QueueErrorType.Persistent)
-            {
-                var createQueueLogCommand = MaptoCreateQueueLogCommand(
-                    queueResponse,
-                    request
-                );
-                await _grpcClient.CreateLogAsync(createQueueLogCommand, cancellationToken);
-                break;
-            }
-
-            // transient error retry but
-            if (queueResponse.ErrorType == QueueErrorType.Transient)
-            {
-                attempt++;
-                if (attempt > maximumRetryAttempt)
+            response = await retryPolicy.ExecuteAsync(
+                async (ct) =>
                 {
-                    break;
-                }
-                queueResponse.RetryCount = attempt;
+                    var result = await sender.Send(request, ct);
+                    if (result is not TResponse typed)
+                        throw new InvalidOperationException(
+                            $"Invalid response type. Got: {result?.GetType().FullName}"
+                        );
 
-                // Calculate delay time with exponential jitter backoff method
-                // 1st -> 2.1s; 2nd -> 4.2; 3rd -> 8.2; 4th -> 16.1
-                double backoff = Math.Pow(QueueExtention.INIT_DELAY, attempt); // Exponential backoff (2^attempt)
-                double jitter = QueueExtention.GenerateJitter(0, QueueExtention.MAXIMUM_JITTER); // Add jitter
-                double delay = Math.Min(backoff + jitter, maximumDelay);
-
-                TimeSpan delayTime = TimeSpan.FromSeconds(delay);
-                logger.Warning(
-                    $"Dead letter queue Retry {attempt} in {delayTime.TotalSeconds:F2} seconds..."
-                );
-                await Task.Delay(delayTime, cancellationToken);
-            }
-        }
-
-        if (!queueResponse.IsSuccess && queueResponse.ErrorType == QueueErrorType.Transient)
-        {
-            // if it still fail after many attempts then logging into db
-            var createQueueLogCommand = MaptoCreateQueueLogCommand(
-                queueResponse,
-                request
+                    return typed;
+                },
+                cancellationToken
             );
-            await _grpcClient.CreateLogAsync(createQueueLogCommand, cancellationToken);
         }
+        catch (Exception ex)
+        {
+            logger.Error(ex, "Unexpected error processing dead-letter request.");
+            await LogFailureAsync<TRequest, TResponse>(
+                request,
+                null,
+                pubSubLogService,
+                logger,
+                cancellationToken
+            );
+            return;
+        }
+
+        if (response?.IsSuccess == true)
+        {
+            logger.Information(
+                "Dead-letter request {PayloadId} processed successfully",
+                response.PayloadId
+            );
+            return;
+        }
+
+        await LogFailureAsync(request, response, pubSubLogService, logger, cancellationToken);
     }
 
-    private static CreateQueueLogRequest MaptoCreateQueueLogCommand<TResponse, TRequest>(
-        QueueResponse<TResponse> response,
-        TRequest request
+    private async Task LogFailureAsync<TRequest, TResponse>(
+        TRequest request,
+        TResponse? response,
+        IPubSubLogService pubSubLogService,
+        ILogger logger,
+        CancellationToken cancellationToken
     )
         where TRequest : class
-        where TResponse : class
+        where TResponse : PubSubResponse<TRequest>
     {
-        return new CreateQueueLogRequest()
+        var requestId = response?.PayloadId?.ToString() ?? Guid.NewGuid().ToString();
+        var requestData = SerializerExtension.Serialize(request).StringJson;
+        var errorDetail =
+            response?.Error != null
+                ? SerializerExtension
+                    .Serialize(
+                        new
+                        {
+                            ErrorType = response.ErrorType.ToString(),
+                            response.Error,
+                            Message = $"Dead-letter request {requestId} failed",
+                        }
+                    )
+                    .StringJson
+                : "Unexpected error during processing";
+
+        var logRequest = new CreatePubSubLogRequest
         {
-            RequestId = response.PayloadId!.Value.ToString(),
-            ErrorDetail = SerializerExtension.Serialize(response.Error!).StringJson,
-            RequestData = SerializerExtension.Serialize(request).StringJson,
-            RetryCount = response.RetryCount,
-            ProcessedBy = ProjectService_gRPC.QueueType.DeadLetterQueue,
+            RequestId = requestId,
+            RequestData = requestData,
+            ErrorDetail = errorDetail,
+            ProcessedBy = ProjectService_gRPC.PubSubType.DeadLetterPubsub,
+            RetryCount = response?.RetryCount ?? 0,
         };
+
+        try
+        {
+            var logResponse = await pubSubLogService.CreateLogAsync(logRequest, cancellationToken);
+            if (!logResponse)
+            {
+                logger.Error(
+                    "Failed to log dead-letter request {RequestId} to PubSubLogService",
+                    requestId
+                );
+            }
+            else
+            {
+                logger.Information(
+                    "Logged dead-letter request {RequestId} to PubSubLogService",
+                    requestId
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.Error(
+                ex,
+                "Error logging dead-letter request {RequestId} to PubSubLogService",
+                requestId
+            );
+        }
     }
 }

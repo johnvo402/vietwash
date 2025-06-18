@@ -226,7 +226,7 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("branch_user", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.QueueLogs.QueueLog", b =>
+            modelBuilder.Entity("Domain.Aggregates.PubSubLogs.PubSubLog", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()

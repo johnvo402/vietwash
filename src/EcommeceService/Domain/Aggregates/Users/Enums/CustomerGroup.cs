@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Domain.Aggregates.Users.Enums
 {
-    public enum CustomerType : byte
+    public enum CustomerGroup : short
     {
-        loyal = 1,
-        normal = 2
+        Loyal = 1,
+        Normal = 2,
     }
 }

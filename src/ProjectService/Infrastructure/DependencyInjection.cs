@@ -3,7 +3,7 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.Infrastructure.Queue;
+using Contracts.Infrastructure.PubSub;
 using Infrastructure.Common;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
@@ -117,8 +117,8 @@ public static class DependencyInjection
             .AddJwtAuth(configuration)
             .AddMemoryCache()
             .AddRedis(configuration)
-            .AddHostedService<QueueBackgroundService>()
-            .AddHostedService<DeadletterQueueBackgroundService>()
+            .AddHostedService<PubSubBackgroundService>()
+            .AddHostedService<DeadletterPubSubBackgroundService>()
             .Configure<CacheSettings>(options =>
                 configuration.GetSection(nameof(CacheSettings)).Bind(options)
             )

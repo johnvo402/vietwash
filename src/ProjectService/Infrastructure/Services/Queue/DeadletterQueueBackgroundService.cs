@@ -1,5 +1,5 @@
 using Application.Common.Interfaces.Services.DistributedCache;
-using Application.Features.QueueLogs;
+using Application.Features.PubSubLogs;
 using Contracts.Dtos.Responses;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,13 +9,13 @@ using Serilog;
 
 namespace Infrastructure.Services.DistributedCache;
 
-public class DeadletterQueueBackgroundService(
-    IQueueFactory factory,
+public class DeadletterPubSubBackgroundService(
+    IPubSubFactory factory,
     IServiceProvider serviceProvider,
-    IOptions<QueueSettings> options
+    IOptions<PubSubSettings> options
 ) : BackgroundService
 {
-    private readonly QueueSettings queueSettings = options.Value;
+    private readonly PubSubSettings queueSettings = options.Value;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -25,14 +25,14 @@ public class DeadletterQueueBackgroundService(
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            // IQueueService deadLetterQueue = factory.GetQueue(QueueType.DeadLetterQueue);
+            // IPubSubService deadLetterPubSub = factory.GetPubSub(PubSubType.DeadLetter);
 
-            // if (!await deadLetterQueue.PingAsync())
+            // if (!await deadLetterPubSub.PingAsync())
             // {
             //     logger.Warning("Redis server has shut down");
             //     continue;
             // }
-            // var request = await deadLetterQueue.DequeueAsync<PayCartPayload, PayCartPayload>();
+            // var request = await deadLetterPubSub.DequeueAsync<PayCartPayload, PayCartPayload>();
 
             // if (request != null)
             // {
@@ -56,7 +56,7 @@ public class DeadletterQueueBackgroundService(
         where TRequest : class
         where TResponse : class
     {
-        QueueResponse<TResponse>? queueResponse = new();
+        PubSubResponse<TResponse>? queueResponse = new();
         int attempt = 0;
         int maximumRetryAttempt = queueSettings.DeadLetterMaxRetryAttempts;
         double maximumDelay = queueSettings.MaximumDelayInSec;
@@ -64,7 +64,7 @@ public class DeadletterQueueBackgroundService(
         while (attempt <= maximumRetryAttempt)
         {
             queueResponse =
-                await sender.Send(request, cancellationToken) as QueueResponse<TResponse>;
+                await sender.Send(request, cancellationToken) as PubSubResponse<TResponse>;
 
             // sucess case
             if (queueResponse!.IsSuccess)
@@ -77,18 +77,18 @@ public class DeadletterQueueBackgroundService(
             }
 
             // 500 or 400 error
-            if (queueResponse.ErrorType == QueueErrorType.Persistent)
+            if (queueResponse.ErrorType == PubSubErrorType.Persistent)
             {
-                CreateQueueLogCommand createQueueLogCommand = MaptoCreateQueueLogCommand(
+                CreatePubSubLogCommand createPubSubLogCommand = MaptoCreatePubSubLogCommand(
                     queueResponse,
                     request
                 );
-                await sender.Send(createQueueLogCommand, cancellationToken);
+                await sender.Send(createPubSubLogCommand, cancellationToken);
                 break;
             }
 
             // transient error retry but
-            if (queueResponse.ErrorType == QueueErrorType.Transient)
+            if (queueResponse.ErrorType == PubSubErrorType.Transient)
             {
                 attempt++;
                 if (attempt > maximumRetryAttempt)
@@ -99,8 +99,8 @@ public class DeadletterQueueBackgroundService(
 
                 // Calculate delay time with exponential jitter backoff method
                 // 1st -> 2.1s; 2nd -> 4.2; 3rd -> 8.2; 4th -> 16.1
-                double backoff = Math.Pow(QueueExtention.INIT_DELAY, attempt); // Exponential backoff (2^attempt)
-                double jitter = QueueExtention.GenerateJitter(0, QueueExtention.MAXIMUM_JITTER); // Add jitter
+                double backoff = Math.Pow(PubSubExtension.InitialSubscribeDelayInSeconds, attempt); // Exponential backoff (2^attempt)
+                double jitter = PubSubExtension.GenerateJitter(0, PubSubExtension.MaximumJitterFactor); // Add jitter
                 double delay = Math.Min(backoff + jitter, maximumDelay);
 
                 TimeSpan delayTime = TimeSpan.FromSeconds(delay);
@@ -111,31 +111,31 @@ public class DeadletterQueueBackgroundService(
             }
         }
 
-        if (!queueResponse.IsSuccess && queueResponse.ErrorType == QueueErrorType.Transient)
+        if (!queueResponse.IsSuccess && queueResponse.ErrorType == PubSubErrorType.Transient)
         {
             // if it still fail after many attempts then logging into db
-            CreateQueueLogCommand createQueueLogCommand = MaptoCreateQueueLogCommand(
+            CreatePubSubLogCommand createPubSubLogCommand = MaptoCreatePubSubLogCommand(
                 queueResponse,
                 request
             );
-            await sender.Send(createQueueLogCommand, cancellationToken);
+            await sender.Send(createPubSubLogCommand, cancellationToken);
         }
     }
 
-    private static CreateQueueLogCommand MaptoCreateQueueLogCommand<TResponse, TRequest>(
-        QueueResponse<TResponse> response,
+    private static CreatePubSubLogCommand MaptoCreatePubSubLogCommand<TResponse, TRequest>(
+        PubSubResponse<TResponse> response,
         TRequest request
     )
         where TRequest : class
         where TResponse : class
     {
-        return new CreateQueueLogCommand()
+        return new CreatePubSubLogCommand()
         {
             RequestId = response.PayloadId!.Value,
             ErrorDetail = response.Error,
             Request = request,
             RetryCount = response.RetryCount,
-            ProcessedBy = Domain.Aggregates.QueueLogs.QueueType.DeadLetterQueue,
+            ProcessedBy = Domain.Aggregates.PubSubLogs.PubSubType.DeadLetter,
         };
     }
 }

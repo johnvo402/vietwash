@@ -41,7 +41,7 @@ public class TheDbContext(DbContextOptions<TheDbContext> options) : DbContext(op
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(DeadLetterQueueConfiguration).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(DeadLetterConfiguration).Assembly);
 
         modelBuilder.HasPostgresExtension("citext");
     }

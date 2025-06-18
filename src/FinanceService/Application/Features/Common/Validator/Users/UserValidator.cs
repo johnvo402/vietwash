@@ -25,12 +25,12 @@ public partial class UserValidator : AbstractValidator<UserModel>
     {
         _ = long.TryParse(accessorService.Id, out long id);
 
-        RuleFor(x => x.LastName)
+        RuleFor(x => x.DisplayName)
             .NotEmpty()
             .WithState(x =>
                 Messager
                     .Create<User>()
-                    .Property(x => x.LastName)
+                    .Property(x => x.DisplayName)
                     .Message(MessageType.Null)
                     .Negative()
                     .Build()
@@ -39,26 +39,7 @@ public partial class UserValidator : AbstractValidator<UserModel>
             .WithState(x =>
                 Messager
                     .Create<User>()
-                    .Property(x => x.LastName)
-                    .Message(MessageType.MaximumLength)
-                    .Build()
-            );
-
-        RuleFor(x => x.FirstName)
-            .NotEmpty()
-            .WithState(x =>
-                Messager
-                    .Create<User>()
-                    .Property(x => x.FirstName)
-                    .Message(MessageType.Null)
-                    .Negative()
-                    .Build()
-            )
-            .MaximumLength(256)
-            .WithState(x =>
-                Messager
-                    .Create<User>()
-                    .Property(x => x.FirstName)
+                    .Property(x => x.DisplayName)
                     .Message(MessageType.MaximumLength)
                     .Build()
             );
@@ -126,17 +107,6 @@ public partial class UserValidator : AbstractValidator<UserModel>
                     .Create<User>()
                     .Property(x => x.PhoneNumber)
                     .Message(MessageType.Valid)
-                    .Negative()
-                    .Build()
-            );
-
-        RuleFor(x => x.Street)
-            .NotEmpty()
-            .WithState(x =>
-                Messager
-                    .Create<User>()
-                    .Property(nameof(UserModel.Street))
-                    .Message(MessageType.Null)
                     .Negative()
                     .Build()
             );

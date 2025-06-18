@@ -16,7 +16,7 @@ public static class GRPCRegisterExtension
     public static IEndpointRouteBuilder UseGrpcEndpoints(this IEndpointRouteBuilder endpoints)
     {
        
-            // endpoints.MapGrpcService<QueueLogServiceHandler>();
+            // endpoints.MapGrpcService<PubSubLogServiceHandler>();
             endpoints.MapGrpcReflectionService();        
 
         return endpoints;

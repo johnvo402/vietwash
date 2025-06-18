@@ -1,12 +1,12 @@
 using AutoMapper;
-using Domain.Aggregates.QueueLogs;
+using Domain.Aggregates.PubSubLogs;
 
-namespace Application.Features.QueueLogs;
+namespace Application.Features.PubSubLogs;
 
-public class CreateQueueLogMapper : Profile
+public class CreatePubSubLogMapper : Profile
 {
-    public CreateQueueLogMapper()
+    public CreatePubSubLogMapper()
     {
-        CreateMap<CreateQueueLogCommand, QueueLog>();
+        CreateMap<CreatePubSubLogCommand, PubSubLog>();
     }
 }

@@ -1,12 +1,12 @@
-using Domain.Aggregates.QueueLogs;
+using Domain.Aggregates.PubSubLogs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Data.Configurations;
 
-public class DeadLetterQueueConfiguration : IEntityTypeConfiguration<QueueLog>
+public class DeadLetterConfiguration : IEntityTypeConfiguration<PubSubLog>
 {
-    public void Configure(EntityTypeBuilder<QueueLog> builder)
+    public void Configure(EntityTypeBuilder<PubSubLog> builder)
     {
         builder.HasKey(x => x.Id);
         builder.Property(x => x.ErrorDetail).HasColumnType("jsonb");

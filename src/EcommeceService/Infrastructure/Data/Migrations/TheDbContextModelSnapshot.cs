@@ -1701,6 +1701,10 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
+                    b.Property<short?>("CustomerGroup")
+                        .HasColumnType("smallint")
+                        .HasColumnName("customer_group");
+
                     b.Property<bool>("Disabled")
                         .HasColumnType("boolean")
                         .HasColumnName("disabled");
@@ -1711,21 +1715,12 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnName("display_name");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("citext")
                         .HasColumnName("email");
-
-                    b.Property<bool>("EmailEnabled")
-                        .HasColumnType("boolean")
-                        .HasColumnName("email_enabled");
 
                     b.Property<int?>("Gender")
                         .HasColumnType("integer")
                         .HasColumnName("gender");
-
-                    b.Property<bool>("PhoneEnabled")
-                        .HasColumnType("boolean")
-                        .HasColumnName("phone_enabled");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
@@ -1887,6 +1882,53 @@ namespace Infrastructure.Data.Migrations
                         .HasDatabaseName("ix_voucher_customer_voucher_id");
 
                     b.ToTable("voucher_customer", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Functions.GetRevenueStatistic", b =>
+                {
+                    b.Property<DateOnly>("RevenueDate")
+                        .HasColumnType("date")
+                        .HasColumnName("revenue_date");
+
+                    b.Property<decimal>("TotalRevenue")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_revenue");
+
+                    b.ToTable("get_revenue_statistic", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Functions.OrderSummaryResult", b =>
+                {
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount");
+
+                    b.Property<long>("BranchId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("branch_id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
+
+                    b.Property<long>("CustomerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("customer_id");
+
+                    b.Property<DateTimeOffset>("OrderDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("order_date");
+
+                    b.Property<long>("OrderId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("order_id");
+
+                    b.Property<int>("OrderItemCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("order_item_count");
+
+                    b.ToTable("order_summary_result", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Equipments.MaintenanceDetail", b =>

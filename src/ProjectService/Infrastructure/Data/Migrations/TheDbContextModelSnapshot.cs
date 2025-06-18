@@ -223,7 +223,7 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("branch_user", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.QueueLogs.QueueLog", b =>
+            modelBuilder.Entity("Domain.Aggregates.PubSubLogs.PubSubLog", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -275,9 +275,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnName("updated_by");
 
                     b.HasKey("Id")
-                        .HasName("pk_queue_log");
+                        .HasName("pk_pub_sub_log");
 
-                    b.ToTable("queue_log", (string)null);
+                    b.ToTable("pub_sub_log", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Warehouses.Warehouse", b =>

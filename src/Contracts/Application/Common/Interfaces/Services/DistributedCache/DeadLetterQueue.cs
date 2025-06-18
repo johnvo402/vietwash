@@ -2,7 +2,7 @@
 
 namespace Application.Common.Interfaces.Services.DistributedCache;
 
-public class DeadLetterQueue : BaseEntity
+public class DeadLetter : BaseEntity
 {
     public Guid RequestId { get; set; }
     public object? ErrorDetail { get; set; }

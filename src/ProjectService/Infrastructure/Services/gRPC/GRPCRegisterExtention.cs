@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Presentation.Services.gRPC.QueueLog;
+using Presentation.Services.gRPC.PubSubLog;
 
 namespace Infrastructure.Services.gRPC;
 
@@ -19,7 +19,7 @@ public static class GRPCRegisterExtension
 
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapGrpcService<QueueLogServiceHandler>();
+            endpoints.MapGrpcService<PubSubLogServiceHandler>();
             endpoints.MapGrpcReflectionService();        
 
         });

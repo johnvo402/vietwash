@@ -1,6 +1,6 @@
 namespace Contracts.Dtos.Requests;
 
-public class QueueRequest<T>
+public class PubSubRequest<T>
 {
     public Guid PayloadId { get; set; }
 

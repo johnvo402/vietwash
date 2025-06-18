@@ -1,9 +1,8 @@
 using Application.Common.Interfaces.Services.DistributedCache;
-using Application.Features.QueueLogs;
-using Contracts.Application.Common.Interfaces.Services.Queue;
-using Contracts.Dtos.Models;
+using Application.Features.Users.Commands.Create;
+using Contracts.Application.Common.Interfaces.Services.PubSub;
 using Contracts.Dtos.Responses;
-using Domain.Aggregates.QueueLogs;
+using Infrastructure.Services.Queue;
 using JohnChum.SharedKernel.Extensions;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,147 +10,214 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using ProjectService_gRPC;
 using Serilog;
-using QueueType = Domain.Aggregates.QueueLogs.QueueType;
 
 namespace Infrastructure.Services.DistributedCache;
 
-public class QueueBackgroundService(
-    IQueueFactory queueFactory,
-    IServiceProvider serviceProvider,
-    IOptions<QueueSettings> options
-) : BackgroundService
+public class PubSubBackgroundService : BackgroundService
 {
-    private readonly QueueSettings queueSettings = options.Value;
+    private readonly IPubSubService _pubSubService;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly PubSubSettings _pubSubSettings;
+    private readonly ILogger _logger;
+
+    public PubSubBackgroundService(
+        IPubSubService pubSubService,
+        IServiceProvider serviceProvider,
+        IOptions<PubSubSettings> options,
+        ILogger logger
+    )
+    {
+        _pubSubService = pubSubService ?? throw new ArgumentNullException(nameof(pubSubService));
+        _serviceProvider =
+            serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _pubSubSettings = options?.Value ?? throw new ArgumentNullException(nameof(options));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using IServiceScope scope = serviceProvider.CreateScope();
-        ISender sender = scope.ServiceProvider.GetRequiredService<ISender>();
-        ILogger logger = scope.ServiceProvider.GetRequiredService<ILogger>();
-
-        List<Task> runningTasks = new();
-
-        while (!stoppingToken.IsCancellationRequested)
+        // Check Redis connection
+        try
         {
-            bool hasWork = false;
-
-            for (int i = 0; i < 5; i++)
+            bool isConnected = await _pubSubService.PingAsync();
+            if (!isConnected)
             {
-                // PayCartPayload? request = await queueFactory
-                //     .GetQueue(QueueType.OriginQueue)
-                //     .DequeueAsync<PayCartPayload, PayCartRequest>();
-
-                // if (request != null)
-                // {
-                //     hasWork = true;
-                //     var task = Task.Run(() =>
-                //         ProcessWithRetryAsync<PayCartPayload, PayCartResponse>(
-                //             request, sender, logger, stoppingToken), stoppingToken);
-                //     runningTasks.Add(task);
-                // }
+                _logger.Error("Failed to connect to Redis. PubSubBackgroundService cannot start.");
+                throw new InvalidOperationException("Redis connection failed.");
             }
-
-            if (!hasWork)
-            {
-                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
-            }
-
-            runningTasks.RemoveAll(t => t.IsCompleted || t.IsFaulted || t.IsCanceled);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Error checking Redis connection.");
+            throw;
         }
 
-        await Task.WhenAll(runningTasks);
+        _logger.Information("PubSubBackgroundService started, subscribing to CreateAccountEvent.");
+
+        // Subscribe to CreateAccountEvent
+        _pubSubService.Subscribe<CreateAccountEvent>(async message =>
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+            var pubSubLogService = scope.ServiceProvider.GetRequiredService<IPubSubLogService>();
+            var deadLetterPubSub = scope.ServiceProvider.GetRequiredService<IPubSubService>();
+
+            var request = new CreateUserCommand { Payload = message };
+
+            await ProcessMessageAsync<CreateUserCommand, PubSubResponse<CreateUserCommand>>(
+                request,
+                sender,
+                pubSubLogService,
+                deadLetterPubSub,
+                stoppingToken
+            );
+        });
+
+        // Keep service running until cancellation
+        await Task.Delay(Timeout.Infinite, stoppingToken);
     }
 
-    private async Task ProcessWithRetryAsync<TRequest, TResponse>(
+    private async Task ProcessMessageAsync<TRequest, TResponse>(
         TRequest request,
         ISender sender,
-        ILogger logger,
-        IQueueService queueService,
+        IPubSubLogService pubSubLogService,
+        IPubSubService deadLetterPubSub,
         CancellationToken cancellationToken
     )
         where TRequest : class
-        where TResponse : class
+        where TResponse : PubSubResponse<TRequest>
     {
-        QueueResponse<TResponse>? queueResponse = new();
-        int attempt = 0;
-        int maximumRetryAttempt = queueSettings.MaxRetryAttempts;
-        double maximumDelay = queueSettings.MaximumDelayInSec;
+        var retryPolicy = new RetryPolicy(_pubSubSettings, _logger);
+        TResponse response;
 
-        while (attempt <= maximumRetryAttempt)
+        try
         {
-            queueResponse =
-                await sender.Send(request, cancellationToken) as QueueResponse<TResponse>;
-
-            // sucess case
-            if (queueResponse!.IsSuccess)
-            {
-                logger.Information(
-                    "excuting request {payloadId} has been success!",
-                    queueResponse.PayloadId
-                );
-                break;
-            }
-
-            // 500 or 400 error
-            if (queueResponse.ErrorType == QueueErrorType.Persistent)
-            {
-                CreateQueueLogCommand createQueueLogCommand = new()
+            response = await retryPolicy.ExecuteAsync(
+                async (ct) =>
                 {
-                    RequestId = queueResponse.PayloadId!.Value,
-                    ErrorDetail = queueResponse.Error,
-                    Request = request,
-                    RetryCount = attempt,
-                };
-                await sender.Send(createQueueLogCommand, cancellationToken);
-                break;
-            }
+                    var result = await sender.Send(request, ct);
+                    if (result is not TResponse typed)
+                        throw new InvalidOperationException(
+                            $"Invalid response type. Got: {result?.GetType().FullName}"
+                        );
 
-            // transient error retry but
-            if (queueResponse.ErrorType == QueueErrorType.Transient)
-            {
-                attempt++;
-                if (attempt > maximumRetryAttempt)
-                {
-                    break;
-                }
-
-                queueResponse.RetryCount = attempt;
-
-                // Calculate delay time with exponential jitter backoff method
-                // 1st -> 2.1s; 2nd -> 4.2; 3rd -> 8.2; 4th -> 16.1
-                double backoff = Math.Pow(QueueExtention.INIT_DELAY, attempt); // Exponential backoff (2^attempt)
-                double jitter = QueueExtention.GenerateJitter(0, QueueExtention.MAXIMUM_JITTER); // Add jitter
-                double delay = Math.Min(backoff + jitter, maximumDelay);
-
-                TimeSpan delayTime = TimeSpan.FromSeconds(delay);
-                logger.Warning($"Retry {attempt} in {delayTime.TotalSeconds:F2} seconds...");
-                await Task.Delay(delayTime, cancellationToken);
-            }
-        }
-
-        if (!queueResponse.IsSuccess && queueResponse.ErrorType == QueueErrorType.Transient)
-        {
-            // if it still fail after many attempts then push it into dead letter queue
-            logger.Warning(
-                "Push request {payloadId} into dead letter queue for maximum attempts",
-                queueResponse.PayloadId
-            );
-            await queueService.EnqueueAsync(request);
-            await sender.Send(
-                new CreateQueueLogCommand()
-                {
-                    RequestId = queueResponse.PayloadId!.Value,
-                    ErrorDetail = new
-                    {
-                        queueResponse.ErrorType,
-                        queueResponse.Error,
-                        Message = $"Push request {queueResponse.PayloadId} into dead letter queue for maximum attempts",
-                    },
-                    Request = request,
-                    RetryCount = queueResponse.RetryCount,
+                    return typed;
                 },
                 cancellationToken
             );
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Unexpected error processing request.");
+            await HandleFailedRequestAsync<TRequest, TResponse>(
+                request,
+                null,
+                pubSubLogService,
+                deadLetterPubSub,
+                cancellationToken
+            );
+            return;
+        }
+
+        if (response.IsSuccess)
+        {
+            _logger.Information("Request {PayloadId} processed successfully", response.PayloadId);
+            return;
+        }
+
+        await HandleFailedRequestAsync(
+            request,
+            response,
+            pubSubLogService,
+            deadLetterPubSub,
+            cancellationToken
+        );
+    }
+
+    private async Task HandleFailedRequestAsync<TRequest, TResponse>(
+        TRequest request,
+        TResponse? response,
+        IPubSubLogService pubSubLogService,
+        IPubSubService deadLetterPubSub,
+        CancellationToken cancellationToken
+    )
+        where TRequest : class
+        where TResponse : PubSubResponse<TRequest>
+    {
+        var requestId = response?.PayloadId?.ToString() ?? Guid.NewGuid().ToString();
+        var requestData = SerializerExtension.Serialize(request).StringJson;
+        var errorDetail =
+            response?.Error != null
+                ? SerializerExtension.Serialize(response.Error).StringJson
+                : "Unexpected error during processing";
+
+        var logRequest = new CreatePubSubLogRequest
+        {
+            RequestId = requestId,
+            RequestData = requestData,
+            ErrorDetail = errorDetail,
+            ProcessedBy = PubSubType.OriginPubsub,
+            RetryCount = response?.RetryCount ?? 0,
+        };
+
+        try
+        {
+            if (response?.ErrorType == PubSubErrorType.Persistent)
+            {
+                _logger.Error(
+                    "Persistent error for request {PayloadId}: {Error}",
+                    requestId,
+                    errorDetail
+                );
+                await pubSubLogService.CreateLogAsync(logRequest, cancellationToken);
+                return;
+            }
+
+            // Handle transient errors or unexpected failures
+            _logger.Warning(
+                "Pushing request {PayloadId} to dead letter queue after max retries or unexpected failure",
+                requestId
+            );
+            logRequest.ErrorDetail = SerializerExtension
+                .Serialize(
+                    new
+                    {
+                        ErrorType = response?.ErrorType.ToString() ?? "Unknown",
+                        Error = response?.Error ?? "Unexpected failure",
+                        Message = $"Request {requestId} failed and is being pushed to dead letter queue",
+                    }
+                )
+                .StringJson;
+
+            var pushed = await deadLetterPubSub.PublishAsync(request);
+            if (pushed)
+            {
+                _logger.Information(
+                    "Request {PayloadId} successfully pushed to dead letter queue",
+                    requestId
+                );
+            }
+            else
+            {
+                _logger.Error("Failed to push request {PayloadId} to dead letter queue", requestId);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Error handling failed request {PayloadId}", requestId);
+        }
+
+        try
+        {
+            var logResponse = await pubSubLogService.CreateLogAsync(logRequest, cancellationToken);
+            if (!logResponse)
+            {
+                _logger.Error("Failed to log request {PayloadId} to PubSubLogService", requestId);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Error logging request {PayloadId} to PubSubLogService", requestId);
         }
     }
 }

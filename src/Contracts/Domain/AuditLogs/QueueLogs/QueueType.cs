@@ -1,7 +1,7 @@
-namespace Domain.Aggregates.QueueLogs;
+namespace Domain.Aggregates.PubSubLogs;
 
-public enum QueueType
+public enum PubSubType
 {
-    OriginQueue = 1,
-    DeadLetterQueue = 2,
+    Origin = 1,
+    DeadLetter = 2,
 }

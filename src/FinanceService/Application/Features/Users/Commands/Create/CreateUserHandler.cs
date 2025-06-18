@@ -12,9 +12,9 @@ public class CreateUserHandler(
     IUnitOfWork unitOfWork,
     IMapper mapper,
     IMediaUpdateService<User> mediaUpdateService
-) : IRequestHandler<CreateUserCommand, QueueResponse<CreateUserCommand>>
+) : IRequestHandler<CreateUserCommand, PubSubResponse<CreateUserCommand>>
 {
-    public async ValueTask<QueueResponse<CreateUserCommand>> Handle(
+    public async ValueTask<PubSubResponse<CreateUserCommand>> Handle(
         CreateUserCommand command,
         CancellationToken cancellationToken
     )
@@ -29,13 +29,13 @@ public class CreateUserHandler(
             User user = await unitOfWork
                 .Repository<User>()
                 .AddAsync(mappingUser, cancellationToken);
-            userAvatar = user.Avatar;
+            userAvatar = user.AvtUrl;
 
             await unitOfWork.SaveAsync(cancellationToken);
 
             await unitOfWork.CommitAsync(cancellationToken);
 
-            return new QueueResponse<CreateUserCommand>
+            return new PubSubResponse<CreateUserCommand>
             {
                 Error = null,
                 ErrorType = null,
@@ -49,10 +49,10 @@ public class CreateUserHandler(
         {
             await mediaUpdateService.DeleteAvatarAsync(userAvatar);
             await unitOfWork.RollbackAsync(cancellationToken);
-            return new QueueResponse<CreateUserCommand>
+            return new PubSubResponse<CreateUserCommand>
             {
                 Error = ex.Message,
-                ErrorType = Contracts.Dtos.Responses.QueueErrorType.Transient,
+                ErrorType = Contracts.Dtos.Responses.PubSubErrorType.Transient,
                 IsSuccess = false,
                 ResponseData = command,
                 LastAttemptTime = DateTime.UtcNow,

@@ -12,9 +12,9 @@ public class CreateUserHandler(
     IUnitOfWork unitOfWork,
     IMapper mapper,
     IMediaUpdateService<User> mediaUpdateService
-) : IRequestHandler<CreateAccountCommand, QueueResponse<CreateAccountCommand>>
+) : IRequestHandler<CreateAccountCommand, PubSubResponse<CreateAccountCommand>>
 {
-    public async ValueTask<QueueResponse<CreateAccountCommand>> Handle(
+    public async ValueTask<PubSubResponse<CreateAccountCommand>> Handle(
         CreateAccountCommand command,
         CancellationToken cancellationToken
     )
@@ -35,14 +35,13 @@ public class CreateUserHandler(
 
             await unitOfWork.CommitAsync(cancellationToken);
 
-
-            return new QueueResponse<CreateAccountCommand>
+            return new PubSubResponse<CreateAccountCommand>
             {
                 Error = null,
                 ErrorType = null,
                 IsSuccess = true,
                 ResponseData = command,
-                LastAttemptTime = DateTime.UtcNow,
+                LastAttemptTime = DateTimeOffset.UtcNow,
                 PayloadId = command.PayloadId,
             };
         }
@@ -50,10 +49,10 @@ public class CreateUserHandler(
         {
             await mediaUpdateService.DeleteAvatarAsync(userAvatar);
             await unitOfWork.RollbackAsync(cancellationToken);
-            return new QueueResponse<CreateAccountCommand>
+            return new PubSubResponse<CreateAccountCommand>
             {
                 Error = ex.Message,
-                ErrorType = Contracts.Dtos.Responses.QueueErrorType.Transient,
+                ErrorType = PubSubErrorType.Transient,
                 IsSuccess = false,
                 ResponseData = command,
                 LastAttemptTime = DateTime.UtcNow,
