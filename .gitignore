@@ -94,4 +94,5 @@ dump.rdb
 [Pp]ublish/
 .azure
 app/
+seq/
 .fake

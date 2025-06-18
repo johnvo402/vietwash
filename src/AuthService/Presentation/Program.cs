@@ -1,14 +1,14 @@
-using Presentation.Extensions;
 using Application;
+using Contracts.Converters;
+using Contracts.Extensions;
 using HealthChecks.UI.Client;
 using Infrastructure;
 using Infrastructure.Data;
+using Infrastructure.Services.BackgroundJobs;
 using Infrastructure.Services.Hangfires;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Presentation.Extensions;
 using Serilog;
-using Infrastructure.Services.BackgroundJobs;
-using Contracts.Extensions;
-using Contracts.Converters;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -25,10 +25,10 @@ builder
         option.JsonSerializerOptions.Converters.Add(
             new Cysharp.Serialization.Json.UlidJsonConverter()
         );
-       
     });
 services.AddSwagger(configuration);
 builder.AddOpenTelemetryTracing(configuration);
+builder.AddSerialogs();
 services.AddHealthChecks();
 services.AddDatabaseHealthCheck(configuration);
 #endregion
@@ -59,7 +59,6 @@ try
     if (!isStaging && !isProduction)
     {
         await DbInitializer.InitializeAsync(serviceProvider);
-
     }
     #endregion
 

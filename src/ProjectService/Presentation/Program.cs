@@ -31,6 +31,7 @@ builder
     });
 services.AddSwagger(configuration);
 builder.AddOpenTelemetryTracing(configuration);
+builder.AddSerialogs();
 services.AddHealthChecks();
 services.AddDatabaseHealthCheck(configuration);
 #endregion

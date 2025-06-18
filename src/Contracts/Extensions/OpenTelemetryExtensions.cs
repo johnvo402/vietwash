@@ -1,49 +1,48 @@
-﻿using OpenTelemetry.Exporter;
+﻿using Contracts.Routers;
+using Contracts.Settings;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Contracts.Settings;
-using Serilog;
-using Contracts.Routers;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
+
 namespace Contracts.Extensions;
 
 public static class OpenTelemetryExtensions
 {
     public static IServiceCollection AddOpenTelemetryTracing(
-    this WebApplicationBuilder builder,
-    IConfiguration configuration
-)
+        this WebApplicationBuilder builder,
+        IConfiguration configuration
+    )
     {
         builder.Services.Configure<OpenTelemetrySettings>(
             configuration.GetSection(nameof(OpenTelemetrySettings))
         );
 
-       
+        var openTelemetrySettings =
+            configuration.GetSection(nameof(OpenTelemetrySettings)).Get<OpenTelemetrySettings>()
+            ?? new();
 
-        var openTelemetrySettings = configuration.GetSection(nameof(OpenTelemetrySettings))
-            .Get<OpenTelemetrySettings>() ?? new();
-
-        builder.Services.Configure<OtlpExporterOptions>(o => o.Headers = $"x-otlp-api-key={openTelemetrySettings.OtelApiKey!}");
         if (openTelemetrySettings.IsEnabled)
         {
-            var resourceBuilder = ResourceBuilder.CreateDefault()
+            var resourceBuilder = ResourceBuilder
+                .CreateDefault()
                 .AddService(
                     serviceName: openTelemetrySettings.ServiceName!,
                     serviceVersion: openTelemetrySettings.ServiceVersion ?? "unknown",
                     serviceInstanceId: Environment.MachineName
                 );
-
-            builder.Services
-                .AddOpenTelemetry()
+            builder
+                .Services.AddOpenTelemetry()
                 .ConfigureResource(r =>
-                r.AddService(
-                    serviceName: openTelemetrySettings.ServiceName!,
-                    serviceVersion: openTelemetrySettings.ServiceVersion ?? "unknown",
-                    serviceInstanceId: Environment.MachineName
-                ))
+                    r.AddService(
+                        serviceName: openTelemetrySettings.ServiceName!,
+                        serviceVersion: openTelemetrySettings.ServiceVersion ?? "unknown",
+                        serviceInstanceId: Environment.MachineName
+                    )
+                )
                 .WithTracing(options =>
                 {
                     options
@@ -84,28 +83,7 @@ public static class OpenTelemetryExtensions
                     {
                         options.AddOtlpExporter(opt =>
                         {
-                            opt.Endpoint = new Uri(openTelemetrySettings.Otelp!.ToString());
-                            opt.Protocol = OtlpExportProtocol.Grpc;
-                            opt.TimeoutMilliseconds = 300000;
-                        });
-                    }
-                    else if (openTelemetrySettings.OtelpOption == OtelpOption.Console)
-                    {
-                        options.AddConsoleExporter();
-                    }
-                })
-                .WithMetrics(options =>
-                {
-                    options.AddMeter("CustomMetrics")
-                        .AddRuntimeInstrumentation()
-                        .AddHttpClientInstrumentation()
-                        .AddAspNetCoreInstrumentation();
-
-                    if (openTelemetrySettings.OtelpOption == OtelpOption.DistributedServer)
-                    {
-                        options.AddOtlpExporter(opt =>
-                        {
-                            opt.Endpoint = new Uri(openTelemetrySettings.Otelp!.ToString());
+                            opt.Endpoint = new Uri(openTelemetrySettings.Endpoint!.ToString());
                             opt.Protocol = OtlpExportProtocol.Grpc;
                             opt.TimeoutMilliseconds = 300000;
                         });
@@ -115,25 +93,6 @@ public static class OpenTelemetryExtensions
                         options.AddConsoleExporter();
                     }
                 });
-
-            var loggerConfiguration = new LoggerConfiguration()
-                .ReadFrom.Configuration(builder.Configuration)
-                .WriteTo.OpenTelemetry(options =>
-                {
-                    options.Endpoint = openTelemetrySettings.Otelp!;
-                    options.Protocol = Serilog.Sinks.OpenTelemetry.OtlpProtocol.Grpc;
-                    options.Headers.Add("x-otlp-api-key", openTelemetrySettings.OtelApiKey!);
-
-                    // Dùng chung Resource Attributes
-                    foreach (var kvp in resourceBuilder.Build().Attributes)
-                    {
-                        options.ResourceAttributes[kvp.Key] = kvp.Value?.ToString()!;
-                    }
-                });
-
-            Log.Logger = loggerConfiguration.CreateLogger();
-            builder.Host.UseSerilog(Log.Logger);
-            builder.Services.AddSingleton(Log.Logger);
         }
 
         return builder.Services;
