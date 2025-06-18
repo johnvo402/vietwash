@@ -23,13 +23,11 @@ namespace Infrastructure.Services.Identity
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentAccount _currentAccount;
         private readonly ILogger _logger;
-        private readonly IWebHostEnvironment _env;
         private readonly IRedisCacheService _cache;
         private static readonly Random _random = new();
 
         private const int OtpLength = 6;
         private const int OtpExpirationMinutes = 10;
-        private const string DevOtpCode = "123456";
 
         public SmsOtpClient(
             IOptions<OtpOption> otpOption,
@@ -37,7 +35,6 @@ namespace Infrastructure.Services.Identity
             IUnitOfWork unitOfWork,
             ICurrentAccount currentAccount,
             ILogger logger,
-            IWebHostEnvironment env,
             IRedisCacheService redisCache
         )
         {
@@ -47,7 +44,6 @@ namespace Infrastructure.Services.Identity
             _currentAccount =
                 currentAccount ?? throw new ArgumentNullException(nameof(currentAccount));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _env = env ?? throw new ArgumentNullException(nameof(env));
             _cache = redisCache ?? throw new ArgumentNullException(nameof(redisCache));
 
             ConfigureHttpClient();
@@ -60,9 +56,7 @@ namespace Infrastructure.Services.Identity
         {
             ValidateCreatePinRequest(request);
 
-            string otpCode = _env.IsDevelopment()
-                ? DevOtpCode
-                : await GenerateAndSendOtpAsync(request, cancellationToken);
+            string otpCode = await GenerateAndSendOtpAsync(request, cancellationToken);
 
             return request.AccountId.HasValue
                 ? await StoreOtpForAccountAsync(request, otpCode, cancellationToken)
@@ -75,11 +69,6 @@ namespace Infrastructure.Services.Identity
         )
         {
             ValidateVerifyPinRequest(request);
-
-            if (_env.IsDevelopment() && request.Otp == DevOtpCode)
-            {
-                return true;
-            }
 
             return request.AccountId.HasValue
                 ? await VerifyAccountOtpAsync(request, cancellationToken)
