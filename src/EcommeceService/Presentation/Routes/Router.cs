@@ -76,13 +76,15 @@ namespace Presentation.Routes
             public const string Tags = $"{nameof(Users)} endpoint";
         }
 
-
         public static class ReportRoute
         {
             public const string Tags = $"{nameof(ReportRoute)} endpoint";
             public const string ReportServiceOrder =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportServiceOrder)}";
-            public const string Order = $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportRoute)}/{nameof(Order)}";
+            public const string Order =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportRoute)}/{nameof(Order)}";
+            public const string CustomerRevenue =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportRoute)}/{nameof(CustomerRevenue)}";
         }
 
         public static class SupplierRoute
