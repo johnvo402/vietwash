@@ -21,6 +21,9 @@ namespace Domain.Aggregates.Funds
         public long BranchId { get; set; } = default!;
         public FundBehavior FundBehavior { get; set; } = default!;
         public User User { get; set; } = default!;
+
+        public object? Metadata { get; set; }
+
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
             throw new NotImplementedException();

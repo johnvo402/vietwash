@@ -6,10 +6,7 @@ namespace Domain.Aggregates.Funds.Specifications
     {
         public GetFundByIdSpecification(long id)
         {
-            Query
-          .Where(x => x.Id == id)
-          .Include(f => f.User)
-          .AsSplitQuery();
+            Query.Where(x => x.Id == id).Include(f => f.User).AsSplitQuery();
         }
     }
 }

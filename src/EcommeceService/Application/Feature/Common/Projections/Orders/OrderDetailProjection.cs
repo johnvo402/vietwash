@@ -8,12 +8,11 @@ namespace Application.Feature.Common.Projections.Orders
     {
         public List<OrderItemProjection> OrderItems { get; set; } = [];
         public List<OrderPaymentProjection> OrderPayments { get; set; } = [];
-        public UserDTO? Customer { get; set; }
     }
 
     public class OrderItemProjection
     {
-        public string Id { get; set; }
+        public long Id { get; set; }
         public long OrderId { get; set; }
         public long ServiceId { get; set; }
         public long UnitRelationId { get; set; }
@@ -23,7 +22,6 @@ namespace Application.Feature.Common.Projections.Orders
         public decimal ProcessingTime { get; set; }
         public string? ServiceName { get; set; }
         public decimal UnitPrice { get; set; }
-        public ServiceModel Service { get; set; }
     }
 
     public class OrderPaymentProjection

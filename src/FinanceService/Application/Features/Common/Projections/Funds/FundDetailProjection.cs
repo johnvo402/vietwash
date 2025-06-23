@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Domain.Aggregates.Users;
+﻿using Application.Features.Common.Projections.Users;
 
 namespace Application.Features.Common.Projections.Funds
 {
-    public class FundDetailProjection : UpdateFundModel
+    public class FundDetailProjection : FundProjection
     {
-        public User User { get; set; } = default!;
+        public string? Note { get; set; }
     }
 }
