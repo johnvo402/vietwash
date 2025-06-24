@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
+
 using Domain.Aggregates.Orders;
 
 namespace Application.Feature.Orders.Queries.List

@@ -1,9 +1,10 @@
-﻿using Application.Common.Errors;
+using Application.Common.Errors;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Funds;
 using Domain.Aggregates.Funds.Specifications;
+
 using Mediator;
 
 namespace Application.Features.Funds.Queries.Detail

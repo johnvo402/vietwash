@@ -9,6 +9,8 @@ namespace Infrastructure.Data.Configurations
         public void Configure(EntityTypeBuilder<FundBehavior> builder)
         {
             builder.HasKey(x => x.Id);
+            builder.HasIndex(x => x.Id);
+            
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +12,7 @@ namespace Domain.Aggregates.Funds.Specifications
     {
         public ListFundSpecification(string? from, string? to)
         {
-            if (from != null || to != null)
+            if (!string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(to))
             {
                 Query
                     .Where(x =>

@@ -1,4 +1,5 @@
 ﻿using Application.Feature.Common.Projections.Services;
+using Domain.Aggregates.Users.Enums;
 
 namespace Application.Feature.Services.Queries.Detail
 {
@@ -16,5 +17,6 @@ namespace Application.Feature.Services.Queries.Detail
         public string? DisplayName { get; set; }
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
+        public CustomerGroup? CustomerGroup { get; set; }
     }
 }

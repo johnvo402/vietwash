@@ -1,4 +1,4 @@
-﻿using Domain.Aggregates.Funds;
+using Domain.Aggregates.Funds;
 using Domain.Aggregates.Users;
 
 namespace Application.Features.Common.Projections.Funds

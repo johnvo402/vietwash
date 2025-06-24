@@ -1,4 +1,4 @@
-﻿using Ardalis.GuardClauses;
+using Ardalis.GuardClauses;
 using Domain.Aggregates.Funds.Enums;
 using Domain.Aggregates.Users;
 using Mediator;

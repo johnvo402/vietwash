@@ -1,4 +1,4 @@
-﻿using Ardalis.GuardClauses;
+using Ardalis.GuardClauses;
 using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Events;
 using Domain.Aggregates.Users;
@@ -21,7 +21,7 @@ namespace Domain.Aggregates.Orders
         public OrderStatus Status { get; set; } = default!;
         public DateTimeOffset OrderDate { get; set; } = default!;
         public DateTimeOffset DeliveryTime { get; set; } = default!;
-
+        public User? Staff { get; set; }
         public User? Customer { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; } = [];
         public ICollection<OrderPayment> OrderPayments { get; set; } = [];

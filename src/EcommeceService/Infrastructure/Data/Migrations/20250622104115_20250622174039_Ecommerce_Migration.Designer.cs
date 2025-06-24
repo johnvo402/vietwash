@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    partial class TheDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250622104115_20250622174039_Ecommerce_Migration")]
+    partial class _20250622174039_Ecommerce_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1885,53 +1888,6 @@ namespace Infrastructure.Data.Migrations
                         .HasDatabaseName("ix_voucher_customer_voucher_id");
 
                     b.ToTable("voucher_customer", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Functions.CustomerRevenueResult", b =>
-                {
-                    b.Property<string>("AvtUrl")
-                        .HasColumnType("text")
-                        .HasColumnName("avt_url");
-
-                    b.Property<decimal>("CancelValue")
-                        .HasColumnType("numeric")
-                        .HasColumnName("cancel_value");
-
-                    b.Property<string>("CustomerCode")
-                        .HasColumnType("text")
-                        .HasColumnName("customer_code");
-
-                    b.Property<long?>("CustomerId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("customer_id");
-
-                    b.Property<string>("DisplayName")
-                        .HasColumnType("text")
-                        .HasColumnName("display_name");
-
-                    b.Property<decimal>("NetRevenue")
-                        .HasColumnType("numeric")
-                        .HasColumnName("net_revenue");
-
-                    b.Property<int>("OrderCancelQuantity")
-                        .HasColumnType("integer")
-                        .HasColumnName("order_cancel_quantity");
-
-                    b.Property<int>("OrderSaleQuantity")
-                        .HasColumnType("integer")
-                        .HasColumnName("order_sale_quantity");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("text")
-                        .HasColumnName("phone_number");
-
-                    b.Property<decimal>("Revenue")
-                        .HasColumnType("numeric")
-                        .HasColumnName("revenue");
-
-                    b.ToTable("customer_revenue_result", (string)null);
-
-                    b.ToView(null, (string)null);
                 });
 
             modelBuilder.Entity("Domain.Functions.GetRevenueStatistic", b =>
