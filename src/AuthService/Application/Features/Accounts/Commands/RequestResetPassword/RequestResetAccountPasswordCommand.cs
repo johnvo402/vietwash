@@ -1,5 +1,6 @@
+using Contracts.ApiWrapper;
 using Mediator;
 
 namespace Application.Features.Accounts.Commands.RequestResetPassword;
 
-public record RequestResetAccountPasswordCommand(string Email) : IRequest;
+public record RequestResetAccountPasswordCommand(string Email) : IRequest<Result>;

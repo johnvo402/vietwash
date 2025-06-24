@@ -1,10 +1,11 @@
-﻿using Domain.Functions;
+﻿using Contracts.ApiWrapper;
+using Domain.Functions;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Feature.Statistics.Queries.RevenueStatistic
 {
-    public class GetRevenueStatisticQuery : IRequest<IEnumerable<GetRevenueStatistic>>
+    public class GetRevenueStatisticQuery : IRequest<Result<IEnumerable<GetRevenueStatistic>>>
     {
         [FromQuery]
         public string BranchId { get; set; }

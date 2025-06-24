@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.Dtos.Requests;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Specifications;
 using Domain.Aggregates.Users;
@@ -33,9 +34,10 @@ namespace Application.Jobs
             foreach (long userId in userIds)
             {
                 var order = await _unitOfWork
-                    .Repository<Order>()
-                    .FindByConditionAsync<List<Order>>(
-                        new GetOrderByCustomerIdSpecification(userId)
+                    .DynamicReadOnlyRepository<Order>()
+                    .ListAsync(
+                        new GetOrderByCustomerIdSpecification(userId),
+                        new QueryParamRequest { }
                     );
                 if (order != null || order?.Count() > 0)
                 {
@@ -44,13 +46,20 @@ namespace Application.Jobs
                     if (totalOrder >= 5 || totalRevenue > 500000)
                     {
                         var user = await _unitOfWork
-                            .Repository<User>()
+                            .DynamicReadOnlyRepository<User>()
                             .FindByConditionAsync(
                                 new GetUserByIdWithoutIncludeSpecification(userId)
                             );
+
+                        if (user == null)
+                        {
+                            break;
+                        }
+
+                        user.CustomerGroup = CustomerGroup.Loyal;
                         try
                         {
-                            DbTransaction transaction = await _unitOfWork.CreateTransactionAsync();
+                            DbTransaction transaction = await _unitOfWork.BeginTransactionAsync();
                             await _unitOfWork.Repository<User>().UpdateAsync(user);
                             await _unitOfWork.SaveAsync();
                             await _unitOfWork.CommitAsync();

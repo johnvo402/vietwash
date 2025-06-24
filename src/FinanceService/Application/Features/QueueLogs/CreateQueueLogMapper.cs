@@ -1,12 +1,17 @@
-using AutoMapper;
 using Domain.Aggregates.PubSubLogs;
 
 namespace Application.Features.PubSubLogs;
 
-public class CreatePubSubLogMapper : Profile
+public static class CreatePubSubLogMapper
 {
-    public CreatePubSubLogMapper()
+    public static PubSubLog MapToEntity(this CreatePubSubLogCommand command)
     {
-        CreateMap<CreatePubSubLogCommand, PubSubLog>();
+        return new PubSubLog(
+            requestId: command.RequestId,
+            request: command.Request,
+            errorDetail: command.ErrorDetail,
+            processedBy: command.ProcessedBy,
+            retryCount: command.RetryCount
+        );
     }
 }

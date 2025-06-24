@@ -1,5 +1,5 @@
 using Domain.Aggregates.Services.Enums;
-using JohnChum.SharedKernel.Domain.Common;
+using Shared.Kernel.Common;
 
 namespace Application.Feature.Common.Projections.Categories;
 

@@ -1,10 +1,10 @@
 using System.Reflection;
 using CaseConverter;
+using Contracts.Dtos.Models;
+using Contracts.Extensions.Reflections;
 using Domain.Common.ElasticConfigurations;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Models;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Extensions.Reflections;
 
 namespace Infrastructure.Services.Elastics;
 
@@ -184,13 +184,12 @@ public static class ElasticFunctionalityHelper
         List<KeyValuePair<PropertyType, string>> properties = stringProperties.FindAll(x =>
             x.Key == PropertyType.Property
         );
-        MultiMatchQuery multiMatchQuery =
-            new()
-            {
-                Query = $"{keyword}",
-                Fields = Fields.FromFields(properties.Select(x => new Field(x.Value)).ToArray()),
-                //Fuzziness = new Fuzziness(2),
-            };
+        MultiMatchQuery multiMatchQuery = new()
+        {
+            Query = $"{keyword}",
+            Fields = Fields.FromFields(properties.Select(x => new Field(x.Value)).ToArray()),
+            //Fuzziness = new Fuzziness(2),
+        };
         List<Query> queries = [multiMatchQuery];
 
         //* search nested properties

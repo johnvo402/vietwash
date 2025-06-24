@@ -1,21 +1,24 @@
 using Application.Common.Interfaces.Services.Elastics;
-using AutoMapper;
+using Contracts.Dtos.Models;
+using Contracts.Dtos.Requests;
+using Contracts.Dtos.Responses;
 using Domain.Common.ElasticConfigurations;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.Fluent;
 using Elastic.Clients.Elasticsearch.QueryDsl;
-using JohnChum.SharedKernel.Domain.Common;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Models;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
+using Infrastructure.Services.Elastics;
+using Microsoft.Extensions.Options;
+using Shared.Kernel.Common;
 
-namespace Infrastructure.Services.Elastics;
+namespace Infrastructure.Services.ElasticSeach;
 
-public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper mapper)
-    : IElasticsearchService<T>
+public class ElasticsearchService<T>(
+    ElasticsearchClient elasticClient,
+    IOptions<ElasticsearchSettings> options
+) : IElasticsearchService<T>
     where T : class
 {
-    private readonly string indexName = ElsIndexExtension.GetName<T>();
+    private readonly string indexName = ElsIndexExtension.GetName<T>(options.Value?.PrefixIndex);
 
     public async Task<T> AddAsync(T entity)
     {
@@ -52,10 +55,7 @@ public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper 
 
     public async Task DeleteAsync(T entity)
     {
-        await elasticClient.DeleteAsync<T>(
-            entity,
-            i => i.Index(indexName).Refresh(Refresh.WaitFor)
-        );
+        await elasticClient.DeleteAsync(entity, i => i.Index(indexName).Refresh(Refresh.WaitFor));
     }
 
     public async Task DeleteByQueryAsync(Action<QueryDescriptor<T>> querySelector)
@@ -89,19 +89,10 @@ public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper 
         return searchResponse.Documents;
     }
 
-    public async Task<PaginationResponse<TResult>> PaginatedListAsync<TResult>(
+    public async Task<SearchResponse<T>> ListAsync(
         QueryParamRequest request,
         Action<QueryDescriptor<T>>? filter = null
-    )
-    {
-        SearchResponse<T> searchResponse = await SearchAsync(request, filter);
-        return new PaginationResponse<TResult>(
-            mapper.Map<IEnumerable<TResult>>(searchResponse.Documents?.AsEnumerable() ?? []),
-            (int)searchResponse.Total,
-            request.Page,
-            request.PageSize
-        );
-    }
+    ) => await SearchAsync(request, filter);
 
     public async Task<PaginationResponse<T>> PaginatedListAsync(
         QueryParamRequest request,
@@ -160,10 +151,10 @@ public class ElasticsearchService<T>(ElasticsearchClient elasticClient, IMapper 
         {
             queries.Add(filter);
         }
-        if (!string.IsNullOrWhiteSpace(request.Search?.Keyword))
+        if (!string.IsNullOrWhiteSpace(request.Keyword))
         {
             queries.Add(search =>
-                search.Search(request.Search.Keyword, searchProperties: request.Search?.Targets)
+                search.Search(request.Keyword, searchProperties: request.Targets)
             );
         }
 

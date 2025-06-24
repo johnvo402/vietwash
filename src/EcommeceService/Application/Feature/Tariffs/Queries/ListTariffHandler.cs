@@ -1,20 +1,38 @@
 using Application.Common.Interfaces.UnitOfWorks;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.QueryStringProcessing;
+using Application.Feature.Tariffs.Queries.List;
+using Contracts.ApiWrapper;
+using Contracts.Common.QueryStringProcessing;
+using Contracts.Dtos.Responses;
 using Domain.Aggregates.Tariffs;
 using Domain.Aggregates.Tariffs.Specifications;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
 using Mediator;
 
 namespace Application.Feature.Tariffs.Queries
 {
-    public class ListTariffHandler(IUnitOfWork unitOfWork) : IRequestHandler<ListTariffQuery, PaginationResponse<ListTariffResponse>>
+    public class ListTariffHandler(IUnitOfWork unitOfWork)
+        : IRequestHandler<ListTariffQuery, Result<PaginationResponse<ListTariffResponse>>>
     {
-        public async ValueTask<PaginationResponse<ListTariffResponse>> Handle(ListTariffQuery request,
-            CancellationToken cancellationToken) => await unitOfWork.CachedRepository<Tariff>()
-                                                                    .PagedListAsync<ListTariffResponse>(
-                                                                        new ListTariffSpecification(),
-                                                                        request.ValidateQuery().ValidateFilter(typeof(ListTariffResponse))
-                                                                    );
+        public async ValueTask<Result<PaginationResponse<ListTariffResponse>>> Handle(
+            ListTariffQuery request,
+            CancellationToken cancellationToken
+        )
+        {
+            var validation = request.Validate<ListTariffQuery, ListTariffResponse>();
 
+            if (validation != null)
+            {
+                return validation;
+            }
+            var response = await unitOfWork
+                .DynamicReadOnlyRepository<Tariff>()
+                .PagedListAsync<ListTariffResponse>(
+                    new ListTariffSpecification(),
+                    request,
+                    ListTariffMapping.Selector(),
+                    cancellationToken
+                );
+
+            return Result<PaginationResponse<ListTariffResponse>>.Success(response);
+        }
     }
 }

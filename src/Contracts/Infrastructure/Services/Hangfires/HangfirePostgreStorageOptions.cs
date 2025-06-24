@@ -4,7 +4,7 @@ public class HangfirePostgreStorageOptions
 {
     public TimeSpan CommandBatchMaxTimeout { get; set; }
 
-    public TimeSpan PubSubPollIntervals { get; set; }
+    public TimeSpan QueuePollIntervals { get; set; }
 
     public TimeSpan SlidingInvisibilityTimeout { get; set; }
 

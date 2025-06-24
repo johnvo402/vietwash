@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
+using Contracts.ApiWrapper;
 using Mediator;
 using Serilog;
 

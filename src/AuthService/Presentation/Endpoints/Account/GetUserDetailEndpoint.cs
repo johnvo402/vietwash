@@ -1,14 +1,14 @@
 using Application.Common.Auth;
 using Application.Features.Accounts.Queries.Detail;
 using Ardalis.ApiEndpoints;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
+using Contracts.ApiWrapper;
 using Contracts.RouteResults;
-using Presentation.Routes;
+using Contracts.Routers;
 using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Routes;
 using Swashbuckle.AspNetCore.Annotations;
-using Contracts.Routers;
 
 namespace Presentation.Endpoints.Account;
 
@@ -21,8 +21,9 @@ public class GetAccountDetailEndpoint(ISender sender)
     public override async Task<ActionResult<ApiResponse<GetAccountDetailResponse>>> HandleAsync(
         [FromRoute(Name = RouterBase.Id)] long userId,
         CancellationToken cancellationToken = default
-    ) =>
-        this.Ok200(
-            await sender.Send(new GetAccountDetailQuery(userId), cancellationToken)
-        );
+    )
+    {
+        var result = await sender.Send(new GetAccountDetailQuery(userId), cancellationToken);
+        return result.ToActionResult();
+    }
 }

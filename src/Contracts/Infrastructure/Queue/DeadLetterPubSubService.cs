@@ -1,5 +1,5 @@
 using Application.Common.Interfaces.Services.DistributedCache;
-using JohnChum.SharedKernel.Extensions;
+using Shared.Kernel.Extensions;
 using Microsoft.Extensions.Options;
 using Serilog;
 using StackExchange.Redis;

@@ -1,20 +1,16 @@
-﻿using Application.Feature.Common.Projections.Units;
-using AutoMapper;
+﻿using System.Linq.Expressions;
 using Domain.Aggregates.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Feature.Units.Queries.List
 {
-	public class ListUnitMapping : Profile
-	{
-		public ListUnitMapping()
-		{
-			CreateMap<Unit, UnitProjection>(); 
-			CreateMap<Unit, ListUnitResponse>().IncludeBase<Unit, UnitProjection>();
-		}
-	}
+    public static class ListUnitMapping
+    {
+        public static Expression<Func<Unit, ListUnitResponse>> Selector() =>
+            unit => new ListUnitResponse
+            {
+                Id = unit.Id,
+                Name = unit.Name,
+                Status = unit.Status,
+            };
+    }
 }

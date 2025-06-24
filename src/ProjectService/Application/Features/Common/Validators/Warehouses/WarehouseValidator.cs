@@ -6,7 +6,7 @@ using Domain.Aggregates.Warehouses;
 using Domain.Aggregates.Warehouses.Enums;
 using FluentValidation;
 using Infrastructure.UnitOfWorks;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Contracts.Common.Messages;
 
 namespace Application.Features.Common.Validators.Warehouses
 {

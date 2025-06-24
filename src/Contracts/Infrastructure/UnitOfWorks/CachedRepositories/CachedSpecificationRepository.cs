@@ -1,0 +1,91 @@
+using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.Application.Common.Interfaces.Services.Cache;
+using Contracts.Dtos.Requests;
+using Contracts.Dtos.Responses;
+using Serilog;
+using Shared.Kernel.Common.Specs.Interfaces;
+
+namespace Infrastructure.UnitOfWorks.CachedRepositories;
+
+public class CachedSpecificationRepository<T>(
+    ISpecificationRepository<T> repository,
+    ILogger logger,
+    IMemoryCacheService memoryCacheService
+) : ISpecificationRepository<T>
+    where T : class
+{
+    public Task<PaginationResponse<TResult>> CursorPagedListAsync<TResult>(
+        ISpecification<T> spec,
+        QueryParamRequest queryParam,
+        System.Linq.Expressions.Expression<Func<T, TResult>> mappingResult,
+        string? uniqueSort = null,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class
+    {
+        if (spec.CacheEnabled)
+        {
+            string key = $"{spec.CacheKey}-{nameof(CursorPagedListAsync)}";
+            string hashingKey = RepositoryExtension.HashKey(key, queryParam, uniqueSort);
+            logger.Information("checking cache for {key}", hashingKey);
+            return memoryCacheService.GetOrSetAsync(
+                hashingKey,
+                () =>
+                    repository.CursorPagedListAsync(
+                        spec,
+                        queryParam,
+                        mappingResult,
+                        uniqueSort,
+                        cancellationToken
+                    )
+            )!;
+        }
+        return repository.CursorPagedListAsync(
+            spec,
+            queryParam,
+            mappingResult,
+            uniqueSort,
+            cancellationToken
+        );
+    }
+
+    public Task<TResult?> FindByConditionAsync<TResult>(
+        ISpecification<T> spec,
+        System.Linq.Expressions.Expression<Func<T, TResult>> mappingResult,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : class
+    {
+        if (spec.CacheEnabled)
+        {
+            string key = $"{spec.CacheKey}-{nameof(FindByConditionAsync)}";
+            string hashingKey = RepositoryExtension.HashKey(key);
+            logger.Information("checking cache for {key}", hashingKey);
+            return memoryCacheService.GetOrSetAsync(
+                hashingKey,
+                () => repository.FindByConditionAsync(spec, mappingResult, cancellationToken)
+            );
+        }
+        return repository.FindByConditionAsync(spec, mappingResult, cancellationToken);
+    }
+
+    public Task<PaginationResponse<TResult>> PagedListAsync<TResult>(
+        ISpecification<T> spec,
+        QueryParamRequest queryParam,
+        System.Linq.Expressions.Expression<Func<T, TResult>> mappingResult,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (spec.CacheEnabled)
+        {
+            string key = $"{spec.CacheKey}-{nameof(PagedListAsync)}";
+            string hashingKey = RepositoryExtension.HashKey(key, queryParam);
+            logger.Information("checking cache for {key}", hashingKey);
+            return memoryCacheService.GetOrSetAsync(
+                hashingKey,
+                () => repository.PagedListAsync(spec, queryParam, mappingResult, cancellationToken)
+            )!;
+        }
+        return repository.PagedListAsync(spec, queryParam, mappingResult, cancellationToken);
+    }
+}

@@ -4,6 +4,7 @@ using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Infrastructure.PubSub;
+using Contracts.Infrastructure.Services.Cache.MemoryCache;
 using Domain.Otp;
 using Infrastructure.Common;
 using Infrastructure.Data;
@@ -88,23 +89,12 @@ public static class DependencyInjection
                 }
             );
         }
-        services.Configure<OtpOption>(
-            configuration.GetSection(nameof(OtpOption))
-        );
+        services.Configure<OtpOption>(configuration.GetSection(nameof(OtpOption)));
         services
             .AddAmazonS3(configuration)
             .AddSingleton<ICurrentAccount, CurrentUserService>()
             .AddSingleton(typeof(IMediaUpdateService<>), typeof(MediaUpdateService<>))
-            .AddTransient<KitMailService>()
-            .AddTransient<IMailService, KitMailService>(provider =>
-                provider.GetService<KitMailService>()!
-            )
-            .AddTransient<FluentMailService>()
-            .AddTransient<IMailService, FluentMailService>(provider =>
-                provider.GetService<FluentMailService>()!
-            )
-            .AddTransient<IMailer, Mailer>()
-            .AddFluentMail(configuration)
+            .AddTransient<MailService>()
             .Scan(scan =>
                 scan.FromCallingAssembly()
                     .AddClasses(classes => classes.AssignableTo<IScope>())
@@ -127,6 +117,8 @@ public static class DependencyInjection
             .Configure<CacheSettings>(options =>
                 configuration.GetSection(nameof(CacheSettings)).Bind(options)
             )
+            .AddMail()
+            .AddMemoryCaching(configuration)
             .AddHangfireConfiguration(configuration)
             .AddElasticSearch(configuration)
             .AddScoped<JobScheduler>()

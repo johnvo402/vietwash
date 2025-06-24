@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Domain.Aggregates.Branches.Enums;
-using JohnChum.SharedKernel.Domain.Common;
+using Shared.Kernel.Common;
 
 namespace Application.Features.Common.Projections.Branches.Branch
 {
@@ -26,5 +26,32 @@ namespace Application.Features.Common.Projections.Branches.Branch
         public string? ProvinceCode { get; set; }
         public string? Street { get; set; }
         public string? Slug { get; set; }
+
+        public virtual void MappingFrom(Domain.Aggregates.Branches.Branch entity)
+        {
+            Id = entity.Id;
+            PublicId = entity.PublicId;
+            CreatedAt = entity.CreatedAt;
+            CreatedBy = entity.CreatedBy;
+            UpdatedAt = entity.UpdatedAt;
+            UpdatedBy = entity.UpdatedBy;
+
+            Name = entity.Name;
+            Code = entity.Code;
+            Main = entity.Main;
+            Status = entity.Status;
+            Email = entity.Email;
+            PhoneCode = entity.PhoneCode;
+            PhoneNumber = entity.PhoneNumber;
+            AddressName = entity.AddressName;
+            CommuneName = entity.CommuneName;
+            CommuneCode = entity.CommuneCode;
+            DistrictName = entity.DistrictName;
+            DistrictCode = entity.DistrictCode;
+            ProvinceName = entity.ProvinceName;
+            ProvinceCode = entity.ProvinceCode;
+            Street = entity.Street;
+            Slug = entity.Slug;
+        }
     }
 }

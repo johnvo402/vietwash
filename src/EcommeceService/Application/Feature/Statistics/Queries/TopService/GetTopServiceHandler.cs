@@ -1,17 +1,18 @@
 ﻿using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Statistics.Queries.TopService;
+using Contracts.ApiWrapper;
+using Contracts.Dtos.Requests;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Specifications;
 using Domain.Aggregates.Services;
 using Domain.Aggregates.Services.Specifications;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
 using Mediator;
 
 public class GetTopServiceHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
-    : IRequestHandler<GetTopServiceQuery, IEnumerable<GetTopServiceResponse>>
+    : IRequestHandler<GetTopServiceQuery, Result<IEnumerable<GetTopServiceResponse>>>
 {
-    public async ValueTask<IEnumerable<GetTopServiceResponse>> Handle(
+    public async ValueTask<Result<IEnumerable<GetTopServiceResponse>>> Handle(
         GetTopServiceQuery query,
         CancellationToken cancellationToken
     )
@@ -22,7 +23,7 @@ public class GetTopServiceHandler(IUnitOfWork unitOfWork, ICurrentAccount curren
             var queryParamRequest = new QueryParamRequest();
 
             var orders = await unitOfWork
-                .Repository<Order>()
+                .DynamicReadOnlyRepository<Order>()
                 .ListAsync(
                     new GetOrderItemSpecification(
                         DateTime.Parse(query.From),
@@ -54,9 +55,9 @@ public class GetTopServiceHandler(IUnitOfWork unitOfWork, ICurrentAccount curren
                 .Take(10)
                 .ToList();
 
-            return result;
+            return Result<IEnumerable<GetTopServiceResponse>>.Success(result);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             throw;
         }

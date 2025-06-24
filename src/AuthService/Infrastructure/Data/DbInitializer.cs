@@ -1,7 +1,6 @@
 ﻿using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Aggregates.Accounts;
 using Domain.Aggregates.Accounts.Enums;
-using Infrastructure.Constants;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -14,7 +13,7 @@ public class DbInitializer
         var unitOfWork = provider.GetRequiredService<IUnitOfWork>();
         var logger = provider.GetRequiredService<ILogger>();
 
-        using var dbTransaction = await unitOfWork.CreateTransactionAsync();
+        using var dbTransaction = await unitOfWork.BeginTransactionAsync();
 
         try
         {

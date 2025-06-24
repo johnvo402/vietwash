@@ -1,12 +1,23 @@
-using AutoMapper;
+using Application.UseCases.AuditLogs.Queries;
 using Domain.Aggregates.AuditLogs;
 
-namespace Application.UseCases.AuditLogs.Queries;
+namespace Application.Features.AuditLogs.Queries;
 
-public class ListAuditLogMapping : Profile
+public static class ListAuditLogMapping
 {
-    public ListAuditLogMapping()
+    public static IEnumerable<ListAuditlogResponse> ToListAuditlogResponse(
+        this IEnumerable<AuditLog> auditLogs
+    )
     {
-        CreateMap<AuditLog, ListAuditlogResponse>();
+        return auditLogs.Select(auditLog => new ListAuditlogResponse()
+        {
+            Id = auditLog.Id,
+            CreatedAt = auditLog.CreatedAt,
+            Entity = auditLog.Entity,
+            ActionPerformBy = auditLog.ActionPerformBy,
+            NewValue = auditLog.NewValue,
+            OldValue = auditLog.OldValue,
+            Type = auditLog.Type,
+        });
     }
 }

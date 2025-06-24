@@ -3,8 +3,7 @@ using Amazon.S3.Model;
 using Application.Common.Interfaces.Services.Aws;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
-using JohnChum.SharedKernel.Extensions;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Extensions;
+using Contracts.Extensions;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.Aws;
@@ -76,8 +75,11 @@ public class AwsAmazonService(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSet
     {
         List<UploadPartResponse> uploadResponses = [];
 
-        InitiateMultipartUploadRequest initiateRequest =
-            new() { BucketName = s3AwsSettings.BucketName, Key = request.Key };
+        InitiateMultipartUploadRequest initiateRequest = new()
+        {
+            BucketName = s3AwsSettings.BucketName,
+            Key = request.Key,
+        };
 
         InitiateMultipartUploadResponse initResponse = await amazonS3.InitiateMultipartUploadAsync(
             initiateRequest
@@ -92,16 +94,15 @@ public class AwsAmazonService(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSet
             {
                 partSize = Math.Min(partSize, request.ContentLength - filePosition);
 
-                UploadPartRequest uploadRequest =
-                    new()
-                    {
-                        BucketName = s3AwsSettings.BucketName,
-                        Key = request.Key,
-                        UploadId = initResponse.UploadId,
-                        PartNumber = i,
-                        PartSize = request.PartSize,
-                        FilePosition = filePosition,
-                    };
+                UploadPartRequest uploadRequest = new()
+                {
+                    BucketName = s3AwsSettings.BucketName,
+                    Key = request.Key,
+                    UploadId = initResponse.UploadId,
+                    PartNumber = i,
+                    PartSize = request.PartSize,
+                    FilePosition = filePosition,
+                };
 
                 if (string.IsNullOrWhiteSpace(request.Path))
                 {
@@ -117,13 +118,12 @@ public class AwsAmazonService(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSet
                 filePosition += request.PartSize;
             }
 
-            CompleteMultipartUploadRequest completeRequest =
-                new()
-                {
-                    BucketName = s3AwsSettings.BucketName,
-                    Key = request.Key,
-                    UploadId = initResponse.UploadId,
-                };
+            CompleteMultipartUploadRequest completeRequest = new()
+            {
+                BucketName = s3AwsSettings.BucketName,
+                Key = request.Key,
+                UploadId = initResponse.UploadId,
+            };
             completeRequest.AddPartETags(uploadResponses);
 
             await amazonS3.CompleteMultipartUploadAsync(completeRequest);
@@ -134,13 +134,12 @@ public class AwsAmazonService(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSet
         {
             Console.WriteLine($"An AmazonS3Exception was thrown: {ex.Message}");
 
-            AbortMultipartUploadRequest abortMPURequest =
-                new()
-                {
-                    BucketName = s3AwsSettings.BucketName,
-                    Key = request.Key,
-                    UploadId = initResponse.UploadId,
-                };
+            AbortMultipartUploadRequest abortMPURequest = new()
+            {
+                BucketName = s3AwsSettings.BucketName,
+                Key = request.Key,
+                UploadId = initResponse.UploadId,
+            };
             await amazonS3.AbortMultipartUploadAsync(abortMPURequest);
 
             return new(ex.Message);

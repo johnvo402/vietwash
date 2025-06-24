@@ -1,40 +1,43 @@
-﻿using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
+﻿using System.Data.Common;
+using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.ApiWrapper;
+using Contracts.Utils;
 using Domain.Aggregates.Suppliers;
 using Mediator;
-using System.Data.Common;
 
 namespace Application.Feature.Suppliers.Command.Create
 {
-	public class CreateSupplierHandler(
-		IUnitOfWork unitOfWork,
-		IMapper mapper) : IRequestHandler<CreateSupplierCommand>
-	{
-		public async ValueTask<Unit> Handle(CreateSupplierCommand request, CancellationToken cancellationToken)
-		{
-			var supplier = mapper.Map<Supplier>(request);
-			if (string.IsNullOrEmpty(supplier.Code))
+    public class CreateSupplierHandler(IUnitOfWork unitOfWork)
+        : IRequestHandler<CreateSupplierCommand, Result>
+    {
+        public async ValueTask<Result> Handle(
+            CreateSupplierCommand request,
+            CancellationToken cancellationToken
+        )
+        {
+            Supplier supplier = request.ToEntity();
+            if (string.IsNullOrEmpty(supplier.Code))
             {
-                supplier.Code = $"SUP-{DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()[^6..]}";
+                supplier.Code = Generator.GenerateCode("SUP", 6);
             }
 
             try
-			{
-				DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
+            {
+                DbTransaction transaction = await unitOfWork.BeginTransactionAsync(
+                    cancellationToken
+                );
 
-				await unitOfWork.Repository<Supplier>().AddAsync(supplier, cancellationToken);
-				await unitOfWork.SaveAsync(cancellationToken);
-				await unitOfWork.CommitAsync(cancellationToken);
+                await unitOfWork.Repository<Supplier>().AddAsync(supplier, cancellationToken);
+                await unitOfWork.SaveAsync(cancellationToken);
+                await unitOfWork.CommitAsync(cancellationToken);
 
-				return Unit.Value;
-			}
-			catch
-			{
-				await unitOfWork.RollbackAsync(cancellationToken);
-				throw;
-			}
-		}
-		
-
-	}
+                return Result.Success();
+            }
+            catch
+            {
+                await unitOfWork.RollbackAsync(cancellationToken);
+                throw;
+            }
+        }
+    }
 }

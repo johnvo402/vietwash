@@ -1,26 +1,83 @@
-﻿using Domain.Aggregates.Funds.Enums;
+﻿using Ardalis.GuardClauses;
+using Domain.Aggregates.Funds.Enums;
 using Domain.Aggregates.Users;
-using JohnChum.SharedKernel.Domain.Common;
 using Mediator;
+using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Funds
 {
     public class Fund : AggregateRoot
     {
-        public string Code { get; set; } = default!;
-        public string Name { get; set; } = default!;
-        public FundType Type { get; set; } = default!;
-        public FundStatus Status { get; set; } = default!;
-        public decimal Amount { get; set; } = default!;
-        public long ObjectId { get; set; }
-        public long FundBehaviorId { get; set; }
+        public string Code { get; private set; } = default!;
+        public string? Name { get; set; }
+        public FundType Type { get; private set; } = default!;
+        public FundStatus Status { get; private set; } = default!;
+        public decimal Amount { get; private set; } = default!;
+        public long? ObjectId { get; set; }
+        public long FundBehaviorId { get; private set; }
         public string? Note { get; set; }
         public DateTimeOffset? TransactionDate { get; set; }
-        public PaymentMethod PaymentMethod { get; set; } = default!;
-        public long ReferenceId { get; set; } = default!;
-        public long BranchId { get; set; } = default!;
-        public FundBehavior FundBehavior { get; set; } = default!;
-        public User User { get; set; } = default!;
+        public PaymentMethod PaymentMethod { get; private set; } = default!;
+        public long? ReferenceId { get; set; }
+        public long BranchId { get; set; }
+        public FundBehavior FundBehavior { get; set; } = default!; // navigation
+        public User User { get; set; } = default!; // navigation
+        public object? Metadata { get; set; }
+
+        public Fund(
+            string code,
+            string? name,
+            FundType type,
+            FundStatus status,
+            decimal amount,
+            long? objectId,
+            long fundBehaviorId,
+            string? note,
+            DateTimeOffset? transactionDate,
+            PaymentMethod paymentMethod,
+            long? referenceId,
+            long branchId,
+            object? metadata
+        )
+        {
+            Code = Guard.Against.NullOrWhiteSpace(code);
+            Name = name;
+            Type = Guard.Against.Null(type);
+            Status = Guard.Against.Null(status);
+            Amount = Guard.Against.Negative(amount);
+            ObjectId = objectId;
+            FundBehaviorId = fundBehaviorId;
+            PaymentMethod = Guard.Against.Null(paymentMethod);
+            ReferenceId = referenceId;
+            BranchId = branchId;
+
+            Note = note;
+            TransactionDate = transactionDate;
+            Metadata = metadata;
+        }
+
+        public void Update(
+            string? note = null,
+            FundStatus? status = null,
+            PaymentMethod? paymentMethod = null
+        )
+        {
+            if (!string.IsNullOrWhiteSpace(note))
+            {
+                Note = note;
+            }
+
+            if (Status != status && status.HasValue)
+            {
+                Status = (FundStatus)status;
+            }
+
+            if (PaymentMethod != paymentMethod && paymentMethod.HasValue)
+            {
+                PaymentMethod = (PaymentMethod)paymentMethod;
+            }
+        }
+
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
             throw new NotImplementedException();

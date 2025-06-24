@@ -1,8 +1,7 @@
 ﻿using Application.Common.Auth;
-using Application.Features.Accounts.Commands.Create;
 using Application.Features.Media;
 using Ardalis.ApiEndpoints;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
+using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
@@ -24,8 +23,8 @@ namespace Presentation.Endpoints.Medias
             CancellationToken cancellationToken = default
         )
         {
-            UploadMediaResponse media = await sender.Send(request, cancellationToken);
-            return this.Ok200(media);
+            var media = await sender.Send(request, cancellationToken);
+            return media.ToActionResult();
         }
     }
 }

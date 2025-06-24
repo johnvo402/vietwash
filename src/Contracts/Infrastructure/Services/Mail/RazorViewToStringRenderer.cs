@@ -5,16 +5,17 @@ namespace Infrastructure.Services.Mail;
 
 public class RazorViewToStringRenderer
 {
-    public static async Task<string> RenderViewToStringAsync(MailTemplate mailTemplate)
-    {
-        RazorLightEngine razorEngine = CreateRazorlight(mailTemplate.Template.GetType());
+    private readonly RazorLightEngine razorLightEngine = new RazorLightEngineBuilder()
+        .UseFileSystemProject(GetRootPath())
+        .UseMemoryCachingProvider()
+        .Build();
 
+    public async Task<string> RenderViewToStringAsync(MailTemplate mailTemplate)
+    {
         try
         {
-            var template = await File.ReadAllTextAsync(GetPath(mailTemplate.ViewName));
-            return await razorEngine.CompileRenderStringAsync(
-                mailTemplate.ViewName,
-                template,
+            return await razorLightEngine.CompileRenderAsync(
+                Path.Combine("Templates", $"{mailTemplate.ViewName}.cshtml"),
                 mailTemplate.Template
             );
         }
@@ -26,15 +27,5 @@ public class RazorViewToStringRenderer
         }
     }
 
-    public static string GetPath(string viewName)
-    {
-        string root = Path.Join(Directory.GetCurrentDirectory(), "wwwroot");
-        return Path.Combine(root, "Templates", $"{viewName}.cshtml");
-    }
-
-    private static RazorLightEngine CreateRazorlight(Type type) =>
-        new RazorLightEngineBuilder()
-            .UseEmbeddedResourcesProject(type)
-            .UseMemoryCachingProvider()
-            .Build();
+    private static string GetRootPath() => Path.Join(Directory.GetCurrentDirectory(), "wwwroot");
 }

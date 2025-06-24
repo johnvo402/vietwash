@@ -6,7 +6,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Projections.Branches.Branch;
 using Domain.Aggregates.Branches;
 using FluentValidation;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Contracts.Common.Messages;
 
 namespace Application.Features.Common.Validators.Branches
 {

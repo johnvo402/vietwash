@@ -1,18 +1,28 @@
-﻿using AutoMapper;
+﻿using System.Linq.Expressions;
 using Domain.Aggregates.Funds;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Application.Features.Funds.Queries.List
+namespace Application.Features.Funds.Queries.List;
+
+public static class ListFundMapping
 {
-    public class ListFundMapping : Profile
+    public static Expression<Func<Fund, ListFundResponse>> Selector()
     {
-        public ListFundMapping()
+        return fund => new ListFundResponse
         {
-            CreateMap<Fund, ListFundResponse>();
-        }
+            Id = fund.Id,
+            PublicId = fund.PublicId,
+            CreatedAt = fund.CreatedAt,
+            CreatedBy = fund.CreatedBy,
+            UpdatedAt = fund.UpdatedAt,
+            UpdatedBy = fund.UpdatedBy,
+            Name = fund.Name,
+            Type = fund.Type,
+            FundBehaviorId = fund.FundBehaviorId,
+            Amount = fund.Amount,
+            Note = fund.Note,
+            TransactionDate = fund.TransactionDate,
+            PaymentMethod = fund.PaymentMethod,
+            ReferenceId = fund.ReferenceId,
+        };
     }
 }

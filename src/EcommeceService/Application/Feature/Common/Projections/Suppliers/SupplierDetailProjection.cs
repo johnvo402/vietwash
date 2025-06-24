@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Application.Feature.Common.Projections.Suppliers
+﻿namespace Application.Feature.Common.Projections.Suppliers
 {
-	public class SupplierDetailProjection : SupplierProjection;
+    public class SupplierDetailProjection : SupplierProjection;
 }

@@ -3,7 +3,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Projections.FundBehaviors;
 using Domain.Aggregates.Funds;
 using FluentValidation;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Contracts.Common.Messages;
 
 namespace Application.Features.Common.Validator.Funds
 {

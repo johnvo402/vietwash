@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Domain.Aggregates.Warehouses.Enums;
-using JohnChum.SharedKernel.Domain.Common;
 using Mediator;
+using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Warehouses
 {
@@ -18,8 +18,30 @@ namespace Domain.Aggregates.Warehouses
         public long BranchId { get; set; } = default!;
         public WarehouseStatus Status { get; set; } = default!;
 
-
         //public ICollection<InventoryRequest> InventoryRequests { get; set; } = [];
         //public ICollection<InventoryDocument> InventoryDocuments { get; set; } = [];
+        public void Update(
+            string? name,
+            string? code,
+            string? description,
+            WarehouseStatus? status,
+            int? reorderLevel = 1
+        )
+        {
+            if (!string.IsNullOrWhiteSpace(name))
+                Name = name;
+
+            if (!string.IsNullOrWhiteSpace(code))
+                Code = code;
+
+            if (!string.IsNullOrWhiteSpace(description))
+                Description = description;
+
+            if (reorderLevel.HasValue)
+                ReorderLevel = reorderLevel.Value;
+
+            if (status.HasValue)
+                Status = status.Value;
+        }
     }
 }

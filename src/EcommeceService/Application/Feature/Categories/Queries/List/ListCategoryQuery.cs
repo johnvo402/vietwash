@@ -1,7 +1,10 @@
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
+using Contracts.ApiWrapper;
+using Contracts.Dtos.Requests;
+using Contracts.Dtos.Responses;
 using Mediator;
 
 namespace Application.Feature.Categories.Queries.List;
 
-public class ListCategoryQuery : QueryParamRequest, IRequest<PaginationResponse<ListCategoryResponse>>;
+public class ListCategoryQuery
+    : QueryParamRequest,
+        IRequest<Result<PaginationResponse<ListCategoryResponse>>>;

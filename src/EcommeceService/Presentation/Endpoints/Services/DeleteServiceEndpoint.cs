@@ -1,6 +1,7 @@
 ﻿using Application.Common.Auth;
 using Application.Feature.Services.Command.Delete;
 using Ardalis.ApiEndpoints;
+using Contracts.ApiWrapper;
 using Contracts.Routers;
 using Infrastructure.Constants;
 using Mediator;
@@ -11,12 +12,12 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Presentation.Endpoints.Services
 {
     public class DeleteServiceEndpoint(ISender sender)
-        : EndpointBaseAsync.WithRequest<long>.WithActionResult
+        : EndpointBaseAsync.WithRequest<long>.WithActionResult<ApiResponse>
     {
         [HttpDelete(Router.ServiceRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.ServiceRoute.Tags], Summary = "Delete service")]
         //[AuthorizeBy(permissions: $"{ActionPermission.delete}:{ObjectPermission.service}")]
-        public override async Task<ActionResult> HandleAsync(
+        public override async Task<ActionResult<ApiResponse>> HandleAsync(
             [FromRoute(Name = RouterBase.Id)] long serviceId,
             CancellationToken cancellationToken = default
         )

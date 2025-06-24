@@ -1,6 +1,6 @@
-﻿using Application.Features.Branches.Branch.Commands.Create;
+﻿using Application.Features.Branches.Commands.Create;
 using Ardalis.ApiEndpoints;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
+using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
@@ -9,14 +9,18 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Presentation.Endpoints.Branches
 {
-    public class CreateBranchEndpoint(ISender sender) : EndpointBaseAsync.WithRequest<CreateBranchCommand>.WithActionResult<ApiResponse<Unit>>
+    public class CreateBranchEndpoint(ISender sender)
+        : EndpointBaseAsync.WithRequest<CreateBranchCommand>.WithActionResult<ApiResponse>
     {
         [HttpPost(Router.BranchRoute.Branches)]
         [SwaggerOperation(Tags = [Router.BranchRoute.Tags], Summary = "Create Branch")]
-        public override async Task<ActionResult<ApiResponse<Unit>>> HandleAsync([FromBody] CreateBranchCommand request, CancellationToken cancellationToken = default)
+        public override async Task<ActionResult<ApiResponse>> HandleAsync(
+            [FromBody] CreateBranchCommand request,
+            CancellationToken cancellationToken = default
+        )
         {
             var branch = await sender.Send(request, cancellationToken);
-            return this.Created201();
+            return branch.ToCreatedResult();
         }
     }
 }

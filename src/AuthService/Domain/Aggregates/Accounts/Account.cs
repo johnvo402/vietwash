@@ -1,8 +1,8 @@
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Accounts.Enums;
 using Domain.Aggregates.Accounts.Events;
-using JohnChum.SharedKernel.Domain.Common;
 using Mediator;
+using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Accounts;
 
@@ -11,7 +11,7 @@ public class Account : AggregateRoot
     public string DisplayName { get; private set; }
     public string? Password { get; private set; }
     public string? Email { get; private set; }
-    public string Code { get; private set; }
+    public string Code { get; set; }
     public string PhoneNumber { get; private set; }
     public string PhoneCode { get; private set; }
     public DateOnly BirthDay { get; set; }
@@ -31,7 +31,7 @@ public class Account : AggregateRoot
     public ICollection<BranchAccount>? BranchAccounts { get; set; } = [];
 
     public Account(
-        string displayName,
+        string? displayName,
         string? password,
         string? email,
         string phoneNumber,
@@ -47,6 +47,38 @@ public class Account : AggregateRoot
         Role = Guard.Against.NullOrEmpty(role, nameof(Role));
         Code = Guard.Against.NullOrEmpty(code, nameof(Code));
         PhoneCode = phoneCode;
+    }
+
+    public void Update(
+        string? displayName = null,
+        string? email = null,
+        string? phoneNumber = null,
+        DateOnly? birthDay = null,
+        Gender? gender = null,
+        string? role = null,
+        AccountStatus? status = null
+    )
+    {
+        if (!string.IsNullOrWhiteSpace(displayName))
+            DisplayName = displayName.Trim();
+
+        if (!string.IsNullOrWhiteSpace(email))
+            Email = email.Trim();
+
+        if (!string.IsNullOrWhiteSpace(phoneNumber))
+            PhoneNumber = phoneNumber.Trim();
+
+        if (birthDay.HasValue)
+            BirthDay = birthDay.Value;
+
+        if (gender.HasValue)
+            Gender = gender;
+
+        if (!string.IsNullOrWhiteSpace(role))
+            Role = role.Trim();
+
+        if (status.HasValue)
+            Status = status.Value;
     }
 
     private Account()

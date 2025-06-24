@@ -2,10 +2,10 @@
 using Application.Feature.Orders.Queries.List;
 using Application.Feature.Units.Queries.List;
 using Ardalis.ApiEndpoints;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
+using Contracts.ApiWrapper;
+using Contracts.Dtos.Responses;
 using Contracts.RouteResults;
 using Infrastructure.Constants;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
@@ -26,6 +26,10 @@ namespace Presentation.Endpoints.Orders
         > HandleAsync(
             [FromQuery] ListOrderQuery request,
             CancellationToken cancellationToken = default
-        ) => this.Ok200(await sender.Send(request, cancellationToken));
+        )
+        {
+            var result = await sender.Send(request, cancellationToken);
+            return result.ToActionResult();
+        }
     }
 }

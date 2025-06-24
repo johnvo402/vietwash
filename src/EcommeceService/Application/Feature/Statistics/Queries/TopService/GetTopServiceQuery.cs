@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Contracts.ApiWrapper;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Feature.Statistics.Queries.TopService
 {
-    public class GetTopServiceQuery : IRequest<IEnumerable<GetTopServiceResponse>>
+    public class GetTopServiceQuery : IRequest<Result<IEnumerable<GetTopServiceResponse>>>
     {
-
-
         [FromQuery]
         public string From { get; set; }
 
@@ -17,7 +14,6 @@ namespace Application.Feature.Statistics.Queries.TopService
 
         [FromQuery]
         public string BranchId { get; set; }
-
 
         //public string From { get; }
         //public string To { get; }

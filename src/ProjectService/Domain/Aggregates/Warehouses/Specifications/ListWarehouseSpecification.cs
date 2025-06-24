@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using JohnChum.SharedKernel.Domain.Common.Specs;
+using Specification;
+using Specification.Builders;
 
 namespace Domain.Aggregates.Warehouses.Specifications
 {

@@ -4,7 +4,7 @@ using Application.Feature.Common.Validators.Services;
 using Domain.Aggregates.Services;
 using FluentValidation;
 using Infrastructure.UnitOfWorks;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Contracts.Common.Messages;
 
 
 namespace Application.Feature.Services.Command.Create;

@@ -5,7 +5,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Ardalis.GuardClauses;
 using Domain.Common;
 using Infrastructure.Data.Configurations;
-using JohnChum.SharedKernel.Domain.Common;
+using Shared.Kernel.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;

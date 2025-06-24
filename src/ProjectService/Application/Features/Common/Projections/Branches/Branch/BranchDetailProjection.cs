@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Application.Features.Common.Projections.Branches.Branch
+﻿namespace Application.Features.Common.Projections.Branches.Branch
 {
-    public class BranchDetailProjection : BranchProjection
-    {
-    }
+    public class BranchDetailProjection : BranchProjection { }
 }

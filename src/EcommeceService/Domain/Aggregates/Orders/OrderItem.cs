@@ -1,6 +1,6 @@
 ﻿using Domain.Aggregates.Orders;
 using Domain.Aggregates.Services;
-using JohnChum.SharedKernel.Domain.Common;
+using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Orders
 {

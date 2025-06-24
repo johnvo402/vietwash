@@ -1,5 +1,5 @@
 ﻿using Domain.Aggregates.Branches.Enums;
-using JohnChum.SharedKernel.Domain.Common;
+using Shared.Kernel.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;

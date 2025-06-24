@@ -2,9 +2,9 @@ using Application.Common.Auth;
 using Application.Features.Accounts.Commands.Create;
 using Ardalis.ApiEndpoints;
 using CaseConverter;
+using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Infrastructure.Constants;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
@@ -25,7 +25,11 @@ public class CreateAccountEndpoint(ISender sender)
         CancellationToken cancellationToken = default
     )
     {
-        CreateAccountResponse user = await sender.Send(request, cancellationToken);
-        return this.Created201(Router.AccountRoute.GetRouteName, user.Id, user);
+        var result = await sender.Send(request, cancellationToken);
+
+        return result.ToCreatedResult(
+            Router.AccountRoute.GetRouteName,
+            result.Value!.Id.ToString()
+        );
     }
 }

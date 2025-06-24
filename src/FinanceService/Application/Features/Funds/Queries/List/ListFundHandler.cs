@@ -1,31 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Application.Common.Interfaces.UnitOfWorks;
+﻿using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.ApiWrapper;
+using Contracts.Common.QueryStringProcessing;
+using Contracts.Dtos.Responses;
 using Domain.Aggregates.Funds;
 using Domain.Aggregates.Funds.Specifications;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.QueryStringProcessing;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
 using Mediator;
 
 namespace Application.Features.Funds.Queries.List
 {
     public class ListFundHandler(IUnitOfWork unitOfWork)
-        : IRequestHandler<ListFundQuery, PaginationResponse<ListFundResponse>>
+        : IRequestHandler<ListFundQuery, Result<PaginationResponse<ListFundResponse>>>
     {
-        public async ValueTask<PaginationResponse<ListFundResponse>> Handle(
+        public async ValueTask<Result<PaginationResponse<ListFundResponse>>> Handle(
             ListFundQuery request,
             CancellationToken cancellationToken
         )
         {
-            return await unitOfWork
-                .Repository<Fund>()
-                .PagedListAsync<ListFundResponse>(
-                    new ListFundSpecification(request.From, request.To),
-                    request.ValidateQuery().ValidateFilter(typeof(ListFundResponse))
-                );
+            var validation = request.Validate<ListFundQuery, ListFundResponse>();
+
+            if (validation != null)
+            {
+                return validation;
+            }
+            return Result<PaginationResponse<ListFundResponse>>.Success(
+                await unitOfWork
+                    .DynamicReadOnlyRepository<Fund>()
+                    .PagedListAsync(
+                        new ListFundSpecification(request.From, request.To),
+                        request,
+                        ListFundMapping.Selector(),
+                        cancellationToken
+                    )
+            );
         }
     }
 }

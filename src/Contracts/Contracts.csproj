@@ -20,7 +20,6 @@
     <PackageReference Include="Ardalis.Result.AspNetCore" />
     <PackageReference Include="CaseConverter" />
     <PackageReference Include="CSharpFunctionalExtensions" />
-    <PackageReference Include="JohnChum.SharedKernel.SpecificationQuery.LHS" />
     <PackageReference Include="Serilog.AspNetCore" />
     <PackageReference Include="Serilog.Enrichers.Environment" />
     <PackageReference Include="Serilog.Sinks.OpenTelemetry" />
@@ -29,7 +28,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="NRedisStack" />
     <PackageReference Include="Elastic.Clients.Elasticsearch" />
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" />
     <PackageReference Include="AWSSDK.S3" />
     <PackageReference Include="Hangfire.AspNetCore" />
     <PackageReference Include="Hangfire.Console.Extensions" />
@@ -57,5 +55,8 @@
     <PackageReference Include="Serilog.Sinks.Seq" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Shared.Kernel\Shared.Kernel.csproj" />
   </ItemGroup>
 </Project>

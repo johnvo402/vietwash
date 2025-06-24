@@ -1,18 +1,32 @@
-using Application.Features.Common.Projections.Users;
-using AutoMapper;
 using Domain.Aggregates.Users;
 
 namespace Application.Features.Users.Commands.Create;
 
-public class CreateUserMapping : Profile
+public static class CreateUserMapping
 {
-    public CreateUserMapping()
+    public static User ToUser(this CreateAccountEvent command)
     {
-        CreateMap<UserModel, User>();
-        CreateMap<CreateAccountEvent, User>();
-        CreateMap<User, UserModel>();
-        CreateMap<User, UserProjection>();
-        CreateMap<UserProjection, CreateUserCommand>();
-        CreateMap<User, UserDetailProjection>();
+        return new User(
+            displayName: command.DisplayName!.Trim(),
+            email: command.Email!,
+            phoneNumber: command.PhoneNumber!,
+            role: command.Role!,
+            code: command.Code!
+        )
+        {
+            Id = command.Id,
+            PublicId = command.PublicId,
+            Gender = command.Gender,
+            Status = command.Status,
+            BirthDay = command.BirthDay,
+            AvtUrl = command.AvtUrl,
+            Disabled = command.Disabled,
+            CustomerGroup = command.CustomerGroup,
+            // BranchUsers = command.BranchUsers.ToListMapping(x => new BranchUser
+            // {
+            //     BranchId = x.BranchId,
+            //     BranchName = x.BranchName,
+            // }),
+        };
     }
 }

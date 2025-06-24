@@ -1,16 +1,15 @@
-﻿using Application.Feature.Common.Projections.Orders;
-using AutoMapper;
+﻿using Application.Feature.Common.Mapping.Orders;
 using Domain.Aggregates.Orders;
 
 namespace Application.Feature.Orders.Queries.Detail
 {
-	public class GetOrderDetailMapping : Profile
-	{
-		public GetOrderDetailMapping()
-		{
-
-			CreateMap<Order, GetOrderDetailResponse>().IncludeBase<Order, OrderDetailProjection>();
-			CreateMap<OrderPayment, OrderPaymentProjection>();
-		}
-	}
+    public static class GetOrderDetailMapping
+    {
+        public static GetOrderDetailResponse ToOrderDetailResponse(this Order order)
+        {
+            var response = new GetOrderDetailResponse();
+            response.MappingFrom(order);
+            return response;
+        }
+    }
 }

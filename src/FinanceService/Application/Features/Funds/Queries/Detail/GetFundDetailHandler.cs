@@ -1,30 +1,39 @@
-﻿using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
+﻿using Application.Common.Errors;
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.ApiWrapper;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Funds;
 using Domain.Aggregates.Funds.Specifications;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Mediator;
-
-
-
 
 namespace Application.Features.Funds.Queries.Detail
 {
     public class GetFundDetailHandler(IUnitOfWork unitOfWork)
-          : IRequestHandler<GetFundDetailQuery, GetFundDetailResponse>
+        : IRequestHandler<GetFundDetailQuery, Result<GetFundDetailResponse>>
     {
-        public async ValueTask<GetFundDetailResponse> Handle(
+        public async ValueTask<Result<GetFundDetailResponse>> Handle(
             GetFundDetailQuery request,
             CancellationToken cancellationToken
-        ) =>
-            await unitOfWork
-                .Repository<Fund>()
-                .FindByConditionAsync<GetFundDetailResponse>(
-                    new GetFundByIdSpecification(long.Parse(request.FundId)),
+        )
+        {
+            GetFundDetailResponse? fund = await unitOfWork
+                .DynamicReadOnlyRepository<Fund>()
+                .FindByConditionAsync(
+                    new GetFundByIdSpecification(request.FundId),
+                    x => x.ToGetFundDetailResponse(),
                     cancellationToken
-                )
-            ?? throw new NotFoundException(
-                [Messager.Create<Fund>().Message(MessageType.Found).Negative().BuildMessage()]
-            );
+                );
+            if (fund == null)
+            {
+                return Result<GetFundDetailResponse>.Failure(
+                    new NotFoundError(
+                        "Fund not found",
+                        Messager.Create<Fund>().Message(MessageType.Found).Negative().BuildMessage()
+                    )
+                );
+            }
+
+            return Result<GetFundDetailResponse>.Success(fund);
+        }
     }
 }

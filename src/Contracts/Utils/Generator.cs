@@ -19,9 +19,9 @@ public static class Generator
 
     private static readonly Random _random = new Random();
 
-    public static string GenerateAccountCode(string code)
+    public static string GenerateAccountCode(string role)
     {
-        if (!_rolePrefixes.TryGetValue(code.ToUpper(), out var prefix))
+        if (!_rolePrefixes.TryGetValue(role.ToUpper(), out var prefix))
             throw new ArgumentException("invalid.");
 
         // Sinh số random 6 chữ số từ 000000 đến 999999
@@ -43,7 +43,7 @@ public static class Generator
         int minValue = (int)Math.Pow(10, numberLength - 1);
 
         int number = _random.Next(minValue, maxValue + 1);
-        return ($"{prefix}{number}").Trim();
+        return $"{prefix}{number}".Trim();
     }
 
     public static string GenerateSlug(string input)

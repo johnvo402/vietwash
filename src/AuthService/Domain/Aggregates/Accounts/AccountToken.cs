@@ -1,4 +1,4 @@
-using JohnChum.SharedKernel.Domain.Common;
+using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Accounts;
 

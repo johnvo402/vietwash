@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Contracts.Common.Messages;
 using Microsoft.AspNetCore.Http;
 
 namespace Application.Features.Media

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Domain.Aggregates.Equipments;
 using Domain.Aggregates.Inventories.Enums;
-using JohnChum.SharedKernel.Domain.Common;
+using Shared.Kernel.Common;
 using Mediator;
 
 namespace Domain.Aggregates.Inventories

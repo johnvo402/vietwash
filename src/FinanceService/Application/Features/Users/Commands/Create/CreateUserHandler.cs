@@ -1,30 +1,26 @@
 using System.Data.Common;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Users;
 using Mediator;
 
 namespace Application.Features.Users.Commands.Create;
 
-public class CreateUserHandler(
-    IUnitOfWork unitOfWork,
-    IMapper mapper,
-    IMediaUpdateService<User> mediaUpdateService
-) : IRequestHandler<CreateUserCommand, PubSubResponse<CreateUserCommand>>
+public class CreateUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService<User> mediaUpdateService)
+    : IRequestHandler<CreateUserCommand, PubSubResponse<CreateUserCommand>>
 {
     public async ValueTask<PubSubResponse<CreateUserCommand>> Handle(
         CreateUserCommand command,
         CancellationToken cancellationToken
     )
     {
-        User mappingUser = mapper.Map<User>(command.Payload);
+        User mappingUser = command.Payload!.ToUser();
 
         string? userAvatar = null;
         try
         {
-            DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
+            DbTransaction transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
 
             User user = await unitOfWork
                 .Repository<User>()

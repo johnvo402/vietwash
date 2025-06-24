@@ -1,37 +1,65 @@
-﻿using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
+﻿using Application.Common.Errors;
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
+using Application.Features.Common.Mapping.Users;
+using Contracts.ApiWrapper;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Services;
 using Domain.Aggregates.Services.Specifications;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Domain.Aggregates.Users;
+using Domain.Aggregates.Users.Specifications;
 using Mediator;
 
 namespace Application.Feature.Services.Queries.Detail;
-public class GetServiceDetailHandler(IUnitOfWork unitOfWork, IMapper mapper)
-    : IRequestHandler<GetServiceDetailQuery, GetServiceDetailResponse>
+
+public class GetServiceDetailHandler(IUnitOfWork unitOfWork)
+    : IRequestHandler<GetServiceDetailQuery, Result<GetServiceDetailResponse>>
 {
-    public async ValueTask<GetServiceDetailResponse> Handle(
+    public async ValueTask<Result<GetServiceDetailResponse>> Handle(
         GetServiceDetailQuery command,
         CancellationToken cancellationToken
     )
     {
-
-        var service =
-            await unitOfWork
-                .Repository<Service>()
-                .FindByConditionAsync(
-                    new GetServiceWithIncludeByIdSpecification(command.ServiceId),
-                    cancellationToken
-                )
-            ?? throw new NotFoundException(
-                [Messager.Create<Service>().Message(MessageType.Found).Negative().BuildMessage()]
+        GetServiceDetailResponse? service = await unitOfWork
+            .DynamicReadOnlyRepository<Service>()
+            .FindByConditionAsync(
+                new GetServiceWithIncludeByIdSpecification(command.ServiceId),
+                x => x.GetDetailSelector(),
+                cancellationToken
             );
+        if (service == null)
+        {
+            return Result<GetServiceDetailResponse>.Failure(
+                new NotFoundError(
+                    "Service not found",
+                    Messager.Create<Service>().Message(MessageType.Found).Negative().BuildMessage()
+                )
+            );
+        }
+        if (!string.IsNullOrEmpty(service.CreatedBy) && service.CreatedBy != "SYSTEM")
+        {
+            UserDTO? createdUser = await unitOfWork
+                .DynamicReadOnlyRepository<User>()
+                .FindByConditionAsync(
+                    new GetUserByIdWithoutIncludeSpecification(long.Parse(service.CreatedBy)),
+                    x => x.UserDTOResponse(),
+                    cancellationToken
+                );
 
+            service.CreatedUser = createdUser;
+        }
+        if (!string.IsNullOrEmpty(service.UpdatedBy) && service.UpdatedBy != "SYSTEM")
+        {
+            UserDTO? updatedUser = await unitOfWork
+                .DynamicReadOnlyRepository<User>()
+                .FindByConditionAsync(
+                    new GetUserByIdWithoutIncludeSpecification(long.Parse(service.UpdatedBy)),
+                    x => x.UserDTOResponse(),
+                    cancellationToken
+                );
 
-        var response = mapper.Map<GetServiceDetailResponse>(service);
+            service.UpdatedUser = updatedUser;
+        }
 
-   
-
-        return response;
+        return Result<GetServiceDetailResponse>.Success(service);
     }
 }

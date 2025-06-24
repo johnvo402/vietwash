@@ -1,19 +1,22 @@
-﻿using Application.Feature.Common.Projections.Orders;
-using Application.Feature.Orders.Command.Create;
-using AutoMapper;
-using Domain.Aggregates.Orders;
+﻿using Application.Feature.Services.Queries.Detail;
+using Domain.Aggregates.Users;
 
 namespace Application.Feature.Common.Mapping.Orders
 {
-    public class OrderMapping : Profile
+    public static class OrderMapping
     {
-        public OrderMapping()
+        public static UserDTO? MappingFrom(this User? user)
         {
-            CreateMap<CreateOrderCommand, Order>();
-            CreateMap<CreateOrderItemModel, OrderItem>();
-            CreateMap<Order, OrderProjection>();
-            CreateMap<Order, OrderDetailProjection>();
-            CreateMap<OrderItem, OrderItemProjection>();
+            if (user == null)
+                return null;
+            return new UserDTO
+            {
+                Id = user.Id,
+                PublicId = user.PublicId,
+                DisplayName = user.DisplayName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+            };
         }
     }
 }

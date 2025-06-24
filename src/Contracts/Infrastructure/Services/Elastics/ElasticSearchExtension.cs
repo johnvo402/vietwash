@@ -2,6 +2,7 @@ using System.Reflection;
 using Application.Common.Interfaces.Services.Elastics;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
+using Infrastructure.Services.ElasticSeach;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -40,7 +41,8 @@ public static class ElasticSearchExtension
 
             IEnumerable<ElasticConfigureResult> elkConfigbuilder =
                 ElasticsearchRegisterHelper.GetElasticsearchConfigBuilder(
-                    Assembly.GetExecutingAssembly()
+                    Assembly.GetExecutingAssembly(),
+                    elasticsearch.PrefixIndex ?? string.Empty
                 );
             ElasticsearchRegisterHelper.ConfigureConnectionSettings(ref settings, elkConfigbuilder);
 
@@ -48,7 +50,6 @@ public static class ElasticSearchExtension
 
             services
                 .AddSingleton(client)
-                .AddHostedService<ElasticsearchIndexBackgoundService>()
                 .AddSingleton<IElasticsearchServiceFactory, ElasticsearchServiceFactory>();
         }
 

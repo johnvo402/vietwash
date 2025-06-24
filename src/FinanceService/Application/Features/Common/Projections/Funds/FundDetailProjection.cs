@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Aggregates.Funds;
 using Domain.Aggregates.Users;
 
 namespace Application.Features.Common.Projections.Funds
 {
-    public class FundDetailProjection : UpdateFundModel
+    public class FundDetailProjection : FundProjection
     {
-        public User User { get; set; } = default!;
+        public override void MappingFrom(Fund fund)
+        {
+            base.MappingFrom(fund);
+        }
     }
 }

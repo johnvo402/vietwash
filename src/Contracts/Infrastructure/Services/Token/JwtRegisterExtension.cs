@@ -1,8 +1,9 @@
 using System.Text;
 using Application.Common.Exceptions;
+using Contracts.Application.Common.Exceptions;
 using Contracts.Application.Common.Interfaces.Services.Token;
+using Contracts.Common.Messages;
 using Contracts.Infrastructure.Services.Token;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -58,14 +59,14 @@ public static class JwtRegisterExtension
                         return TokenErrorExtension.UnauthorizedException(
                             context,
                             !context.Response.HasStarted
-                                ? new UnauthorizedException(Message.UNAUTHORIZED)
-                                : new UnauthorizedException(Message.TOKEN_EXPIRED)
+                                ? new UnauthorizedError(Message.UNAUTHORIZED)
+                                : new UnauthorizedError(Message.TOKEN_EXPIRED)
                         );
                     },
                     OnForbidden = context =>
                         TokenErrorExtension.ForbiddenException(
                             context,
-                            new ForbiddenException(Message.FORBIDDEN)
+                            new ForbiddenError(Message.FORBIDDEN)
                         ),
                 };
             })

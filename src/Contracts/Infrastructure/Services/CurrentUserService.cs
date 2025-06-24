@@ -2,7 +2,7 @@ using System.Security.Claims;
 using Application.Common.Auth;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.DistributedCache;
-using JohnChum.SharedKernel.Extensions;
+using Contracts.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 

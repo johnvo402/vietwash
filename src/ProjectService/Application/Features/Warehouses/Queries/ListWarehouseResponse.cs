@@ -7,7 +7,5 @@ using Application.Features.Common.Projections.Warehouses;
 
 namespace Application.Features.Warehouses.Queries
 {
-    public class ListWarehouseResponse : WarehouseProjection
-    {
-    }
+    public class ListWarehouseResponse : WarehouseProjection;
 }

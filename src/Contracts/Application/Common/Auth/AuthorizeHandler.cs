@@ -1,10 +1,10 @@
 ﻿using System.Text.Json;
 using Application.Common.Interfaces.Services.DistributedCache;
 using Contracts.Application.Common.Interfaces.Services.Token;
-using JohnChum.SharedKernel.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Kernel.Extensions;
 
 namespace Application.Common.Auth;
 

@@ -1,27 +1,38 @@
 ﻿using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.ApiWrapper;
+using Contracts.Common.QueryStringProcessing;
+using Contracts.Dtos.Responses;
 using Domain.Aggregates.Accounts;
 using Domain.Aggregates.Accounts.Specifications;
 using Infrastructure.Constants;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.QueryStringProcessing;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
 using Mediator;
 
 namespace Application.Features.Customers.Queries.ListCustomer
 {
     public class ListCustomerHandler(IUnitOfWork unitOfWork)
-        : IRequestHandler<ListCustomerQuery, PaginationResponse<ListCustomerResponse>>
+        : IRequestHandler<ListCustomerQuery, Result<PaginationResponse<ListCustomerResponse>>>
     {
-        public async ValueTask<PaginationResponse<ListCustomerResponse>> Handle(
+        public async ValueTask<Result<PaginationResponse<ListCustomerResponse>>> Handle(
             ListCustomerQuery query,
             CancellationToken cancellationToken
         )
         {
-            return await unitOfWork
-                .Repository<Account>()
-                .PagedListAsync<ListCustomerResponse>(
+            var validation = query.Validate<ListCustomerQuery, ListCustomerResponse>();
+
+            if (validation != null)
+            {
+                return validation;
+            }
+            var response = await unitOfWork
+                .DynamicReadOnlyRepository<Account>()
+                .PagedListAsync(
                     new ListAccountSpecification([ROLE.CUSTOMER]),
-                    query.ValidateQuery().ValidateFilter(typeof(ListCustomerResponse))
+                    query,
+                    ListCustomerMapping.Selector(),
+                    cancellationToken: cancellationToken
                 );
+
+            return Result<PaginationResponse<ListCustomerResponse>>.Success(response);
         }
     }
 }

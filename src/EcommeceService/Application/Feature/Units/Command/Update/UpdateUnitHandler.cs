@@ -1,16 +1,17 @@
-﻿using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+﻿using Application.Common.Errors;
+using Application.Common.Interfaces.UnitOfWorks;
+using Application.Feature.Common.Mapping.Units;
+using Contracts.ApiWrapper;
+using Contracts.Common.Messages;
 using Mediator;
 using Unit = Domain.Aggregates.Services.Unit;
 
 namespace Application.Feature.Units.Command.Update
 {
-    public class UpdateUnitHandler(IUnitOfWork unitOfWork, IMapper mapper)
-        : IRequestHandler<UpdateUnitCommand, UpdateUnitResponse>
+    public class UpdateUnitHandler(IUnitOfWork unitOfWork)
+        : IRequestHandler<UpdateUnitCommand, Result<UpdateUnitResponse>>
     {
-        public async ValueTask<UpdateUnitResponse> Handle(
+        public async ValueTask<Result<UpdateUnitResponse>> Handle(
             UpdateUnitCommand request,
             CancellationToken cancellationToken
         )
@@ -23,35 +24,36 @@ namespace Application.Feature.Units.Command.Update
 
                 if (unit == null)
                 {
-                    throw new NotFoundException(
-                        [
+                    return Result<UpdateUnitResponse>.Failure(
+                        new NotFoundError(
+                            "Unit not found",
                             Messager
                                 .Create<Unit>()
                                 .Message(MessageType.Found)
                                 .Negative()
-                                .BuildMessage(),
-                        ]
+                                .BuildMessage()
+                        )
                     );
                 }
-
-                // Ánh xạ dữ liệu từ command vào unit (chỉ Name)
-                mapper.Map(request.Unit, unit);
+                unit.FromUpdateUnit(request.Unit);
                 // Bắt đầu transaction
-                using var transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
+                _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
 
                 // Cập nhật và lưu thay đổi
                 await unitOfWork.Repository<Unit>().UpdateAsync(unit);
                 await unitOfWork.SaveAsync(cancellationToken);
 
                 // Commit transaction
-                await transaction.CommitAsync(cancellationToken);
+                await unitOfWork.CommitAsync(cancellationToken);
 
                 // Trả về phản hồi với thông tin cập nhật
-                return new UpdateUnitResponse
-                {
-                    Message = "Unit updated successfully",
-                    Name = unit.Name,
-                };
+                return Result<UpdateUnitResponse>.Success(
+                    new UpdateUnitResponse
+                    {
+                        Message = "Unit updated successfully",
+                        Name = unit.Name,
+                    }
+                );
             }
             catch (Exception)
             {

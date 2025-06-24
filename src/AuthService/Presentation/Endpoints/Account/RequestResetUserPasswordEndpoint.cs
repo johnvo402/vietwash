@@ -1,24 +1,27 @@
 using Application.Features.Accounts.Commands.RequestResetPassword;
 using Ardalis.ApiEndpoints;
 using Contracts.RouteResults;
-using Presentation.Routes;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Routes;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Presentation.Endpoints.Account;
 
 public class RequestResetAccountPasswordEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<RequestResetAccountPasswordCommand>.WithActionResult
+    : EndpointBaseAsync.WithRequest<RequestResetAccountPasswordCommand>.WithoutResult
 {
     [HttpPut(Router.AccountRoute.RequestResetPassowrd)]
-    [SwaggerOperation(Tags = [Router.AccountRoute.Tags], Summary = "request reset Account password")]
-    public override async Task<ActionResult> HandleAsync(
+    [SwaggerOperation(
+        Tags = [Router.AccountRoute.Tags],
+        Summary = "request reset Account password"
+    )]
+    public override async Task<IActionResult> HandleAsync(
         RequestResetAccountPasswordCommand request,
         CancellationToken cancellationToken = default
     )
     {
-        await sender.Send(request, cancellationToken);
-        return this.NoContent204();
+        var result = await sender.Send(request, cancellationToken);
+        return result.ToNoContentResult();
     }
 }

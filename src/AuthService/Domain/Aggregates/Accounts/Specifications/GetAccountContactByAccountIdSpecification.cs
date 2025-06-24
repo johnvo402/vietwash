@@ -1,9 +1,5 @@
-﻿using JohnChum.SharedKernel.Domain.Common.Specs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Specification;
+using Specification.Builders;
 
 namespace Domain.Aggregates.Accounts.Specifications
 {
@@ -11,9 +7,7 @@ namespace Domain.Aggregates.Accounts.Specifications
     {
         public GetAccountContactByAccountIdSpecification(long accountId)
         {
-            Query.Where(x => x.AccountId == accountId)
-                 .Include(x => x.Account)
-                 .AsSplitQuery();
+            Query.Where(x => x.AccountId == accountId).Include(x => x.Account).AsSplitQuery();
         }
     }
 }

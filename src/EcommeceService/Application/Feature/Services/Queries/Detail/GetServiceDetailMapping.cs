@@ -1,28 +1,16 @@
-﻿using Application.Feature.Common.Projections.Services;
-using Application.Feature.Common.Projections.Units;
-using Application.Feature.Services.Queries.List;
-using AutoMapper;
-using Domain.Aggregates.Services;
-using Domain.Aggregates.Users;
+﻿using Domain.Aggregates.Services;
 
 namespace Application.Feature.Services.Queries.Detail
 {
-    public class GetServiceDetailMapping : Profile
+    public static class GetServiceDetailMapping
     {
-        public GetServiceDetailMapping()
+        public static GetServiceDetailResponse GetDetailSelector(this Service service)
         {
-            CreateMap<Service, GetServiceDetailResponse>()
-                .IncludeBase<Service, ServiceProjection>()
-                .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category)); // 🔹 Map Category
+            GetServiceDetailResponse response = new GetServiceDetailResponse();
+            response.MappingFrom(service);
+            response.CategoryId = service.CategoryId;
 
-            CreateMap<UnitRelation, UnitRelationProjection>();
-                //.ForMember(dest => dest.Unit, opt => opt.MapFrom(src => src.Unit));
-
-            CreateMap<Unit, UnitProjection>();
-
-            CreateMap<Category, CategoryModel>(); // 🔹 Map Category sang CategoryProjection
-
-            CreateMap<User, UserDTO>();
+            return response;
         }
     }
 }

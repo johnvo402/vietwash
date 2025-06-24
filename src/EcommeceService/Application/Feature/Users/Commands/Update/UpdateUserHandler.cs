@@ -1,64 +1,71 @@
-using System.Data.Common;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
+using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Contracts.ApiWrapper;
+using Contracts.Common.Messages;
+using Contracts.Dtos.Models;
 using Domain.Aggregates.Users;
 using Mediator;
-using Microsoft.AspNetCore.Http;
-using Domain.Aggregates.Users.Specifications;
 
 namespace Application.Features.Users.Commands.Update;
 
 public class UpdateUserHandler(
     IUnitOfWork unitOfWork,
-    IMapper mapper,
-    IMediaUpdateService<User> mediaUpdateService
-) : IRequestHandler<UpdateUserCommand, UpdateUserResponse>
+    IMediaUpdateService<Image> mediaUpdateService
+) : IRequestHandler<UpdateUserCommand, Result<UpdateUserResponse>>
 {
-    public async ValueTask<UpdateUserResponse> Handle(
-        UpdateUserCommand command,
+    public async ValueTask<Result<UpdateUserResponse>> Handle(
+        UpdateUserCommand request,
         CancellationToken cancellationToken
     )
     {
-        User user =
-            await unitOfWork
-                .Repository<User>()
-                .FindByConditionAsync(
-                    new GetUserByIdWithoutIncludeSpecification(command.UserId),
-                    cancellationToken
+        var user = await unitOfWork
+            .Repository<User>()
+            .FindByIdAsync(request.UserId, cancellationToken);
+
+        if (user is null)
+        {
+            return Result<UpdateUserResponse>.Failure(
+                new NotFoundError(
+                    "User not found",
+                    Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()
                 )
-            ?? throw new NotFoundException(
-                [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
             );
+        }
 
         string? oldAvatar = user.AvtUrl;
 
-        mapper.Map(command.User, user);
-
-        // update default claim
-
+        user.FromUpdateModel(model: request.User!);
         try
         {
-            DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
+            _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
 
             await unitOfWork.Repository<User>().UpdateAsync(user);
             await unitOfWork.SaveAsync(cancellationToken);
-
-
-            await unitOfWork.Repository<User>().UpdateAsync(
-                user
-            );
             await unitOfWork.CommitAsync(cancellationToken);
 
-            await mediaUpdateService.DeleteAvatarAsync(oldAvatar);
-            return mapper.Map<UpdateUserResponse>(user);
+            // 🔁 Nếu avatar đã đổi thì xoá ảnh cũ
+            if (
+                !string.IsNullOrWhiteSpace(oldAvatar)
+                && oldAvatar != user.AvtUrl
+                && !string.IsNullOrWhiteSpace(user.AvtUrl)
+            )
+            {
+                await mediaUpdateService.DeleteAvatarAsync(oldAvatar);
+            }
+
+            return Result<UpdateUserResponse>.Success(user.ToUpdateUserResponse());
         }
         catch (Exception)
         {
-            await mediaUpdateService.DeleteAvatarAsync(user.AvtUrl);
             await unitOfWork.RollbackAsync(cancellationToken);
+
+            // Nếu user.AvtUrl là mới upload, xoá ảnh rác
+            if (!string.IsNullOrWhiteSpace(user.AvtUrl))
+            {
+                await mediaUpdateService.DeleteAvatarAsync(user.AvtUrl);
+            }
+
             throw;
         }
     }

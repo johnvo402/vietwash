@@ -1,48 +1,46 @@
 using System.Data.Common;
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
+using Contracts.ApiWrapper;
+using Contracts.Common.Messages;
 using Contracts.Utils;
 using Domain.Aggregates.Services;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Mediator;
 
 namespace Application.Feature.Categories.Command.Create;
 
-public class CreateCategoryHandler(IUnitOfWork unitOfWork, IMapper mapper)
-    : IRequestHandler<CreateCategoryCommand>
+public class CreateCategoryHandler(IUnitOfWork unitOfWork)
+    : IRequestHandler<CreateCategoryCommand, Result>
 {
-    public async ValueTask<Mediator.Unit> Handle(
+    public async ValueTask<Result> Handle(
         CreateCategoryCommand command,
         CancellationToken cancellationToken
     )
     {
         if (string.IsNullOrEmpty(command.Id))
         {
-            command.Id = Generator.GenerateCode("CT-",6);
+            command.Id = Generator.GenerateCode("CT-", 6);
         }
-        Category mappingCategory = mapper.Map<Category>(command);
+        Category mappingCategory = command.ToEntity();
         try
         {
-            DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
-
+            DbTransaction transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
+            mappingCategory.Path = await GenerateCategoryPathAsync(
+                mappingCategory.Id,
+                command.ParentId,
+                cancellationToken
+            );
             //add into database
             Category category = await unitOfWork
                 .Repository<Category>()
                 .AddAsync(mappingCategory, cancellationToken);
-            
-            category.Path = await GenerateCategoryPathAsync(
-                category.Id,
-                command.ParentId,
-                cancellationToken
-            );
+
             //cancel token
             await unitOfWork.SaveAsync(cancellationToken);
 
             //commit transaction
             await unitOfWork.CommitAsync(cancellationToken);
 
-            return Mediator.Unit.Value;
+            return Result.Success();
         }
         catch (Exception)
         {
@@ -51,19 +49,23 @@ public class CreateCategoryHandler(IUnitOfWork unitOfWork, IMapper mapper)
         }
     }
 
-    private async Task<string> GenerateCategoryPathAsync(string id, string? parentId, CancellationToken cancellationToken)
+    private async Task<string> GenerateCategoryPathAsync(
+        string id,
+        string? parentId,
+        CancellationToken cancellationToken
+    )
     {
         if (string.IsNullOrEmpty(parentId))
         {
-            return id;
+            return id.ToLower();
         }
 
-        var parent = await unitOfWork.Repository<Category>().FindByIdAsync(parentId, cancellationToken);
+        var parent = await unitOfWork
+            .Repository<Category>()
+            .FindByIdAsync(parentId, cancellationToken);
 
         if (parent == null)
-             throw new NotFoundException(
-                [Messager.Create<Category>().Message(MessageType.Found).Negative().BuildMessage()]
-            );
+            return id.ToLower();
 
         return $"{parent.Path}.{id.ToLower()}";
     }

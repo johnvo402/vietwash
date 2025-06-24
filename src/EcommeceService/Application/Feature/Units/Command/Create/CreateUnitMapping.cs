@@ -1,19 +1,12 @@
-﻿using Application.Feature.Services.Command.Create;
-using AutoMapper;
-using Domain.Aggregates.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Aggregates.Services;
 
 namespace Application.Feature.Units.Command.Create
 {
-	public class CreateUnitMapping : Profile
-	{
-		public CreateUnitMapping()
-		{
-			CreateMap<CreateUnitCommand, Unit>();
-		}
-	}
+    public static class CreateUnitMapping
+    {
+        public static Unit ToUnit(this CreateUnitCommand command)
+        {
+            return new Unit(command.Name, command.Status);
+        }
+    }
 }

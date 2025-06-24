@@ -1,6 +1,6 @@
 ﻿using Application.Features.FundBehaviors.Command;
 using Ardalis.ApiEndpoints;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
+using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
@@ -9,17 +9,18 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Presentation.Endpoints.FundBehaviors
 {
-    public class CreateFundBehaviorEnpoint(ISender sender) : EndpointBaseAsync.WithRequest<CreateFundBehaviorCommand>.WithActionResult<ApiResponse<Unit>>
+    public class CreateFundBehaviorEnpoint(ISender sender)
+        : EndpointBaseAsync.WithRequest<CreateFundBehaviorCommand>.WithActionResult<ApiResponse>
     {
-
-
         [HttpPost(Router.FundBehaviorRoute.FundBehaviors)]
         [SwaggerOperation(Tags = [Router.FundBehaviorRoute.Tags], Summary = "create fundBehavior")]
-        public override async Task<ActionResult<ApiResponse<Unit>>> HandleAsync([FromBody] CreateFundBehaviorCommand request, CancellationToken cancellationToken = default)
+        public override async Task<ActionResult<ApiResponse>> HandleAsync(
+            [FromBody] CreateFundBehaviorCommand request,
+            CancellationToken cancellationToken = default
+        )
         {
-            await sender.Send(request, cancellationToken);
-            return this.Created201();
+            var result = await sender.Send(request, cancellationToken);
+            return result.ToCreatedResult();
         }
     }
-
 }

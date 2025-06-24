@@ -1,15 +1,10 @@
-﻿using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
+﻿using Contracts.ApiWrapper;
+using Contracts.Dtos.Requests;
 using Mediator;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Features.FundBehaviors.Queries
 {
-    public class ListFundBehaviorQuery : QueryParamRequest, IRequest<IEnumerable<ListFundBehaviorResponse>>;
-
-
+    public class ListFundBehaviorQuery
+        : QueryParamRequest,
+            IRequest<Result<IEnumerable<ListFundBehaviorResponse>>>;
 }

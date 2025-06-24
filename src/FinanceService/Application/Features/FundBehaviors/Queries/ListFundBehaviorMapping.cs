@@ -1,18 +1,24 @@
-﻿using AutoMapper;
+﻿using System.Linq.Expressions;
 using Domain.Aggregates.Funds;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Features.FundBehaviors.Queries
 {
-    public class ListFundBehaviorMapping : Profile
+    public static class ListFundBehaviorMapping
     {
-        public ListFundBehaviorMapping()
+        public static Expression<Func<FundBehavior, ListFundBehaviorResponse>> Selector()
         {
-            CreateMap<FundBehavior, ListFundBehaviorResponse>();
+            return service => new ListFundBehaviorResponse
+            {
+                Id = service.Id,
+                CreatedAt = service.CreatedAt,
+                CreatedBy = service.CreatedBy,
+                UpdatedAt = service.UpdatedAt,
+                UpdatedBy = service.UpdatedBy,
+
+                // Từ ServiceProjection
+                Name = service.Name,
+                Type = service.Type,
+            };
         }
     }
 }

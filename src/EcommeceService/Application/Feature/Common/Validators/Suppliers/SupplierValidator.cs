@@ -3,7 +3,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Common.Projections.Suppliers;
 using Domain.Aggregates.Suppliers;
 using FluentValidation;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Contracts.Common.Messages;
 namespace Application.Feature.Common.Validators.Suppliers
 {
 	internal class SupplierValidator : AbstractValidator<SupplierModel>

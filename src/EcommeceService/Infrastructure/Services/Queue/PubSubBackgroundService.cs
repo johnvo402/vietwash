@@ -3,7 +3,7 @@ using Application.Features.Users.Commands.Create;
 using Contracts.Application.Common.Interfaces.Services.PubSub;
 using Contracts.Dtos.Responses;
 using Infrastructure.Services.Queue;
-using JohnChum.SharedKernel.Extensions;
+using Shared.Kernel.Extensions;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

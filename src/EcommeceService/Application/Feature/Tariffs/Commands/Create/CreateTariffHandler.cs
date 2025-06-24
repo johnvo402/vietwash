@@ -1,43 +1,40 @@
 using System.Data.Common;
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
+using Contracts.ApiWrapper;
 using Domain.Aggregates.Tariffs;
 using Mediator;
 
 namespace Application.Feature.Tariffs.Commands.Create
 {
-    public class CreateTariffHandler(
-    IUnitOfWork unitOfWork,
-    IMapper mapper
-) : IRequestHandler<CreateTariffCommand, CreateTariffResponse>
+    public class CreateTariffHandler(IUnitOfWork unitOfWork)
+        : IRequestHandler<CreateTariffCommand, Result>
     {
-        public async ValueTask<CreateTariffResponse> Handle(CreateTariffCommand request, CancellationToken cancellationToken)
+        public async ValueTask<Result> Handle(
+            CreateTariffCommand request,
+            CancellationToken cancellationToken
+        )
         {
-            Tariff mappingTaiff = mapper.Map<Tariff>(request);
+            Tariff mappingTariff = request.ToEntityCreate();
+
             try
             {
-                DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
+                DbTransaction transaction = await unitOfWork.BeginTransactionAsync(
+                    cancellationToken
+                );
 
                 Tariff tariff = await unitOfWork
                     .Repository<Tariff>()
-                    .AddAsync(mappingTaiff, cancellationToken);
+                    .AddAsync(mappingTariff, cancellationToken);
 
                 await unitOfWork.SaveAsync(cancellationToken);
-
                 await unitOfWork.CommitAsync(cancellationToken);
-                return new CreateTariffResponse
-                {
-                    Message = "Tariff created successfully"
-                };
-            }
-            catch (Exception ex)
-            {
 
+                return Result.Success();
+            }
+            catch (Exception)
+            {
                 await unitOfWork.RollbackAsync(cancellationToken);
-                return new CreateTariffResponse
-                {
-                    Message = ex.Message
-                };
+                throw;
             }
         }
     }

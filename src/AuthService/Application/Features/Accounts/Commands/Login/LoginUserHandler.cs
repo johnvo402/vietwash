@@ -1,19 +1,20 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using Application.Common.Auth;
+using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Token;
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.ApiWrapper;
 using Contracts.Application.Common.Interfaces.Services.Token;
+using Contracts.Common.Messages;
+using Contracts.Extensions;
 using Domain.Aggregates.Accounts;
 using Domain.Aggregates.Accounts.Enums;
 using Domain.Aggregates.Accounts.Specifications;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Extensions;
 using Mediator;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Wangkanai.Detection.Services;
-using SerializerExtension = JohnChum.SharedKernel.SpecificationQuery.LHS.Extensions.SerializerExtension;
+using SerializerExtension = Contracts.Extensions.SerializerExtension;
 
 namespace Application.Features.Accounts.Commands.Login;
 
@@ -25,47 +26,55 @@ public class LoginAccountHandler(
     IDetectionService detectionService,
     ICurrentAccount currentAccount,
     ITokenSecurityService securityService
-) : IRequestHandler<LoginCommand, LoginResponse>
+) : IRequestHandler<LoginCommand, Result<LoginResponse>>
 {
-    public async ValueTask<LoginResponse> Handle(
+    public async ValueTask<Result<LoginResponse>> Handle(
         LoginCommand request,
         CancellationToken cancellationToken
     )
     {
-        Account user =
-            await unitOfWork
-                .Repository<Account>()
-                .FindByConditionAsync(
-                    new GetAccountByEmailSpecification(request.Email!),
-                    cancellationToken
-                )
-            ?? throw new NotFoundException(
-                [Messager.Create<Account>().Message(MessageType.Found).Negative().BuildMessage()]
+        Account? user = await unitOfWork
+            .DynamicReadOnlyRepository<Account>()
+            .FindByConditionAsync(
+                new GetAccountByEmailSpecification(request.Email!),
+                cancellationToken
             );
+        if (user == null)
+        {
+            return Result<LoginResponse>.Failure(
+                new NotFoundError(
+                    "Account not found",
+                    Messager.Create<Account>().Message(MessageType.Found).Negative().BuildMessage()
+                )
+            );
+        }
+
         if (!(user.Status == AccountStatus.Active))
         {
-            throw new BadRequestException(
-                [
+            return Result<LoginResponse>.Failure(
+                new BadRequestError(
+                    "Account not active",
                     Messager
                         .Create<Account>()
                         .Property(x => x.Status)
                         .Message(MessageType.Active)
                         .Negative()
-                        .BuildMessage(),
-                ]
+                        .BuildMessage()
+                )
             );
         }
         if (!Verify(request.Password, user.Password))
         {
-            throw new BadRequestException(
-                [
+            return Result<LoginResponse>.Failure(
+                new BadRequestError(
+                    "Password not correct",
                     Messager
                         .Create<Account>()
                         .Property(x => x.Password!)
                         .Message(MessageType.Correct)
                         .Negative()
-                        .BuildMessage(),
-                ]
+                        .BuildMessage()
+                )
             );
         }
 
@@ -118,16 +127,18 @@ public class LoginAccountHandler(
         await securityService.AddSessionUserAsync(
             user.Id.ToString(),
             result.StringJson,
-            (refreshExpireTime - DateTime.UtcNow)
+            refreshExpireTime - DateTime.UtcNow
         );
-        return new()
-        {
-            Token = accessToken,
-            Refresh = refreshToken,
-            AccessTokenExpiredIn = new DateTimeOffset(
-                accesstokenExpiredTime
-            ).ToUnixTimeMilliseconds(),
-            TokenType = JwtBearerDefaults.AuthenticationScheme,
-        };
+        return Result<LoginResponse>.Success(
+            new()
+            {
+                Token = accessToken,
+                Refresh = refreshToken,
+                AccessTokenExpiredIn = new DateTimeOffset(
+                    accesstokenExpiredTime
+                ).ToUnixTimeMilliseconds(),
+                TokenType = JwtBearerDefaults.AuthenticationScheme,
+            }
+        );
     }
 }

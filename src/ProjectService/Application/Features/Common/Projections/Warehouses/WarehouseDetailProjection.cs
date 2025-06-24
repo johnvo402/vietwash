@@ -6,7 +6,5 @@ using System.Threading.Tasks;
 
 namespace Application.Features.Common.Projections.Warehouses
 {
-    public class WarehouseDetailProjection : WarehouseProjection
-    {
-    }
+    public class WarehouseDetailProjection : WarehouseProjection { }
 }

@@ -1,5 +1,5 @@
 using Domain.Common;
-using JohnChum.SharedKernel.Domain.Common;
+using Shared.Kernel.Common;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;

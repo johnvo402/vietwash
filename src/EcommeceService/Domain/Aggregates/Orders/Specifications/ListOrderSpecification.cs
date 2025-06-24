@@ -1,6 +1,7 @@
-﻿using Domain.Aggregates.Orders.Enums;
-using JohnChum.SharedKernel.Domain.Common.Specs;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
+using Domain.Aggregates.Orders.Enums;
+using Specification;
+using Specification.Builders;
 
 namespace Domain.Aggregates.Orders.Specifications
 {
@@ -13,22 +14,22 @@ namespace Domain.Aggregates.Orders.Specifications
             List<string> branchs
         )
         {
-            Expression<Func<Order, bool>> criteria = x =>
-    x.Status == OrderStatus.Completed ;
+            Expression<Func<Order, bool>> criteria = x => x.Status == OrderStatus.Completed;
 
             if (DateTime.TryParse(from, out var fromDate) && DateTime.TryParse(to, out var toDate))
             {
                 criteria = x =>
-                    x.Status == OrderStatus.Completed &&
-                    branchs.Contains(x.BranchId.ToString()) &&
-                    x.OrderDate >= fromDate && x.OrderDate < toDate;
+                    x.Status == OrderStatus.Completed
+                    && branchs.Contains(x.BranchId.ToString())
+                    && x.OrderDate >= fromDate
+                    && x.OrderDate < toDate;
             }
             else if (!string.IsNullOrEmpty(branchId) && long.TryParse(branchId, out var bid))
             {
                 criteria = x =>
-                    x.Status == OrderStatus.Completed &&
-                    branchs.Contains(x.BranchId.ToString()) &&
-                    x.BranchId == bid;
+                    x.Status == OrderStatus.Completed
+                    && branchs.Contains(x.BranchId.ToString())
+                    && x.BranchId == bid;
             }
 
             Query

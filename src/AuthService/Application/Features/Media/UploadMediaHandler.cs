@@ -1,19 +1,21 @@
 ﻿using Application.Common.Interfaces.Services.Identity;
-using Infrastructure.Services.Identity;
+using Contracts.ApiWrapper;
+using Contracts.Dtos.Models;
 using Mediator;
 
 namespace Application.Features.Media
 {
-    public class UploadMediaHandler(IMediaUpdateService<Image> mediaUpdateService) : IRequestHandler<UploadMediaCommand, UploadMediaResponse>
+    public class UploadMediaHandler(IMediaUpdateService<Image> mediaUpdateService)
+        : IRequestHandler<UploadMediaCommand, Result<UploadMediaResponse>>
     {
-        public async ValueTask<UploadMediaResponse> Handle(UploadMediaCommand request, CancellationToken cancellationToken)
+        public async ValueTask<Result<UploadMediaResponse>> Handle(
+            UploadMediaCommand request,
+            CancellationToken cancellationToken
+        )
         {
             string? key = mediaUpdateService.GetKey(request.File);
             var path = await mediaUpdateService.UploadAvatarAsync(request.File, key);
-            return new UploadMediaResponse
-            {
-                Key = path
-            };
+            return Result<UploadMediaResponse>.Success(new UploadMediaResponse { Key = path });
         }
     }
 }

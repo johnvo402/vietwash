@@ -1,7 +1,6 @@
 using System.Reflection;
 using Application.Common.Auth;
 using Application.Common.Behaviors;
-using Application.Common.Mapping;
 using Application.Jobs;
 using FluentValidation;
 using Mediator;
@@ -27,8 +26,6 @@ public static class DependencyInjection
             .AddSingleton(typeof(IPipelineBehavior<,>), typeof(PerformaceBehavior<,>))
             .AddSingleton(typeof(IPipelineBehavior<,>), typeof(ProcessImagePathBehavior<,>))
             .AddValidatorsFromAssembly(currentAssembly)
-            .AddAutoMapper(currentAssembly)
-            .AddAutoMapper(typeof(ApplicationMappingProfile))
             .AddSingleton<IAuthorizationPolicyProvider, AuthorizePolicyProvider>()
             .AddSingleton<IAuthorizationHandler, AuthorizeHandler>()
             .AddScoped<UpdateUserStatusJob>();

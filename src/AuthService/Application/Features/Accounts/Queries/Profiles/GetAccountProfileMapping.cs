@@ -1,14 +1,14 @@
-using Application.Features.Common.Projections.Accounts;
-using AutoMapper;
 using Domain.Aggregates.Accounts;
 
 namespace Application.Features.Accounts.Queries.Profiles;
 
-public class GetAccountProfileMapping : Profile
+public static class GetAccountProfileMapping
 {
-    public GetAccountProfileMapping()
+    public static GetAccountProfileResponse ToGetAccountProfileResponse(this Account user)
     {
-        CreateMap<Account, GetAccountProfileResponse>()
-            .IncludeBase<Account, AccountDetailProjection>();
+        var response = new GetAccountProfileResponse();
+        response.MappingFrom(user);
+
+        return response;
     }
 }

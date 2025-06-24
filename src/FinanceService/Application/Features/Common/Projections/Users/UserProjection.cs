@@ -1,6 +1,6 @@
 using Application.Common.Security;
+using Contracts.Application.Common;
 using Domain.Aggregates.Users.Enums;
-using JohnChum.SharedKernel.Application.Common;
 
 namespace Application.Features.Common.Projections.Users;
 
@@ -16,15 +16,13 @@ public class UserProjection : BaseResponse
 
     public string? PhoneNumber { get; set; }
 
-    public DateTime? DayOfBirth { get; set; }
+    public DateOnly? BirthDay { get; set; }
 
     public Gender? Gender { get; set; }
 
     public string? Street { get; set; }
-
-    [File]
     public string? Avatar { get; set; }
     public CustomerGroup? CustomerGroup { get; set; }
     public UserStatus Status { get; set; }
-    public Ulid RoleId { get; set; }
+    public string Role { get; set; }
 }

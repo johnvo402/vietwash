@@ -1,6 +1,5 @@
+using Application.Features.Common.Projections;
+
 namespace Application.Features.Accounts.Commands.Logout;
 
-public class LogoutResponse
-{
-    public string? Message { get; set; }
-}
+public class LogoutResponse : MessageOutput;

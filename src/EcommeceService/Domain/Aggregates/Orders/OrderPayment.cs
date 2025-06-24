@@ -1,5 +1,5 @@
 ﻿using Domain.Aggregates.Orders.Enums;
-using JohnChum.SharedKernel.Domain.Common;
+using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Orders
 {

@@ -1,8 +1,9 @@
+using Contracts.ApiWrapper;
 using Mediator;
 
 namespace Application.Features.Accounts.Commands.ChangePassword;
 
-public class ChangeAccountPasswordCommand : IRequest
+public class ChangeAccountPasswordCommand : IRequest<Result>
 {
     public string? OldPassword { get; set; }
 

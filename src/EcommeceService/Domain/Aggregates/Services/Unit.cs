@@ -1,8 +1,5 @@
-﻿using Domain.Aggregates.Equipments;
-using Domain.Aggregates.Inventories;
-using Domain.Aggregates.Services.Enums;
-using Domain.Aggregates.Suppliers;
-using JohnChum.SharedKernel.Domain.Common;
+﻿using Domain.Aggregates.Services.Enums;
+using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Services
 {
@@ -11,5 +8,23 @@ namespace Domain.Aggregates.Services
         public string Name { get; set; } = default!;
         public ActivationStatus Status { get; set; } = default!;
 
+        public void Update(string? name = null, ActivationStatus? status = null)
+        {
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                Name = name;
+            }
+
+            if (status.HasValue)
+            {
+                Status = status.Value;
+            }
+        }
+
+        public Unit(string name, ActivationStatus status)
+        {
+            Name = name;
+            Status = status;
+        }
     }
 }

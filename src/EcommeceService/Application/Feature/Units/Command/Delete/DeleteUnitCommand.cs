@@ -1,8 +1,7 @@
-﻿using Mediator;
-
+﻿using Contracts.ApiWrapper;
+using Mediator;
 
 namespace Application.Feature.Units.Command.Delete
 {
-	public record DeleteUnitCommand(long UnitId) : IRequest;
-
+    public record DeleteUnitCommand(long UnitId) : IRequest<Result>;
 }

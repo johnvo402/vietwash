@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using Application.Common.Interfaces.Services.Token;
 using Contracts.Dtos.Responses;
-using JohnChum.SharedKernel.Extensions;
+using Shared.Kernel.Extensions;
 using JWT;
 using JWT.Algorithms;
 using JWT.Builder;

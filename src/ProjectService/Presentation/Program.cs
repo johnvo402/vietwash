@@ -1,14 +1,14 @@
-using Presentation.Extensions;
 using Application;
+using Contracts.Converters;
+using Contracts.Extensions;
 using HealthChecks.UI.Client;
 using Infrastructure;
-using Infrastructure.Services.Hangfires;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Serilog;
 using Infrastructure.Services.BackgroundJobs;
 using Infrastructure.Services.gRPC;
-using Contracts.Extensions;
-using Contracts.Converters;
+using Infrastructure.Services.Hangfires;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Presentation.Extensions;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -27,8 +27,10 @@ builder
         option.JsonSerializerOptions.Converters.Add(
             new Cysharp.Serialization.Json.UlidJsonConverter()
         );
-
     });
+services.AddAuthentication();
+services.AddErrorDetails();
+services.AddErrorDetails();
 services.AddSwagger(configuration);
 builder.AddOpenTelemetryTracing(configuration);
 builder.AddSerialogs();
@@ -68,21 +70,22 @@ try
             x.RoutePrefix = "docs";
             x.ConfigObject.PersistAuthorization = true;
         });
+        app.AddLog(Log.Logger, "docs", "/api/health");
     }
+    app.UseStatusCodePages();
+    app.UseExceptionHandler();
     app.UseAuthentication();
     app.CurrentUser();
     app.UseAuthorization();
     app.UseDetection();
     app.UseGrpcEndpoints();
     app.UseSerilogRequestLogging();
-    app.LogContext();
-    app.ExceptionHandler();
     app.BlackListContext();
     app.MapControllers();
     app.MapHealthChecks(
-       "/api/health",
-       new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }
-   );
+        "/api/health",
+        new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }
+    );
     Log.Logger.Information(
         "Application is launching with {environment}",
         app.Environment.EnvironmentName

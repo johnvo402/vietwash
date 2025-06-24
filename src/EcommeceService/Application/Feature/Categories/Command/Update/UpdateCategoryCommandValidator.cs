@@ -3,7 +3,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Common.Validators.Categories;
 using Domain.Aggregates.Services;
 using FluentValidation;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Contracts.Common.Messages;
 
 namespace Application.Feature.Categories.Command.Update;
 

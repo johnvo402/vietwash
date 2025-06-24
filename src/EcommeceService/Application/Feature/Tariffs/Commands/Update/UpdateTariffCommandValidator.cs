@@ -6,7 +6,7 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Common.Validators.Tariffs;
 using FluentValidation;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Contracts.Common.Messages;
 
 namespace Application.Feature.Tariffs.Commands.Update
 {

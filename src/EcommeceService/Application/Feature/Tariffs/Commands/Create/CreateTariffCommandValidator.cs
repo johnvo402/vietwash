@@ -7,7 +7,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Common.Validators.Tariffs;
 using Domain.Aggregates.Tariffs;
 using FluentValidation;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Contracts.Common.Messages;
 using Wangkanai.Extensions;
 
 namespace Application.Feature.Tariffs.Commands.Create

@@ -1,15 +1,27 @@
-﻿using Application.Feature.Common.Projections.Suppliers;
-using AutoMapper;
+﻿using System.Linq.Expressions;
 using Domain.Aggregates.Suppliers;
 
 namespace Application.Feature.Suppliers.Query.List
 {
-	public class ListSupplierMapping : Profile
-	{
-		public ListSupplierMapping()
-		{
-			CreateMap<Supplier, SupplierProjection>();
-			CreateMap<Supplier, ListSupplierResponse>();
-		}
-	}
+    public static class ListSupplierMapping
+    {
+        public static Expression<Func<Supplier, ListSupplierResponse>> Selector() =>
+            supplier => new ListSupplierResponse
+            {
+                Id = supplier.Id,
+                PublicId = supplier.PublicId,
+                CreatedAt = supplier.CreatedAt,
+                CreatedBy = supplier.CreatedBy,
+                UpdatedAt = supplier.UpdatedAt,
+                UpdatedBy = supplier.UpdatedBy,
+
+                Name = supplier.Name,
+                Code = supplier.Code,
+                Email = supplier.Email,
+                Address = supplier.Address,
+                Phone = supplier.Phone,
+                Description = supplier.Description,
+                Status = supplier.Status,
+            };
+    }
 }

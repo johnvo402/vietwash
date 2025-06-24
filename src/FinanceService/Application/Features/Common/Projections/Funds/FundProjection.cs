@@ -1,26 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using Contracts.Application.Common;
+using Domain.Aggregates.Funds;
 using Domain.Aggregates.Funds.Enums;
 
 namespace Application.Features.Common.Projections.Funds
 {
-    public class FundProjection
+    public class FundProjection : BaseResponse
     {
-        public long Id { get; set; }
         public string? Name { get; set; }
-        public long? TypeId { get; set; }
-        public long? BehaviorId { get; set; }
-        public decimal Amount { get; set; }
+        public decimal? Amount { get; set; }
+        public long FundBehaviorId { get; set; }
         public string? Note { get; set; }
-        public DateTimeOffset CreatedAt { get; set; }
-        public DateTimeOffset TransactionDate { get; set; }
+        public FundStatus Status { get; set; } = default!;
+        public PaymentMethod PaymentMethod { get; set; } = default!;
+        public DateTimeOffset? TransactionDate { get; set; } = default!;
+        public long BranchId { get; set; } = default!;
+        public FundType? Type { get; set; }
+        public long? ReferenceId { get; set; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public PaymentMethod PaymentMethod { get; set; }
-        public long ReferenceId { get; set; }
+        public virtual void MappingFrom(Fund fund)
+        {
+            Id = fund.Id;
+            PublicId = fund.PublicId;
+            CreatedAt = fund.CreatedAt;
+            CreatedBy = fund.CreatedBy;
+            UpdatedAt = fund.UpdatedAt;
+            UpdatedBy = fund.UpdatedBy;
+
+            Name = fund.Name;
+            Type = fund.Type;
+            Amount = fund.Amount;
+            FundBehaviorId = fund.FundBehaviorId;
+            Note = fund.Note;
+            Status = fund.Status;
+            PaymentMethod = fund.PaymentMethod;
+            TransactionDate = fund.TransactionDate;
+            BranchId = fund.BranchId;
+            Type = fund.Type;
+            FundBehaviorId = fund.FundBehaviorId;
+            ReferenceId = fund.ReferenceId;
+        }
     }
 }

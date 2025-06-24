@@ -1,18 +1,15 @@
-﻿using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
+﻿using Contracts.ApiWrapper;
+using Contracts.Dtos.Requests;
+using Contracts.Dtos.Responses;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Features.Funds.Queries.List
 {
-    public class ListFundQuery : QueryParamRequest, IRequest<PaginationResponse<ListFundResponse>>
+    public class ListFundQuery
+        : QueryParamRequest,
+            IRequest<Result<PaginationResponse<ListFundResponse>>>
     {
-
         [FromQuery]
         public string? From { get; set; }
 

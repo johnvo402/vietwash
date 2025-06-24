@@ -1,13 +1,15 @@
-using Application.Feature.Common.Projections.Services;
-using AutoMapper;
 using Domain.Aggregates.Services;
 
 namespace Application.Feature.Categories.Command.Create;
 
-public class CreateCategoryMapping : Profile
+public static class CreateCategoryMapping
 {
-    public CreateCategoryMapping()
+    public static Category ToEntity(this CreateCategoryCommand command)
     {
-        CreateMap<CreateCategoryCommand, Category>().IncludeBase<CategoryModel, Category>();
+        return new Category(
+            name: command.Name!,
+            parentId: command.ParentId,
+            status: command.Status
+        );
     }
 }

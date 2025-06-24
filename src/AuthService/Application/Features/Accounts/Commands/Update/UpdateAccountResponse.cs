@@ -1,5 +1,5 @@
-using Application.Features.Common.Projections.Accounts;
+using Application.Features.Common.Projections;
 
 namespace Application.Features.Accounts.Commands.Update;
 
-public class UpdateAccountResponse : AccountDetailProjection;
+public class UpdateAccountResponse : MessageOutput;

@@ -1,9 +1,10 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Features.Common.Projections.Users;
 using Application.Features.Common.Validators.Users;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Users;
 using FluentValidation;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 
 namespace Application.Features.Users.Commands.Update;
 
@@ -32,7 +33,7 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
             .NotEmpty()
             .WithState(x =>
                 Messager
-                    .Create<UpdateUser>(nameof(User))
+                    .Create<UserModel>(nameof(User))
                     .Property(x => x.Role!)
                     .Message(MessageType.Null)
                     .Negative()

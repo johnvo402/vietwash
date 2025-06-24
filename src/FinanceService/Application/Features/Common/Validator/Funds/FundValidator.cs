@@ -1,9 +1,9 @@
 ﻿using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Projections.Funds;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Funds;
 using FluentValidation;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 
 namespace Application.Features.Common.Validator.Funds
 {
@@ -21,33 +21,10 @@ namespace Application.Features.Common.Validator.Funds
 
         private void ApplyRules()
         {
-            RuleFor(x => x.Name)
-                .NotEmpty()
-                .WithState(x =>
-                    Messager
-                        .Create<Fund>()
-                        .Property(x => x.Name)
-                        .Message(MessageType.Null)
-                        .Negative()
-                        .Build()
-                )
-                .MaximumLength(256)
-                .WithState(x =>
-                    Messager
-                        .Create<Fund>()
-                        .Property(x => x.Name)
-                        .Message(MessageType.MaximumLength)
-                        .Build()
-                );
-
             RuleFor(x => x.Type)
                 .IsInEnum()
                 .WithState(x =>
-                    Messager
-                        .Create<Fund>()
-                        .Property(x => x.Type)
-                        .Message(MessageType.Valid)
-                        .Build()
+                    Messager.Create<Fund>().Property(x => x.Type).Message(MessageType.Valid).Build()
                 );
 
             RuleFor(x => x.Amount)
@@ -55,7 +32,7 @@ namespace Application.Features.Common.Validator.Funds
                 .WithState(x =>
                     Messager
                         .Create<Fund>()
-                        .Property(x => x.Name)
+                        .Property(x => x.Amount)
                         .Message(MessageType.GreaterThan)
                         .Build()
                 );
@@ -75,7 +52,7 @@ namespace Application.Features.Common.Validator.Funds
                 .WithState(x =>
                     Messager
                         .Create<Fund>()
-                        .Property(x => x.Name)
+                        .Property(x => x.Note)
                         .Message(MessageType.MaximumLength)
                         .Build()
                 );
@@ -96,5 +73,4 @@ namespace Application.Features.Common.Validator.Funds
             return await _unitOfWork.Repository<FundBehavior>().AnyAsync(fb => fb.Id == id, ct);
         }
     }
-
 }

@@ -1,8 +1,8 @@
 ﻿using Application.Common.Auth;
 using Application.Feature.Statistics.Queries.TopService;
 using Ardalis.ApiEndpoints;
+using Contracts.ApiWrapper;
 using Contracts.RouteResults;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -25,6 +25,10 @@ namespace Presentation.Endpoints.SaleStatistic
         > HandleAsync(
             [FromQuery] GetTopServiceQuery request,
             CancellationToken cancellationToken = default
-        ) => this.Ok200(await sender.Send(request, cancellationToken));
+        )
+        {
+            var result = await sender.Send(request, cancellationToken);
+            return result.ToActionResult();
+        }
     }
 }

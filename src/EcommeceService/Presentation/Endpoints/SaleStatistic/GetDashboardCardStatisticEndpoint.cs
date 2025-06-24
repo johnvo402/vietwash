@@ -2,8 +2,8 @@
 using Application.Feature.Statistics.Queries.RevenueStatistic;
 using Application.Feature.Statistics.Queries.SaleResult;
 using Ardalis.ApiEndpoints;
+using Contracts.ApiWrapper;
 using Contracts.RouteResults;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -21,11 +21,13 @@ namespace Presentation.Endpoints.SaleStatistic
             Summary = "Dashboard card"
         )]
         [AuthorizeBy(roles: "ADMIN, MANAGER")]
-        public override async Task<
-            ActionResult<ApiResponse<GetDashboardCardResponse>>
-        > HandleAsync(
-           GetDashboardCardQuery request,
+        public override async Task<ActionResult<ApiResponse<GetDashboardCardResponse>>> HandleAsync(
+            GetDashboardCardQuery request,
             CancellationToken cancellationToken = default
-        ) => this.Ok200(await sender.Send(request, cancellationToken));
+        )
+        {
+            var result = await sender.Send(request, cancellationToken);
+            return result.ToActionResult();
+        }
     }
 }

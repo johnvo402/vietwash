@@ -1,27 +1,38 @@
 ﻿using Application.Common.Interfaces.UnitOfWorks;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.QueryStringProcessing;
+using Contracts.ApiWrapper;
+using Contracts.Common.QueryStringProcessing;
 using Domain.Aggregates.Funds;
 using Domain.Aggregates.Funds.Specifications;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
 using Mediator;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Features.FundBehaviors.Queries
 {
-
     public class ListFundBehaviorHandler(IUnitOfWork unitOfWork)
-     : IRequestHandler<ListFundBehaviorQuery, IEnumerable<ListFundBehaviorResponse>>
+        : IRequestHandler<ListFundBehaviorQuery, Result<IEnumerable<ListFundBehaviorResponse>>>
     {
-        public async ValueTask<IEnumerable<ListFundBehaviorResponse>> Handle(
+        public async ValueTask<Result<IEnumerable<ListFundBehaviorResponse>>> Handle(
             ListFundBehaviorQuery query,
             CancellationToken cancellationToken
-        ) =>
-            await unitOfWork
-                .CachedRepository<FundBehavior>()
-                .ListAsync<ListFundBehaviorResponse>(cancellationToken);
+        )
+        {
+            var validation = query.ValidateWithoutPaging<
+                ListFundBehaviorQuery,
+                IEnumerable<ListFundBehaviorResponse>
+            >();
+
+            if (validation != null)
+            {
+                return validation;
+            }
+            var response = await unitOfWork
+                .DynamicReadOnlyRepository<FundBehavior>()
+                .ListAsync(
+                    new ListFundBehaviorSpecification(),
+                    query,
+                    ListFundBehaviorMapping.Selector(),
+                    cancellationToken
+                );
+            return Result<IEnumerable<ListFundBehaviorResponse>>.Success(response);
+        }
     }
 }

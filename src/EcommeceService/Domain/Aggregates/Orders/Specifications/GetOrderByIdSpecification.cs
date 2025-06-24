@@ -1,5 +1,5 @@
-﻿using Domain.Aggregates.Orders.Enums;
-using JohnChum.SharedKernel.Domain.Common.Specs;
+﻿using Specification;
+using Specification.Builders;
 
 namespace Domain.Aggregates.Orders.Specifications
 {
@@ -8,11 +8,9 @@ namespace Domain.Aggregates.Orders.Specifications
         public GetOrderByIdSpecification(long id)
         {
             Query
-                .Where(x => x.Id == id && x.Status != OrderStatus.Cancelled)
+                .Where(x => x.Id == id)
                 .Include(x => x.OrderItems)
-                .ThenInclude(x => x.Service)
-                .Include(x => x.OrderItems)
-                .ThenInclude(x => x.UnitRelation)
+                .Include(x => x.Customer)
                 .Include(x => x.OrderPayments)
                 .AsSplitQuery();
         }

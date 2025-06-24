@@ -2,7 +2,7 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Aggregates.Users;
 using FluentValidation;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Contracts.Common.Messages;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Users.Commands.Create;
