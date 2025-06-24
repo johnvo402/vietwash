@@ -1,5 +1,6 @@
 ﻿using Domain.Aggregates.Services;
-using JohnChum.SharedKernel.Domain.Common.Specs;
+using Specification;
+using Specification.Builders;
 namespace Domain.Aggregates.Services.Specifications;
 public class GetServiceWithIncludeByIdSpecification : Specification<Service>
 {

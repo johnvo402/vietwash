@@ -5,9 +5,9 @@
     <Using Include="BCrypt.Net.BCrypt" Static="True" />
   </ItemGroup>
   <ItemGroup>
-  <None Include="Data\Migrations\**\*.sql">
-    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-  </None>
+    <None Include="Data\Migrations\**\*.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="EFCore.NamingConventions" />

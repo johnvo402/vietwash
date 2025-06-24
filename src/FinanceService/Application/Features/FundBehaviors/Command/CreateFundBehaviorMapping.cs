@@ -1,14 +1,12 @@
-﻿using AutoMapper;
-using Domain.Aggregates.Funds;
+﻿using Domain.Aggregates.Funds;
 
 namespace Application.Features.FundBehaviors.Command
 {
-    public class CreateFundBehaviorMapping : Profile
+    public static class CreateFundBehaviorMapping
     {
-        public CreateFundBehaviorMapping()
+        public static FundBehavior ToEntity(this CreateFundBehaviorCommand command)
         {
-            CreateMap<CreateFundBehaviorCommand, FundBehavior>();
+            return new FundBehavior(command.Name, command.Type);
         }
-
     }
 }

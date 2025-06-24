@@ -1,12 +1,15 @@
-using AutoMapper;
 using Domain.Aggregates.Services;
 
 namespace Application.Feature.Categories.Command.Update;
 
-public class UpdateCategoryMapping : Profile
+public static class UpdateCategoryMapper
 {
-    public UpdateCategoryMapping()
+    public static void MapUpdateToEntity(this UpdateCategoryCommand command, Category category)
     {
-        CreateMap<UpdateCategoryCommand, Category>();
+        category.Update(
+            name: command.Category.Name,
+            parentId: command.Category.ParentId,
+            status: command.Category.Status
+        );
     }
 }

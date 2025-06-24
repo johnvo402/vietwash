@@ -1,20 +1,36 @@
-using Application.Feature.Common.Projections.Categories;
-using Application.Feature.Common.Projections.Services;
-using Application.Feature.Common.Projections.Units;
-using AutoMapper;
+using System.Linq.Expressions;
+using Application.Feature.Common.Mapping.Units;
 using Domain.Aggregates.Services;
 
 namespace Application.Feature.Services.Queries.List;
 
-public class ListServiceMapping : Profile
+public class ListServiceMapping
 {
-    public ListServiceMapping()
+    public static Expression<Func<Service, ListServiceResponse>> Selector()
     {
+        return service => new ListServiceResponse
+        {
+            Id = service.Id,
+            PublicId = service.PublicId,
+            CreatedAt = service.CreatedAt,
+            CreatedBy = service.CreatedBy,
+            UpdatedAt = service.UpdatedAt,
+            UpdatedBy = service.UpdatedBy,
 
-        CreateMap<Service, ListServiceResponse>().IncludeBase<Service, ServiceProjection>();
+            // Từ ServiceProjection
+            Name = service.Name,
+            Type = service.Type,
+            Image = service.Image,
+            Status = service.Status,
 
-        CreateMap<UnitRelation, UnitRelationService>();
-
-        CreateMap<Category, CategoryService>();
+            // Navigation properties
+            Category =
+                service.Category == null
+                    ? null
+                    : new CategoryService { Name = service.Category.Name },
+            UnitRelations = service
+                .UnitRelations.Select(x => x.ToUnitRelationProjectionResponse())
+                .ToList(),
+        };
     }
 }

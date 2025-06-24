@@ -1,4 +1,5 @@
-﻿using JohnChum.SharedKernel.Domain.Common.Specs;
+﻿using Specification;
+using Specification.Builders;
 
 namespace Domain.Aggregates.Funds.Specifications
 {

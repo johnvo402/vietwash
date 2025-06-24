@@ -1,13 +1,14 @@
-using Application.Features.Common.Projections.Accounts;
-using AutoMapper;
 using Domain.Aggregates.Accounts;
 
 namespace Application.Features.Accounts.Queries.Detail;
 
-public class GetAccountDetailMapping : Profile
+public static class GetAccountDetailMapping
 {
-    public GetAccountDetailMapping()
+    public static GetAccountDetailResponse ToGetAccountDetailResponse(this Account account)
     {
-        CreateMap<Account, GetAccountDetailResponse>().IncludeBase<Account, AccountDetailProjection>();
+        var response = new GetAccountDetailResponse();
+        response.MappingFrom(account);
+
+        return response;
     }
 }

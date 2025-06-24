@@ -2,14 +2,15 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Statistics.Queries.RevenueStatistic;
+using Contracts.ApiWrapper;
 using Domain.Functions;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
 
 public class GetRevenueStatisticHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
-    : IRequestHandler<GetRevenueStatisticQuery, IEnumerable<GetRevenueStatistic>>
+    : IRequestHandler<GetRevenueStatisticQuery, Result<IEnumerable<GetRevenueStatistic>>>
 {
-    public async ValueTask<IEnumerable<GetRevenueStatistic>> Handle(
+    public async ValueTask<Result<IEnumerable<GetRevenueStatistic>>> Handle(
         GetRevenueStatisticQuery request,
         CancellationToken cancellationToken
     )
@@ -31,6 +32,6 @@ public class GetRevenueStatisticHandler(IUnitOfWork unitOfWork, ICurrentAccount 
             )
             .ToListAsync(cancellationToken);
 
-        return result;
+        return Result<IEnumerable<GetRevenueStatistic>>.Success(result);
     }
 }

@@ -4,7 +4,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Projections.Accounts;
 using Domain.Aggregates.Accounts;
 using FluentValidation;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Contracts.Common.Messages;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Common.Validators.Accounts;

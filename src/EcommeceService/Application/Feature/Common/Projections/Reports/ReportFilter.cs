@@ -1,4 +1,4 @@
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
+using Contracts.Dtos.Requests;
 
 namespace Application.Feature.Common.Projections.Reports;
 

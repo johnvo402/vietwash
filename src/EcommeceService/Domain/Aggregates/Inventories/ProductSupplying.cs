@@ -1,6 +1,6 @@
 using Domain.Aggregates.Services;
 using Domain.Aggregates.Suppliers;
-using JohnChum.SharedKernel.Domain.Common;
+using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Inventories
 {

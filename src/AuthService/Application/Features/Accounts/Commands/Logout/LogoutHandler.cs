@@ -1,11 +1,12 @@
 using System.IdentityModel.Tokens.Jwt;
 using Application.Common.Interfaces.Services.Token;
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.ApiWrapper;
 using Contracts.Application.Common.Interfaces.Services.Token;
+using Contracts.Dtos.Models;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Accounts;
 using Domain.Aggregates.Accounts.Specifications;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Models;
 using Mediator;
 
 namespace Application.Features.Accounts.Commands.Logout;
@@ -14,9 +15,9 @@ public class LogoutHandler(
     ITokenSecurityService blacklistService,
     ITokenFactory tokenFactory,
     IUnitOfWork unitOfWork
-) : IRequestHandler<LogoutCommand, LogoutResponse>
+) : IRequestHandler<LogoutCommand, Result<LogoutResponse>>
 {
-    public async ValueTask<LogoutResponse> Handle(
+    public async ValueTask<Result<LogoutResponse>> Handle(
         LogoutCommand command,
         CancellationToken cancellationToken
     )
@@ -26,7 +27,7 @@ public class LogoutHandler(
             DecodeTokenResponse decodeToken = tokenFactory.DecodeToken(command.Token!);
 
             IEnumerable<AccountToken> refreshTokens = await unitOfWork
-                .Repository<AccountToken>()
+                .DynamicReadOnlyRepository<AccountToken>()
                 .ListAsync(
                     new ListRefreshtokenByFamillyIdSpecification(
                         decodeToken.FamilyId!,
@@ -56,6 +57,8 @@ public class LogoutHandler(
             }
         }
 
-        return new LogoutResponse { Message = "Logged out successfully" };
+        return Result<LogoutResponse>.Success(
+            new LogoutResponse { Message = "Logged out successfully" }
+        );
     }
 }

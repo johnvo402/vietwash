@@ -1,47 +1,52 @@
-﻿using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
+﻿using System.Data.Common;
+using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.ApiWrapper;
+using Contracts.Utils;
 using Domain.Aggregates.Funds;
+using Domain.Aggregates.Funds.Enums;
 using Mediator;
-using System.Data.Common;
 
 namespace Application.Features.Funds.Command.Create
 {
-    public class CreateFundHandler(IUnitOfWork unitOfWork, IMapper mapper) : IRequestHandler<CreateFundCommand>
+    public class CreateFundHandler(IUnitOfWork unitOfWork)
+        : IRequestHandler<CreateFundCommand, Result>
     {
-        public async ValueTask<Unit> Handle(CreateFundCommand request, CancellationToken cancellationToken)
+        public async ValueTask<Result> Handle(
+            CreateFundCommand request,
+            CancellationToken cancellationToken
+        )
         {
-            var fund = mapper.Map<Fund>(request);
+            string code = Generator.GenerateCode("FU-", 6);
+            Fund fund = request.ToFund(code);
 
-            if (fund == null)
+            if (fund.Status == FundStatus.Confirmed)
             {
-                return Unit.Value;
+                fund.TransactionDate = DateTimeOffset.UtcNow;
             }
-
-            fund.Code = $"FU-{DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()[^6..]}";
-            if (fund.Status.Equals("Confirmed")) { fund.TransactionDate = DateTimeOffset.UtcNow; } else { fund.TransactionDate = null; }
+            else
+            {
+                fund.TransactionDate = null;
+            }
 
             try
             {
-
-                DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
-
+                DbTransaction transaction = await unitOfWork.BeginTransactionAsync(
+                    cancellationToken
+                );
 
                 await unitOfWork.Repository<Fund>().AddAsync(fund, cancellationToken);
 
-
                 await unitOfWork.SaveAsync(cancellationToken);
-
 
                 await unitOfWork.CommitAsync(cancellationToken);
             }
             catch
             {
-
                 await unitOfWork.RollbackAsync(cancellationToken);
                 throw;
             }
 
-            return Unit.Value;
+            return Result.Success();
         }
     }
 }

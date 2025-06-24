@@ -1,5 +1,5 @@
-﻿using Domain.Aggregates.Funds.Enums;
-using JohnChum.SharedKernel.Application.Common;
+﻿using Contracts.Application.Common;
+using Domain.Aggregates.Funds.Enums;
 
 namespace Application.Features.Common.Projections.FundBehaviors
 {

@@ -6,9 +6,11 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="IdGen.DependencyInjection" />
-    <PackageReference Include="JohnChum.SharedKernel" />
     <PackageReference Include="NEST" />
     <PackageReference Include="NewId" />
     <PackageReference Include="CSharpFunctionalExtensions" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Shared.Kernel\Shared.Kernel.csproj" />
   </ItemGroup>
 </Project>

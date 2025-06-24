@@ -2,11 +2,11 @@
 using Domain.Aggregates.AuditLogs;
 using Domain.Common.ElasticConfigurations;
 using Elastic.Clients.Elasticsearch;
-using JohnChum.SharedKernel.Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Serilog;
+using Shared.Kernel.Common;
 
 namespace Infrastructure.Data.Interceptors;
 

@@ -1,19 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Application.Feature.Common.Projections.Tariffs;
-using AutoMapper;
 using Domain.Aggregates.Tariffs;
 
 namespace Application.Feature.Tariffs.Commands.Update
 {
-    public class UpdateTariffMapping : Profile
+    public static class UpdateTariffMapping
     {
-        public UpdateTariffMapping()
+        public static Tariff FromUpdateTariff(this Tariff tariff, TariffModel update)
         {
-            CreateMap<UpdateTariff, Tariff>();
-            CreateMap<Tariff, UpdateTariffResponse>().IncludeBase<Tariff, TariffDetailProjection>();
+            tariff.Update(name: update.Name, disable: update.Disable, branchId: update.BranchId);
+            return tariff;
         }
     }
 }

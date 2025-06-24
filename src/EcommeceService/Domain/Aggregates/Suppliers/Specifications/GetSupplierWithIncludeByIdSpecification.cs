@@ -1,7 +1,8 @@
 ﻿using Domain.Aggregates.Enums;
 using Domain.Aggregates.Services;
 using Domain.Aggregates.Suppliers.Enum;
-using JohnChum.SharedKernel.Domain.Common.Specs;
+using Specification;
+using Specification.Builders;
 using System;
 using System.Collections.Generic;
 using System.Linq;

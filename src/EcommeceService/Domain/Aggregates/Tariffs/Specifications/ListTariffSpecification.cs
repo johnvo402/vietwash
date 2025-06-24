@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using JohnChum.SharedKernel.Domain.Common.Specs;
+using Specification;
+using Specification.Builders;
 
 namespace Domain.Aggregates.Tariffs.Specifications
 {

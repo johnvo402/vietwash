@@ -1,20 +1,17 @@
 using Application.Feature.Common.Projections.Tariffs;
+using Contracts.ApiWrapper;
 using Contracts.Routers;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Feature.Tariffs.Commands.Update
 {
-    public class UpdateTariffCommand : IRequest<UpdateTariffResponse>
+    public class UpdateTariffCommand : IRequest<Result<UpdateTariffResponse>>
     {
         [FromRoute(Name = RouterBase.Id)]
         public string TariffId { get; set; } = string.Empty;
 
         [FromBody]
-        public UpdateTariff? Tariff { get; set; }
-    }
-    public class UpdateTariff : TariffModel
-    {
-
+        public TariffModel? Tariff { get; set; }
     }
 }

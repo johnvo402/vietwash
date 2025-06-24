@@ -1,15 +1,14 @@
-﻿using Application.Features.Common.Projections.Funds;
-using AutoMapper;
-using Domain.Aggregates.Funds;
-
+﻿using Domain.Aggregates.Funds;
 
 namespace Application.Features.Funds.Queries.Detail
 {
-    public class GetFundDetailMapping : Profile
+    public static class GetFundDetailMapping
     {
-        public GetFundDetailMapping()
+        public static GetFundDetailResponse ToGetFundDetailResponse(this Fund fund)
         {
-            CreateMap<Fund, GetFundDetailResponse>();
+            var response = new GetFundDetailResponse();
+            response.MappingFrom(fund);
+            return response;
         }
     }
 }

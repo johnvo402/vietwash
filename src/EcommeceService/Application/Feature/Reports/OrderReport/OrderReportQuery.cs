@@ -1,9 +1,10 @@
 using Application.Feature.Common.Projections.Reports;
+using Contracts.ApiWrapper;
+using Contracts.Dtos.Responses;
 using Domain.Functions;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
 using Mediator;
 
 namespace Application.Feature.Reports.OrderReport
 {
-    public class OrderReportQuery : ReportFilter, IRequest<PaginationResponse<OrderSummaryResult>>;
+    public class OrderReportQuery : ReportFilter, IRequest<Result<PaginationResponse<OrderSummaryResult>>>;
 }

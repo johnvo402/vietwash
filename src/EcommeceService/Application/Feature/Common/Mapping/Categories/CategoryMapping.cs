@@ -1,14 +1,22 @@
-using Application.Feature.Common.Projections.Services;
-using AutoMapper;
+using Application.Feature.Common.Projections.Categories;
 using Domain.Aggregates.Services;
 
 namespace Application.Feature.Common.Mapping.Categories
 {
-    public class CategoryMapping : Profile
+    public static class CategoryMapping
     {
-        public CategoryMapping()
+        public static CategoryProjection ToCategoryProjectionResponse(this Category category)
         {
-            CreateMap<CategoryModel, Category>();
+            return new()
+            {
+                Id = category.Id,
+                Name = category.Name,
+                Path = category.Path,
+                ParentId = category.ParentId,
+                Status = category.Status,
+                CreatedAt = category.CreatedAt,
+                UpdatedAt = category.UpdatedAt,
+            };
         }
     }
 }

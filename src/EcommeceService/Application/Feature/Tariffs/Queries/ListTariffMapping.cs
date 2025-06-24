@@ -1,19 +1,22 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Application.Feature.Common.Projections.Tariffs;
-using AutoMapper;
+using System.Linq.Expressions;
 using Domain.Aggregates.Tariffs;
 
-namespace Application.Feature.Tariffs.Queries
+namespace Application.Feature.Tariffs.Queries.List
 {
-    public class ListTariffMapping : Profile
+    public static class ListTariffMapping
     {
-        public ListTariffMapping()
-        {
-            CreateMap<Tariff, TariffProjection>();
-            CreateMap<Tariff, ListTariffResponse>().IncludeBase<Tariff, TariffProjection>();
-        }
+        public static Expression<Func<Tariff, ListTariffResponse>> Selector() =>
+            tariff => new ListTariffResponse
+            {
+                Id = tariff.Id,
+                PublicId = tariff.PublicId,
+                CreatedAt = tariff.CreatedAt,
+                CreatedBy = tariff.CreatedBy,
+                UpdatedAt = tariff.UpdatedAt,
+                UpdatedBy = tariff.UpdatedBy,
+
+                Name = tariff.Name,
+                Disable = tariff.Disable,
+            };
     }
 }

@@ -1,47 +1,47 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
-using System.Linq;
-using System.Threading.Tasks;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
-using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Errors;
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
+using Contracts.ApiWrapper;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Tariffs;
 using Domain.Aggregates.Tariffs.Specifications;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Mediator;
 
 namespace Application.Feature.Tariffs.Commands.Update
 {
-    public class UpdateTariffHandler(IUnitOfWork unitOfWork,
-    IMapper mapper
-) : IRequestHandler<UpdateTariffCommand, UpdateTariffResponse>
+    public class UpdateTariffHandler(IUnitOfWork unitOfWork)
+        : IRequestHandler<UpdateTariffCommand, Result<UpdateTariffResponse>>
     {
-        public async ValueTask<UpdateTariffResponse> Handle(
+        public async ValueTask<Result<UpdateTariffResponse>> Handle(
             UpdateTariffCommand command,
             CancellationToken cancellationToken
         )
         {
-            Tariff tariff =
-                await unitOfWork
-                    .Repository<Tariff>()
-                    .FindByConditionAsync(
-                        new GetTariffByIdWithoutIncludeSpecification(long.Parse(command.TariffId)),
-                        cancellationToken
-                    )
-                ?? throw new NotFoundException(
-                    [Messager.Create<Tariff>().Message(MessageType.Found).Negative().BuildMessage()]
+            Tariff? tariff = await unitOfWork
+                .DynamicReadOnlyRepository<Tariff>()
+                .FindByConditionAsync(
+                    new GetTariffByIdWithoutIncludeSpecification(long.Parse(command.TariffId)),
+                    cancellationToken
                 );
-
-
-            mapper.Map(command.Tariff, tariff);
-
-            // update default claim
-
+            if (tariff == null)
+            {
+                return Result<UpdateTariffResponse>.Failure(
+                    new NotFoundError(
+                        "Your resource is not found",
+                        Messager
+                            .Create<Tariff>()
+                            .Message(MessageType.Found)
+                            .Negative()
+                            .BuildMessage()
+                    )
+                );
+            }
+            tariff.FromUpdateTariff(command.Tariff!);
             try
             {
-                DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
+                _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
 
                 await unitOfWork.Repository<Tariff>().UpdateAsync(tariff);
 
@@ -49,7 +49,9 @@ namespace Application.Feature.Tariffs.Commands.Update
 
                 await unitOfWork.CommitAsync(cancellationToken);
 
-                return mapper.Map<UpdateTariffResponse>(tariff);
+                return Result<UpdateTariffResponse>.Success(
+                    new UpdateTariffResponse { Message = "Success" }
+                );
             }
             catch (Exception)
             {

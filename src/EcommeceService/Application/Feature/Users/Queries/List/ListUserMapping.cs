@@ -1,22 +1,28 @@
-using Application.Features.Common.Projections.Users;
-using AutoMapper;
+using System.Linq.Expressions;
 using Domain.Aggregates.Users;
 
 namespace Application.Features.Users.Queries.List;
 
-public class ListUserMapping : Profile
+public static class ListUserMapping
 {
-    public ListUserMapping()
-    {
-        CreateMap<User, ListUserResponse>().IncludeBase<User, UserProjection>();
-        // .ForMember(
-        //     dest => dest.Age,
-        //     opt =>
-        //         opt.MapFrom(src =>
-        //             src.DayOfBirth == null
-        //                 ? 0
-        //                 : DateTimeOffset.UtcNow.Year - src.DayOfBirth.Value.Year
-        //         )
-        // );
-    }
+    public static Expression<Func<User, ListUserResponse>> Selector() =>
+        user => new ListUserResponse
+        {
+            Id = user.Id,
+            PublicId = user.PublicId,
+            CreatedAt = user.CreatedAt,
+            CreatedBy = user.CreatedBy,
+            UpdatedAt = user.UpdatedAt,
+            UpdatedBy = user.UpdatedBy,
+
+            DisplayName = user.DisplayName,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            BirthDay = user.BirthDay,
+            Gender = user.Gender,
+            Avatar = user.AvtUrl,
+            CustomerGroup = user.CustomerGroup,
+            Status = user.Status,
+            Role = user.Role,
+        };
 }

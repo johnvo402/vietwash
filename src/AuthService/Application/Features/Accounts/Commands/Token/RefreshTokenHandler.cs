@@ -1,19 +1,20 @@
 using System.IdentityModel.Tokens.Jwt;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
+using Application.Common.Auth;
+using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Token;
 using Application.Common.Interfaces.UnitOfWorks;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Contracts.ApiWrapper;
+using Contracts.Application.Common.Interfaces.Services.Token;
+using Contracts.Common.Messages;
+using Contracts.Dtos.Models;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Accounts;
 using Domain.Aggregates.Accounts.Enums;
 using Domain.Aggregates.Accounts.Specifications;
 using Mediator;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Application.Common.Auth;
-using JohnChum.SharedKernel.Extensions;
-using Contracts.Application.Common.Interfaces.Services.Token;
+using Shared.Kernel.Extensions;
 
 namespace Application.Features.Accounts.Commands.Token;
 
@@ -22,17 +23,17 @@ public class RefreshTokenHandler(
     ITokenFactory tokenFactory,
     ICurrentAccount currentUser,
     ITokenSecurityService securityService
-) : IRequestHandler<RefreshTokenCommand, RefreshTokenResponse>
+) : IRequestHandler<RefreshTokenCommand, Result<RefreshTokenResponse>>
 {
-    public async ValueTask<RefreshTokenResponse> Handle(
+    public async ValueTask<Result<RefreshTokenResponse>> Handle(
         RefreshTokenCommand command,
         CancellationToken cancellationToken
     )
     {
         DecodeTokenResponse decodeToken = tokenFactory.DecodeToken(command.RefreshToken!);
- 
+
         AccountToken? refresh = await unitOfWork
-            .Repository<AccountToken>()
+            .DynamicReadOnlyRepository<AccountToken>()
             .FindByConditionAsync(
                 new GetRefreshtokenSpecification(
                     command.RefreshToken!,
@@ -42,13 +43,16 @@ public class RefreshTokenHandler(
             );
 
         IEnumerable<AccountToken> refreshTokens = await unitOfWork
-            .Repository<AccountToken>()
+            .DynamicReadOnlyRepository<AccountToken>()
             .ListAsync(
                 new ListRefreshtokenByFamillyIdSpecification(
                     decodeToken.FamilyId!,
                     long.Parse(decodeToken.Sub!)
                 ),
-                new() { Sort = $"{nameof(AccountToken.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}" },
+                new()
+                {
+                    Sort = $"{nameof(AccountToken.CreatedAt)}{OrderTerm.DELIMITER}{OrderTerm.DESC}",
+                },
                 cancellationToken
             );
 
@@ -56,47 +60,44 @@ public class RefreshTokenHandler(
         {
             await unitOfWork.Repository<AccountToken>().DeleteRangeAsync(refreshTokens);
             await unitOfWork.SaveAsync(cancellationToken);
-            throw new BadRequestException(
-                [
+            return Result<RefreshTokenResponse>.Failure(
+                new BadRequestError(
+                    "Token invalid",
                     Messager
                         .Create<AccountToken>(nameof(Account))
                         .Property(x => x.Token!)
                         .Message(MessageType.Correct)
                         .Negative()
-                        .BuildMessage(),
-                ]
-            );
-        }
-
-        if (refresh.Account!.Status == AccountStatus.Inactive)
-        {
-            throw new BadRequestException(
-                [Messager.Create<Account>().Message(MessageType.Active).Negative().BuildMessage()]
+                        .BuildMessage()
+                )
             );
         }
 
         await unitOfWork.Repository<AccountToken>().DeleteRangeAsync(refreshTokens);
-        Account user =
-           await unitOfWork
-               .Repository<Account>()
-               .FindByConditionAsync(
-                   new GetAccountByIdSpecification(long.Parse(decodeToken.Sub!)),
-                   cancellationToken
-               )
-           ?? throw new NotFoundException(
-               [Messager.Create<Account>().Message(MessageType.Found).Negative().BuildMessage()]
-           );
+        Account? user = await unitOfWork
+            .DynamicReadOnlyRepository<Account>()
+            .FindByConditionAsync(
+                new GetAccountByIdSpecification(long.Parse(decodeToken.Sub!)),
+                cancellationToken
+            );
+
+        if (user == null)
+        {
+            return Result<RefreshTokenResponse>.Failure(
+                new NotFoundError(
+                    "Account not found",
+                    Messager.Create<Account>().Message(MessageType.Found).Negative().BuildMessage()
+                )
+            );
+        }
+
         if (!(user.Status == AccountStatus.Active))
         {
-            throw new BadRequestException(
-                [
-                    Messager
-                        .Create<Account>()
-                        .Property(x => x.Status)
-                        .Message(MessageType.Active)
-                        .Negative()
-                        .BuildMessage(),
-                ]
+            return Result<RefreshTokenResponse>.Failure(
+                new BadRequestError(
+                    "Account inactive",
+                    Messager.Create<Account>().Message(MessageType.Active).Negative().BuildMessage()
+                )
             );
         }
         var accesstokenExpiredTime = tokenFactory.AccesstokenExpiredTime;
@@ -105,18 +106,18 @@ public class RefreshTokenHandler(
             [
                 new(JwtRegisteredClaimNames.Sub.ToString(), user.Id.ToString()),
                 new("family_id", decodeToken.FamilyId!),
-                new("token_type", "access")
+                new("token_type", "access"),
             ],
             accesstokenExpiredTime
         );
-       
+
         var refreshTokenExpiredTime = tokenFactory.RefreshtokenExpiredTime;
 
         string refreshToken = tokenFactory.CreateToken(
             [
                 new(JwtRegisteredClaimNames.Sub.ToString(), decodeToken.Sub!.ToString()),
                 new("family_id", decodeToken.FamilyId!),
-                new("token_type", "refresh")
+                new("token_type", "refresh"),
             ],
             refreshTokenExpiredTime
         );
@@ -134,14 +135,29 @@ public class RefreshTokenHandler(
         await unitOfWork.SaveAsync(cancellationToken);
 
         var branches = user.BranchAccounts?.Select(x => x.BranchId.ToString()) ?? [];
-        UserAuth value = new UserAuth() { Id = user.Id, Role = user.Role, Branches = branches };
+        UserAuth value = new UserAuth()
+        {
+            Id = user.Id,
+            Role = user.Role,
+            Branches = branches,
+        };
         var result = SerializerExtension.Serialize(value!);
         await securityService.AddSessionUserAsync(
             user.Id.ToString(),
             result.StringJson,
-            (refreshTokenExpiredTime - DateTime.UtcNow)
+            refreshTokenExpiredTime - DateTime.UtcNow
         );
 
-        return new() { Token = accessToken, Refresh = refreshToken, AccessTokenExpiredIn = new DateTimeOffset(accesstokenExpiredTime).ToUnixTimeMilliseconds(), TokenType = JwtBearerDefaults.AuthenticationScheme };
+        return Result<RefreshTokenResponse>.Success(
+            new()
+            {
+                Token = accessToken,
+                Refresh = refreshToken,
+                AccessTokenExpiredIn = new DateTimeOffset(
+                    accesstokenExpiredTime
+                ).ToUnixTimeMilliseconds(),
+                TokenType = JwtBearerDefaults.AuthenticationScheme,
+            }
+        );
     }
 }

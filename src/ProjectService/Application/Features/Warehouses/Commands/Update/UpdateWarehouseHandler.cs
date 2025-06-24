@@ -1,35 +1,55 @@
 ﻿using System.Data.Common;
 using System.Threading.Tasks;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
+using Application.Common.Errors;
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
+using Contracts.ApiWrapper;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Warehouses;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
-using Mediator;
 using Domain.Aggregates.Warehouses.Specifications;
+using Mediator;
 
 namespace Application.Features.Warehouses.Commands.Update
 {
-    public class UpdateWarehouseHandler(IUnitOfWork unitOfWork, IMapper mapper) : IRequestHandler<UpdateWarehouseCommand, string>
+    public class UpdateWarehouseHandler(IUnitOfWork unitOfWork)
+        : IRequestHandler<UpdateWarehouseCommand, Result>
     {
-        public async ValueTask<string> Handle(UpdateWarehouseCommand request, CancellationToken cancellationToken)
+        public async ValueTask<Result> Handle(
+            UpdateWarehouseCommand request,
+            CancellationToken cancellationToken
+        )
         {
-            Warehouse warehouse = await unitOfWork.Repository<Warehouse>()
-                                                        .FindByConditionAsync(
-                                                            new GetWarehouseByIdWithoutIncludeSpecification(request.WarehouseId), cancellationToken
-                                                        ) ?? throw new NotFoundException(
-                                                            [Messager.Create<Warehouse>().Message(MessageType.Found).Negative().BuildMessage()]
-                                                            );
-            mapper.Map(request.Warehouse, warehouse);
+            Warehouse? warehouse = await unitOfWork
+                .DynamicReadOnlyRepository<Warehouse>()
+                .FindByConditionAsync(
+                    new GetWarehouseByIdWithoutIncludeSpecification(request.WarehouseId),
+                    cancellationToken
+                );
+            if (warehouse == null)
+            {
+                return Result.Failure(
+                    new NotFoundError(
+                        "Warehouse not found",
+                        Messager
+                            .Create<Warehouse>()
+                            .Message(MessageType.Found)
+                            .Negative()
+                            .BuildMessage()
+                    )
+                );
+            }
+            warehouse.UpdateWarehouse(request.Warehouse!);
+
             try
             {
-                DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
+                DbTransaction transaction = await unitOfWork.BeginTransactionAsync(
+                    cancellationToken
+                );
                 await unitOfWork.Repository<Warehouse>().UpdateAsync(warehouse);
                 await unitOfWork.SaveAsync(cancellationToken);
                 await unitOfWork.CommitAsync(cancellationToken);
-                return "Success";
+                return Result.Success();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 await unitOfWork.RollbackAsync(cancellationToken);
                 throw;

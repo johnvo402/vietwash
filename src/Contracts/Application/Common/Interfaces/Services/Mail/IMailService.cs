@@ -4,6 +4,6 @@ namespace Application.Common.Interfaces.Services.Mail;
 
 public interface IMailService
 {
-    Task<bool> SendAsync(MessageMailMetaData metaData);
-    Task<bool> SendWithTemplateAsync(TemplateMailMetaData metaData);
+    Task<bool> SendAsync(MailMessageData metaData);
+    Task<bool> SendWithTemplateAsync(MailTemplateData metaData);
 }

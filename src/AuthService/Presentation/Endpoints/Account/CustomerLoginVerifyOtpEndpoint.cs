@@ -1,7 +1,7 @@
 using Application.Features.Accounts.Commands.VerifyOtpLoginCustomer;
 using Ardalis.ApiEndpoints;
+using Contracts.ApiWrapper;
 using Contracts.RouteResults;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
@@ -19,5 +19,9 @@ public class CustomerLoginVerifyOtpEndpoint(ISender sender)
     public override async Task<ActionResult<ApiResponse<VerifyOtpResponse>>> HandleAsync(
         VerifyOtpCommand request,
         CancellationToken cancellationToken = default
-    ) => this.Ok200(await sender.Send(request, cancellationToken));
+    )
+    {
+        var result = await sender.Send(request, cancellationToken);
+        return result.ToActionResult();
+    }
 }

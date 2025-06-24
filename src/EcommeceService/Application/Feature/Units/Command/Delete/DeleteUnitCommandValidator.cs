@@ -2,7 +2,7 @@
 using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Aggregates.Services;
 using FluentValidation;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Contracts.Common.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;

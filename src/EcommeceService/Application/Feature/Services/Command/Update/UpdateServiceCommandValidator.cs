@@ -3,7 +3,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Aggregates.Services;
 using FluentValidation;
 using Infrastructure.UnitOfWorks;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Contracts.Common.Messages;
 
 namespace Application.Feature.Services.Command.Update
 {

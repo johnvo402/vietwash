@@ -1,14 +1,15 @@
-﻿using Domain.Otp;
+﻿using Contracts.ApiWrapper;
+using Domain.Otp;
 
 namespace Application.Common.Interfaces.Services.Identity
 {
     public interface ISmsOtpClient
     {
-        Task<CreatePinResponse> CreatePinAsync(
+        Task<ErrorDetails?> CreateAsync(
             CreatePinRequest request,
             CancellationToken cancellationToken = default
         );
-        Task<bool> VerifyPinAsync(
+        Task<bool> VerifyAsync(
             VerifyPinRequest request,
             CancellationToken cancellationToken = default
         );

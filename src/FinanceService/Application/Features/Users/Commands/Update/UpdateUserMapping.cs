@@ -1,14 +1,21 @@
 using Application.Features.Common.Projections.Users;
-using AutoMapper;
 using Domain.Aggregates.Users;
 
 namespace Application.Features.Users.Commands.Update;
 
-public class UpdateUserMapping : Profile
+public static class UpdateUserMapping
 {
-    public UpdateUserMapping()
+    public static User FromUpdateUser(this User user, UserModel update)
     {
-        CreateMap<UpdateUser, User>();
-        CreateMap<User, UpdateUserResponse>().IncludeBase<User, UserDetailProjection>();
+        user.Update(
+            update.DisplayName,
+            update.Email,
+            update.PhoneNumber,
+            update.BirthDay != null ? DateOnly.FromDateTime((DateTime)update.BirthDay) : null,
+            update.Status,
+            update.Role,
+            update.AvtUrl
+        );
+        return user;
     }
 }

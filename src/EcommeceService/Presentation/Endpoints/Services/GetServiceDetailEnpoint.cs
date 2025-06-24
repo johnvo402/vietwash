@@ -1,7 +1,7 @@
 ﻿using Application.Common.Auth;
 using Application.Feature.Services.Queries.Detail;
 using Ardalis.ApiEndpoints;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
+using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Contracts.Routers;
 using Infrastructure.Constants;
@@ -14,7 +14,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Presentation.Endpoints.Services
 {
     public class GetServiceDetailEnpoint(ISender sender)
-        : EndpointBaseAsync.WithRequest<long>.WithActionResult<
+        : EndpointBaseAsync.WithRequest<GetServiceDetailQuery>.WithActionResult<
             ApiResponse<GetServiceDetailResponse>
         >
     {
@@ -25,8 +25,12 @@ namespace Presentation.Endpoints.Services
         )]
         //[AuthorizeBy(permissions: $"{ActionPermission.detail}:{ObjectPermission.service}")]
         public override async Task<ActionResult<ApiResponse<GetServiceDetailResponse>>> HandleAsync(
-            [FromRoute(Name = RouterBase.Id)] long serviceId,
+            GetServiceDetailQuery request,
             CancellationToken cancellationToken = default
-        ) => this.Ok200(await sender.Send(new GetServiceDetailQuery(serviceId), cancellationToken));
+        )
+        {
+            var result = await sender.Send(request, cancellationToken);
+            return result.ToActionResult();
+        }
     }
 }

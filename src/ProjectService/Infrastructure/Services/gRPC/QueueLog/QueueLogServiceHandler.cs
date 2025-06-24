@@ -1,6 +1,6 @@
 ﻿using Application.Features.PubSubLogs;
 using Grpc.Core;
-using JohnChum.SharedKernel.Extensions;
+using Shared.Kernel.Extensions;
 using Mediator;
 using ProjectService_gRPC;
 using Serilog;

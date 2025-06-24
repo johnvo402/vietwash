@@ -26,6 +26,8 @@ builder
             new Cysharp.Serialization.Json.UlidJsonConverter()
         );
     });
+
+services.AddErrorDetails();
 services.AddSwagger(configuration);
 builder.AddOpenTelemetryTracing(configuration);
 builder.AddSerialogs();
@@ -63,7 +65,6 @@ try
     #endregion
 
     app.UseHangfireDashboard(configuration);
-
     if (isDevelopment || isStaging)
     {
         app.UseSwagger();
@@ -73,16 +74,17 @@ try
             x.RoutePrefix = "docs";
             x.ConfigObject.PersistAuthorization = true;
         });
+        app.AddLog(Log.Logger, "docs", "/api/health");
     }
 
+    app.UseStatusCodePages();
+    app.UseExceptionHandler();
     app.UseAuthentication();
     app.CurrentUser();
     app.UseAuthorization();
     app.UseDetection();
 
     app.UseSerilogRequestLogging();
-    app.LogContext();
-    app.ExceptionHandler();
     app.BlackListContext();
     app.MapControllers();
     Log.Logger.Information(

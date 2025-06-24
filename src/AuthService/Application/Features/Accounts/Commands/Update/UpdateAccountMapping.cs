@@ -1,14 +1,28 @@
-using Application.Features.Common.Projections.Accounts;
-using AutoMapper;
+using System.Linq.Expressions;
+using Contracts.Extensions;
 using Domain.Aggregates.Accounts;
 
 namespace Application.Features.Accounts.Commands.Update;
 
-public class UpdateAccountMapping : Profile
+public static class UpdateAccountMapping
 {
-    public UpdateAccountMapping()
+    public static Account FromUpdateUser(this Account user, UpdateAccount update)
     {
-        CreateMap<UpdateAccount, Account>().IncludeBase<AccountModel, Account>();
-        CreateMap<Account, UpdateAccountResponse>().IncludeBase<Account, AccountDetailProjection>();
+        user.Update(
+            update.DisplayName,
+            update.Email,
+            update.PhoneNumber,
+            update.BirthDay != null ? DateOnly.FromDateTime((DateTime)update.BirthDay) : null,
+            status: update.Status,
+            role: update.Role,
+            gender: update.Gender
+        );
+        user.AvtUrl = update.AvtUrl;
+        user.BranchAccounts = update.BranchAccounts.ToListMapping(x => new BranchAccount
+        {
+            BranchId = x.BranchId,
+            BranchName = x.BranchName,
+        });
+        return user;
     }
 }

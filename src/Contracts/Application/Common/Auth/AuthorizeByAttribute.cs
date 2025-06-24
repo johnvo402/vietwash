@@ -1,5 +1,5 @@
 using Application.Common.Security;
-using JohnChum.SharedKernel.Extensions;
+using Shared.Kernel.Extensions;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Application.Common.Auth;

@@ -1,33 +1,44 @@
 using Application.Common.Interfaces.UnitOfWorks;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.QueryStringProcessing;
+using Contracts.ApiWrapper;
+using Contracts.Common.QueryStringProcessing;
+using Contracts.Dtos.Responses;
 using Domain.Aggregates.Services;
 using Domain.Aggregates.Services.Specifications;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
 using Mediator;
 
 namespace Application.Feature.Services.Queries.List;
 
 public class ListServiceHandler(IUnitOfWork unitOfWork)
-	: IRequestHandler<ListServiceQuery, PaginationResponse<ListServiceResponse>>
+    : IRequestHandler<ListServiceQuery, Result<PaginationResponse<ListServiceResponse>>>
 {
-    public async ValueTask<PaginationResponse<ListServiceResponse>> Handle(
+    public async ValueTask<Result<PaginationResponse<ListServiceResponse>>> Handle(
         ListServiceQuery query,
         CancellationToken cancellationToken
     )
     {
         try
         {
-           return await unitOfWork.Repository<Service>().
-       PagedListAsync<ListServiceResponse>(
-    new ListServiceSpecification(),
-    query.ValidateQuery().ValidateFilter(typeof(ListServiceResponse))
+            var validation = query.Validate<ListServiceQuery, ListServiceResponse>();
 
-);
+            if (validation != null)
+            {
+                return validation;
+            }
+
+            var response = await unitOfWork
+                .DynamicReadOnlyRepository<Service>()
+                .PagedListAsync(
+                    new ListServiceSpecification(),
+                    query,
+                    ListServiceMapping.Selector(),
+                    cancellationToken
+                );
+
+            return Result<PaginationResponse<ListServiceResponse>>.Success(response);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            throw new Exception("Exception", ex) ;
+            throw new Exception("Exception", ex);
         }
     }
-
 }

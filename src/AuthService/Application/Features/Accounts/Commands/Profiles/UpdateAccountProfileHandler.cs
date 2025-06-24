@@ -1,14 +1,14 @@
 using System.Data.Common;
+using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
+using Contracts.ApiWrapper;
+using Contracts.Common.Messages;
+using Contracts.Dtos.Models;
 using Domain.Aggregates.Accounts;
 using Domain.Aggregates.Accounts.Specifications;
 using Infrastructure.Constants;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
 using Mediator;
 
 namespace Application.Features.Accounts.Commands.Profiles;
@@ -16,29 +16,33 @@ namespace Application.Features.Accounts.Commands.Profiles;
 public class UpdateAccountProfileHandler(
     IUnitOfWork unitOfWork,
     ICurrentAccount currentAccount,
-    IMapper mapper,
-    IMediaUpdateService<Account> avatarUpdate
-) : IRequestHandler<UpdateAccountProfileCommand, UpdateAccountProfileResponse>
+    IMediaUpdateService<Image> avatarUpdate
+) : IRequestHandler<UpdateAccountProfileCommand, Result<UpdateAccountProfileResponse>>
 {
-    public async ValueTask<UpdateAccountProfileResponse> Handle(
+    public async ValueTask<Result<UpdateAccountProfileResponse>> Handle(
         UpdateAccountProfileCommand command,
         CancellationToken cancellationToken
     )
     {
-        Account user =
-            await unitOfWork
-                .Repository<Account>()
-                .FindByConditionAsync(
-                    new GetAccountByIdSpecification(currentAccount.Id!.Value),
-                    cancellationToken
-                )
-            ?? throw new NotFoundException(
-                [Messager.Create<Account>().Message(MessageType.Found).Negative().BuildMessage()]
+        Account? user = await unitOfWork
+            .DynamicReadOnlyRepository<Account>()
+            .FindByConditionAsync(
+                new GetAccountByIdSpecification(currentAccount.Id!.Value),
+                cancellationToken
             );
+        if (user == null)
+        {
+            return Result<UpdateAccountProfileResponse>.Failure(
+                new NotFoundError(
+                    "Account not found",
+                    Messager.Create<Account>().Message(MessageType.Found).Negative().BuildMessage()
+                )
+            );
+        }
 
         string? oldAvatar = user.AvtUrl;
 
-        mapper.Map(command, user);
+        user.FromUpdateModel(command);
 
         user.AvtUrl = command.AvtUrl;
         if (user.Role == ROLE.CUSTOMER)
@@ -47,7 +51,7 @@ public class UpdateAccountProfileHandler(
         }
         try
         {
-            DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
+            DbTransaction transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
             await unitOfWork.Repository<Account>().UpdateAsync(user);
 
             await unitOfWork.SaveAsync(cancellationToken);
@@ -63,6 +67,6 @@ public class UpdateAccountProfileHandler(
             throw;
         }
 
-        return new UpdateAccountProfileResponse { Message = "Success" };
+        return Result<UpdateAccountProfileResponse>.Success(new() { Message = "Success" });
     }
 }

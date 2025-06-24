@@ -1,29 +1,36 @@
-﻿
-
-using Application.Common.Interfaces.UnitOfWorks;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.QueryStringProcessing;
-using AutoMapper;
-using Domain.Aggregates.Services;
+﻿using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.ApiWrapper;
+using Contracts.Common.QueryStringProcessing;
+using Contracts.Dtos.Responses;
 using Domain.Aggregates.Services.Specifications;
-using Infrastructure.UnitOfWorks;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
 using Mediator;
 using Unit = Domain.Aggregates.Services.Unit;
 
 namespace Application.Feature.Units.Queries.List
 {
-	public class ListUnitHandler(IUnitOfWork unitOfWork, IMapper mapper)
-		: IRequestHandler<ListUnitQuery, PaginationResponse<ListUnitResponse>>
-	{
-		public async ValueTask<PaginationResponse<ListUnitResponse>> Handle(
-			ListUnitQuery query, CancellationToken cancellationToken
-			) =>
-			await unitOfWork
-				.Repository<Unit>()
-				.PagedListAsync<ListUnitResponse>(
-					new ListUnitSpecification(),
-					query.ValidateQuery().ValidateFilter(typeof(ListUnitResponse))
-				);
+    public class ListUnitHandler(IUnitOfWork unitOfWork)
+        : IRequestHandler<ListUnitQuery, Result<PaginationResponse<ListUnitResponse>>>
+    {
+        public async ValueTask<Result<PaginationResponse<ListUnitResponse>>> Handle(
+            ListUnitQuery query,
+            CancellationToken cancellationToken
+        )
+        {
+            var validation = query.Validate<ListUnitQuery, ListUnitResponse>();
 
-	}
+            if (validation != null)
+            {
+                return validation;
+            }
+            var response = await unitOfWork
+                .DynamicReadOnlyRepository<Unit>()
+                .PagedListAsync(
+                    new ListUnitSpecification(),
+                    query,
+                    ListUnitMapping.Selector(),
+                    cancellationToken: cancellationToken
+                );
+            return Result<PaginationResponse<ListUnitResponse>>.Success(response);
+        }
+    }
 }

@@ -1,9 +1,9 @@
-using Domain.Functions;
 using Application.Feature.Reports.OrderReport;
 using Ardalis.ApiEndpoints;
+using Contracts.ApiWrapper;
+using Contracts.Dtos.Responses;
 using Contracts.RouteResults;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
+using Domain.Functions;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
@@ -24,6 +24,11 @@ namespace Presentation.Endpoints.Reports
         > HandleAsync(
             [FromQuery] OrderReportQuery request,
             CancellationToken cancellationToken = default
-        ) => this.Ok200(await sender.Send(request, cancellationToken));
+        )
+        {
+            var result = await sender.Send(request, cancellationToken);
+
+            return result.ToActionResult();
+        }
     }
 }

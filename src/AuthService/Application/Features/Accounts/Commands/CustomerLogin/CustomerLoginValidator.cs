@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
+using Contracts.Common.Messages;
 using FluentValidation;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 
 namespace Application.Features.Accounts.Commands.CustomerLogin;
 

@@ -1,7 +1,7 @@
 ﻿using Application.Feature.Orders.Queries.Detail;
 using Ardalis.ApiEndpoints;
+using Contracts.ApiWrapper;
 using Contracts.RouteResults;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
@@ -22,11 +22,8 @@ namespace Presentation.Endpoints.Orders
             CancellationToken cancellationToken = default
         )
         {
-            var response = await sender.Send(
-                new GetOrderDetailQuery { OrderId = request.OrderId },
-                cancellationToken
-            );
-            return this.Ok200(response);
+            var response = await sender.Send(request, cancellationToken);
+            return response.ToActionResult();
         }
     }
 }

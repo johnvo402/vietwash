@@ -1,18 +1,19 @@
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.ApiWrapper;
+using Contracts.Dtos.Models;
+using Contracts.Dtos.Requests;
+using Contracts.Dtos.Responses;
 using Domain.Functions;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Models;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
 using Mediator;
 
 namespace Application.Feature.Reports.OrderReport;
 
 public class OrderReportHandler(IUnitOfWork unitOfWork)
-    : IRequestHandler<OrderReportQuery, PaginationResponse<OrderSummaryResult>>
+    : IRequestHandler<OrderReportQuery, Result<PaginationResponse<OrderSummaryResult>>>
 {
     private const string functionName = "get_order_summary";
 
-    public async ValueTask<PaginationResponse<OrderSummaryResult>> Handle(
+    public async ValueTask<Result<PaginationResponse<OrderSummaryResult>>> Handle(
         OrderReportQuery request,
         CancellationToken cancellationToken
     )
@@ -28,14 +29,15 @@ public class OrderReportHandler(IUnitOfWork unitOfWork)
                 : request.SearchKeywords,
         };
 
-        return await unitOfWork
+        var response = await unitOfWork
             .RepositoryFunction<OrderSummaryResult>()
-            .PagedListFunctionAsync(
+            .PagedListAsync(
                 functionName: functionName,
                 parameters: parameters,
                 defaultSort: $"{nameof(OrderSummaryResult.OrderId)}{OrderTerm.DELIMITER}{OrderTerm.DESC}",
                 queryParam: request,
                 cancellationToken: cancellationToken
             );
+        return Result<PaginationResponse<OrderSummaryResult>>.Success(response);
     }
 }

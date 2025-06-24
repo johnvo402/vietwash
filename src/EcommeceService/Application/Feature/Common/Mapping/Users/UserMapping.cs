@@ -1,17 +1,17 @@
-using Application.Features.Common.Projections.Users;
-using AutoMapper;
+using Application.Feature.Services.Queries.Detail;
 using Domain.Aggregates.Users;
 
 namespace Application.Features.Common.Mapping.Users;
 
-public class UserMapping : Profile
+public static class UserMapping
 {
-    public UserMapping()
-    {
-        CreateMap<User, UserProjection>();
-
-        CreateMap<User, UserDetailProjection>();
-           
-
-    }
+    public static UserDTO UserDTOResponse(this User user) =>
+        new()
+        {
+            Id = user.Id,
+            PublicId = user.PublicId,
+            DisplayName = user.DisplayName,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+        };
 }

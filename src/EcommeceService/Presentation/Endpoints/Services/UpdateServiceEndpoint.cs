@@ -1,7 +1,7 @@
 using Application.Common.Auth;
 using Application.Feature.Services.Command.Update;
 using Ardalis.ApiEndpoints;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
+using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Infrastructure.Constants;
 using Mediator;
@@ -12,19 +12,17 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Presentation.Endpoints.Services;
 
 public class UpdateServiceEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<UpdateServiceCommand>.WithActionResult<
-        ApiResponse<Mediator.Unit>
-    >
+    : EndpointBaseAsync.WithRequest<UpdateServiceCommand>.WithActionResult<ApiResponse>
 {
     [HttpPut(Router.ServiceRoute.GetUpdateDelete)]
     [SwaggerOperation(Tags = [Router.ServiceRoute.Tags], Summary = "Update service")]
     //[AuthorizeBy(permissions: $"{ActionPermission.update}:{ObjectPermission.service}")]
-    public override async Task<ActionResult<ApiResponse<Mediator.Unit>>> HandleAsync(
+    public override async Task<ActionResult<ApiResponse>> HandleAsync(
         UpdateServiceCommand request,
         CancellationToken cancellationToken = default
     )
     {
-        await sender.Send(request);
-        return this.Created201();
+        var result = await sender.Send(request);
+        return result.ToCreatedResult();
     }
 }

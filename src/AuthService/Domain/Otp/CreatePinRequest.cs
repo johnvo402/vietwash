@@ -4,8 +4,7 @@ namespace Domain.Otp
 {
     public class CreatePinRequest
     {
-        public long? AccountId { get; set; }
-        public string To { get; set; } = default!;
-        public AccountActivityType Type { get; set; } = default!;
+        public string To { get; set; } = string.Empty; // Phone number to send OTP to
+        public string ClientIp { get; set; } = string.Empty; // Client IP for security checks
     }
 }

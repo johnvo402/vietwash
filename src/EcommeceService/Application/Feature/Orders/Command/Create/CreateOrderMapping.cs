@@ -1,41 +1,67 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Application.Feature.Common.Projections.Orders;
-using Application.Feature.Orders.Queries.Detail;
-using AutoMapper;
+﻿using Contracts.Extensions;
+using Contracts.Utils;
 using Domain.Aggregates.Orders;
+using Domain.Aggregates.Orders.Enums;
 
 namespace Application.Feature.Orders.Command.Create
 {
-    public class CreateOrderMapping : Profile
+    public static class CreateOrderMapping
     {
-        public CreateOrderMapping()
+        public static Order ToEntity(this CreateOrderCommand command)
         {
-            CreateMap<CreateOrderCommand, Order>()
-                .ForMember(
-                    dest => dest.CustomerId,
-                    opt => opt.MapFrom(src => Ulid.Parse(src.CustomerId))
-                )
-                .ForMember(
-                    dest => dest.OrderItems,
-                    opt =>
-                        opt.MapFrom(src =>
-                            src.OrderItems.Select(item => new OrderItem
-                                {
-                                    ServiceId = item.ServiceId,
-                                    UnitRelationId = item.UnitRelationId,
-                                    Quantity = item.Quantity,
-                                    Price = item.Price,
-                                })
-                                .ToList()
-                        )
-                );
+            string code = Generator.GenerateCode("OD", 6);
+            decimal amount = command.OrderItems.Sum(i => i.Price * i.Quantity);
+            var response = new Order(
+                customerId: command.CustomerId,
+                branchId: command.BranchId,
+                staffId: command.StaffId,
+                code: code,
+                amount: amount,
+                total: CalculationTotal(amount, command.DiscountFixed, command.DiscountValue),
+                discountFixed: command.DiscountFixed,
+                discountValue: command.DiscountValue,
+                note: command.Note,
+                status: OrderStatus.Pending,
+                orderDate: DateTimeOffset.UtcNow,
+                deliveryTime: command.DeliveryTime
+            );
+            response.OrderItems = command.OrderItems.ToListMapping(x => new OrderItem
+            {
+                OrderId = x.OrderId,
+                ServiceId = x.ServiceId,
+                UnitRelationId = x.UnitRelationId,
+                Price = x.Price,
+                Quantity = x.Quantity,
+                UnitRelationName = x.UnitRelationName,
+                ProcessingTime = x.ProcessingTime,
+                ServiceName = x.ServiceName,
+                UnitPrice = x.UnitPrice,
+            });
 
-            CreateMap<Order, CreateOrderResponse>().IncludeBase<Order, OrderDetailProjection>();
-            CreateMap<GetOrderDetailResponse, CreateOrderResponse>();
+            return response;
+        }
+
+        private static decimal CalculationTotal(
+            decimal amount,
+            bool discountFixed,
+            decimal discountValue
+        )
+        {
+            if (discountFixed)
+            {
+                return amount - discountValue;
+            }
+            else
+            {
+                return amount - (amount * discountValue / 100);
+            }
+        }
+
+        public static CreateOrderResponse ToCreateOrderResponse(this Order order)
+        {
+            var response = new CreateOrderResponse();
+            response.MappingFrom(order);
+            return response;
         }
     }
 }

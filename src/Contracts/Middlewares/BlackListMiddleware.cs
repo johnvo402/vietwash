@@ -1,7 +1,9 @@
-﻿using Application.Common.Exceptions;
+﻿using System.Text.Json;
+using Application.Common.Exceptions;
+using Contracts.ApiWrapper;
+using Contracts.Application.Common.Exceptions;
 using Contracts.Application.Common.Interfaces.Services.Token;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Contracts.Common.Messages;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -68,17 +70,9 @@ namespace Contracts.Middlewares
 
         private async Task ReturnUnauthorizedAsync(HttpContext context)
         {
-            var exception = new UnauthorizedException(Message.UNAUTHORIZED);
-            int statusCode = exception.HttpStatusCode;
-            context.Response.StatusCode = statusCode;
+            var error = new UnauthorizedError(Message.UNAUTHORIZED);
 
-            var error = new ErrorResponse(
-                exception.Message,
-                nameof(UnauthorizedException),
-                statusCode: statusCode
-            );
-
-            await context.Response.WriteAsJsonAsync(error, error.GetOptions());
+            await context.Response.WriteAsJsonAsync(error);
         }
     }
 }

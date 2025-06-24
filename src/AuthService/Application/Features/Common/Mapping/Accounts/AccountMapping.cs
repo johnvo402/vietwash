@@ -1,24 +1,46 @@
+using System.Linq.Expressions;
 using Application.Features.Common.Projections.Accounts;
-using AutoMapper;
 using Domain.Aggregates.Accounts;
 
 namespace Application.Features.Common.Mapping.Accounts;
 
-public class AccountMapping : Profile
+public static class AccountMapping
 {
-    public AccountMapping()
+    public static AccountProjection ToUserProjection(this Account account)
     {
-        CreateMap<Account, AccountProjection>();
-        CreateMap<Account, AccountDetailProjection>();
-        CreateMap<AccountModel, Account>()
-        .ForMember(dest => dest.BirthDay, opt =>
-        opt.MapFrom(src => src.BirthDay.HasValue
-            ? DateOnly.FromDateTime(src.BirthDay.Value)
-            : (DateOnly?)null));
-        CreateMap<AccountContact, AccountContactProjection>();
-        CreateMap<AccountContactProjection, AccountContact>();
-        CreateMap<BranchAccountProjection, BranchAccount>();
-        CreateMap<BranchAccount, BranchAccountProjection>();
-        CreateMap<BranchAccountModel, BranchAccount>();
+        var response = new AccountProjection();
+        response.MappingFrom(account);
+
+        return response;
+    }
+
+    public static AccountContactProjection ToAccountContactProjectionResponse(
+        this AccountContact contact
+    )
+    {
+        return new()
+        {
+            PhoneNumber = contact.PhoneNumber,
+            Address = contact.Address,
+            Commune = contact.Commune,
+            District = contact.District,
+            Province = contact.Province,
+            CommuneCode = contact.CommuneCode,
+            DistrictCode = contact.DistrictCode,
+            ProvinceCode = contact.ProvinceCode,
+            Street = contact.Street,
+        };
+    }
+
+    public static BranchAccountProjection ToBranchAccountProjectionResponse(
+        this BranchAccount branch
+    )
+    {
+        return new()
+        {
+            AccountId = branch.AccountId,
+            BranchId = branch.BranchId,
+            BranchName = branch.BranchName,
+        };
     }
 }

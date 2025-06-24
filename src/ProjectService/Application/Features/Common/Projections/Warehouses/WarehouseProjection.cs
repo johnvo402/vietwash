@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.Aggregates.Warehouses;
 using Domain.Aggregates.Warehouses.Enums;
-using JohnChum.SharedKernel.Domain.Common;
+using Shared.Kernel.Common;
 
 namespace Application.Features.Common.Projections.Warehouses
 {
-    public class WarehouseProjection : BaseEntity
+    public class WarehouseProjection : BaseEntity<long>
     {
         public string Name { get; set; } = default!;
         public string Code { get; set; } = default!;
@@ -16,5 +17,21 @@ namespace Application.Features.Common.Projections.Warehouses
         public int ReorderLevel { get; set; } = default!;
         public long BranchId { get; set; } = default!;
         public WarehouseStatus Status { get; set; }
+
+        public virtual void MappingFrom(Warehouse entity)
+        {
+            Id = entity.Id;
+            Name = entity.Name;
+            Code = entity.Code;
+            Description = entity.Description;
+            ReorderLevel = entity.ReorderLevel;
+            BranchId = entity.BranchId;
+            Status = entity.Status;
+
+            CreatedAt = entity.CreatedAt;
+            CreatedBy = entity.CreatedBy;
+            UpdatedAt = entity.UpdatedAt;
+            UpdatedBy = entity.UpdatedBy;
+        }
     }
 }

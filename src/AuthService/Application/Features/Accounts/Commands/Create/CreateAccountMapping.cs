@@ -1,24 +1,37 @@
 using Application.Features.Common.Projections.Accounts;
-using AutoMapper;
+using Contracts.Extensions;
 using Domain.Aggregates.Accounts;
 
 namespace Application.Features.Accounts.Commands.Create;
 
-public class CreateAccountMapping : Profile
+public static class CreateAccountMapping
 {
-    public CreateAccountMapping()
+    public static Account ToAccount(this CreateAccountCommand command, string code)
     {
-        CreateMap<CreateAccountCommand, Account>()
-            .AfterMap(
-                (src, dest) =>
-                {
-                    dest.SetPassword(HashPassword(src.Password));
-                }
-            )
-            .IncludeBase<AccountModel, Account>();
+        return new Account(
+            displayName: command.DisplayName?.Trim(),
+            password: HashPassword(command.Password!),
+            email: command.Email,
+            phoneNumber: command.PhoneNumber!,
+            role: command.Role!,
+            code: code
+        )
+        {
+            Gender = command.Gender,
+            Status = command.Status,
+            BirthDay = DateOnly.FromDateTime((DateTime)command.BirthDay!),
+            BranchAccounts = command.BranchAccounts.ToListMapping(x => new BranchAccount
+            {
+                BranchId = x.BranchId,
+                BranchName = x.BranchName,
+            }),
+        };
+    }
 
-        CreateMap<Account, CreateAccountResponse>().IncludeBase<Account, AccountDetailProjection>();
-        CreateMap<Account, CreateAccountCommand>()
-            .ForMember(dest => dest.Password, opt => opt.Ignore());
+    public static CreateAccountResponse ToCreateAccountResponse(this Account user)
+    {
+        var response = new CreateAccountResponse();
+        response.MappingFrom(user);
+        return response;
     }
 }

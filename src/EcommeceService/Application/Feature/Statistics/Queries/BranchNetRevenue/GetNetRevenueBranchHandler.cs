@@ -1,16 +1,20 @@
 ﻿using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.ApiWrapper;
+using Contracts.Dtos.Requests;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Specifications;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
 using Mediator;
 
 namespace Application.Feature.Statistics.Queries.BranchNetRevenue
 {
     public class GetNetRevenueBranchHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
-        : IRequestHandler<GetNetRevenueBranchQuery, IEnumerable<GetNetRevenueBranchResponse>>
+        : IRequestHandler<
+            GetNetRevenueBranchQuery,
+            Result<IEnumerable<GetNetRevenueBranchResponse>>
+        >
     {
-        public async ValueTask<IEnumerable<GetNetRevenueBranchResponse>> Handle(
+        public async ValueTask<Result<IEnumerable<GetNetRevenueBranchResponse>>> Handle(
             GetNetRevenueBranchQuery request,
             CancellationToken cancellationToken
         )
@@ -18,7 +22,7 @@ namespace Application.Feature.Statistics.Queries.BranchNetRevenue
             var queryParamRequest = new QueryParamRequest();
             var listBranchUser = currentUser.Session!.Branches!.ToList();
             var orders = await unitOfWork
-                .Repository<Order>()
+                .DynamicReadOnlyRepository<Order>()
                 .ListAsync(
                     new ListOrderSpecification(request.From, request.To, null, listBranchUser),
                     queryParamRequest,
@@ -53,7 +57,7 @@ namespace Application.Feature.Statistics.Queries.BranchNetRevenue
                         / 100;
                 }
             }
-            return revenueByBranch.Values;
+            return Result<IEnumerable<GetNetRevenueBranchResponse>>.Success(revenueByBranch.Values);
         }
     }
 }

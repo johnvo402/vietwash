@@ -1,14 +1,11 @@
-
-
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
 using Domain.Aggregates.PubSubLogs;
 using Mediator;
 using Serilog;
 
 namespace Application.Features.PubSubLogs;
 
-public class CreatePubSubLogHandler(IUnitOfWork unitOfWork, IMapper mapper, ILogger logger)
+public class CreatePubSubLogHandler(IUnitOfWork unitOfWork, ILogger logger)
     : IRequestHandler<CreatePubSubLogCommand>
 {
     public async ValueTask<Unit> Handle(
@@ -17,9 +14,7 @@ public class CreatePubSubLogHandler(IUnitOfWork unitOfWork, IMapper mapper, ILog
     )
     {
         logger.Information("Pushing request {payloadId} to logging queue.", command.RequestId);
-        await unitOfWork
-            .Repository<PubSubLog>()
-            .AddAsync(mapper.Map<PubSubLog>(command), cancellationToken);
+        await unitOfWork.Repository<PubSubLog>().AddAsync(command.ToEntity(), cancellationToken);
         await unitOfWork.SaveAsync(cancellationToken);
         return Unit.Value;
     }

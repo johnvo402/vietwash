@@ -1,5 +1,5 @@
 ﻿using Domain.Aggregates.Funds.Enums;
-using JohnChum.SharedKernel.Domain.Common;
+using Shared.Kernel.Common;
 using Mediator;
 
 namespace Domain.Aggregates.Funds

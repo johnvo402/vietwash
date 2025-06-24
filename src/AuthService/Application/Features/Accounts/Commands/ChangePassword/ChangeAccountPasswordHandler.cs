@@ -1,52 +1,57 @@
+using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.ApiWrapper;
+using Contracts.Application.Common.Exceptions;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Accounts;
 using Domain.Aggregates.Accounts.Specifications;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Mediator;
 
 namespace Application.Features.Accounts.Commands.ChangePassword;
 
 public class ChangeAccountPasswordHandler(IUnitOfWork unitOfWork, ICurrentAccount currentAccount)
-    : IRequestHandler<ChangeAccountPasswordCommand>
+    : IRequestHandler<ChangeAccountPasswordCommand, Result>
 {
-    public async ValueTask<Unit> Handle(
+    public async ValueTask<Result> Handle(
         ChangeAccountPasswordCommand request,
         CancellationToken cancellationToken
     )
     {
         long? userId = currentAccount.Id;
-
-        if (!userId.HasValue)
+        if (userId == null)
         {
-            throw new NotFoundException(
-                [Messager.Create<Account>().Message(MessageType.Found).Negative().Build()]
+            return Result.Failure(new UnauthorizedError("Not allow"));
+        }
+        Account? user = await unitOfWork
+            .DynamicReadOnlyRepository<Account>()
+            .FindByConditionAsync(
+                new GetAccountByIdWithoutIncludeSpecification((long)userId),
+                cancellationToken
+            );
+
+        if (user == null)
+        {
+            return Result.Failure(
+                new NotFoundError(
+                    "The resource is not found",
+                    Messager.Create<Account>().Message(MessageType.Found).Negative().Build()
+                )
             );
         }
 
-        Account user =
-            await unitOfWork
-                .Repository<Account>()
-                .FindByConditionAsync(
-                    new GetAccountByIdWithoutIncludeSpecification(userId.Value),
-                    cancellationToken
-                )
-            ?? throw new NotFoundException(
-                [Messager.Create<Account>().Message(MessageType.Found).Negative().Build()]
-            );
-
         if (!Verify(request.OldPassword, user.Password))
         {
-            throw new BadRequestException(
-                [
+            return Result.Failure(
+                new BadRequestError(
+                    "Error has occured with password",
                     Messager
                         .Create<ChangeAccountPasswordCommand>(nameof(Account))
                         .Property(x => x.OldPassword!)
                         .Message(MessageType.Correct)
                         .Negative()
-                        .Build(),
-                ]
+                        .Build()
+                )
             );
         }
 
@@ -55,6 +60,6 @@ public class ChangeAccountPasswordHandler(IUnitOfWork unitOfWork, ICurrentAccoun
         await unitOfWork.Repository<Account>().UpdateAsync(user);
         await unitOfWork.SaveAsync(cancellationToken);
 
-        return Unit.Value;
+        return Result.Success();
     }
 }

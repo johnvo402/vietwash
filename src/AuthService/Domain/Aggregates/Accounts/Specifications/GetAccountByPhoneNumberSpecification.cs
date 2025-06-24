@@ -1,5 +1,6 @@
-using JohnChum.SharedKernel.Domain.Common.Specs;
 using Microsoft.EntityFrameworkCore;
+using Specification;
+using Specification.Builders;
 
 namespace Domain.Aggregates.Accounts.Specifications;
 

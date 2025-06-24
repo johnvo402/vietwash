@@ -82,7 +82,6 @@ public class AuditLogConfiguration : IElasticsearchDocumentConfigure<AuditLog>
                             .SearchAnalyzer("standardAnalyzer")
                 )
                 .Keyword(d => d.CreatedAt)
-
         );
     }
 }

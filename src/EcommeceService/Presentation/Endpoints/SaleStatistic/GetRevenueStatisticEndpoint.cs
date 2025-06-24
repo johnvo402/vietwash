@@ -1,8 +1,8 @@
 ﻿using Application.Feature.Statistics.Queries.RevenueStatistic;
 using Ardalis.ApiEndpoints;
+using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Domain.Functions;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -27,7 +27,8 @@ namespace Presentation.Endpoints.SaleStatistic
             CancellationToken cancellationToken = default
         )
         {
-            return this.Ok200(await sender.Send(request, cancellationToken));
+            var result = await sender.Send(request, cancellationToken);
+            return result.ToActionResult();
         }
     }
 }

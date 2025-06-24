@@ -1,41 +1,42 @@
-﻿using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
+﻿using System.Data.Common;
+using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.ApiWrapper;
 using Domain.Aggregates.Funds;
 using Mediator;
-using System.Data.Common;
 
 namespace Application.Features.FundBehaviors.Command
 {
-    public class CreateFundBehaviorHandler(IUnitOfWork unitOfWork, IMapper mapper) : IRequestHandler<CreateFundBehaviorCommand>
+    public class CreateFundBehaviorHandler(IUnitOfWork unitOfWork)
+        : IRequestHandler<CreateFundBehaviorCommand, Result>
     {
-        public async ValueTask<Unit> Handle(CreateFundBehaviorCommand command, CancellationToken cancellationToken)
+        public async ValueTask<Result> Handle(
+            CreateFundBehaviorCommand command,
+            CancellationToken cancellationToken
+        )
         {
-            var fundBehavior = mapper.Map<FundBehavior>(command);
-
-            if (fundBehavior == null)
-            {
-                return Unit.Value;
-            }
+            var fundBehavior = command.ToEntity();
 
             try
             {
-                DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
+                DbTransaction transaction = await unitOfWork.BeginTransactionAsync(
+                    cancellationToken
+                );
 
-                await unitOfWork.Repository<FundBehavior>().AddAsync(fundBehavior, cancellationToken);
+                await unitOfWork
+                    .Repository<FundBehavior>()
+                    .AddAsync(fundBehavior, cancellationToken);
 
                 await unitOfWork.SaveAsync(cancellationToken);
 
                 await unitOfWork.CommitAsync(cancellationToken);
 
-
-                return Unit.Value;
+                return Result.Success();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 await unitOfWork.RollbackAsync(cancellationToken);
                 throw;
             }
-
         }
     }
 }

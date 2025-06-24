@@ -35,26 +35,28 @@ public static class HangfireRegisterExtension
                 ValidateHangfireStorage
             >();
 
-            services.AddHangfire(
-                (provider, hangfireConfiguration) =>
-                {
-                    HangfireStorageSettings hangfireStorageSettings = provider
-                        .GetRequiredService<IOptions<HangfireStorageSettings>>()
-                        .Value;
-                    hangfireConfiguration.UsePostgreSqlStorage(
-                        options =>
-                        {
-                            options.UseNpgsqlConnection(hangfireStorageSettings.ConnectionString);
-                        },
-                        configuration
-                            .GetSection("HangfireSettings:Storage:Options")
-                            .Get<PostgreSqlStorageOptions>()
-                    );
-                    hangfireConfiguration.UseConsole();
-                }
-            )
-            .AddScoped(typeof(SerilogJobWrapper<>));
-            
+            services
+                .AddHangfire(
+                    (provider, hangfireConfiguration) =>
+                    {
+                        HangfireStorageSettings hangfireStorageSettings = provider
+                            .GetRequiredService<IOptions<HangfireStorageSettings>>()
+                            .Value;
+                        hangfireConfiguration.UsePostgreSqlStorage(
+                            options =>
+                            {
+                                options.UseNpgsqlConnection(
+                                    hangfireStorageSettings.ConnectionString
+                                );
+                            },
+                            configuration
+                                .GetSection("HangfireSettings:Storage:Options")
+                                .Get<PostgreSqlStorageOptions>()
+                        );
+                        hangfireConfiguration.UseConsole();
+                    }
+                )
+                .AddScoped(typeof(SerilogJobWrapper<>));
         }
 
         return services;

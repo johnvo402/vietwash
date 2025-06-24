@@ -1,6 +1,6 @@
+using Contracts.Common.Messages;
 using Domain.Otp;
 using FluentValidation;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 
 namespace Application.Features.Accounts.Commands.VerifyOtpLoginCustomer
 {
@@ -29,16 +29,6 @@ namespace Application.Features.Accounts.Commands.VerifyOtpLoginCustomer
                     Messager
                         .Create<VerifyOtpCommand>()
                         .Property(x => x.PhoneNumber!)
-                        .Message(MessageType.Empty)
-                        .Negative()
-                        .Build()
-                );
-            RuleFor(x => x.Type)
-                .NotEmpty()
-                .WithState(x =>
-                    Messager
-                        .Create<VerifyPinRequest>()
-                        .Property(x => x.Type!)
                         .Message(MessageType.Empty)
                         .Negative()
                         .Build()

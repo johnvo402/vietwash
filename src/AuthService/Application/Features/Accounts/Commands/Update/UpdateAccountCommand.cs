@@ -1,4 +1,5 @@
 using Application.Features.Common.Projections.Accounts;
+using Contracts.ApiWrapper;
 using Contracts.Routers;
 using Domain.Aggregates.Accounts.Enums;
 using Mediator;
@@ -6,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Features.Accounts.Commands.Update;
 
-public class UpdateAccountCommand : IRequest<UpdateAccountResponse>
+public class UpdateAccountCommand : IRequest<Result<UpdateAccountResponse>>
 {
     [FromRoute(Name = RouterBase.Id)]
     public long AccountId { get; set; }

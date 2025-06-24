@@ -1,11 +1,10 @@
 using System.Text.RegularExpressions;
 using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Validators.Accounts;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Accounts;
 using FluentValidation;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Accounts.Commands.Create;

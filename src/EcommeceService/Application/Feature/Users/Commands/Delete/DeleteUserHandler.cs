@@ -1,36 +1,36 @@
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Contracts.ApiWrapper;
+using Contracts.Common.Messages;
+using Contracts.Dtos.Models;
 using Domain.Aggregates.Users;
-using Mediator;
 using Domain.Aggregates.Users.Specifications;
+using Mediator;
 
 namespace Application.Features.Users.Commands.Delete;
 
-public class DeleteUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService<User> MediaUpdateService)
-    : IRequestHandler<DeleteUserCommand>
+public class DeleteUserHandler(
+    IUnitOfWork unitOfWork,
+    IMediaUpdateService<Image> MediaUpdateService
+) : IRequestHandler<DeleteUserCommand, Result>
 {
-    public async ValueTask<Unit> Handle(
+    public async ValueTask<Result> Handle(
         DeleteUserCommand command,
         CancellationToken cancellationToken
     )
     {
-        User user =
-            await unitOfWork
-                .Repository<User>()
-                .FindByConditionAsync(
-                    new GetUserByIdWithoutIncludeSpecification(command.UserId),
-                    cancellationToken
-                )
-            ?? throw new NotFoundException(
-                [Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()]
+        User? user = await unitOfWork
+            .DynamicReadOnlyRepository<User>()
+            .FindByConditionAsync(
+                new GetUserByIdWithoutIncludeSpecification(command.UserId),
+                cancellationToken
             );
+
         string? avatar = user.AvtUrl;
         await unitOfWork.Repository<User>().DeleteAsync(user);
         await unitOfWork.SaveAsync(cancellationToken);
 
         await MediaUpdateService.DeleteAvatarAsync(avatar);
-        return Unit.Value;
+        return Result.Success();
     }
 }

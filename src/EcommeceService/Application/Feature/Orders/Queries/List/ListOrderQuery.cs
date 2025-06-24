@@ -1,11 +1,14 @@
-﻿using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
+﻿using Contracts.ApiWrapper;
+using Contracts.Dtos.Requests;
+using Contracts.Dtos.Responses;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Feature.Orders.Queries.List
 {
-    public class ListOrderQuery : QueryParamRequest, IRequest<PaginationResponse<ListOrderResponse>>
+    public class ListOrderQuery
+        : QueryParamRequest,
+            IRequest<Result<PaginationResponse<ListOrderResponse>>>
     {
         [FromQuery]
         public string? From { get; set; }

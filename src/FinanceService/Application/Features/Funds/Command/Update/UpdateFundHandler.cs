@@ -1,44 +1,48 @@
 ﻿using System.Data.Common;
+using Application.Common.Errors;
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
+using Contracts.ApiWrapper;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Funds;
+using Domain.Aggregates.Funds.Enums;
 using Domain.Aggregates.Funds.Specifications;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Mediator;
 
 namespace Application.Features.Funds.Command.Update
 {
-    public class UpdateFundHandler(IUnitOfWork unitOfWork, IMapper mapper)
-        : IRequestHandler<UpdateFundCommand>
+    public class UpdateFundHandler(IUnitOfWork unitOfWork)
+        : IRequestHandler<UpdateFundCommand, Result>
     {
-        public async ValueTask<Unit> Handle(
+        public async ValueTask<Result> Handle(
             UpdateFundCommand command,
             CancellationToken cancellationToken
         )
         {
-            Fund fund =
-                await unitOfWork
-                    .Repository<Fund>()
-                    .FindByConditionAsync(
-                        new GetFundByIdSpecification(long.Parse(command.FundId)),
-                        cancellationToken
+            Fund? fund = await unitOfWork
+                .Repository<Fund>()
+                .FindByIdAsync(long.Parse(command.FundId), cancellationToken);
+            if (fund == null)
+            {
+                return Result.Failure(
+                    new NotFoundError(
+                        "Fund not found",
+                        Messager.Create<Fund>().Message(MessageType.Found).Negative().BuildMessage()
                     )
-                ?? throw new NotFoundException(
-                    [Messager.Create<Fund>().Message(MessageType.Found).Negative().BuildMessage()]
                 );
+            }
+            command.UpdateFundModel.MapUpdateToEntity(fund);
+
             if (
-                fund.Status.Equals("PendingConfirmation")
-                && command.updateFundModel!.Status.Equals("Confirmed")
+                fund.Status == FundStatus.PendingConfirmation
+                && command.UpdateFundModel!.Status == FundStatus.Confirmed
             )
             {
-                command.updateFundModel.TransactionDate = DateTimeOffset.UtcNow;
+                fund.TransactionDate = DateTimeOffset.UtcNow;
             }
-            mapper.Map(command.updateFundModel, fund);
 
             try
             {
-                DbTransaction transaction = await unitOfWork.CreateTransactionAsync(
+                DbTransaction transaction = await unitOfWork.BeginTransactionAsync(
                     cancellationToken
                 );
 
@@ -46,7 +50,7 @@ namespace Application.Features.Funds.Command.Update
                 await unitOfWork.SaveAsync(cancellationToken);
                 await unitOfWork.CommitAsync(cancellationToken);
 
-                return Unit.Value;
+                return Result.Success();
             }
             catch
             {

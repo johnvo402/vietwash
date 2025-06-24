@@ -3,7 +3,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Services.Command.Delete;
 using Domain.Aggregates.Suppliers;
 using FluentValidation;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Contracts.Common.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;

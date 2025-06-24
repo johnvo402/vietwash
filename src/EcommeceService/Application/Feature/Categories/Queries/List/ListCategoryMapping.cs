@@ -1,15 +1,25 @@
+using System.Linq.Expressions;
 using Application.Feature.Common.Projections.Categories;
-using AutoMapper;
 using Domain.Aggregates.Services;
 
 namespace Application.Feature.Categories.Queries.List;
 
-public class ListCategoryMapping : Profile
+public class ListCategoryMapping
 {
-    public ListCategoryMapping()
+    public static Expression<Func<Category, ListCategoryResponse>> Selector()
     {
-        CreateMap<Category, CategoryProjection>();
+        return c => new ListCategoryResponse
+        {
+            Id = c.Id,
+            CreatedAt = c.CreatedAt,
+            CreatedBy = c.CreatedBy,
+            UpdatedAt = c.UpdatedAt,
+            UpdatedBy = c.UpdatedBy,
 
-        CreateMap<Category, ListCategoryResponse>().IncludeBase<Category, CategoryProjection>();
+            Name = c.Name,
+            Path = c.Path,
+            ParentId = c.ParentId,
+            Status = c.Status,
+        };
     }
 }

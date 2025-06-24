@@ -1,9 +1,13 @@
-﻿using Application.Features.Common.Projections.Users;
+using Domain.Aggregates.Funds;
+using Domain.Aggregates.Users;
 
 namespace Application.Features.Common.Projections.Funds
 {
     public class FundDetailProjection : FundProjection
     {
-        public string? Note { get; set; }
+        public override void MappingFrom(Fund fund)
+        {
+            base.MappingFrom(fund);
+        }
     }
 }

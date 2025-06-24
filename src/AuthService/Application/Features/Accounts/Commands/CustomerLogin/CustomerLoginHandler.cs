@@ -1,26 +1,31 @@
+using Application.Common.Errors;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.ApiWrapper;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Accounts;
 using Domain.Aggregates.Accounts.Enums;
 using Domain.Aggregates.Accounts.Specifications;
 using Domain.Otp;
 using Infrastructure.Constants;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Exceptions;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
 using Mediator;
 
 namespace Application.Features.Accounts.Commands.CustomerLogin;
 
-public class CustomerLoginHandler(IUnitOfWork unitOfWork, ISmsOtpClient _client)
-    : IRequestHandler<CustomerLoginCommand, CustomerLoginResponse>
+public class CustomerLoginHandler(
+    IUnitOfWork unitOfWork,
+    ISmsOtpClient _client,
+    ICurrentAccount _currentAccount
+) : IRequestHandler<CustomerLoginCommand, Result>
 {
-    public async ValueTask<CustomerLoginResponse> Handle(
+    public async ValueTask<Result> Handle(
         CustomerLoginCommand request,
         CancellationToken cancellationToken
     )
     {
         Account? user = await unitOfWork
-            .Repository<Account>()
+            .DynamicReadOnlyRepository<Account>()
             .FindByConditionAsync(
                 new GetAccountByPhoneNumberSpecification(request.PhoneNumber, ROLE.CUSTOMER),
                 cancellationToken
@@ -31,34 +36,29 @@ public class CustomerLoginHandler(IUnitOfWork unitOfWork, ISmsOtpClient _client)
             accountId = user.Id;
             if (!(user.Status == AccountStatus.Active))
             {
-                throw new BadRequestException(
-                    [
+                return Result.Failure(
+                    new BadRequestError(
+                        "Account inactive",
                         Messager
                             .Create<Account>()
                             .Property(x => x.Status)
                             .Message(MessageType.Active)
                             .Negative()
-                            .BuildMessage(),
-                    ]
+                            .BuildMessage()
+                    )
                 );
             }
         }
 
-        var response = await _client.CreatePinAsync(
-            new CreatePinRequest
-            {
-                To = request.PhoneNumber,
-                AccountId = accountId,
-                Type = AccountActivityType.Login,
-            },
+        var error = await _client.CreateAsync(
+            new CreatePinRequest { To = request.PhoneNumber, ClientIp = _currentAccount.ClientIp! },
             cancellationToken
         );
-
-        return new CustomerLoginResponse
+        if (error != null)
         {
-            Message = "SendOTP",
-            Key = response.Key,
-            AccountId = accountId,
-        };
+            return Result.Failure(error);
+        }
+
+        return Result.Success();
     }
 }

@@ -1,18 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Application.Feature.Common.Projections.Tariffs;
-using AutoMapper;
 using Domain.Aggregates.Tariffs;
 
-namespace Application.Feature.Tariffs.Commands.Create
+namespace Application.Feature.Tariffs.Commands.Create;
+
+public static class CreateTariffMapping
 {
-    public class CreateTariffMapping : Profile
+    public static Tariff ToEntityCreate(this TariffModel model)
     {
-        public CreateTariffMapping()
-        {
-            CreateMap<TariffModel, Tariff>();
-        }
+        return new Tariff(
+            name: model.Name.Trim(),
+            branchId: model.BranchId,
+            disable: model.Disable
+        );
     }
 }

@@ -7,7 +7,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Common.Projections.Tariffs;
 using FluentValidation;
 using Domain.Aggregates.Tariffs;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.Messages;
+using Contracts.Common.Messages;
 using Org.BouncyCastle.Math.EC.Rfc7748;
 
 namespace Application.Feature.Common.Validators.Tariffs

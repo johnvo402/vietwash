@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using Application.Feature.Services.Queries.Detail;
+using Contracts.Application.Common;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
-using Domain.Aggregates.Users;
-using JohnChum.SharedKernel.Application.Common;
 
 namespace Application.Feature.Common.Projections.Orders
 {

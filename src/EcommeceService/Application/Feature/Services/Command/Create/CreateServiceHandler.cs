@@ -1,47 +1,40 @@
 ﻿using System.Data.Common;
-using System.Globalization;
-using System.Text.RegularExpressions;
-using System.Text;
-using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
-using Domain.Aggregates.Services;
-using Infrastructure.UnitOfWorks;
-using Mediator;
+using Contracts.ApiWrapper;
 using Contracts.Utils;
+using Domain.Aggregates.Services;
+using Mediator;
 
 namespace Application.Feature.Services.Command.Create
 {
     public class CreateServiceHandler(
         IUnitOfWork unitOfWork,
-        IMapper mapper,
         IMediaUpdateService<Service> mediaUpdateService
-	) : IRequestHandler<CreateServiceCommand>
+    ) : IRequestHandler<CreateServiceCommand, Result>
     {
-        public async ValueTask<Mediator.Unit> Handle(
+        public async ValueTask<Result> Handle(
             CreateServiceCommand request,
             CancellationToken cancellationToken
-
-		)
+        )
         {
-            Service mappingService = mapper.Map<Service>(request);
+            Service mappingService = request.ToEntity();
             mappingService.Slug = Generator.GenerateSlug(mappingService.Name);
-			string? serviceImage = null;
+            string? serviceImage = null;
             try
             {
-                DbTransaction transaction = await unitOfWork.CreateTransactionAsync(
+                DbTransaction transaction = await unitOfWork.BeginTransactionAsync(
                     cancellationToken
                 );
 
-				Service service = await unitOfWork
+                Service service = await unitOfWork
                     .Repository<Service>()
                     .AddAsync(mappingService, cancellationToken);
                 serviceImage = service.Image;
 
-				await unitOfWork.SaveAsync(cancellationToken);
+                await unitOfWork.SaveAsync(cancellationToken);
                 await unitOfWork.CommitAsync(cancellationToken);
-                return Mediator.Unit.Value;
+                return Result.Success();
             }
             catch (Exception)
             {
@@ -53,8 +46,5 @@ namespace Application.Feature.Services.Command.Create
                 throw;
             }
         }
-		
-
-
-	}
+    }
 }

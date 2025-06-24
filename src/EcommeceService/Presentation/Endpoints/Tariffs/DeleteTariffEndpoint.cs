@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Application.Common.Auth;
 using Application.Feature.Tariffs.Commands.Delete;
 using Ardalis.ApiEndpoints;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
+using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Contracts.Routers;
 using Infrastructure.Constants;
@@ -17,18 +17,18 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Presentation.Endpoints.Tariffs
 {
     public class DeleteTariffEndpoint(ISender sender)
-    : EndpointBaseAsync.WithRequest<long>.WithActionResult
+        : EndpointBaseAsync.WithRequest<long>.WithActionResult<ApiResponse>
     {
         [HttpDelete(Router.TariffRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.TariffRoute.Tags], Summary = "Delete Tariff")]
         //[AuthorizeBy(permissions: $"{ActionPermission.delete}:{ObjectPermission.tariff}")]
-        public override async Task<ActionResult> HandleAsync(
+        public override async Task<ActionResult<ApiResponse>> HandleAsync(
             [FromRoute(Name = RouterBase.Id)] long tariffId,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default
+        )
         {
-            await sender.Send(new DeleteTariffCommand(tariffId), cancellationToken);
-            return this.NoContent204();
+            var result = await sender.Send(new DeleteTariffCommand(tariffId), cancellationToken);
+            return result.ToNoContentResult();
         }
-
     }
 }

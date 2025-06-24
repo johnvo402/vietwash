@@ -1,18 +1,18 @@
 ﻿using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Feature.Orders.Queries.List;
 using Application.Feature.Statistics.Queries.RevenueStatistic;
 using Application.Feature.Statistics.Queries.SaleResult;
+using Contracts.ApiWrapper;
+using Contracts.Dtos.Requests;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Specifications;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Requests;
 using Mediator;
 
 public class GetDashboardCardHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
-    : IRequestHandler<GetDashboardCardQuery, GetDashboardCardResponse>
+    : IRequestHandler<GetDashboardCardQuery, Result<GetDashboardCardResponse>>
 {
-    public async ValueTask<GetDashboardCardResponse> Handle(
+    public async ValueTask<Result<GetDashboardCardResponse>> Handle(
         GetDashboardCardQuery request,
         CancellationToken cancellationToken
     )
@@ -20,18 +20,22 @@ public class GetDashboardCardHandler(IUnitOfWork unitOfWork, ICurrentAccount cur
         var listBranchUser = currentUser.Session!.Branches!.ToList();
         var queryParamRequest = new QueryParamRequest();
 
-        // Lấy danh sách order đã filter theo Branch + các điều kiện cần thiết
         var orderList = await unitOfWork
-            .Repository<Order>()
+            .DynamicReadOnlyRepository<Order>()
             .ListAsync(
-                new ListOrderSpecification(string.Empty, string.Empty, request.BranchId, listBranchUser),
+                new ListOrderSpecification(
+                    string.Empty,
+                    string.Empty,
+                    request.BranchId,
+                    listBranchUser
+                ),
                 queryParamRequest,
                 cancellationToken
             );
 
         if (orderList == null || !orderList.Any())
         {
-            return new GetDashboardCardResponse();
+            return Result<GetDashboardCardResponse>.Success();
         }
 
         var today = DateTime.UtcNow.Date;
@@ -57,24 +61,34 @@ public class GetDashboardCardHandler(IUnitOfWork unitOfWork, ICurrentAccount cur
 
         // Tổng doanh thu tháng trước
         decimal revenueLastMonth = orderList
-            .Where(o => o.Status == OrderStatus.Completed && o.OrderDate.Month == lastMonth.Month && o.OrderDate.Year == lastMonth.Year)
+            .Where(o =>
+                o.Status == OrderStatus.Completed
+                && o.OrderDate.Month == lastMonth.Month
+                && o.OrderDate.Year == lastMonth.Year
+            )
             .Sum(o => o.Amount);
 
-       
-
-        return new GetDashboardCardResponse
-        {
-            NumberOrder = numberOrder,
-            Revenue = revenue,
-            NetRevenue = netRevenue,
-            RevenueYesterday = revenueYesterday,
-            RevenueLastMonth = revenueLastMonth,
-            PercentageChangeDay = CalculatePercentageChange((float)revenue, (float)revenueYesterday),
-            PercentageChangeMonth = CalculatePercentageChange((float)revenue, (float)revenueLastMonth),
-        };
+        return Result<GetDashboardCardResponse>.Success(
+            new GetDashboardCardResponse
+            {
+                NumberOrder = numberOrder,
+                Revenue = revenue,
+                NetRevenue = netRevenue,
+                RevenueYesterday = revenueYesterday,
+                RevenueLastMonth = revenueLastMonth,
+                PercentageChangeDay = CalculatePercentageChange(
+                    (float)revenue,
+                    (float)revenueYesterday
+                ),
+                PercentageChangeMonth = CalculatePercentageChange(
+                    (float)revenue,
+                    (float)revenueLastMonth
+                ),
+            }
+        );
     }
 
-    public float CalculatePercentageChange(float today, float last)
+    private float CalculatePercentageChange(float today, float last)
     {
         if (last == 0)
         {

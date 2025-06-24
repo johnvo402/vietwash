@@ -1,33 +1,38 @@
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Common.QueryStringProcessing;
+using Application.Features.Common.Helpers;
+using Contracts.ApiWrapper;
+using Contracts.Common.QueryStringProcessing;
+using Contracts.Dtos.Responses;
 using Domain.Aggregates.Accounts;
 using Domain.Aggregates.Accounts.Specifications;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
 using Mediator;
-using Application.Common.Interfaces.Services.DistributedCache;
-using Application.Common.Auth;
-using Application.Common.Interfaces.Services;
-using JohnChum.SharedKernel.Extensions;
-using Application.Features.Common.Helpers;
 
 namespace Application.Features.Accounts.Queries.List;
 
 public class ListAccountHandler(IUnitOfWork unitOfWork, ICurrentAccount currentAccount)
-    : IRequestHandler<ListAccountQuery, PaginationResponse<ListAccountResponse>>
+    : IRequestHandler<ListAccountQuery, Result<PaginationResponse<ListAccountResponse>>>
 {
-    public async ValueTask<PaginationResponse<ListAccountResponse>> Handle(
+    public async ValueTask<Result<PaginationResponse<ListAccountResponse>>> Handle(
         ListAccountQuery query,
         CancellationToken cancellationToken
     )
     {
-       
+        var validation = query.Validate<ListAccountQuery, ListAccountResponse>();
+
+        if (validation != null)
+        {
+            return validation;
+        }
         string[] roles = AccountHelper.GetRolesByRole(currentAccount.Session!.Role!);
-        return await unitOfWork
-            .Repository<Account>()
-            .PagedListAsync<ListAccountResponse>(
+        var response = await unitOfWork
+            .DynamicReadOnlyRepository<Account>()
+            .PagedListAsync(
                 new ListAccountSpecification(roles),
-                query.ValidateQuery().ValidateFilter(typeof(ListAccountResponse))
+                query,
+                ListAccountMapping.Selector(),
+                cancellationToken: cancellationToken
             );
+        return Result<PaginationResponse<ListAccountResponse>>.Success(response);
     }
-       
 }

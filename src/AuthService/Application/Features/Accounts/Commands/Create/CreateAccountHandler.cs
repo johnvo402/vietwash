@@ -1,7 +1,10 @@
-using System.Data.Common;
+using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using AutoMapper;
+using Contracts.ApiWrapper;
+using Contracts.Common.Messages;
+using Contracts.Dtos.Models;
+using Contracts.Utils;
 using Domain.Aggregates.Accounts;
 using Domain.Aggregates.Accounts.Specifications;
 using Mediator;
@@ -10,24 +13,21 @@ namespace Application.Features.Accounts.Commands.Create;
 
 public class CreateAccountHandler(
     IUnitOfWork unitOfWork,
-    IMapper mapper,
-    IMediaUpdateService<Account> mediaUpdateService
-) : IRequestHandler<CreateAccountCommand, CreateAccountResponse>
+    IMediaUpdateService<Image> mediaUpdateService
+) : IRequestHandler<CreateAccountCommand, Result<CreateAccountResponse>>
 {
-    public async ValueTask<CreateAccountResponse> Handle(
+    public async ValueTask<Result<CreateAccountResponse>> Handle(
         CreateAccountCommand command,
         CancellationToken cancellationToken
     )
     {
-        Account mappingAccount = mapper.Map<Account>(command);
-
-
-        mappingAccount.AvtUrl = command.AvtUrl;
+        string code = Generator.GenerateAccountCode(command.Role);
+        Account mappingAccount = command.ToAccount(code);
 
         string? userAvatar = null;
         try
         {
-            DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
+            _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
 
             Account user = await unitOfWork
                 .Repository<Account>()
@@ -38,14 +38,23 @@ public class CreateAccountHandler(
 
             await unitOfWork.CommitAsync(cancellationToken);
 
-            return (
-                await unitOfWork
-                    .Repository<Account>()
-                    .FindByConditionAsync<CreateAccountResponse>(
-                        new GetAccountByIdSpecification(user.Id),
-                        cancellationToken
+            CreateAccountResponse? response = await unitOfWork
+                .DynamicReadOnlyRepository<Account>()
+                .FindByConditionAsync(
+                    new GetAccountByIdSpecification(user.Id),
+                    x => x.ToCreateAccountResponse(),
+                    cancellationToken
+                );
+            if (response == null)
+            {
+                return Result<CreateAccountResponse>.Failure(
+                    new BadRequestError(
+                        "Create failure",
+                        Messager.Create<Account>().Message(MessageType.Found).Negative().Build()
                     )
-            )!;
+                );
+            }
+            return Result<CreateAccountResponse>.Success(response);
         }
         catch (Exception)
         {
