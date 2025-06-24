@@ -18,7 +18,10 @@ namespace Presentation.Endpoints.FundBehaviors
         [SwaggerOperation(Tags = [Router.FundBehaviorRoute.Tags], Summary = "list Fundbehavior")]
         public override async Task<
             ActionResult<ApiResponse<IEnumerable<ListFundBehaviorResponse>>>
-        > HandleAsync(ListFundBehaviorQuery request, CancellationToken cancellationToken = default)
+        > HandleAsync(
+            [FromQuery] ListFundBehaviorQuery request,
+            CancellationToken cancellationToken = default
+        )
         {
             var result = await sender.Send(request, cancellationToken);
             return result.ToActionResult();

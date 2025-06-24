@@ -5,6 +5,7 @@ using Contracts.Dtos.Requests;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Specifications;
 using Mediator;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Feature.Statistics.Queries.BranchNetRevenue
 {
@@ -15,7 +16,7 @@ namespace Application.Feature.Statistics.Queries.BranchNetRevenue
         >
     {
         public async ValueTask<Result<IEnumerable<GetNetRevenueBranchResponse>>> Handle(
-            GetNetRevenueBranchQuery request,
+            [FromQuery] GetNetRevenueBranchQuery request,
             CancellationToken cancellationToken
         )
         {

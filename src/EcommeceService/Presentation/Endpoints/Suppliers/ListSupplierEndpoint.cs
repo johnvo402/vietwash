@@ -20,7 +20,10 @@ namespace Presentation.Endpoints.Suppliers
         //[AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.supplier}")]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<ListSupplierResponse>>>
-        > HandleAsync(ListSupplierQuery request, CancellationToken cancellationToken = default)
+        > HandleAsync(
+            [FromQuery] ListSupplierQuery request,
+            CancellationToken cancellationToken = default
+        )
         {
             var result = await sender.Send(request, cancellationToken);
             return result.ToActionResult();

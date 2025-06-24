@@ -22,7 +22,10 @@ namespace Presentation.Endpoints.Units
         //[AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.unit}")]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<ListUnitResponse>>>
-        > HandleAsync(ListUnitQuery request, CancellationToken cancellationToken = default)
+        > HandleAsync(
+            [FromQuery] ListUnitQuery request,
+            CancellationToken cancellationToken = default
+        )
         {
             var result = await sender.Send(request, cancellationToken);
             return result.ToActionResult();

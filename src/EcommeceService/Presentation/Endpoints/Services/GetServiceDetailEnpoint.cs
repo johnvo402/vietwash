@@ -18,11 +18,8 @@ namespace Presentation.Endpoints.Services
             ApiResponse<GetServiceDetailResponse>
         >
     {
-        [HttpGet(Presentation.Routes.Router.ServiceRoute.GetDetail)]
-        [SwaggerOperation(
-            Tags = [Presentation.Routes.Router.ServiceRoute.Tags],
-            Summary = "Detail service"
-        )]
+        [HttpGet(Routes.Router.ServiceRoute.GetDetail)]
+        [SwaggerOperation(Tags = [Routes.Router.ServiceRoute.Tags], Summary = "Detail service")]
         //[AuthorizeBy(permissions: $"{ActionPermission.detail}:{ObjectPermission.service}")]
         public override async Task<ActionResult<ApiResponse<GetServiceDetailResponse>>> HandleAsync(
             GetServiceDetailQuery request,

@@ -23,7 +23,10 @@ public class ListServiceEndpoint(ISender sender)
     //[AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.service}")]
     public override async Task<
         ActionResult<ApiResponse<PaginationResponse<ListServiceResponse>>>
-    > HandleAsync(ListServiceQuery request, CancellationToken cancellationToken = default)
+    > HandleAsync(
+        [FromQuery] ListServiceQuery request,
+        CancellationToken cancellationToken = default
+    )
     {
         var result = await sender.Send(request, cancellationToken);
         return result.ToActionResult();

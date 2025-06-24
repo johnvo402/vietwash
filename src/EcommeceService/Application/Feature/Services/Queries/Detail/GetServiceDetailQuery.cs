@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Feature.Services.Queries.Detail
 {
-    public record GetServiceDetailQuery([FromRoute(Name = RouterBase.Id)] long ServiceId)
-        : IRequest<Result<GetServiceDetailResponse>>;
+    public record GetServiceDetailQuery : IRequest<Result<GetServiceDetailResponse>>
+    {
+        [FromRoute(Name = RouterBase.Id)]
+        public long ServiceId { get; set; }
+    }
 }

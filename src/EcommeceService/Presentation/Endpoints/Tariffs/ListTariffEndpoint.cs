@@ -26,7 +26,10 @@ namespace Presentation.Endpoints.Tariffs
         //[AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.tariff}")]
         public async override Task<
             ActionResult<ApiResponse<PaginationResponse<ListTariffResponse>>>
-        > HandleAsync(ListTariffQuery request, CancellationToken cancellationToken = default)
+        > HandleAsync(
+            [FromQuery] ListTariffQuery request,
+            CancellationToken cancellationToken = default
+        )
         {
             var result = await sender.Send(request, cancellationToken);
             return result.ToActionResult();

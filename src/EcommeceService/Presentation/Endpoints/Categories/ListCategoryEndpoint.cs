@@ -19,7 +19,10 @@ public class ListCategoryEndpoint(ISender sender)
     [SwaggerOperation(Tags = [Router.CategoryRoute.Tags], Summary = "Category list")]
     public override async Task<
         ActionResult<ApiResponse<PaginationResponse<ListCategoryResponse>>>
-    > HandleAsync(ListCategoryQuery request, CancellationToken cancellationToken = default)
+    > HandleAsync(
+        [FromQuery] ListCategoryQuery request,
+        CancellationToken cancellationToken = default
+    )
     {
         var result = await sender.Send(request, cancellationToken);
         return result.ToActionResult();

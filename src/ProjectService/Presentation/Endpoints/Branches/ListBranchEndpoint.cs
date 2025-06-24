@@ -19,7 +19,10 @@ namespace Presentation.Endpoints.Branches
         [SwaggerOperation(Tags = [Router.BranchRoute.Tags], Summary = "List Branch")]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<ListBranchResponse>>>
-        > HandleAsync(ListBranchQuery request, CancellationToken cancellationToken = default)
+        > HandleAsync(
+            [FromQuery] ListBranchQuery request,
+            CancellationToken cancellationToken = default
+        )
         {
             var result = await sender.Send(request, cancellationToken);
             return result.ToActionResult();

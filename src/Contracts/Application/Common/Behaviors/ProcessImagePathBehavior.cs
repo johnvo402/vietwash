@@ -93,8 +93,6 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
                 continue;
             }
 
-            logger.Information("image key {value}", imageKey);
-
             UpdatePropertyIfNotPublicUrl(data, prop, imageKey);
         }
     }
@@ -106,7 +104,7 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
         if (!imageKeyStr.StartsWith(storageService.GetPublicUrl()!))
         {
             string? fullPath = storageService.GetFullpath(imageKeyStr);
-            logger.Information("image path {value}", fullPath);
+
             property.SetValue(target, fullPath);
         }
     }

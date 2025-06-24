@@ -19,7 +19,10 @@ namespace Presentation.Endpoints.Warehouses
         [SwaggerOperation(Tags = [Router.WarehouseRoute.Tags], Summary = "List Branch Product")]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<ListWarehouseResponse>>>
-        > HandleAsync(ListWarehouseQuery request, CancellationToken cancellationToken = default)
+        > HandleAsync(
+            [FromQuery] ListWarehouseQuery request,
+            CancellationToken cancellationToken = default
+        )
         {
             var result = await sender.Send(request, cancellationToken);
             return result.ToActionResult();
