@@ -1,5 +1,4 @@
 ﻿using Application.Feature.Common.Mapping.Orders;
-using Application.Feature.Services.Queries.Detail;
 using Contracts.Extensions;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
@@ -8,9 +7,9 @@ namespace Application.Feature.Common.Projections.Orders
 {
     public class OrderDetailProjection : OrderProjection
     {
+        public string? Note { get; set; }
         public ICollection<OrderItemProjection> OrderItems { get; set; } = [];
         public ICollection<OrderPaymentProjection> OrderPayments { get; set; } = [];
-        public UserDTO? Customer { get; set; }
 
         public virtual void MappingFrom(Order order)
         {

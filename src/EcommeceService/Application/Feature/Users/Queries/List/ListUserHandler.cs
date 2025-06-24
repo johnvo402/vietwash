@@ -2,7 +2,6 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Contracts.Common.QueryStringProcessing;
 using Contracts.Dtos.Responses;
-using Contracts.Dtos.Responses;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Mediator;

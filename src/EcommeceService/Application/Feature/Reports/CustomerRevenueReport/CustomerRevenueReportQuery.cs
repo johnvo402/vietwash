@@ -1,11 +1,12 @@
 ﻿using Application.Feature.Common.Projections.Reports;
+using Contracts.ApiWrapper;
+using Contracts.Dtos.Responses;
 using Domain.Functions;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
 using Mediator;
 
 namespace Application.Feature.Reports.CustomerRevenueReport
 {
     public class CustomerRevenueReportQuery
         : ReportFilter,
-            IRequest<PaginationResponse<CustomerRevenueResult>>;
+            IRequest<Result<PaginationResponse<CustomerRevenueResult>>>;
 }

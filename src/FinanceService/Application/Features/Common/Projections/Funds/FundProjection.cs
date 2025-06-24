@@ -1,7 +1,6 @@
 using Contracts.Application.Common;
 using Domain.Aggregates.Funds;
 using Domain.Aggregates.Funds.Enums;
-using JohnChum.SharedKernel.Application.Common;
 
 namespace Application.Features.Common.Projections.Funds
 {

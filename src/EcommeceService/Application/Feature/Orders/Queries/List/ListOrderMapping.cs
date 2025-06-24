@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-
 using Domain.Aggregates.Orders;
 
 namespace Application.Feature.Orders.Queries.List
@@ -23,7 +22,6 @@ namespace Application.Feature.Orders.Queries.List
                 DiscountFixed = order.DiscountFixed,
                 DiscountValue = order.DiscountValue,
                 CustomerId = order.CustomerId,
-                Note = order.Note,
                 OrderDate = order.OrderDate,
                 DeliveryTime = order.DeliveryTime,
                 Status = order.Status,

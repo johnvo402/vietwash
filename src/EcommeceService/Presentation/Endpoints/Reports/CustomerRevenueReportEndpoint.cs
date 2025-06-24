@@ -1,9 +1,9 @@
 ﻿using Application.Feature.Reports.CustomerRevenueReport;
 using Ardalis.ApiEndpoints;
+using Contracts.ApiWrapper;
+using Contracts.Dtos.Responses;
 using Contracts.RouteResults;
 using Domain.Functions;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.ApiWrapper;
-using JohnChum.SharedKernel.SpecificationQuery.LHS.Dtos.Responses;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
@@ -24,6 +24,10 @@ namespace Presentation.Endpoints.Reports
         > HandleAsync(
             [FromQuery] CustomerRevenueReportQuery request,
             CancellationToken cancellationToken = default
-        ) => this.Ok200(await sender.Send(request, cancellationToken));
+        )
+        {
+            var result = await sender.Send(request, cancellationToken);
+            return result.ToActionResult();
+        }
     }
 }
