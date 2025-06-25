@@ -58,10 +58,7 @@ public static class DependencyInjection
             .AddSingleton<UpdateAuditableEntityInterceptor>()
             .AddSingleton<DispatchDomainEventInterceptor>();
 
-        if (
-            environmentName!.CompareTo("Staging") == 0
-            || environmentName!.CompareTo("Development") == 0
-        )
+        if (environmentName!.CompareTo("Development") == 0)
         {
             services.AddDbContext<TheDbContext>(
                 (sp, options) =>
