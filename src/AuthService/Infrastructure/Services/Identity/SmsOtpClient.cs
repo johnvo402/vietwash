@@ -350,8 +350,8 @@ namespace Infrastructure.Services.Identity
         }
 
         private async Task<bool> VerifyOtpAsync(
-            VerifyPinRequest request,
-            CancellationToken cancellationToken
+           VerifyPinRequest request,
+           CancellationToken cancellationToken
         )
         {
             string key = $"otp:{request.To}:{request.ClientIp}";
@@ -366,11 +366,11 @@ namespace Infrastructure.Services.Identity
                 return false;
             }
 
-            var otpData = JsonSerializer.Deserialize<Dictionary<string, string>>(otpJson);
+            var otpData = JsonSerializer.Deserialize<Dictionary<string, object>>(otpJson!);
             if (
                 otpData == null
                 || !otpData.TryGetValue("Code", out var code)
-                || code != request.Otp
+                || code?.ToString() != request.Otp!
             )
             {
                 _logger.Warning(
@@ -383,7 +383,7 @@ namespace Infrastructure.Services.Identity
 
             if (
                 !otpData.TryGetValue("ExpiresAt", out var expiresAt)
-                || !long.TryParse(expiresAt, out var expiresAtLong)
+                || !long.TryParse(expiresAt?.ToString(), out var expiresAtLong)
                 || expiresAtLong < DateTimeOffset.UtcNow.ToUnixTimeSeconds()
             )
             {
@@ -395,7 +395,7 @@ namespace Infrastructure.Services.Identity
                 return false;
             }
 
-            if (!otpData.TryGetValue("Ip", out var storedIp) || storedIp != request.ClientIp)
+            if (!otpData.TryGetValue("Ip", out var storedIp) || storedIp?.ToString() != request.ClientIp)
             {
                 _logger.Warning(
                     "IP mismatch for phone: {Phone}, stored: {StoredIp}, provided: {ProvidedIp}",
@@ -406,7 +406,7 @@ namespace Infrastructure.Services.Identity
                 return false;
             }
 
-            // Clear OTP on successful verification
+            // Clear OTP on successful verification  
             await _cache.Database.StringGetAsync(key);
             _logger.Information(
                 "OTP verified successfully for phone: {Phone}, ip: {Ip}",
