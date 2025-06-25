@@ -76,7 +76,7 @@ namespace Domain.Aggregates.Services
                 Image = image;
         }
 
-        protected override bool TryApplyDomainEvent(INotification domainEvent)
+		protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
             throw new NotImplementedException();
         }
