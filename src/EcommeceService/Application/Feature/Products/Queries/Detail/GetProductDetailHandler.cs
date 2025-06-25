@@ -16,13 +16,14 @@ namespace Application.Feature.Products.Queries.Detail
 			CancellationToken cancellationToken
 		)
 		{
-			var product = await unitOfWork
+			var response = await unitOfWork
 				.DynamicReadOnlyRepository<Product>()
 				.FindByConditionAsync(
 					new GetProductWithIncludeByIdSpecification(query.ProductId),
+					product => product.ToCreateUserResponse(),
 					cancellationToken
 				);
-			if (product == null)
+			if (response == null)
 			{
 				return Result<GetProductDetailResponse>.Failure(
 					new NotFoundError(
@@ -36,7 +37,6 @@ namespace Application.Feature.Products.Queries.Detail
 				);
 			}
 
-			var response = product.ToCreateUserResponse();
 			return Result<GetProductDetailResponse>.Success(response);
 		}
 	}
