@@ -16,7 +16,7 @@ namespace Application.Features.Accounts.Commands.Profiles;
 public class UpdateAccountProfileHandler(
     IUnitOfWork unitOfWork,
     ICurrentAccount currentAccount,
-    IMediaUpdateService<Image> avatarUpdate
+    IMediaUpdateService avatarUpdate
 ) : IRequestHandler<UpdateAccountProfileCommand, Result<UpdateAccountProfileResponse>>
 {
     public async ValueTask<Result<UpdateAccountProfileResponse>> Handle(

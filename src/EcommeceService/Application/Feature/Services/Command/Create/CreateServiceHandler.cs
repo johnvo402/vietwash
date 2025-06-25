@@ -10,7 +10,7 @@ namespace Application.Feature.Services.Command.Create
 {
     public class CreateServiceHandler(
         IUnitOfWork unitOfWork,
-        IMediaUpdateService<Service> mediaUpdateService
+        IMediaUpdateService mediaUpdateService
     ) : IRequestHandler<CreateServiceCommand, Result>
     {
         public async ValueTask<Result> Handle(

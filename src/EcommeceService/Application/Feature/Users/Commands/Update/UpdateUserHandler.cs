@@ -11,7 +11,7 @@ namespace Application.Features.Users.Commands.Update;
 
 public class UpdateUserHandler(
     IUnitOfWork unitOfWork,
-    IMediaUpdateService<Image> mediaUpdateService
+    IMediaUpdateService mediaUpdateService
 ) : IRequestHandler<UpdateUserCommand, Result<UpdateUserResponse>>
 {
     public async ValueTask<Result<UpdateUserResponse>> Handle(

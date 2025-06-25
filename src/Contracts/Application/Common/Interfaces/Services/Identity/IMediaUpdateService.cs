@@ -1,12 +1,12 @@
 using Application.Common.Interfaces.Registers;
+using Contracts.Dtos.Models;
 using Microsoft.AspNetCore.Http;
 
 namespace Application.Common.Interfaces.Services.Identity;
 
-public interface IMediaUpdateService<T> : ISingleton
-    where T : class
+public interface IMediaUpdateService : ISingleton
 {
-    string? GetKey(IFormFile? avatar);
+    string? GetKey(IFormFile? avatar, MediaType mediaType);
 
     Task<string?> UploadAvatarAsync(IFormFile? avatar, string? key);
 

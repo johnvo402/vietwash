@@ -9,6 +9,7 @@ using Infrastructure.Services.Hangfires;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Presentation.Extensions;
 using Serilog;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -27,6 +28,7 @@ builder
         option.JsonSerializerOptions.Converters.Add(
             new Cysharp.Serialization.Json.UlidJsonConverter()
         );
+        option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 services.AddAuthentication();
 services.AddErrorDetails();

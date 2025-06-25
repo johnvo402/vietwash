@@ -11,10 +11,8 @@ using Mediator;
 
 namespace Application.Features.Accounts.Commands.Create;
 
-public class CreateAccountHandler(
-    IUnitOfWork unitOfWork,
-    IMediaUpdateService<Image> mediaUpdateService
-) : IRequestHandler<CreateAccountCommand, Result<CreateAccountResponse>>
+public class CreateAccountHandler(IUnitOfWork unitOfWork, IMediaUpdateService mediaUpdateService)
+    : IRequestHandler<CreateAccountCommand, Result<CreateAccountResponse>>
 {
     public async ValueTask<Result<CreateAccountResponse>> Handle(
         CreateAccountCommand command,

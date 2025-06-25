@@ -1,9 +1,12 @@
 using System.Reflection;
+using Contracts.Converters;
+using Contracts.Dtos.Models;
 using Contracts.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.OpenApi.Models;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 
 namespace Contracts.Extensions;
 

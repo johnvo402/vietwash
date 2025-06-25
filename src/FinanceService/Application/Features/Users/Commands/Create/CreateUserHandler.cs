@@ -7,7 +7,7 @@ using Mediator;
 
 namespace Application.Features.Users.Commands.Create;
 
-public class CreateUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService<User> mediaUpdateService)
+public class CreateUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService mediaUpdateService)
     : IRequestHandler<CreateUserCommand, PubSubResponse<CreateUserCommand>>
 {
     public async ValueTask<PubSubResponse<CreateUserCommand>> Handle(
