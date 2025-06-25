@@ -1,4 +1,4 @@
-using System.Data.Common;
+﻿using System.Data.Common;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Contracts.Common.Messages;
@@ -64,8 +64,10 @@ public class CreateCategoryHandler(IUnitOfWork unitOfWork)
             .Repository<Category>()
             .FindByIdAsync(parentId, cancellationToken);
 
-        if (parent == null)
-            return id.ToLower();
+        if (parent == null || string.IsNullOrEmpty(parent.Path))
+        {
+            return id.ToLower(); // hoặc throw nếu Path bắt buộc
+        }
 
         return $"{parent.Path}.{id.ToLower()}";
     }
