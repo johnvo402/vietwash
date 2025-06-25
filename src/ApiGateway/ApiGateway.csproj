@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Wangkanai.Detection" />
     <PackageReference Include="Yarp.ReverseProxy" />
     <PackageReference Include="System.Text.Json" />
     <PackageReference Include="System.Security.Cryptography.Xml" />

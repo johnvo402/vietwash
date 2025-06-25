@@ -1,7 +1,10 @@
 using System.Threading.RateLimiting;
+using ApiGateway.AppCheck.Extensions;
+using ApiGateway.AppCheck.Models;
 using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDetection();
 
 // Thêm YARP
 builder
@@ -21,6 +24,7 @@ builder.Services.AddRateLimiter(options =>
         }
     );
 });
+builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
@@ -37,6 +41,7 @@ builder.Services.AddCors(options =>
 });
 var app = builder.Build();
 app.UseCors("AllowFrontend");
+app.UseApiKeyValidation();
 app.UseRateLimiter();
 app.MapGet("/", () => "Run oke!");
 

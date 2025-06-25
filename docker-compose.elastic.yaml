@@ -202,11 +202,11 @@ services:
       test:
         [
           "CMD-SHELL",
-          "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'",
+          "curl -s -k http://localhost:5601/api/status | grep -q '\"state\":\"green\"'",
         ]
       interval: 10s
       timeout: 10s
-      retries: 120
+      retries: 180
 
 volumes:
   certs:
