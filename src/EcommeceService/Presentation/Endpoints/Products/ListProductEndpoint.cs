@@ -1,8 +1,10 @@
-﻿using Application.Feature.Products.Queries.List;
+﻿using Application.Common.Auth;
+using Application.Feature.Products.Queries.List;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
 using Contracts.RouteResults;
+using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
@@ -17,7 +19,7 @@ namespace Presentation.Endpoints.Products
 	{
 		[HttpGet(Router.ProductRoute.Products)]
 		[SwaggerOperation(Tags = [Router.ProductRoute.Tags], Summary = "Product list")]
-		//[AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.product}")]
+		[AuthorizeBy]
 		public override async Task<
 			ActionResult<ApiResponse<PaginationResponse<ListProductResponse>>>
 		> HandleAsync(

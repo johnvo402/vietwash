@@ -16,10 +16,11 @@ namespace Application.Feature.Products.Command.Create
 		{
 			return new Product(
 				name: model.Name,
-				sku: model.Sku,
-				status: model.Status,
 				description: model.Description,
+				sku: model.Sku,
 				barcode: model.Barcode,
+				image: model.Image,
+				status: model.Status,
 				recommendedPrice: model.RecommendedPrice
 			);
 		}

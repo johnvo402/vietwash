@@ -1,4 +1,5 @@
 ﻿using Domain.Aggregates.Products;
+using Domain.Aggregates.Services;
 using System.Linq.Expressions;
 
 namespace Application.Feature.Products.Queries.List
@@ -18,6 +19,7 @@ namespace Application.Feature.Products.Queries.List
 				Name = product.Name,
 				Description = product.Description,
 				Sku = product.Sku,
+				Image = product.Image,
 				Status = product.Status,
 				Barcode = product.Barcode,
 				RecommendedPrice = product.RecommendedPrice,

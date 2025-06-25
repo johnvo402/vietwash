@@ -10,14 +10,15 @@ namespace Domain.Aggregates.Products
 		public string Name { get; set; }
 		public string Description { get; set; }
 		public string Sku { get; set; }
-		public ProductStatus Status { get; set; }
 		public string Barcode { get; set; }
+		public string? Image { get; set; }
+		public ProductStatus Status { get; set; }
 		public decimal RecommendedPrice { get; set; }
 		public bool Disable { get; set; } = false;
 
 		public Product() { }
 
-		public Product(string name, string sku, ProductStatus status, string? description = null, string barcode = null, decimal? recommendedPrice = null)
+		public Product(string name, string sku, ProductStatus status, string? description = null, string barcode = null, decimal? recommendedPrice = null, string? image = null)
 		{
 			Name = Guard.Against.NullOrWhiteSpace(name, nameof(name));
 			Sku = Guard.Against.NullOrWhiteSpace(sku, nameof(sku));
@@ -25,6 +26,7 @@ namespace Domain.Aggregates.Products
 			Description = description?.Trim();
 			Barcode = Guard.Against.NullOrWhiteSpace(barcode, nameof(barcode));
 			RecommendedPrice = recommendedPrice ?? 0;
+			Image = image;
 		}
 
 		public void Update(
@@ -34,7 +36,8 @@ namespace Domain.Aggregates.Products
 		   string? description = null,
 		   string? barcode = null,
 		   decimal? recommendedPrice = null,
-		   bool? disable = null
+		   bool? disable = null,
+		   string? image = null
 	   )
 		{
 			if (!string.IsNullOrWhiteSpace(name))
@@ -57,6 +60,8 @@ namespace Domain.Aggregates.Products
 
 			if (disable.HasValue)
 				Disable = disable.Value;
+			if (image != null)
+				Image = image;
 		}
 
 		protected override bool TryApplyDomainEvent(INotification domainEvent)

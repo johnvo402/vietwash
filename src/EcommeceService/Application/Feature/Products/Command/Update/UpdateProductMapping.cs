@@ -10,10 +10,11 @@ namespace Application.Feature.Products.Command.Update
 		{
 			product.Update(
 				name: model.Name,
-				sku: model.Sku,
-				status: model.Status,
 				description: model.Description,
+				sku: model.Sku,
 				barcode: model.Barcode,
+				image: model.Image,
+				status: model.Status,
 				recommendedPrice: model.RecommendedPrice,
 				disable: null
 			);
