@@ -31,6 +31,7 @@ namespace Application.Feature.Common.Mapping.Units
         {
             return new()
             {
+                Id = ur.Id,
                 Name = ur.Name,
                 BaseUnit = ur.BaseUnit,
                 Price = ur.Price,

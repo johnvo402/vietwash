@@ -59,7 +59,7 @@ try
 
     app.UseHangfireDashboard(configuration);
 
-    if (isDevelopment || isStaging)
+    if (isDevelopment)
     {
         app.UseSwagger();
         app.UseSwaggerUI(x =>

@@ -3,5 +3,13 @@ using Domain.Aggregates.Users;
 
 namespace Application.Features.Common.Mapping
 {
-    public class UserMapping { }
+    public static class UserMapping
+    {
+        public static UserDTO ToUserDTOResponse(this User order)
+        {
+            var response = new UserDTO();
+            response.MappingFrom(order);
+            return response;
+        }
+    }
 }

@@ -58,14 +58,14 @@ try
     var serviceProvider = scope.ServiceProvider;
     var jobScheduler = scope.ServiceProvider.GetRequiredService<JobScheduler>();
     jobScheduler.ScheduleJobs();
-    if (!isStaging && !isProduction)
+    if (!isProduction)
     {
         await DbInitializer.InitializeAsync(serviceProvider);
     }
     #endregion
 
     app.UseHangfireDashboard(configuration);
-    if (isDevelopment || isStaging)
+    if (isDevelopment)
     {
         app.UseSwagger();
         app.UseSwaggerUI(x =>
