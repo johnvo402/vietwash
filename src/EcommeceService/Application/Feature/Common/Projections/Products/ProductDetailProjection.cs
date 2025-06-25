@@ -4,11 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Aggregates.Products.Enums
+namespace Application.Feature.Common.Projections.Products
 {
-    public enum Status
-    {
-        Active = 1,
-        Inactive = 2,
-    }
+	public class ProductDetailProjection : ProductProjection;
 }
