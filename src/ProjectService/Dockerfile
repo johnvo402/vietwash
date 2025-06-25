@@ -7,6 +7,6 @@ EXPOSE 8080
 FROM base AS final
 WORKDIR /app
 COPY src/ProjectService/Presentation/app/publish .
-COPY src/AuthService/Presentation/Resources/Translations Resources/Translations
+COPY src/ProjectService/Presentation/Resources/Translations Resources/Translations
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 ENTRYPOINT ["dotnet", "Presentation.dll"]
