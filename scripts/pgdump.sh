@@ -9,7 +9,7 @@ if [ -f "$ROOT/.env" ]; then
   export $(grep -v '^#' "$ROOT/.env" | xargs)
 fi
 
-DB_LIST=("auth_service" "ecommerce_service" "project_service")
+DB_LIST=("auth_service" "ecommerce_service" "project_service" "finance_service")
 
 backup() {
   for db in ${DB_LIST[@]}; do
