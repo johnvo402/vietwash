@@ -50,16 +50,24 @@ public static partial class QueryParamValidate
         [
             .. StringExtension.TransformStringQuery(request.OriginFilters),
         ];
-
         int length = queries.Count;
 
         for (int i = 0; i < length; i++)
         {
             QueryResult query = queries[i];
+            Log.Information(
+                "Processing query: {CleanKey}, Value: {Value}",
+                string.Join(".", query.CleanKey),
+                query.Value
+            );
 
-            //if it's $and,$or,$in and $between then they must have a index after like $or[0],$[in][1]
+            // Kiểm tra array operator ($and, $or, $in, $between)
             if (!ValidateArrayOperator(query.CleanKey))
             {
+                Log.Error(
+                    "ValidateArrayOperator failed for {CleanKey}",
+                    string.Join(".", query.CleanKey)
+                );
                 return new(
                     Error: new BadRequestError(
                         Message,
@@ -73,9 +81,13 @@ public static partial class QueryParamValidate
                 );
             }
 
-            /// check if the index of array operator has to start with 0 like $and[0][firstName]
+            // Kiểm tra index của array operator bắt đầu từ 0
             if (i == 0 && !ValidateArrayOperatorInvalidIndex(query.CleanKey))
             {
+                Log.Error(
+                    "ValidateArrayOperatorInvalidIndex failed for {CleanKey}",
+                    string.Join(".", query.CleanKey)
+                );
                 return new(
                     Error: new BadRequestError(
                         Message,
@@ -90,9 +102,13 @@ public static partial class QueryParamValidate
                 );
             }
 
-            // lack of operator
+            // Kiểm tra thiếu operator
             if (!ValidateLackOfOperator(query.CleanKey))
             {
+                Log.Error(
+                    "ValidateLackOfOperator failed for {CleanKey}",
+                    string.Join(".", query.CleanKey)
+                );
                 return new(
                     Error: new BadRequestError(
                         Message,
@@ -106,9 +122,13 @@ public static partial class QueryParamValidate
                 );
             }
 
-            // if the last element is logical operator ($and, $or) it's wrong like filter[$and][0] which is lack of body
+            // Kiểm tra thiếu element sau logical operator
             if (LackOfElementInArrayOperator(query.CleanKey))
             {
+                Log.Error(
+                    "LackOfElementInArrayOperator failed for {CleanKey}",
+                    string.Join(".", query.CleanKey)
+                );
                 return new(
                     Error: new BadRequestError(
                         Message,
@@ -122,6 +142,7 @@ public static partial class QueryParamValidate
                 );
             }
 
+            // Lấy danh sách properties
             IEnumerable<string> properties = query.CleanKey.Where(x =>
                 string.Compare(x, "$or", StringComparison.OrdinalIgnoreCase) != 0
                 && string.Compare(x, "$and", StringComparison.OrdinalIgnoreCase) != 0
@@ -129,9 +150,10 @@ public static partial class QueryParamValidate
                 && !validOperators.Contains(x.ToLower())
             );
 
-            // lack of property
+            // Kiểm tra thiếu property
             if (!properties.Any())
             {
+                Log.Error("No properties found for {CleanKey}", string.Join(".", query.CleanKey));
                 return new(
                     Error: new BadRequestError(
                         Message,
@@ -144,23 +166,90 @@ public static partial class QueryParamValidate
                     )
                 );
             }
+
+            // Kiểm tra thuộc tính trong TResponse
             Type type = typeof(TResponse);
-            PropertyInfo propertyInfo = type.GetNestedPropertyInfo(string.Join(".", properties));
+            PropertyInfo propertyInfo;
+            try
+            {
+                propertyInfo = type.GetNestedPropertyInfo(string.Join(".", properties));
+            }
+            catch (Exception ex)
+            {
+                Log.Error(
+                    "GetNestedPropertyInfo failed for {Properties}: {Error}",
+                    string.Join(".", properties),
+                    ex.Message
+                );
+                return new(
+                    Error: new BadRequestError(
+                        Message,
+                        Messager
+                            .Create<QueryParamRequest>("QueryParam")
+                            .Property(x => x.Filter!)
+                            .Message(MessageType.Missing)
+                            .ObjectName("Property")
+                            .Build()
+                    )
+                );
+            }
+
             Type[] arguments = propertyInfo.PropertyType.GetGenericArguments();
             Type nullableType = arguments.Length > 0 ? arguments[0] : propertyInfo.PropertyType;
 
-            // value must be enum
-            if (
-                (nullableType.IsEnum || IsNumericType(nullableType))
-                && query.Value?.IsDigit() == false
-            )
+            // Kiểm tra giá trị enum
+            if (nullableType.IsEnum)
             {
+                if (
+                    string.IsNullOrWhiteSpace(query.Value)
+                    || !Enum.IsDefined(nullableType, query.Value)
+                )
+                {
+                    Log.Error(
+                        "Invalid enum value for {Property}: {Value}",
+                        string.Join(".", properties),
+                        query.Value
+                    );
+                    return new(
+                        Error: new BadRequestError(
+                            Message,
+                            Messager
+                                .Create<QueryParamRequest>("QueryParam")
+                                .Property("FilterValue")
+                                .Message(MessageType.Matching)
+                                .Negative()
+                                .ObjectName("Enum")
+                                .Build()
+                        )
+                    );
+                }
+                // Thay thế tên enum bằng giá trị số
+                string originalValue = query.Value;
+                object enumValue = Enum.Parse(nullableType, query.Value);
+                string newValue = Convert.ToInt64(enumValue).ToString(); // Hỗ trợ mọi kiểu cơ bản
+                queries[i] = query with { Value = newValue };
+                Log.Information(
+                    "Converted enum {OriginalValue} to {NewValue} for {Property}",
+                    originalValue,
+                    newValue,
+                    string.Join(".", properties)
+                );
+            }
+            // Kiểm tra giá trị numeric
+            else if (IsNumericType(nullableType) && query.Value?.All(char.IsDigit) == false)
+            {
+                Log.Error(
+                    "Invalid numeric value for {Property}: {Value}",
+                    string.Join(".", properties),
+                    query.Value
+                );
                 return new(
                     Error: new BadRequestError(
                         Message,
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
                             .Property("FilterValue")
+                            .Message(MessageType.Matching)
                             .Negative()
                             .ObjectName("Integer")
                             .Build()
@@ -168,7 +257,7 @@ public static partial class QueryParamValidate
                 );
             }
 
-            // value must be datetime
+            // Kiểm tra giá trị datetime
             if (
                 (nullableType == typeof(DateTime) && !DateTime.TryParse(query.Value, out _))
                 || (
@@ -177,12 +266,18 @@ public static partial class QueryParamValidate
                 )
             )
             {
+                Log.Error(
+                    "Invalid datetime value for {Property}: {Value}",
+                    string.Join(".", properties),
+                    query.Value
+                );
                 return new(
                     Error: new BadRequestError(
                         Message,
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
                             .Property("FilterValue")
+                            .Message(MessageType.Matching)
                             .Negative()
                             .ObjectName("Datetime")
                             .Build()
@@ -190,15 +285,21 @@ public static partial class QueryParamValidate
                 );
             }
 
-            // value must be Ulid
+            // Kiểm tra giá trị Ulid
             if ((nullableType == typeof(Ulid)) && !Ulid.TryParse(query.Value, out _))
             {
+                Log.Error(
+                    "Invalid Ulid value for {Property}: {Value}",
+                    string.Join(".", properties),
+                    query.Value
+                );
                 return new(
                     Error: new BadRequestError(
                         Message,
                         Messager
                             .Create<QueryParamRequest>("QueryParam")
                             .Property("FilterValue")
+                            .Message(MessageType.Matching)
                             .Negative()
                             .ObjectName("Ulid")
                             .Build()
@@ -207,9 +308,10 @@ public static partial class QueryParamValidate
             }
         }
 
-        // validate between operator is correct in format like [age][$between][0] = 1 & [age][$between][1] = 2
+        // Kiểm tra $between operator
         if (!ValidateBetweenAndInOperator("$between", queries))
         {
+            Log.Error("Invalid $between operator format");
             return new(
                 Error: new BadRequestError(
                     Message,
@@ -224,9 +326,10 @@ public static partial class QueryParamValidate
             );
         }
 
-        // validate $in operator is correct in format like [age][$int][0] = 1 & [age][$in][1] = 2
+        // Kiểm tra $in operator
         if (!ValidateBetweenAndInOperator("$in", queries))
         {
+            Log.Error("Invalid $in operator format");
             return new(
                 Error: new BadRequestError(
                     Message,
@@ -241,10 +344,11 @@ public static partial class QueryParamValidate
             );
         }
 
-        // duplicated element of filter
+        // Kiểm tra trùng lặp filter
         var trimQueries = queries.Select(x => string.Join(".", x.CleanKey));
         if (trimQueries.Distinct().Count() != queries.Count)
         {
+            Log.Error("Duplicated filter elements found");
             return new(
                 Error: new BadRequestError(
                     Message,
@@ -258,8 +362,8 @@ public static partial class QueryParamValidate
             );
         }
 
+        // Gán filter đã xử lý
         request.Filter = StringExtension.Parse(queries);
-
         Log.Information(
             "Filter has been bound {filter}",
             SerializerExtension.Serialize(request.Filter!).StringJson
@@ -273,21 +377,21 @@ public static partial class QueryParamValidate
         IEnumerable<QueryResult> queries
     )
     {
-        IEnumerable<QueryResult> betweenOperators = queries.Where(x =>
-            x.CleanKey.Contains(operation)
-        );
+        var betweenOperators = queries.Where(x => x.CleanKey.Contains(operation)).ToList();
+        if (!betweenOperators.Any())
+        {
+            return true; // Không có operator, hợp lệ
+        }
 
         var betweenOperatorsGroup = betweenOperators
             .Select(betweenOperator =>
             {
                 int betweenIndex = betweenOperator.CleanKey.IndexOf(operation);
-                int index = betweenIndex - 1;
-
-                if (index < 0)
+                if (betweenIndex <= 0)
                 {
                     throw new InvalidOperationException("Invalid format of cleanKey.");
                 }
-
+                int index = betweenIndex - 1;
                 string key = string.Join(
                     ".",
                     betweenOperator
@@ -295,10 +399,14 @@ public static partial class QueryParamValidate
                         .Take(betweenOperator.CleanKey.Count - betweenIndex)
                 );
 
-                _ = int.TryParse(betweenOperator.CleanKey.Last(), out int indexValue);
+                if (!int.TryParse(betweenOperator.CleanKey.Last(), out int indexValue))
+                {
+                    return new { key, indexValue = -1 };
+                }
 
                 if (
-                    int.TryParse(
+                    betweenOperator.CleanKey.Contains("$and")
+                    && int.TryParse(
                         betweenOperator.CleanKey[betweenOperator.CleanKey.IndexOf("$and") + 1],
                         out int andIndex
                     )
@@ -306,36 +414,26 @@ public static partial class QueryParamValidate
                 {
                     return new { key = $"$and.{andIndex}.{key}", indexValue };
                 }
-                _ = int.TryParse(
-                    betweenOperator.CleanKey[betweenOperator.CleanKey.IndexOf("$or") + 1],
-                    out int orInddex
-                );
-
-                return new { key = $"$or.{orInddex}.{key}", indexValue };
+                if (
+                    betweenOperator.CleanKey.Contains("$or")
+                    && int.TryParse(
+                        betweenOperator.CleanKey[betweenOperator.CleanKey.IndexOf("$or") + 1],
+                        out int orIndex
+                    )
+                )
+                {
+                    return new { key = $"$or.{orIndex}.{key}", indexValue };
+                }
+                return new { key, indexValue };
             })
             .GroupBy(x => x.key)
             .Select(x => new { x.Key, values = x.Select(x => x.indexValue).ToList() })
             .ToList();
 
-        if (
-            betweenOperatorsGroup.Count != 0
-            && (
-                betweenOperatorsGroup.Count != 1
-                || !betweenOperatorsGroup[0].values.SequenceEqual([0, 1])
-            )
-        )
-        {
-            return false;
-        }
-
-        return true;
+        return betweenOperatorsGroup.Count == 1
+            && betweenOperatorsGroup[0].values.SequenceEqual([0, 1]);
     }
 
-    /// <summary>
-    /// just for enum
-    /// </summary>
-    /// <param name="type"></param>
-    /// <returns></returns>
     private static bool IsNumericType(Type type)
     {
         return Type.GetTypeCode(type) switch
@@ -363,30 +461,25 @@ public static partial class QueryParamValidate
     private static bool ValidateArrayOperator(List<string> input)
     {
         var validOperators = new HashSet<string> { "$and", "$or", "$in", "$between" };
-
         for (int i = 0; i < input.Count; i++)
         {
             if (!validOperators.Contains(input[i]))
             {
                 continue;
             }
-
             if (i + 1 >= input.Count)
             {
                 continue;
             }
-
-            if (!input[i + 1].IsDigit())
+            if (!input[i + 1].All(char.IsDigit))
             {
                 return false;
             }
         }
-
         if (input[^1] == validOperators.Last() || input[^1] == "$in")
         {
             return false;
         }
-
         return true;
     }
 
@@ -394,50 +487,42 @@ public static partial class QueryParamValidate
     /// check if array operator has invalid index like $and[1][firstName], index must start with 0.
     /// </summary>
     /// <param name="input"></param>
-    /// <returns></returns>
+    /// /// <returns></returns>
     private static bool ValidateArrayOperatorInvalidIndex(List<string> input)
     {
         var validOperators = new HashSet<string> { "$and", "$or", "$in", "$between" };
-
         for (int i = 0; i < input.Count; i++)
         {
             if (!validOperators.Contains(input[i]))
             {
                 continue;
             }
-
             if (i + 1 >= input.Count)
             {
                 continue;
             }
-
             string theNextItem = input[i + 1];
-            if (!theNextItem.IsDigit() || int.Parse(theNextItem) != 0)
+            if (!theNextItem.All(char.IsDigit) || int.Parse(theNextItem) != 0)
             {
                 return false;
             }
         }
-
         if (input[^1] == validOperators.Last() || input[^1] == "$in")
         {
             return false;
         }
-
         return true;
     }
 
     private static bool ValidateLackOfOperator(List<string> input)
     {
         Stack<string> inputs = new(input);
-
         string last = inputs.Pop();
         string preLast = inputs.Pop();
-
         if (arrayOperators.Contains(preLast.ToLower()))
         {
             return true;
         }
-
         return validOperators.Contains(last.ToLower());
     }
 
@@ -446,11 +531,9 @@ public static partial class QueryParamValidate
         Stack<string> inputs = new(input);
         string last = inputs.Pop();
         string preLast = inputs.Pop();
-
-        return logicalOperators.Contains(preLast.ToLower()) && last.IsDigit();
+        return logicalOperators.Contains(preLast.ToLower()) && last.All(char.IsDigit);
     }
 
-    // Array of valid operators
     private static readonly string[] validOperators =
     [
         "$eq",
@@ -472,8 +555,6 @@ public static partial class QueryParamValidate
         "$endswith",
     ];
 
-    // Operators that don't require further validation after them
     private static readonly string[] arrayOperators = ["$in", "$between"];
-
     private static readonly string[] logicalOperators = ["$and", "$or"];
 }
