@@ -1,7 +1,7 @@
 services:
-  authen:
-    container_name: authen
-    image: authen
+  auth:
+    container_name: auth
+    image: auth
     ports:
       - "8080"
     restart: always

@@ -49,11 +49,11 @@ namespace Application.Feature.Orders.Command.Create
         {
             if (discountFixed)
             {
-                return amount - discountValue;
+                return amount - (amount * discountValue / 100);
             }
             else
             {
-                return amount - (amount * discountValue / 100);
+                return amount - discountValue;
             }
         }
 
