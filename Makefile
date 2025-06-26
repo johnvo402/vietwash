@@ -8,12 +8,12 @@ SHELL := /bin/bash
 # TAG ?= $(shell ./scripts/get-version.sh)
 # GIT_COMMIT ?= $(shell git rev-parse HEAD)
 # GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
-# ENV_FILE ?= .env
+ENV_FILE ?= .env
 # args=$(filter-out $@,$(MAKECMDGOALS))
 
-# # export .env file
-# -include $(ENV_FILE)
-# export
+export .env file
+-include $(ENV_FILE)
+export
 # Mục chính để chạy migration
 migration:
 	@echo "Running migration for database(s): $(NAME)"
@@ -22,6 +22,8 @@ migration:
 # Mục để cập nhật migration (tùy chọn)
 update:
 	./scripts/update-db.sh
+deploy:
+	./scripts/deploy.sh ${SERVICE}
 publish:
 	./scripts/publish.sh $(foreach db,$(NAME),$(db))
 
