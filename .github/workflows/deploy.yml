@@ -3,11 +3,11 @@ name: Auto Deploy Service to VPS
 on:
   push:
     branches:
-      - dev
+      - test-deploy
     paths:
       - "src/ApiGateway/**"
       - "src/AuthService/**"
-      - "src/EcommeceService/**"
+      - "src/EcommerceService/**"
       - "src/FinanceService/**"
       - "src/ProjectService/**"
       - "src/Contracts/**"
@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Lấy full history để diff
 
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.4
@@ -29,6 +31,7 @@ jobs:
         id: detect
         run: |
           echo "Detecting changed services..."
+
           CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
 
           echo "Changed files:"
@@ -36,22 +39,22 @@ jobs:
 
           SERVICES=()
 
-          for DIR in ApiGateway AuthService EcommeceService FinanceService ProjectService; do
+          for DIR in src/ApiGateway src/AuthService src/EcommerceService src/FinanceService src/ProjectService; do
             if echo "$CHANGED_FILES" | grep -q "^${DIR}/"; then
               case $DIR in
-                ApiGateway)
+                src/ApiGateway)
                   SERVICES+=("gateway")
                   ;;
-                AuthService)
+                src/AuthService)
                   SERVICES+=("auth")
                   ;;
-                EcommeceService)
+                src/EcommerceService)
                   SERVICES+=("ecommerce")
                   ;;
-                FinanceService)
+                src/FinanceService)
                   SERVICES+=("finance")
                   ;;
-                ProjectService)
+                src/ProjectService)
                   SERVICES+=("project")
                   ;;
               esac
@@ -59,7 +62,7 @@ jobs:
           done
 
           # Nếu Contracts bị thay đổi thì deploy tất cả
-          if echo "$CHANGED_FILES" | grep -q "^Contracts/"; then
+          if echo "$CHANGED_FILES" | grep -q "^src/Contracts/"; then
             SERVICES=(gateway auth ecommerce finance project)
           fi
 
@@ -79,6 +82,9 @@ jobs:
       - name: Make deploy script executable
         if: steps.detect.outputs.skip != 'true'
         run: chmod +x ./scripts/deploy.sh
+      - name: Add VPS to known hosts
+        run: |
+          ssh-keyscan -p ${{ secrets.REMOTE_SERVER_PORT }} ${{ secrets.REMOTE_SERVER_IP }} >> ~/.ssh/known_hosts
 
       - name: Run deploy script
         if: steps.detect.outputs.skip != 'true'
