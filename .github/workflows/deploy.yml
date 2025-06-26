@@ -5,12 +5,12 @@ on:
     branches:
       - dev
     paths:
-      - "ApiGateway/**"
-      - "AuthService/**"
-      - "EcommeceService/**"
-      - "FinanceService/**"
-      - "ProjectService/**"
-      - "Contracts/**"
+      - "src/ApiGateway/**"
+      - "src/AuthService/**"
+      - "src/EcommeceService/**"
+      - "src/FinanceService/**"
+      - "src/ProjectService/**"
+      - "src/Contracts/**"
 
 jobs:
   deploy:
