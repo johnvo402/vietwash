@@ -2,6 +2,8 @@ name: Auto Deploy Service to VPS
 
 on:
   push:
+    branches:
+      - dev
     paths:
       - "ApiGateway/**"
       - "AuthService/**"
