@@ -1,9 +1,7 @@
 using Application.Common.Interfaces.Registers;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
-using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.Infrastructure.PubSub;
 using Contracts.Infrastructure.Services.Cache.MemoryCache;
 using Infrastructure.Common;
 using Infrastructure.Data;
@@ -12,7 +10,7 @@ using Infrastructure.Services;
 using Infrastructure.Services.Aws;
 using Infrastructure.Services.BackgroundJobs;
 using Infrastructure.Services.DistributedCache;
-using Infrastructure.Services.Elastics;
+using Infrastructure.Services.ElasticSeach;
 using Infrastructure.Services.gRPC;
 using Infrastructure.Services.Hangfires;
 using Infrastructure.Services.Identity;
