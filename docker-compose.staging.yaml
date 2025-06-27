@@ -22,7 +22,7 @@ services:
     # <<: *common_config
     image: auth
     volumes:
-      - ./logs:/app/logs
+      - ./logs:/logs
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
     build:
@@ -32,7 +32,7 @@ services:
     # <<: *common_config
     image: ecommerce
     volumes:
-      - ./logs:/app/logs
+      - ./logs:/logs
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
     build:
@@ -42,7 +42,7 @@ services:
     # <<: *common_config
     image: project
     volumes:
-      - ./logs:/app/logs
+      - ./logs:/logs
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
     build:
@@ -62,7 +62,7 @@ services:
     # <<: *common_config
     image: finance
     volumes:
-      - ./logs:/app/logs
+      - ./logs:/logs
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
     build:

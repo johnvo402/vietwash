@@ -27,7 +27,6 @@ namespace Application.Feature.Orders.Command.Create
             );
             response.OrderItems = command.OrderItems.ToListMapping(x => new OrderItem
             {
-                OrderId = x.OrderId,
                 ServiceId = x.ServiceId,
                 UnitRelationId = x.UnitRelationId,
                 Price = x.Price,
