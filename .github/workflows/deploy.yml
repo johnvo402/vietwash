@@ -27,10 +27,10 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Detect changed services
+      - name: Detect changed services and migrations
         id: detect
         run: |
-          echo "Detecting changed services..."
+          echo "Detecting changed services and migrations..."
 
           CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
 
@@ -38,6 +38,7 @@ jobs:
           echo "$CHANGED_FILES"
 
           SERVICES=()
+          DB_UPDATE_SERVICES=()
 
           for DIR in src/ApiGateway src/AuthService src/EcommerceService src/FinanceService src/ProjectService; do
             if echo "$CHANGED_FILES" | grep -q "^${DIR}/"; then
@@ -59,6 +60,24 @@ jobs:
                   ;;
               esac
             fi
+
+            # Kiểm tra file migration có thay đổi không
+            if echo "$CHANGED_FILES" | grep -q "^${DIR}/Infrastructure/Data/Migrations/"; then
+              case $DIR in
+                src/AuthService)
+                  DB_UPDATE_SERVICES+=("auth")
+                  ;;
+                src/EcommerceService)
+                  DB_UPDATE_SERVICES+=("ecommerce")
+                  ;;
+                src/FinanceService)
+                  DB_UPDATE_SERVICES+=("finance")
+                  ;;
+                src/ProjectService)
+                  DB_UPDATE_SERVICES+=("project")
+                  ;;
+              esac
+            fi
           done
 
           # Nếu Contracts bị thay đổi thì deploy tất cả
@@ -75,6 +94,9 @@ jobs:
           echo "Services to deploy: ${SERVICES[@]}"
           echo "services=${SERVICES[@]}" >> $GITHUB_OUTPUT
 
+          echo "Services need DB update: ${DB_UPDATE_SERVICES[@]}"
+          echo "db_update_services=${DB_UPDATE_SERVICES[@]}" >> $GITHUB_OUTPUT
+
       - name: Skip if no service changed
         if: steps.detect.outputs.skip == 'true'
         run: echo "No services need deployment."
@@ -82,6 +104,7 @@ jobs:
       - name: Make deploy script executable
         if: steps.detect.outputs.skip != 'true'
         run: chmod +x ./scripts/deploy.sh
+
       - name: Add VPS to known hosts
         run: |
           ssh-keyscan -p ${{ secrets.REMOTE_SERVER_PORT }} ${{ secrets.REMOTE_SERVER_IP }} >> ~/.ssh/known_hosts
@@ -94,3 +117,10 @@ jobs:
           REMOTE_SERVER_PORT: ${{ secrets.REMOTE_SERVER_PORT }}
         run: |
           ./scripts/deploy.sh ${{ steps.detect.outputs.services }}
+
+          # Nếu có service cần update DB thì chạy thêm lệnh update-db
+          if [ -n "${{ steps.detect.outputs.db_update_services }}" ]; then
+            echo "Running DB update for: ${{ steps.detect.outputs.db_update_services }}"
+            ./scripts/update-db.sh ${{ steps.detect.outputs.db_update_services }}
+          fi
+          echo "Deployment completed successfully."
