@@ -26,7 +26,6 @@ namespace Domain.Aggregates.Branches
         public string? Street { get; set; }
         public string? Slug { get; set; }
         public ICollection<BranchUser> BranchUsers { get; set; } = [];
-        public ICollection<BranchProduct> BranchProducts { get; set; } = [];
         public ICollection<Warehouse> Warehouses { get; set; } = [];
 
         public Branch(

@@ -1,14 +1,19 @@
 ﻿using Application.Common.Errors;
+using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Products;
+using Domain.Aggregates.Products.Specifications;
 using Mediator;
 using System.Data.Common;
 
 namespace Application.Feature.Products.Command.Update
 {
-	public class UpdateProductHandler(IUnitOfWork unitOfWork)
+	public class UpdateProductHandler(
+		IUnitOfWork unitOfWork,
+		IMediaUpdateService mediaUpdateService
+	)
 		: IRequestHandler<UpdateProductCommand, Result>
 	{
 		public async ValueTask<Result> Handle(
@@ -17,9 +22,9 @@ namespace Application.Feature.Products.Command.Update
 			)
 		{
 			Product? existingProduct = await unitOfWork
-				.Repository<Product>()
+				.DynamicReadOnlyRepository<Product>()
 				.FindByConditionAsync(
-					s => s.Id == request.ProductId && !s.Disable,
+					new GetProductWithIncludeByIdSpecification(request.ProductId),
 					cancellationToken
 				);
 			if (existingProduct == null)
@@ -35,8 +40,9 @@ namespace Application.Feature.Products.Command.Update
 					)
 				);
 			}
-
-			existingProduct.FromModel(request.Product);
+			string? oldProductImage = existingProduct.Image;
+			existingProduct.UpdateFromModel(request.Product);
+			string? newProductImage = request.Product.Image;
 			try
 			{
 				DbTransaction transaction = await unitOfWork.BeginTransactionAsync(
@@ -47,10 +53,19 @@ namespace Application.Feature.Products.Command.Update
 				await unitOfWork.SaveAsync(cancellationToken);
 				await unitOfWork.CommitAsync(cancellationToken);
 
+				if (!string.IsNullOrEmpty(oldProductImage))
+				{
+					await mediaUpdateService.DeleteAvatarAsync(oldProductImage);
+				}
+
 				return Result.Success();
 			}
 			catch
 			{
+				if (!string.IsNullOrEmpty(newProductImage))
+				{
+					await mediaUpdateService.DeleteAvatarAsync(newProductImage);
+				}
 				await unitOfWork.RollbackAsync(cancellationToken);
 				throw;
 			}

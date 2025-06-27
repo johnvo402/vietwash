@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Aggregates.Services.Enums
+namespace Application.Feature.Common.Projections.Products
 {
-	public enum ActivationStatus
+	public class ProductBranchModel
 	{
-		active = 0,
-		inactive = 1,
+		public long BranchId { get; set; }
 	}
 }

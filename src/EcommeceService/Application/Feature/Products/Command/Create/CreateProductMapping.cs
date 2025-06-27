@@ -1,12 +1,6 @@
 ﻿using Application.Feature.Common.Projections.Products;
-using Application.Feature.Common.Projections.Services;
+using Contracts.Extensions;
 using Domain.Aggregates.Products;
-using Domain.Aggregates.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Feature.Products.Command.Create
 {
@@ -15,14 +9,25 @@ namespace Application.Feature.Products.Command.Create
 		public static Product ToEntity(this ProductModel model)
 		{
 			return new Product(
-				name: model.Name,
-				description: model.Description,
-				sku: model.Sku,
-				barcode: model.Barcode,
-				image: model.Image,
-				status: model.Status,
-				recommendedPrice: model.RecommendedPrice
-			);
+			   name: model.Name.Trim(),
+			   description: model.Description?.Trim(),
+			   sku: model.Sku.Trim(),
+			   barcode: model.Barcode.Trim(),
+			   image: model.Image,
+			   status: model.Status,
+			   recommendedPrice: model.RecommendedPrice
+		   )
+			{
+				ProductBranches = model.ProductBranches.ToListMapping(branch => new ProductBranch
+				{
+					BranchId = branch.BranchId,
+					Description = model.Description?.Trim(),
+					Sku = model.Sku.Trim(),
+					Barcode = model.Barcode.Trim(),
+					Status = model.Status,
+					Image = model.Image
+				})
+			};
 		}
 	}
 }

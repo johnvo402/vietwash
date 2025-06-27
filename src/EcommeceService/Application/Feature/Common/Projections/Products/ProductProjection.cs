@@ -5,6 +5,8 @@ using FluentEmail.Core.Models;
 using FluentEmail.Core;
 using Domain.Aggregates.Products;
 using Application.Common.Security;
+using Domain.Aggregates.Enums;
+using Application.Feature.Common.Mapping.Units;
 
 
 namespace Application.Feature.Common.Projections.Products
@@ -14,14 +16,16 @@ namespace Application.Feature.Common.Projections.Products
 		public string Name { get; set; }
 		public string Description { get; set; }
 		public string Sku { get; set; }
-		public ProductStatus Status { get; set; }
+		public ActivationStatus Status { get; set; }
 		[File]
 		public string? Image { get; set; }
 		public string Barcode { get; set; }
 		public decimal RecommendedPrice { get; set; }
+		public ICollection<ProductBranchProjection> ProductBranches { get; set; } = [];
 
 
-		public virtual void MappingFrom(Product product)
+
+		public void MappingFrom(Product product)
 		{
 			Id = product.Id;
 			PublicId = product.PublicId;
@@ -29,7 +33,6 @@ namespace Application.Feature.Common.Projections.Products
 			CreatedBy = product.CreatedBy;
 			UpdatedAt = product.UpdatedAt;
 			UpdatedBy = product.UpdatedBy;
-
 			Name = product.Name;
 			Description = product.Description;
 			Sku = product.Sku;
@@ -37,7 +40,10 @@ namespace Application.Feature.Common.Projections.Products
 			Status = product.Status;
 			Barcode = product.Barcode;
 			RecommendedPrice = product.RecommendedPrice;
-
+			ProductBranches = product.ProductBranches
+			.Select(pb => pb.ToProductBranchProjectionResponse())
+			.ToList();
+			 
 		}
 	}
 }

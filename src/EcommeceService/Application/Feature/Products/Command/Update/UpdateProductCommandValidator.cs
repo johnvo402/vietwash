@@ -4,6 +4,7 @@ using Application.Feature.Common.Validators.Products;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Products;
 using FluentValidation;
+using Infrastructure.UnitOfWorks;
 
 namespace Application.Feature.Products.Command.Update
 {
@@ -36,6 +37,52 @@ namespace Application.Feature.Products.Command.Update
 						.Negative()
 						.Build()
 				);
+			RuleFor(x => x.Product.Sku)
+					.NotEmpty()
+					.WithState(x =>
+							Messager
+								.Create<Product>()
+								.Property(x => x.Sku)
+								.Message(MessageType.Null)
+								.Negative()
+								.Build()
+					)
+					.MustAsync(IsSkuExistsAsync)
+					.WithState(_ =>
+							Messager
+								.Create<Product>()
+								.Property(x => x.Sku)
+								.Message(MessageType.Found)
+								.Negative()
+								.Build()
+					);
+			RuleFor(x => x.Product.Barcode)
+					.NotEmpty()
+					.WithState(x =>
+							Messager
+								.Create<Product>()
+								.Property(x => x.Barcode)
+								.Message(MessageType.Null)
+								.Negative()
+								.Build()
+					)
+					.MustAsync(IsBarcodeExistsAsync)
+					.WithState(_ =>
+							Messager
+								.Create<Product>()
+								.Property(x => x.Barcode)
+								.Message(MessageType.Found)
+								.Negative()
+								.Build()
+					);
+		}
+		private async Task<bool> IsSkuExistsAsync(UpdateProductCommand command, string sku, CancellationToken cancellation)
+		{
+			return !await unitOfWork.Repository<Product>().AnyAsync(p => p.Sku == sku && p.Id != command.ProductId, cancellation);
+		}
+		private async Task<bool> IsBarcodeExistsAsync(UpdateProductCommand command, string barcode, CancellationToken cancellation)
+		{
+			return !await unitOfWork.Repository<Product>().AnyAsync(p => p.Barcode == barcode && p.Id != command.ProductId, cancellation);
 		}
 	}
 }

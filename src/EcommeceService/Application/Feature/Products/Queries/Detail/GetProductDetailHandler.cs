@@ -20,7 +20,7 @@ namespace Application.Feature.Products.Queries.Detail
 				.DynamicReadOnlyRepository<Product>()
 				.FindByConditionAsync(
 					new GetProductWithIncludeByIdSpecification(query.ProductId),
-					product => product.ToCreateUserResponse(),
+					product => product.ToGetProductDetailResponse(),
 					cancellationToken
 				);
 			if (response == null)

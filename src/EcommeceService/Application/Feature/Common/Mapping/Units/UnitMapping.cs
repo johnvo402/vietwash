@@ -1,4 +1,6 @@
-﻿using Application.Feature.Common.Projections.Units;
+﻿using Application.Feature.Common.Projections.Products;
+using Application.Feature.Common.Projections.Units;
+using Domain.Aggregates.Products;
 using Domain.Aggregates.Services;
 
 namespace Application.Feature.Common.Mapping.Units
@@ -40,5 +42,17 @@ namespace Application.Feature.Common.Mapping.Units
                 Status = ur.Status,
             };
         }
-    }
+		public static ProductBranchProjection ToProductBranchProjectionResponse(this ProductBranch entity)
+		{
+			return new ProductBranchProjection
+			{
+				BranchId = entity.BranchId,
+				Sku = entity.Sku,
+				Barcode = entity.Barcode,
+				Description = entity.Description,
+				Status = entity.Status,
+				Image = entity.Image
+			};
+		}
+	}
 }

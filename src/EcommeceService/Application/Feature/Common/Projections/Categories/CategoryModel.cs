@@ -1,3 +1,4 @@
+using Domain.Aggregates.Enums;
 using Domain.Aggregates.Services.Enums;
 
 namespace Application.Feature.Common.Projections.Services
@@ -7,6 +8,6 @@ namespace Application.Feature.Common.Projections.Services
         public string? Name { get; set; }
         public string? ParentId { get; set; }
 
-        public ActivationStatus Status { get; set; } = ActivationStatus.active;
+        public ActivationStatus Status { get; set; } = ActivationStatus.Active;
     }
 }
