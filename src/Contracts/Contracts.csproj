@@ -15,6 +15,7 @@
     <Protobuf Include="Protos/queue_log.proto" GrpcServices="Both" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="DinkToPdf" />
     <PackageReference Include="Grpc.AspNetCore" />
     <PackageReference Include="Ardalis.GuardClauses" />
     <PackageReference Include="Ardalis.Result.AspNetCore" />

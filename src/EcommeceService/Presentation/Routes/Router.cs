@@ -54,6 +54,11 @@ namespace Presentation.Routes
                 + "{"
                 + RouterBase.Id
                 + "}";
+            public const string GetReceipt =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(GetReceipt)}"
+                + "{"
+                + RouterBase.Id
+                + "}";
         }
 
         public static class SaleResultRoute
@@ -99,17 +104,18 @@ namespace Presentation.Routes
                 + RouterBase.Id
                 + "}";
         }
-		public static class ProductRoute
-		{
-			public const string Tags = $"{nameof(ProductRoute)} endpoint";
-			public const string Products = $"{Ecommerce}/{RouterBase.prefix}{nameof(Products)}";
-			public const string GetUpdateDelete =
-				$"{Ecommerce}/{RouterBase.prefix}{nameof(Products)}/" + "{" + RouterBase.Id + "}";
-			public const string GetDetail =
-				$"{Ecommerce}/{RouterBase.prefix}{nameof(Products)}/detail/"
-				+ "{"
-				+ RouterBase.Id
-				+ "}";
-		}
-	}
+
+        public static class ProductRoute
+        {
+            public const string Tags = $"{nameof(ProductRoute)} endpoint";
+            public const string Products = $"{Ecommerce}/{RouterBase.prefix}{nameof(Products)}";
+            public const string GetUpdateDelete =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Products)}/" + "{" + RouterBase.Id + "}";
+            public const string GetDetail =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Products)}/detail/"
+                + "{"
+                + RouterBase.Id
+                + "}";
+        }
+    }
 }

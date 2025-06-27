@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biên nhận</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #e0f7fa;
+        }
+
+        .receipt {
+            width: 210mm;
+            height: 148mm;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 10mm;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+
+        .header {
+            background-color: #ffe6e6;
+            color: black;
+            padding: 5mm;
+            margin: -10mm -10mm 10mm -10mm;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header .top-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 2mm;
+        }
+
+        .header .info {
+            text-align: left;
+            font-size: 10px;
+        }
+
+        .header .info h2 {
+            margin: 0 0 1mm 0;
+            font-size: 14px;
+        }
+
+        .header .info p {
+            margin: 0.5mm 0;
+        }
+
+        .header .logo {
+            width: 30mm;
+            height: 15mm;
+            background-color: #ddd;
+            text-align: center;
+            line-height: 15mm;
+            color: #666;
+            font-size: 10px;
+            margin-left: 5mm;
+        }
+
+        .header h3 {
+            margin: 2mm 0 0;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .info {
+            font-size: 10px;
+            margin-bottom: 5mm;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10mm;
+            font-size: 10px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #000;
+        }
+
+        th {
+            background-color: #ffe6e6;
+            color: black;
+            padding: 3mm;
+        }
+
+        td {
+            padding: 3mm;
+            text-align: left;
+        }
+
+        .footer {
+            font-size: 10px;
+            text-align: center;
+            border-top: 1px solid #000;
+            padding-top: 5mm;
+            margin-top: 5mm;
+        }
+
+        .footer p {
+            margin: 2mm 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="receipt">
+        <div class="header">
+            <div class="top-row">
+                <div class="info">
+                    <h2>CỬA HÀNG GIẶT ỦI VIETWASH</h2>
+                    <p>Địa chỉ: Nguyễn Văn Cừ, An Khánh, Ninh Kiều, Cần Thơ</p>
+                    <p>Điện thoại: 038 339 5692</p>
+                </div>
+                <div class="logo">Logo</div>
+            </div>
+            <h3>BIÊN NHẬN</h3>
+        </div>
+        <div class="info">
+            <p>Khách hàng: @Model.Customer.DisplayName</p>
+            <p>SĐT: @Model.Customer.PhoneNumber</p>
+        </div>
+        <table>
+            <tr>
+                <th>STT</th>
+                <th>Dịch vụ</th>
+                <th>DVT</th>
+                <th>Số lượng</th>
+                <th>Đơn Giá</th>
+                <th>Thành Tiền</th>
+            </tr>
+            @{
+                int index = 0;
+                foreach (var item in Model.OrderItems)
+                {
+                    index++;
+                    <tr>
+                        <td>@index</td>
+                        <td>@item.ServiceName</td>
+                        <td>@item.UnitRelationName</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.UnitPrice</td>
+                        <td>@(item.Quantity* item.UnitPrice)</td>
+                    </tr>
+                }
+                // Điền các dòng trống nếu cần (tối đa 5 dòng)
+                while (index < 3)
+                {
+                    index++;
+                    <tr>
+                        <td>@index</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                }
+            }
+        </table>
+        <div class="footer">
+            <p>TỔNG CỘNG: @Model.Total</p>
+            <p>Ngày @Model.OrderDate.ToString("dd/MM/yyyy")</p>
+        </div>
+    </div>
+</body>
+
+</html>

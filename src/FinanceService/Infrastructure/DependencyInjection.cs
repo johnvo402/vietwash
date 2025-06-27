@@ -116,7 +116,7 @@ public static class DependencyInjection
             .Configure<CacheSettings>(options =>
                 configuration.GetSection(nameof(CacheSettings)).Bind(options)
             )
-            .AddMail()
+            .AddMailPdf()
             .AddMemoryCaching(configuration)
             .AddHangfireConfiguration(configuration)
             .AddElasticSearch(configuration)
