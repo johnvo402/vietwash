@@ -36,7 +36,9 @@ namespace Domain.Aggregates.Orders
                     return false;
             }
         }
+
         private Order() { }
+
         public Order(
             long branchId,
             long staffId,

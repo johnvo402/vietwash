@@ -1,4 +1,5 @@
 ﻿using System.Data.Common;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Orders;
@@ -7,7 +8,7 @@ using Mediator;
 
 namespace Application.Feature.Orders.Command.Create
 {
-    public class CreateOrderHandler(IUnitOfWork unitOfWork)
+    public class CreateOrderHandler(IUnitOfWork unitOfWork, ICurrentAccount _currentAccount)
         : IRequestHandler<CreateOrderCommand, Result<CreateOrderResponse>>
     {
         public async ValueTask<Result<CreateOrderResponse>> Handle(
@@ -15,7 +16,7 @@ namespace Application.Feature.Orders.Command.Create
             CancellationToken cancellationToken
         )
         {
-            Order order = request.ToEntity();
+            Order order = request.ToEntity((long)_currentAccount.Id!);
 
             try
             {
