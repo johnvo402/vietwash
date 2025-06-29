@@ -1,6 +1,7 @@
 using Application.Features.Common.Projections.Users;
 using Contracts.Dtos.Models;
 using Contracts.Dtos.Responses;
+using Domain.Aggregates.Enums;
 using Domain.Aggregates.Users.Enums;
 using Mediator;
 using Microsoft.AspNetCore.Http;
@@ -26,5 +27,5 @@ public class CreateAccountEvent
     public bool Disabled { get; set; }
     public CustomerGroup? CustomerGroup { get; set; }
 
-    public UserStatus Status { get; set; }
+    public ActivationStatus Status { get; set; }
 }

@@ -1,12 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Domain.Aggregates.Enums
 {
-	public enum ActivationStatus
+    public enum ActivationStatus
 	{
 		Active = 1,
 		Inactive = 2,

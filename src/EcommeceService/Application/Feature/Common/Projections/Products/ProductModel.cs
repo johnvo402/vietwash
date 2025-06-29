@@ -1,4 +1,4 @@
-﻿using Domain.Aggregates.Products.Enums;
+﻿using Domain.Aggregates.Enums;
 
 namespace Application.Feature.Common.Projections.Products
 {
@@ -9,7 +9,7 @@ namespace Application.Feature.Common.Projections.Products
 		public string Sku { get; set; } = default!;
 		public string Barcode { get; set; } = default!;
 		public string? Image { get; set; }
-		public ProductStatus Status { get; set; } = ProductStatus.Active;
+		public ActivationStatus Status { get; set; } = ActivationStatus.Active;
 		public decimal RecommendedPrice { get; set; } = default!;
 	}
 }

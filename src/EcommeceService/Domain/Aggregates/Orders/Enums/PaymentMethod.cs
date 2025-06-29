@@ -8,7 +8,7 @@ namespace Domain.Aggregates.Orders.Enums
 {
 	public enum PaymentMethod : byte
 	{
-		Cash = 0,
-		Card = 1
+		Cash = 1,
+		Card = 2
 	}
 }

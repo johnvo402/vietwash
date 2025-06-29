@@ -8,10 +8,10 @@ namespace Domain.Aggregates.Orders.Enums
 {
 	public enum OrderStatus : byte
 	{
-		Pending = 0,
-		InProgress = 1,
-		Processed = 2,
-		Completed = 3,
-		Cancelled = 4,
+		Pending = 1,
+		InProgress = 2,
+		Processed = 3,
+		Completed = 4,
+		Cancelled = 5,
 	}
 }

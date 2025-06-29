@@ -1,4 +1,5 @@
-﻿using Domain.Aggregates.Services.Enums;
+﻿using Domain.Aggregates.Enums;
+using Domain.Aggregates.Services.Enums;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Services

@@ -1,4 +1,5 @@
-﻿using Domain.Aggregates.Inventories.Enums;
+﻿using Domain.Aggregates.Enums;
+using Domain.Aggregates.Inventories.Enums;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Inventories
@@ -6,7 +7,7 @@ namespace Domain.Aggregates.Inventories
     public class InventoryRequest : BaseEntity
     {
         public long? SupplierId { get; set; }
-        public Status Status { get; set; }
+        public ActivationStatus Status { get; set; }
         public string Note { get; set; }
         public Enums.Type Type { get; set; }
         public DateTimeOffset? RequestAt { get; set; }

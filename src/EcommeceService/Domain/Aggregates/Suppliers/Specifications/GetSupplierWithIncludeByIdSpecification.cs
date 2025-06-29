@@ -1,6 +1,5 @@
 ﻿using Domain.Aggregates.Enums;
 using Domain.Aggregates.Services;
-using Domain.Aggregates.Suppliers.Enum;
 using Specification;
 using Specification.Builders;
 using System;

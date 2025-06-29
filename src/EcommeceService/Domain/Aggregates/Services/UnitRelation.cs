@@ -1,3 +1,4 @@
+using Domain.Aggregates.Enums;
 using Domain.Aggregates.Inventories;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Services.Enums;

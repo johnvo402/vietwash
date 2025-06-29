@@ -1,4 +1,5 @@
 ﻿using Application.Common.Security;
+using Domain.Aggregates.Enums;
 using Domain.Aggregates.Services;
 using Domain.Aggregates.Services.Enums;
 using Shared.Kernel.Common;
@@ -13,7 +14,7 @@ namespace Application.Feature.Common.Projections.Services
 
         [File]
         public string? Image { get; set; }
-        public ServiceStatus? Status { get; set; }
+        public ActivationStatus? Status { get; set; }
 
         public virtual void MappingFrom(Service service)
         {

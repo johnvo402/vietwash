@@ -7,6 +7,7 @@ using Domain.Aggregates.Equipments;
 using Domain.Aggregates.Inventories.Enums;
 using Shared.Kernel.Common;
 using Mediator;
+using Domain.Aggregates.Enums;
 
 namespace Domain.Aggregates.Inventories
 {
@@ -22,7 +23,7 @@ namespace Domain.Aggregates.Inventories
         public long? FromWarehouseId { get; set; }
         public DateTimeOffset? TransactionAt { get; set; }
         public string Code { get; set; } = null!;
-        public Status Status { get; set; }
+        public ActivationStatus Status { get; set; }
         public Enums.Type Type { get; set; }
         public string? Note { get; set; }
 

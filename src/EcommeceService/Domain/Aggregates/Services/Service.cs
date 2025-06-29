@@ -1,4 +1,5 @@
 ﻿using Ardalis.GuardClauses;
+using Domain.Aggregates.Enums;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Services.Enums;
 using Domain.Aggregates.Tariffs;
@@ -17,7 +18,7 @@ namespace Domain.Aggregates.Services
 		public bool Disable { get; set; } = default!;
 		public string? Slug { get; set; }
 		public TypeStatus Type { get; set; } = default!; // combo hay service thường
-		public ServiceStatus Status { get; set; } = default!;
+		public ActivationStatus Status { get; set; } = default!;
 		public Category Category { get; set; } = default!;
 		public ICollection<OrderItem> OrderItems { get; set; } = [];
 		public ICollection<UnitRelation> UnitRelations { get; set; } = [];
@@ -30,7 +31,7 @@ namespace Domain.Aggregates.Services
 			long branchId,
 			string name,
 			TypeStatus type,
-			ServiceStatus status,
+			ActivationStatus status,
 			string? description = null,
 			string? image = null
 		)
@@ -49,7 +50,7 @@ namespace Domain.Aggregates.Services
 			long? branchId = null,
 			string? name = null,
 			TypeStatus? type = null,
-			ServiceStatus? status = null,
+			ActivationStatus? status = null,
 			string? description = null,
 			string? image = null
 		)
