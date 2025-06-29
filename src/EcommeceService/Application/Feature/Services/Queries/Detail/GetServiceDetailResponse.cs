@@ -7,7 +7,6 @@ namespace Application.Feature.Services.Queries.Detail
     {
         public UserDTO? CreatedUser { get; set; }
         public UserDTO? UpdatedUser { get; set; }
-        public string? CategoryId { get; set; }
     }
 
     public class UserDTO

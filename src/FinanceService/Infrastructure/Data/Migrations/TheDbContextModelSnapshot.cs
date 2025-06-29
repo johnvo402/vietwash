@@ -26,11 +26,8 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Funds.Fund", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric")
@@ -63,7 +60,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnName("metadata");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
 
@@ -71,7 +67,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("note");
 
-                    b.Property<long>("ObjectId")
+                    b.Property<long?>("ObjectId")
                         .HasColumnType("bigint")
                         .HasColumnName("object_id");
 
@@ -84,7 +80,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("character varying(26)")
                         .HasColumnName("public_id");
 
-                    b.Property<long>("ReferenceId")
+                    b.Property<long?>("ReferenceId")
                         .HasColumnType("bigint")
                         .HasColumnName("reference_id");
 
@@ -127,11 +123,8 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Funds.FundBehavior", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -176,11 +169,8 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Funds.Transaction", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric")
@@ -233,17 +223,14 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("AvtUrl")
                         .HasColumnType("text")
                         .HasColumnName("avt_url");
 
-                    b.Property<DateOnly>("BirthDay")
+                    b.Property<DateOnly?>("BirthDay")
                         .HasColumnType("date")
                         .HasColumnName("birth_day");
 
@@ -334,8 +321,6 @@ namespace Infrastructure.Data.Migrations
                     b.HasOne("Domain.Aggregates.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("ObjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("fk_fund_user_object_id");
 
                     b.Navigation("FundBehavior");

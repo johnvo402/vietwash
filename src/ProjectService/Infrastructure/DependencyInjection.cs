@@ -1,10 +1,9 @@
 using Application.Common.Interfaces.Registers;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
-using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.Infrastructure.PubSub;
 using Contracts.Infrastructure.Services.Cache.MemoryCache;
+using Contracts.Infrastructure.Services.GenIdLong;
 using Infrastructure.Common;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
@@ -12,7 +11,6 @@ using Infrastructure.Services;
 using Infrastructure.Services.Aws;
 using Infrastructure.Services.BackgroundJobs;
 using Infrastructure.Services.DistributedCache;
-using Infrastructure.Services.Elastics;
 using Infrastructure.Services.gRPC;
 using Infrastructure.Services.Hangfires;
 using Infrastructure.Services.Identity;
@@ -92,7 +90,7 @@ public static class DependencyInjection
         services
             .AddAmazonS3(configuration)
             .AddSingleton<ICurrentAccount, CurrentUserService>()
-            .AddSingleton(typeof(IMediaUpdateService<>), typeof(MediaUpdateService<>))
+            .AddSingleton(typeof(IMediaUpdateService), typeof(MediaUpdateService))
             .Scan(scan =>
                 scan.FromCallingAssembly()
                     .AddClasses(classes => classes.AssignableTo<IScope>())
@@ -114,12 +112,12 @@ public static class DependencyInjection
             .Configure<CacheSettings>(options =>
                 configuration.GetSection(nameof(CacheSettings)).Bind(options)
             )
-            .AddMail()
+            .AddMailPdf()
             .AddMemoryCaching(configuration)
             .AddHangfireConfiguration(configuration)
-            .AddElasticSearch(configuration)
             .AddGrpcServices()
-            .AddScoped<JobScheduler>();
+            .AddScoped<JobScheduler>()
+            .AddSnowflakeIdGenerator(configuration);
 
         return services;
     }

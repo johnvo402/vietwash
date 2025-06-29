@@ -31,7 +31,7 @@ services:
     depends_on:
       - "database"
 
-  authen:
+  auth:
     depends_on:
       - "database"
   project:

@@ -10,7 +10,7 @@ using Mediator;
 
 namespace Application.Features.Users.Commands.Delete;
 
-public class DeleteUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService<User> mediaUpdateService)
+public class DeleteUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService mediaUpdateService)
     : IRequestHandler<DeleteUserCommand, Result<MessageOutput>>
 {
     public async ValueTask<Result<MessageOutput>> Handle(

@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Application;
 using Application.Jobs;
 using Contracts.Converters;
@@ -28,6 +29,7 @@ builder
         option.JsonSerializerOptions.Converters.Add(
             new Cysharp.Serialization.Json.UlidJsonConverter()
         );
+        option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 services.AddScoped<CheckCustomerLoyal>();
 
@@ -83,6 +85,7 @@ try
     app.UseSerilogRequestLogging();
     app.BlackListContext();
     app.MapControllers();
+    app.ApplyMigrations();
     app.MapHealthChecks(
         "/api/health",
         new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }

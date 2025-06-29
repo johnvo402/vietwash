@@ -26,11 +26,8 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Branches.Branch", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("AddressName")
                         .HasColumnType("text")
@@ -140,11 +137,8 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Branches.BranchProduct", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Barcode")
                         .HasColumnType("text")
@@ -189,11 +183,8 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Branches.BranchUser", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("BranchId")
                         .HasColumnType("bigint")
@@ -226,11 +217,8 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.PubSubLogs.PubSubLog", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -283,11 +271,8 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Warehouses.Warehouse", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("BranchId")
                         .HasColumnType("bigint")

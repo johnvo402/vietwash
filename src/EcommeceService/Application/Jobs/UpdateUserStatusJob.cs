@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -14,6 +15,12 @@ using Domain.Aggregates.Users.Specifications;
 
 namespace Application.Jobs
 {
+
+    public class UserOnlyId
+    {
+        public long Id { get; set; }
+        public CustomerGroup? CustomerGroup { get; set; }
+    }
     public class CheckCustomerLoyal : IJob
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -22,41 +29,46 @@ namespace Application.Jobs
         {
             _unitOfWork = unitOfWork;
         }
-
         public async Task ExecuteAsync()
         {
-            IEnumerable<User> users = await _unitOfWork.Repository<User>().ListAsync();
-            List<long> userIds = new List<long>();
-            foreach (User user in users)
+            var userIds = await _unitOfWork.DynamicReadOnlyRepository<User>()
+                .ListAsync(  
+                    new ListCustomerWithoutIncludeSpecification(CustomerGroup.Normal),
+                    new QueryParamRequest(),
+                    x => new UserOnlyId
+                    {
+                        Id = x.Id,
+                        CustomerGroup = x.CustomerGroup,
+                    },
+                    cancellationToken: default
+                );
+
+            foreach (var userId in userIds)
             {
-                userIds.Add(user.Id);
-            }
-            foreach (long userId in userIds)
-            {
-                var order = await _unitOfWork
+                var orders = await _unitOfWork
                     .DynamicReadOnlyRepository<Order>()
                     .ListAsync(
-                        new GetOrderByCustomerIdSpecification(userId),
+                        new GetOrderByCustomerIdSpecification(userId.Id),
                         new QueryParamRequest { }
                     );
-                if (order != null || order?.Count() > 0)
+
+                if (orders != null && orders.Count() > 0)
                 {
-                    var totalOrder = order.Count();
-                    var totalRevenue = order.Sum(x => x.Total);
+                    var totalOrder = orders.Count();
+                    var totalRevenue = orders.Sum(x => x.Total);
+
                     if (totalOrder >= 5 || totalRevenue > 500000)
                     {
+                        // Lấy user với AsNoTracking để tránh bị tracked  
                         var user = await _unitOfWork
-                            .DynamicReadOnlyRepository<User>()
-                            .FindByConditionAsync(
-                                new GetUserByIdWithoutIncludeSpecification(userId)
-                            );
+                            .Repository<User>()
+                            .FindByIdAsync(userId);
 
                         if (user == null)
-                        {
-                            break;
-                        }
+                            continue;
 
                         user.CustomerGroup = CustomerGroup.Loyal;
+
                         try
                         {
                             DbTransaction transaction = await _unitOfWork.BeginTransactionAsync();

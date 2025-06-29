@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Application.Features.Common.Mapping.Users;
 using Domain.Aggregates.Orders;
 
 namespace Application.Feature.Orders.Queries.List
@@ -26,6 +27,7 @@ namespace Application.Feature.Orders.Queries.List
                 DeliveryTime = order.DeliveryTime,
                 Status = order.Status,
                 BranchId = order.BranchId,
+                Customer = order.Customer != null ? order.Customer.UserDTOResponse() : null,
             };
     }
 }

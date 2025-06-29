@@ -9,7 +9,7 @@ using Mediator;
 
 namespace Application.Features.Users.Commands.Update;
 
-public class UpdateUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService<User> mediaUpdateService)
+public class UpdateUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService mediaUpdateService)
     : IRequestHandler<UpdateUserCommand, Result<UpdateUserResponse>>
 {
     public async ValueTask<Result<UpdateUserResponse>> Handle(

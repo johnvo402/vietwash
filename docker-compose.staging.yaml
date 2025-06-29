@@ -18,9 +18,11 @@ services:
     depends_on:
       - gateway
 
-  authen:
+  auth:
     # <<: *common_config
-    image: authen
+    image: auth
+    volumes:
+      - ./logs:/logs
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
     build:
@@ -29,6 +31,8 @@ services:
   ecommerce:
     # <<: *common_config
     image: ecommerce
+    volumes:
+      - ./logs:/logs
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
     build:
@@ -37,6 +41,8 @@ services:
   project:
     # <<: *common_config
     image: project
+    volumes:
+      - ./logs:/logs
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
     build:
@@ -55,6 +61,8 @@ services:
   finance:
     # <<: *common_config
     image: finance
+    volumes:
+      - ./logs:/logs
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
     build:

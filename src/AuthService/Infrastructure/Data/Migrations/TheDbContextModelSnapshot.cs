@@ -28,11 +28,8 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Accounts.Account", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("AvtUrl")
                         .HasColumnType("text")
@@ -149,11 +146,8 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Accounts.AccountActivity", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("AccountId")
                         .HasColumnType("bigint")
@@ -207,11 +201,8 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Accounts.AccountContact", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("AccountId")
                         .HasColumnType("bigint")
@@ -293,11 +284,8 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Accounts.AccountResetPassword", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("AccountId")
                         .HasColumnType("bigint")
@@ -346,11 +334,8 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Accounts.AccountToken", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("AccountId")
                         .HasColumnType("bigint")
@@ -401,11 +386,8 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Accounts.BranchAccount", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("AccountId")
                         .HasColumnType("bigint")

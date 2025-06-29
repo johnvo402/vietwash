@@ -1,17 +1,15 @@
 using Application.Common.Interfaces.Services.Aws;
 using Application.Common.Interfaces.Services.Identity;
+using Contracts.Dtos.Models;
 using Contracts.Dtos.Responses;
 using Microsoft.AspNetCore.Http;
 using Serilog;
 
 namespace Infrastructure.Services.Identity;
 
-public class MediaUpdateService<T>(IAmazonS3Service awsAmazonService, ILogger logger)
-    : IMediaUpdateService<T>
-    where T : class
+public class MediaUpdateService(IAmazonS3Service awsAmazonService, ILogger logger)
+    : IMediaUpdateService
 {
-    private readonly string Directory = $"{typeof(T).Name}s";
-
     public async Task DeleteAvatarAsync(string? key)
     {
         if (string.IsNullOrWhiteSpace(key))
@@ -30,14 +28,14 @@ public class MediaUpdateService<T>(IAmazonS3Service awsAmazonService, ILogger lo
         logger.Information("Remove object {key} successfully.", key);
     }
 
-    public string? GetKey(IFormFile? avatar)
+    public string? GetKey(IFormFile? avatar, MediaType mediaType)
     {
         if (avatar == null)
         {
             return null;
         }
 
-        return $"{Directory}/{awsAmazonService.UniqueFileName(avatar.FileName)}";
+        return $"{mediaType}s/{awsAmazonService.UniqueFileName(avatar.FileName)}";
     }
 
     public async Task<string?> UploadAvatarAsync(IFormFile? avatar, string? key)

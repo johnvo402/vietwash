@@ -13,7 +13,7 @@ namespace Application.Feature.Services.Command.Update;
 
 public class UpdateServiceHandler(
     IUnitOfWork unitOfWork,
-    IMediaUpdateService<Service> mediaUpdateService
+    IMediaUpdateService mediaUpdateService
 ) : IRequestHandler<UpdateServiceCommand, Result>
 {
     public async ValueTask<Result> Handle(

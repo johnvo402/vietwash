@@ -11,7 +11,7 @@ namespace Application.Features.Users.Commands.Delete;
 
 public class DeleteUserHandler(
     IUnitOfWork unitOfWork,
-    IMediaUpdateService<Image> MediaUpdateService
+    IMediaUpdateService MediaUpdateService
 ) : IRequestHandler<DeleteUserCommand, Result>
 {
     public async ValueTask<Result> Handle(

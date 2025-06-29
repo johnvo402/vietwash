@@ -1,5 +1,4 @@
 namespace Domain.Functions;
-
 public class OrderSummaryResult
 {
     public long OrderId { get; set; }

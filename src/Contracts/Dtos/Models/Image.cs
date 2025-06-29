@@ -1,4 +1,8 @@
 ﻿namespace Contracts.Dtos.Models
 {
-    public class Image { }
+    public enum MediaType
+    {
+        Image = 1,
+        File = 2,
+    }
 }

@@ -1,19 +1,14 @@
 ﻿using Application.Common.Interfaces.Services;
-using Domain.Aggregates.AuditLogs;
-using Domain.Common.ElasticConfigurations;
-using Elastic.Clients.Elasticsearch;
+using Contracts.Application.Common.Interfaces.GenIdLong;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Serilog;
 using Shared.Kernel.Common;
 
 namespace Infrastructure.Data.Interceptors;
 
-public class UpdateAuditableEntityInterceptor(
-    ElasticsearchClient elasticsearchClient,
-    ICurrentAccount currentUser
-) : SaveChangesInterceptor
+public class UpdateAuditableEntityInterceptor(ICurrentAccount currentUser, IIdGenerator idGenerator)
+    : SaveChangesInterceptor
 {
     private const string ANONYMOUS_CREATED_BY = "SYSTEM";
 
@@ -25,18 +20,16 @@ public class UpdateAuditableEntityInterceptor(
     {
         if (eventData.Context is not null)
         {
-            UpdateAuditableEntities(elasticsearchClient, eventData.Context);
+            UpdateAuditableEntities(eventData.Context);
         }
 
         return base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
-    private async void UpdateAuditableEntities(
-        ElasticsearchClient elasticsearchClient,
-        DbContext context
-    )
+    private void UpdateAuditableEntities(DbContext context)
     {
         DateTimeOffset currentTime = DateTimeOffset.UtcNow;
+
         var entities = context
             .ChangeTracker.Entries()
             .Where(e =>
@@ -44,71 +37,59 @@ public class UpdateAuditableEntityInterceptor(
             )
             .ToList();
 
-        foreach (EntityEntry entry in entities)
+        foreach (var entry in entities)
         {
-            var auditLog = new AuditLog
-            {
-                Entity = entry.Entity.GetType().Name,
-                ActionPerformBy = currentUser.Id?.ToString() ?? ANONYMOUS_CREATED_BY,
-                CreatedAt = currentTime,
-            };
             switch (entry.State)
             {
                 case EntityState.Added:
-
-                    entry.Property(nameof(IAuditable.CreatedBy)).CurrentValue =
-                        currentUser.Id?.ToString() ?? ANONYMOUS_CREATED_BY;
-
-                    entry.Property(nameof(DefaultEntity.CreatedAt)).CurrentValue = currentTime;
-
-                    auditLog.Type = 0; // 🔹 Create
-                    auditLog.NewValue = entry.CurrentValues.ToObject();
-
+                    SetIdIfNeeded(entry);
+                    SetPublicIdIfNeeded(entry);
+                    SetAuditOnCreate(entry, currentTime);
                     break;
 
                 case EntityState.Modified:
-
-                    entry.Property(nameof(IAuditable.UpdatedBy)).CurrentValue =
-                        currentUser.Id?.ToString() ?? ANONYMOUS_CREATED_BY;
-
-                    entry.Property(nameof(IAuditable.UpdatedAt)).CurrentValue = currentTime;
-
-                    auditLog.Type = 1; // 🔹 Update
-                    auditLog.OldValue = entry.OriginalValues.ToObject();
-                    auditLog.NewValue = entry.CurrentValues.ToObject();
-
+                    SetAuditOnUpdate(entry, currentTime);
                     break;
-
-                case EntityState.Deleted:
-                    auditLog.Type = 2; // 🔹 Delete
-                    auditLog.OldValue = entry.OriginalValues.ToObject();
-                    auditLog.NewValue = null;
-                    break;
-            }
-
-            try
-            {
-                if (auditLog.OldValue == null && auditLog.NewValue == null)
-                {
-                    continue;
-                }
-                var response = await elasticsearchClient.IndexAsync(
-                    auditLog,
-                    index: ElsIndexExtension.GetName<AuditLog>()
-                );
-
-                if (!response.IsSuccess())
-                {
-                    Log.Error(
-                        "Elasticsearch has been failed in index audit with {debug}",
-                        response.DebugInformation
-                    );
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Elasticsearch error: {ex.Message}");
             }
         }
+    }
+
+    private void SetIdIfNeeded(EntityEntry entry)
+    {
+        var idProperty = entry.Property("Id");
+
+        if (idProperty != null && idProperty.CurrentValue is long idValue && idValue == 0)
+        {
+            idProperty.CurrentValue = idGenerator.GenerateId();
+        }
+    }
+
+    private void SetPublicIdIfNeeded(EntityEntry entry)
+    {
+        if (entry.Metadata.FindProperty("PublicId") is not null)
+        {
+            var publicIdProperty = entry.Property("PublicId");
+
+            if (publicIdProperty.CurrentValue is Ulid publicIdValue && publicIdValue == Ulid.Empty)
+            {
+                publicIdProperty.CurrentValue = Ulid.NewUlid();
+            }
+        }
+    }
+
+    private void SetAuditOnCreate(EntityEntry entry, DateTimeOffset currentTime)
+    {
+        entry.Property(nameof(IAuditable.CreatedBy)).CurrentValue =
+            currentUser.Id?.ToString() ?? ANONYMOUS_CREATED_BY;
+
+        entry.Property(nameof(DefaultEntity.CreatedAt)).CurrentValue = currentTime;
+    }
+
+    private void SetAuditOnUpdate(EntityEntry entry, DateTimeOffset currentTime)
+    {
+        entry.Property(nameof(IAuditable.UpdatedBy)).CurrentValue =
+            currentUser.Id?.ToString() ?? ANONYMOUS_CREATED_BY;
+
+        entry.Property(nameof(IAuditable.UpdatedAt)).CurrentValue = currentTime;
     }
 }

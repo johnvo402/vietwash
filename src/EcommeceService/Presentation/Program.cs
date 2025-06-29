@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Application;
 using Contracts.Converters;
 using Contracts.Extensions;
@@ -17,7 +18,6 @@ services.AddScoped<JobScheduler>();
 #region main dependencies
 builder.AddConfiguration();
 
-builder.Services.AddGrpcServices();
 builder
     .Services.AddControllers()
     .AddJsonOptions(option =>
@@ -27,6 +27,7 @@ builder
         option.JsonSerializerOptions.Converters.Add(
             new Cysharp.Serialization.Json.UlidJsonConverter()
         );
+        option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 services.AddErrorDetails();
 services.AddSwagger(configuration);
@@ -84,6 +85,7 @@ try
     app.UseSerilogRequestLogging();
     app.BlackListContext();
     app.MapControllers();
+    app.ApplyMigrations();
     app.MapHealthChecks(
         "/api/health",
         new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }

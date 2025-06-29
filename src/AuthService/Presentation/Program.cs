@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Application;
 using Contracts.Converters;
 using Contracts.Extensions;
@@ -7,6 +8,7 @@ using Infrastructure.Data;
 using Infrastructure.Services.BackgroundJobs;
 using Infrastructure.Services.Hangfires;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Options;
 using Presentation.Extensions;
 using Serilog;
 
@@ -25,6 +27,7 @@ builder
         option.JsonSerializerOptions.Converters.Add(
             new Cysharp.Serialization.Json.UlidJsonConverter()
         );
+        option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 
 services.AddErrorDetails();
@@ -87,6 +90,7 @@ try
     app.UseSerilogRequestLogging();
     app.BlackListContext();
     app.MapControllers();
+    app.ApplyMigrations();
     Log.Logger.Information(
         "Application is launching with {environment}",
         app.Environment.EnvironmentName

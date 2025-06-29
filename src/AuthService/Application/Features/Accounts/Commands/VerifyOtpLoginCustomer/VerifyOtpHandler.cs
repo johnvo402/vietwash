@@ -39,8 +39,6 @@ namespace Application.Features.Accounts.Commands.VerifyOtpLoginCustomer
                 ClientIp = _currentAccount.ClientIp!,
             };
 
-            // Validate request
-            var error = _client.VerifyAsync(verifyRequest);
 
             // Verify OTP
             bool isValid = await _client.VerifyAsync(verifyRequest, cancellationToken);
