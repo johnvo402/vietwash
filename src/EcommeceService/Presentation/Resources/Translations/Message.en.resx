@@ -285,4 +285,52 @@
     <value>Claims</value>
     <comment>isPlural=true</comment>
   </data>
+  <data name="CategoryId" xml:space="preserve">
+    <value>Category ID</value>
+    <comment> </comment>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Category</value>
+    <comment> </comment>
+  </data>
+  <data name="Order" xml:space="preserve">
+    <value>Order</value>
+    <comment> </comment>
+  </data>
+  <data name="OrderId" xml:space="preserve">
+    <value>Order ID</value>
+    <comment> </comment>
+  </data>
+  <data name="Service" xml:space="preserve">
+    <value>Service</value>
+    <comment> </comment>
+  </data>
+  <data name="ServiceId" xml:space="preserve">
+    <value>Service ID</value>
+    <comment> </comment>
+  </data>
+  <data name="Supplier" xml:space="preserve">
+    <value>Supplier</value>
+    <comment> </comment>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Code</value>
+    <comment> </comment>
+  </data>
+  <data name="Tariff" xml:space="preserve">
+    <value>Tariff</value>
+    <comment> </comment>
+  </data>
+  <data name="Unit" xml:space="preserve">
+    <value>Unit</value>
+    <comment> </comment>
+  </data>
+  <data name="UnitId" xml:space="preserve">
+    <value>Unit ID</value>
+    <comment> </comment>
+  </data>
+  <data name="Payload" xml:space="preserve">
+    <value>Payload</value>
+    <comment> </comment>
+  </data>
 </root>

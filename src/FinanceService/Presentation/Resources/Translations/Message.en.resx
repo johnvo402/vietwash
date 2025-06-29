@@ -285,4 +285,16 @@
     <value>Claims</value>
     <comment>isPlural=true</comment>
   </data>
+  <data name="UpdateFundModel" xml:space="preserve">
+    <value>Update fund model</value>
+    <comment> </comment>
+  </data>
+  <data name="PaymentMethod" xml:space="preserve">
+    <value>Payment method</value>
+    <comment> </comment>
+  </data>
+  <data name="Payload" xml:space="preserve">
+    <value>Payload</value>
+    <comment> </comment>
+  </data>
 </root>

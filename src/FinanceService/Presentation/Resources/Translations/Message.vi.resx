@@ -285,4 +285,16 @@
     <value>Các thông tin xác nhận</value>
     <comment>  </comment>
   </data>
+  <data name="UpdateFundModel" xml:space="preserve">
+    <value>Cập nhật mô hình quỹ</value>
+    <comment> </comment>
+  </data>
+  <data name="PaymentMethod" xml:space="preserve">
+    <value>Phương thức thanh toán</value>
+    <comment> </comment>
+  </data>
+   <data name="Payload" xml:space="preserve">
+    <value>Tải trọng</value>
+    <comment> </comment>
+  </data>
 </root>
