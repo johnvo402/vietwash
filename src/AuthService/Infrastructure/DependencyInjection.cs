@@ -4,6 +4,7 @@ using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Infrastructure.PubSub;
 using Contracts.Infrastructure.Services.Cache.MemoryCache;
+using Contracts.Infrastructure.Services.GenIdLong;
 using Domain.Otp;
 using Infrastructure.Common;
 using Infrastructure.Data;
@@ -12,7 +13,6 @@ using Infrastructure.Services;
 using Infrastructure.Services.Aws;
 using Infrastructure.Services.BackgroundJobs;
 using Infrastructure.Services.DistributedCache;
-using Infrastructure.Services.ElasticSeach;
 using Infrastructure.Services.Hangfires;
 using Infrastructure.Services.Identity;
 using Infrastructure.Services.Mail;
@@ -119,9 +119,9 @@ public static class DependencyInjection
             .AddMailPdf()
             .AddMemoryCaching(configuration)
             .AddHangfireConfiguration(configuration)
-            .AddElasticSearch(configuration)
             .AddScoped<JobScheduler>()
-            .AddScoped<ISmsOtpClient, SmsOtpClient>();
+            .AddScoped<ISmsOtpClient, SmsOtpClient>()
+            .AddSnowflakeIdGenerator(configuration);
 
         return services;
     }

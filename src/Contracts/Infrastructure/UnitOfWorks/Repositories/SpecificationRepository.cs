@@ -3,7 +3,6 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
 using Contracts.Extensions.QueryExtensions;
-using Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Shared.Kernel.Common;
 using Shared.Kernel.Common.Specs.Interfaces;

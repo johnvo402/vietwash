@@ -1,18 +1,23 @@
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Orders.Queries.Detail;
 using Contracts.ApiWrapper;
 using Contracts.Application.Common.Interfaces.Services.Pdf;
 using Contracts.Common.Messages;
 using Contracts.Dtos.Models;
 using Domain.Aggregates.Orders;
+using Domain.Aggregates.Orders.Specifications;
 using Mediator;
 using Microsoft.AspNetCore.Http;
 
 namespace Application.Feature.Orders.Queries.GetReceipt;
 
-public class GetReceiptHandler(ISender sender, IPdfService pdfService, IMediaUpdateService media)
-    : IRequestHandler<GetReceiptQuery, Result<GetReceiptResponse>>
+public class GetReceiptHandler(
+    IPdfService pdfService,
+    IMediaUpdateService media,
+    IUnitOfWork unitOfWork
+) : IRequestHandler<GetReceiptQuery, Result<GetReceiptResponse>>
 {
     public async ValueTask<Result<GetReceiptResponse>> Handle(
         GetReceiptQuery request,
@@ -20,25 +25,32 @@ public class GetReceiptHandler(ISender sender, IPdfService pdfService, IMediaUpd
     )
     {
         // Step 1: Get order details
-        var orderDetailResult = await sender.Send(
-            new GetOrderDetailQuery { OrderId = request.OrderId },
-            cancellationToken
-        );
+        var orderDetailResult = await unitOfWork
+            .DynamicReadOnlyRepository<Order>()
+            .FindByConditionAsync(
+                new GetOrderByIdSpecification(request.OrderId),
+                cancellationToken
+            );
 
-        if (!orderDetailResult.IsSuccess || orderDetailResult.Value is null)
+        if (orderDetailResult is null)
         {
             return Result<GetReceiptResponse>.Failure(
-                orderDetailResult.Error
-                    ?? new NotFoundError(
-                        "Order not found",
-                        Messager.Create<Order>().Message(MessageType.Found).Negative().Build()
-                    )
+                new NotFoundError(
+                    "Order not found",
+                    Messager.Create<Order>().Message(MessageType.Found).Negative().Build()
+                )
             );
         }
-
+        var receipt = orderDetailResult.Receipt;
+        if (!string.IsNullOrEmpty(receipt))
+        {
+            return Result<GetReceiptResponse>.Success(
+                new GetReceiptResponse { ReceiptUrl = receipt }
+            );
+        }
         // Step 2: Generate PDF
         var pdfBytes = await pdfService.GeneratePdfAsync(
-            new PdfGlobalParams { Template = new("Biennhan", orderDetailResult.Value) }
+            new PdfGlobalParams { Template = new("Biennhan", orderDetailResult) }
         );
 
         if (pdfBytes is null || pdfBytes.Length == 0)
@@ -65,6 +77,19 @@ public class GetReceiptHandler(ISender sender, IPdfService pdfService, IMediaUpd
                     Messager.Create<Order>().Message(MessageType.Empty).Build()
                 )
             );
+        }
+        try
+        {
+            orderDetailResult.Receipt = mediaKey;
+            _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
+            await unitOfWork.Repository<Order>().UpdateAsync(orderDetailResult);
+            await unitOfWork.SaveAsync(cancellationToken);
+            await unitOfWork.CommitAsync(cancellationToken);
+        }
+        catch (Exception)
+        {
+            await unitOfWork.RollbackAsync(cancellationToken);
+            throw;
         }
 
         var fileUrl = await media.UploadAvatarAsync(formFile, mediaKey);

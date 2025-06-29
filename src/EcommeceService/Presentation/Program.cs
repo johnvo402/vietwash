@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Application;
 using Contracts.Converters;
 using Contracts.Extensions;
@@ -9,7 +10,6 @@ using Infrastructure.Services.Hangfires;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Presentation.Extensions;
 using Serilog;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -18,7 +18,6 @@ services.AddScoped<JobScheduler>();
 #region main dependencies
 builder.AddConfiguration();
 
-builder.Services.AddGrpcServices();
 builder
     .Services.AddControllers()
     .AddJsonOptions(option =>
@@ -86,6 +85,7 @@ try
     app.UseSerilogRequestLogging();
     app.BlackListContext();
     app.MapControllers();
+    app.ApplyMigrations();
     app.MapHealthChecks(
         "/api/health",
         new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }

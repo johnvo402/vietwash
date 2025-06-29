@@ -1,9 +1,8 @@
-using Domain.Common;
-using Shared.Kernel.Common;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Kernel.Common;
 
 namespace Infrastructure.Data.Interceptors;
 

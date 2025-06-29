@@ -55,7 +55,7 @@ namespace Presentation.Routes
                 + RouterBase.Id
                 + "}";
             public const string GetReceipt =
-                $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(GetReceipt)}"
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(GetReceipt)}/"
                 + "{"
                 + RouterBase.Id
                 + "}";

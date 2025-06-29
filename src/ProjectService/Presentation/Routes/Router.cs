@@ -5,11 +5,7 @@ namespace Presentation.Routes
     public static class Router
     {
         public const string Project = $"{nameof(Project)}";
-        public static class AuditLogRoute
-        {
-            public const string AuditLog = $"{Project}/{RouterBase.prefix}{nameof(AuditLog)}";
-            public const string Tags = $"{nameof(AuditLog)} endpoint";
-        }
+
         public static class BranchRoute
         {
             public const string Tags = $"{nameof(BranchRoute)} endpoint";
@@ -25,6 +21,5 @@ namespace Presentation.Routes
             public const string GetUpdateDelete =
                 $"{Project}/{RouterBase.prefix}{nameof(Warehouses)}/" + "{" + RouterBase.Id + "}";
         }
-
     }
 }

@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Application;
 using Contracts.Converters;
 using Contracts.Extensions;
@@ -10,7 +11,6 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using Presentation.Extensions;
 using Serilog;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -90,6 +90,7 @@ try
     app.UseSerilogRequestLogging();
     app.BlackListContext();
     app.MapControllers();
+    app.ApplyMigrations();
     Log.Logger.Information(
         "Application is launching with {environment}",
         app.Environment.EnvironmentName

@@ -8,6 +8,8 @@ namespace Application.Feature.Common.Projections.Orders
     public class OrderDetailProjection : OrderProjection
     {
         public string? Note { get; set; }
+        public string? Receipt { get; set; }
+        public long? StaffId { get; set; }
         public ICollection<OrderItemProjection> OrderItems { get; set; } = [];
         public ICollection<OrderPaymentProjection> OrderPayments { get; set; } = [];
 
@@ -31,7 +33,7 @@ namespace Application.Feature.Common.Projections.Orders
             DeliveryTime = order.DeliveryTime;
             Status = order.Status;
             BranchId = order.BranchId;
-
+            Receipt = order.Receipt;
             OrderItems = order
                 .OrderItems.ToListMapping(item => new OrderItemProjection
                 {

@@ -47,14 +47,14 @@ clean:
 	@echo "Stopping Docker containers and removing volumes..."
 	docker compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml down --remove-orphans -v
 external:
-	docker compose -f docker-compose.s3.yaml -f docker-compose.elastic.yaml -f docker-compose.extension.yaml up -d
+	docker compose -f docker-compose.s3.yaml -f docker-compose.extension.yaml up -d
 # Mục để chỉ tắt Docker container mà không xóa volume
 down:
 	@echo "Stopping Docker containers..."
-	docker compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml -f docker-compose.s3.yaml -f docker-compose.elastic.yaml down
+	docker compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml -f docker-compose.s3.yaml down
 stop:
 	@echo "Stopping Docker containers..."
-	docker compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml -f docker-compose.s3.yaml -f docker-compose.elastic.yaml stop
+	docker compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml -f docker-compose.s3.yaml stop
 ssh:
 	ssh -p $(REMOTE_SERVER_PORT) $(REMOTE_SERVER_USER)@$(REMOTE_SERVER_IP)
 .PHONY: backup
