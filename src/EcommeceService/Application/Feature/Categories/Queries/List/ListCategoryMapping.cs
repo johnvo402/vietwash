@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using Application.Feature.Common.Projections.Categories;
 using Domain.Aggregates.Services;
 
 namespace Application.Feature.Categories.Queries.List;

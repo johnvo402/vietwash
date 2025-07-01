@@ -11,10 +11,8 @@ using Mediator;
 
 namespace Application.Feature.Services.Command.Update;
 
-public class UpdateServiceHandler(
-    IUnitOfWork unitOfWork,
-    IMediaUpdateService mediaUpdateService
-) : IRequestHandler<UpdateServiceCommand, Result>
+public class UpdateServiceHandler(IUnitOfWork unitOfWork, IMediaUpdateService mediaUpdateService)
+    : IRequestHandler<UpdateServiceCommand, Result>
 {
     public async ValueTask<Result> Handle(
         UpdateServiceCommand command,

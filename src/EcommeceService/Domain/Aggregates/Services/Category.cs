@@ -1,11 +1,12 @@
-﻿using Domain.Aggregates.Services.Enums;
-using Mediator;
+﻿using Ardalis.GuardClauses;
+using Domain.Aggregates.Enums;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Services
 {
-    public class Category : BaseEntity<string>
+    public class Category : BaseEntity<long>
     {
+        public string Code { get; set; } = default!;
         public string Name { get; set; } = default!;
         public string Path { get; set; } = default!;
         public string? ParentId { get; set; }
@@ -13,11 +14,13 @@ namespace Domain.Aggregates.Services
         public bool Disabled { get; set; }
         public ICollection<Service> Services { get; set; } = [];
 
-        public Category(string name, string? parentId, ActivationStatus status)
+        public Category(string name, string? parentId, ActivationStatus status, string code)
         {
-            Name = name;
+            Name = Guard.Against.Null(name, nameof(Name));
             ParentId = parentId;
             Status = status;
+            Code = Guard.Against.NullOrEmpty(code, nameof(Code));
+            Path = string.IsNullOrWhiteSpace(parentId) ? name : $"{parentId}/{name}";
         }
 
         public void Update(string? name, string? parentId, ActivationStatus? status)

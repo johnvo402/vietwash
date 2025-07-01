@@ -18,7 +18,7 @@ public class UpdateCategoryHandler(IUnitOfWork unitOfWork)
     {
         Category? getCategory = await unitOfWork
             .Repository<Category>()
-            .FindByIdAsync(command.CategoryId);
+            .FindByIdAsync(long.Parse(command.CategoryId), cancellationToken);
 
         if (getCategory == null)
         {
@@ -33,7 +33,7 @@ public class UpdateCategoryHandler(IUnitOfWork unitOfWork)
         command.MapUpdateToEntity(getCategory);
 
         getCategory.Path = await GenerateCategoryPathAsync(
-            getCategory.Id,
+            getCategory.Code,
             command.Category.ParentId,
             cancellationToken
         );

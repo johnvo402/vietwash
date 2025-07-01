@@ -1,5 +1,4 @@
-﻿
-using Domain.Aggregates.Accounts;
+﻿using Domain.Aggregates.Accounts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,7 +10,6 @@ namespace Infrastructure.Data.Configurations.Identity
         {
             builder.HasKey(x => x.Id);
             builder.HasIndex(x => x.Id);
-
         }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using System.Data.Common;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
-using Contracts.Common.Messages;
-using Contracts.Utils;
 using Domain.Aggregates.Services;
 using Mediator;
 
@@ -16,16 +14,12 @@ public class CreateCategoryHandler(IUnitOfWork unitOfWork)
         CancellationToken cancellationToken
     )
     {
-        if (string.IsNullOrEmpty(command.Id))
-        {
-            command.Id = Generator.GenerateCode("CT-", 6);
-        }
         Category mappingCategory = command.ToEntity();
         try
         {
             DbTransaction transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
             mappingCategory.Path = await GenerateCategoryPathAsync(
-                mappingCategory.Id,
+                mappingCategory.Code,
                 command.ParentId,
                 cancellationToken
             );

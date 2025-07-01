@@ -1,16 +1,17 @@
 using Application.Common.Interfaces.Services.DistributedCache;
+using Application.Features.BranchUsers;
+using Application.Features.Funds.Events;
 using Application.Features.Users.Commands.Create;
 using Contracts.Application.Common.Interfaces.Services.PubSub;
 using Contracts.Dtos.Responses;
-using Domain.Aggregates.PubSubLogs;
 using Infrastructure.Services.Queue;
-using Shared.Kernel.Extensions;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using ProjectService_gRPC;
 using Serilog;
+using Shared.Kernel.Extensions;
 
 namespace Infrastructure.Services.DistributedCache;
 
@@ -60,66 +61,183 @@ public class DeadletterPubSubBackgroundService : BackgroundService
             "DeadletterPubSubBackgroundService started, subscribing to dead-letter queue."
         );
 
-        pubSubService.Subscribe<CreateAccountEvent>(async message =>
-        {
-            // Limit concurrent tasks
-            if (_runningTasks.Count >= _settings.DeadLetterMaxRetryAttempts)
+        pubSubService.Subscribe<CreateAccountEvent>(
+            async message =>
             {
-                _logger.Warning(
-                    "Max concurrent tasks reached ({MaxTasks}). Waiting for tasks to complete.",
-                    _settings.DeadLetterMaxRetryAttempts
-                );
-                await Task.WhenAny(_runningTasks);
-                _runningTasks.RemoveAll(t => t.IsCompleted || t.IsFaulted || t.IsCanceled);
-            }
-
-            var task = Task.Run(
-                async () =>
+                // Limit concurrent tasks
+                if (_runningTasks.Count >= _settings.DeadLetterMaxRetryAttempts)
                 {
-                    using var scope = _serviceProvider.CreateScope();
-                    var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-                    var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
-                    var pubSubLogService =
-                        scope.ServiceProvider.GetRequiredService<IPubSubLogService>();
-                    var request = new CreateUserCommand { Payload = message };
-                    await ProcessMessageAsync<CreateUserCommand, PubSubResponse<CreateUserCommand>>(
-                        request,
-                        sender,
-                        pubSubLogService,
-                        logger,
-                        stoppingToken
+                    _logger.Warning(
+                        "Max concurrent tasks reached ({MaxTasks}). Waiting for tasks to complete.",
+                        _settings.DeadLetterMaxRetryAttempts
                     );
-                },
-                stoppingToken
-            );
-
-            lock (_runningTasks)
-            {
-                _runningTasks.Add(task);
-            }
-
-            // Clean up completed tasks
-            try
-            {
-                await Task.WhenAny(_runningTasks);
-                lock (_runningTasks)
-                {
-                    foreach (var failedTask in _runningTasks.FindAll(t => t.IsFaulted))
-                    {
-                        _logger.Error(
-                            failedTask.Exception,
-                            "Task processing dead-letter message failed."
-                        );
-                    }
+                    await Task.WhenAny(_runningTasks);
                     _runningTasks.RemoveAll(t => t.IsCompleted || t.IsFaulted || t.IsCanceled);
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error cleaning up tasks.");
-            }
-        });
 
+                var task = Task.Run(
+                    async () =>
+                    {
+                        using var scope = _serviceProvider.CreateScope();
+                        var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+                        var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
+                        var pubSubLogService =
+                            scope.ServiceProvider.GetRequiredService<IPubSubLogService>();
+                        var request = new CreateUserCommand { Payload = message };
+                        await ProcessMessageAsync<
+                            CreateUserCommand,
+                            PubSubResponse<CreateUserCommand>
+                        >(request, sender, pubSubLogService, logger, stoppingToken);
+                    },
+                    stoppingToken
+                );
+
+                lock (_runningTasks)
+                {
+                    _runningTasks.Add(task);
+                }
+
+                // Clean up completed tasks
+                try
+                {
+                    await Task.WhenAny(_runningTasks);
+                    lock (_runningTasks)
+                    {
+                        foreach (var failedTask in _runningTasks.FindAll(t => t.IsFaulted))
+                        {
+                            _logger.Error(
+                                failedTask.Exception,
+                                "Task processing dead-letter message failed."
+                            );
+                        }
+                        _runningTasks.RemoveAll(t => t.IsCompleted || t.IsFaulted || t.IsCanceled);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Error cleaning up tasks.");
+                }
+            },
+            "CreateAccountEvent"
+        );
+        pubSubService.Subscribe<UpdateStatusOrderEventPayload>(
+            async message =>
+            {
+                // Limit concurrent tasks
+                if (_runningTasks.Count >= _settings.DeadLetterMaxRetryAttempts)
+                {
+                    _logger.Warning(
+                        "Max concurrent tasks reached ({MaxTasks}). Waiting for tasks to complete.",
+                        _settings.DeadLetterMaxRetryAttempts
+                    );
+                    await Task.WhenAny(_runningTasks);
+                    _runningTasks.RemoveAll(t => t.IsCompleted || t.IsFaulted || t.IsCanceled);
+                }
+
+                var task = Task.Run(
+                    async () =>
+                    {
+                        using var scope = _serviceProvider.CreateScope();
+                        var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+                        var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
+                        var pubSubLogService =
+                            scope.ServiceProvider.GetRequiredService<IPubSubLogService>();
+                        var request = new UpdateStatusOrderEvent { Payload = message };
+                        await ProcessMessageAsync<
+                            UpdateStatusOrderEvent,
+                            PubSubResponse<UpdateStatusOrderEvent>
+                        >(request, sender, pubSubLogService, logger, stoppingToken);
+                    },
+                    stoppingToken
+                );
+
+                lock (_runningTasks)
+                {
+                    _runningTasks.Add(task);
+                }
+
+                // Clean up completed tasks
+                try
+                {
+                    await Task.WhenAny(_runningTasks);
+                    lock (_runningTasks)
+                    {
+                        foreach (var failedTask in _runningTasks.FindAll(t => t.IsFaulted))
+                        {
+                            _logger.Error(
+                                failedTask.Exception,
+                                "Task processing dead-letter message failed."
+                            );
+                        }
+                        _runningTasks.RemoveAll(t => t.IsCompleted || t.IsFaulted || t.IsCanceled);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Error cleaning up tasks.");
+                }
+            },
+            "UpdateStatusOrderEvent"
+        );
+        pubSubService.Subscribe<BranchCreateEvent>(
+            async message =>
+            {
+                // Limit concurrent tasks
+                if (_runningTasks.Count >= _settings.DeadLetterMaxRetryAttempts)
+                {
+                    _logger.Warning(
+                        "Max concurrent tasks reached ({MaxTasks}). Waiting for tasks to complete.",
+                        _settings.DeadLetterMaxRetryAttempts
+                    );
+                    await Task.WhenAny(_runningTasks);
+                    _runningTasks.RemoveAll(t => t.IsCompleted || t.IsFaulted || t.IsCanceled);
+                }
+
+                var task = Task.Run(
+                    async () =>
+                    {
+                        using var scope = _serviceProvider.CreateScope();
+                        var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+                        var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
+                        var pubSubLogService =
+                            scope.ServiceProvider.GetRequiredService<IPubSubLogService>();
+                        var request = new BranchUserCommand { Payload = message };
+                        await ProcessMessageAsync<
+                            BranchUserCommand,
+                            PubSubResponse<BranchUserCommand>
+                        >(request, sender, pubSubLogService, logger, stoppingToken);
+                    },
+                    stoppingToken
+                );
+
+                lock (_runningTasks)
+                {
+                    _runningTasks.Add(task);
+                }
+
+                // Clean up completed tasks
+                try
+                {
+                    await Task.WhenAny(_runningTasks);
+                    lock (_runningTasks)
+                    {
+                        foreach (var failedTask in _runningTasks.FindAll(t => t.IsFaulted))
+                        {
+                            _logger.Error(
+                                failedTask.Exception,
+                                "Task processing dead-letter message failed."
+                            );
+                        }
+                        _runningTasks.RemoveAll(t => t.IsCompleted || t.IsFaulted || t.IsCanceled);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Error cleaning up tasks.");
+                }
+            },
+            "branch-create-event"
+        );
         // Keep service running until cancellation
         await Task.Delay(Timeout.Infinite, stoppingToken);
     }

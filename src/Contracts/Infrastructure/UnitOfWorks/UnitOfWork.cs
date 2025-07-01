@@ -118,7 +118,7 @@ public class UnitOfWork(
         CancellationToken cancellationToken = default
     )
     {
-        if (CurrentTransaction != null)
+        if (CurrentTransaction != null || dbContext.DatabaseFacade.CurrentTransaction != null)
         {
             throw new InvalidOperationException("A transaction is already in progress.");
         }

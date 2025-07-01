@@ -1,4 +1,4 @@
-﻿using Domain.Aggregates.Services.Enums;
+﻿using Domain.Aggregates.Enums;
 using Shared.Kernel.Common;
 
 namespace Application.Feature.Common.Projections.Units
@@ -6,6 +6,6 @@ namespace Application.Feature.Common.Projections.Units
     public class UnitProjection : BaseEntity
     {
         public string Name { get; set; } = default!;
-        public ActivationStatus Status { get; set; } 
+        public ActivationStatus Status { get; set; }
     }
 }

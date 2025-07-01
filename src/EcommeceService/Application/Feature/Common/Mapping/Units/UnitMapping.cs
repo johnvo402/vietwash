@@ -27,6 +27,23 @@ namespace Application.Feature.Common.Mapping.Units
             return entity;
         }
 
+        public static List<UnitRelation>? ToListUnitRelation(
+            this List<UnitRelationModel>? unitRelations
+        ) => unitRelations?.Select(ToUnitRelationEntity).ToList();
+
+        public static UnitRelation ToUnitRelationEntity(this UnitRelationModel model)
+        {
+            return new UnitRelation
+            {
+                Name = model.Name,
+                BaseUnit = model.BaseUnit,
+                Price = model.Price,
+                Multiple = model.Multiple,
+                ProcessingTime = model.ProcessingTime,
+                Status = model.Status,
+            };
+        }
+
         public static UnitRelationProjection ToUnitRelationProjectionResponse(this UnitRelation ur)
         {
             return new()

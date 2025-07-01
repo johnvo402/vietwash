@@ -4,6 +4,7 @@ using Contracts.Converters;
 using Contracts.Extensions;
 using HealthChecks.UI.Client;
 using Infrastructure;
+using Infrastructure.Data;
 using Infrastructure.Services.BackgroundJobs;
 using Infrastructure.Services.gRPC;
 using Infrastructure.Services.Hangfires;
@@ -93,6 +94,10 @@ try
         "Application is launching with {environment}",
         app.Environment.EnvironmentName
     );
+    if (!isProduction)
+    {
+        await DbInitializer.InitializeAsync(serviceProvider);
+    }
     app.Run();
 }
 catch (Exception ex)

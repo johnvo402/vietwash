@@ -3,6 +3,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Orders;
+using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Specifications;
 using Mediator;
 
@@ -52,6 +53,17 @@ namespace Application.Feature.Orders.Command.UpdateStatus
                                     .BuildMessage()
                             )
                         );
+                    if (request.Status.Value == OrderStatus.Completed)
+                    {
+                        order.OrderPayments.Add(
+                            new OrderPayment
+                            {
+                                Amount = order.Total,
+                                PaymentMethod = (PaymentMethod)request.PaymentMethod!,
+                                PaymentDate = DateTimeOffset.UtcNow,
+                            }
+                        );
+                    }
 
                     order.UpdateStatus(request.Status.Value);
                 }
@@ -60,7 +72,7 @@ namespace Application.Feature.Orders.Command.UpdateStatus
                 await unitOfWork.Repository<Order>().UpdateAsync(order);
                 await unitOfWork.SaveAsync(cancellationToken);
 
-                await transaction.CommitAsync(cancellationToken);
+                await unitOfWork.CommitAsync(cancellationToken);
                 return Result.Success();
             }
             catch (Exception)

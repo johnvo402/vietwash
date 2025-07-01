@@ -17,6 +17,7 @@ public class User : BaseEntity
     public bool Disabled { get; set; }
     public CustomerGroup? CustomerGroup { get; set; }
     public UserStatus Status { get; set; }
+    public ICollection<BranchUser>? BranchUsers { get; set; } = [];
 
     public User(string displayName, string email, string phoneNumber, string role, string code)
     {

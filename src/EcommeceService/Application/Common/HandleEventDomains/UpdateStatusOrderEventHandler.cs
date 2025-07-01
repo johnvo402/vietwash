@@ -1,44 +1,33 @@
-﻿using Application.Common.Interfaces.UnitOfWorks;
+﻿using Application.Common.Interfaces.Services.DistributedCache;
 using Domain.Aggregates.Orders.Events;
+using Domain.Aggregates.PubSubLogs;
 using Mediator;
 using Serilog;
-using System.Data.Common;
-
 
 namespace Application.Common.HandleEventDomains
 {
-	public class UpdateStatusOrderEventHandler(ILogger logger, IUnitOfWork unitOfWork) : INotificationHandler<UpdateStatusOrderEvent>
-	{
-		public async ValueTask Handle(UpdateStatusOrderEvent notification, CancellationToken cancellationToken)
-		{
-			//var fund = new Fund
-			//{
-			//	TypeId = notification.TypeId,
-			//	BehaviorId = notification.BehaviorId,
-			//	Amount = notification.Amount,
-			//	PaymentMethod = notification.PaymentMethod,
-			//	ReferenceId = notification.ReferenceId,
-			//	TransactionDate = DateTimeOffset.UtcNow,
-			//	Name = $"Fund for Order - {notification.TypeId}", // Gán giá trị cho Name
-			//	Note = $"Created due to order status update with BehaviorId: {notification.BehaviorId}", // Gán giá trị cho Note
-			//	Code = $"FU-{DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()[^6..]}"
-			//         };
-			//try
-			//{
-			//	DbTransaction transaction = await unitOfWork.CreateTransactionAsync(cancellationToken);
+    public class UpdateStatusOrderEventHandler(ILogger logger, IPubSubFactory queueFactory)
+        : INotificationHandler<UpdateStatusOrderEvent>
+    {
+        public async ValueTask Handle(
+            UpdateStatusOrderEvent notification,
+            CancellationToken cancellationToken
+        )
+        {
+            logger.Information("UpdateStatusOrderEventHandler: {@Id}", notification.OrderId);
 
-			//	await unitOfWork.Repository<Fund>().AddAsync(fund, cancellationToken);
+            var check = await queueFactory
+                .GetPubSub(PubSubType.Origin)
+                .PublishAsync(notification, "UpdateStatusOrderEvent");
+            if (!check)
+            {
+                logger.Error(
+                    "UpdateStatusOrderEventHandler: {@User} enqueue failed",
+                    notification.OrderId
+                );
+            }
 
-			//	await unitOfWork.SaveAsync(cancellationToken);
-
-			//	await unitOfWork.CommitAsync(cancellationToken);
-			//}
-			//catch (Exception)
-			//{
-			//	await unitOfWork.RollbackAsync(cancellationToken);
-			//	throw;
-			//}
-			await Task.CompletedTask;
-		}
-	}
+            await Task.CompletedTask;
+        }
+    }
 }

@@ -9,7 +9,7 @@ namespace Application.Features.Common.Projections.Funds
 {
     public class FundProjection : BaseResponse
     {
-        public string? Code { get; private set; }
+        public string Code { get; set; }
         public string? Name { get; set; }
         public decimal? Amount { get; set; }
         public long FundBehaviorId { get; set; }

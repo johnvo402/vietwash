@@ -5,6 +5,7 @@ using Contracts.Converters;
 using Contracts.Extensions;
 using HealthChecks.UI.Client;
 using Infrastructure;
+using Infrastructure.Data;
 using Infrastructure.Services.BackgroundJobs;
 using Infrastructure.Services.gRPC;
 using Infrastructure.Services.Hangfires;
@@ -60,6 +61,10 @@ try
     var serviceProvider = scope.ServiceProvider;
     var jobScheduler = scope.ServiceProvider.GetRequiredService<JobScheduler>();
     jobScheduler.ScheduleJobs();
+    if (!isProduction)
+    {
+        await DbInitializer.InitializeAsync(serviceProvider);
+    }
     #endregion
 
     app.UseHangfireDashboard(configuration);

@@ -41,13 +41,13 @@ namespace Domain.Aggregates.Suppliers
             string? description = null
         )
         {
-            var supplier = new Supplier(name, code, status)
-            {
-                Email = email?.Trim() ?? string.Empty,
-                Address = address?.Trim() ?? string.Empty,
-                Phone = phone?.Trim() ?? string.Empty,
-                Description = description?.Trim() ?? string.Empty,
-            };
+            Name = name?.Trim() ?? string.Empty;
+            Code = code?.Trim() ?? string.Empty;
+            Status = status;
+            Email = email?.Trim() ?? string.Empty;
+            Address = address?.Trim() ?? string.Empty;
+            Phone = phone?.Trim() ?? string.Empty;
+            Description = description?.Trim() ?? string.Empty;
         }
 
         public void Update(

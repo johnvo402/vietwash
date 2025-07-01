@@ -15,13 +15,13 @@ public class DeadLetterPubSubService(
     private readonly ISubscriber subscriber = redis.GetSubscriber();
     private readonly PubSubSettings settings = options.Value;
 
-    public async Task<bool> PublishAsync<T>(T payload)
+    public async Task<bool> PublishAsync<T>(T payload, string eventName)
     {
         ArgumentNullException.ThrowIfNull(payload);
         try
         {
             var message = SerializerExtension.Serialize(payload).StringJson;
-            var channel = GetChannelName(typeof(T));
+            var channel = GetChannelName(eventName);
 
             var result = await subscriber.PublishAsync(RedisChannel.Literal(channel), message);
 
@@ -54,9 +54,9 @@ public class DeadLetterPubSubService(
         }
     }
 
-    public void Subscribe<T>(Func<T, Task> handler)
+    public void Subscribe<T>(Func<T, Task> handler, string eventName)
     {
-        var channel = GetChannelName(typeof(T));
+        var channel = GetChannelName(eventName);
 
         subscriber.Subscribe(
             RedisChannel.Literal(channel),
@@ -96,5 +96,5 @@ public class DeadLetterPubSubService(
         }
     }
 
-    private string GetChannelName(Type type) => $"{settings.ChannelPrefix}:deadletter:{type.Name}";
+    private string GetChannelName(string name) => $"{settings.ChannelPrefix}:deadletter:{name}";
 }

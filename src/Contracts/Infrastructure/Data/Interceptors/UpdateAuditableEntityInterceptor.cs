@@ -30,12 +30,7 @@ public class UpdateAuditableEntityInterceptor(ICurrentAccount currentUser, IIdGe
     {
         DateTimeOffset currentTime = DateTimeOffset.UtcNow;
 
-        var entities = context
-            .ChangeTracker.Entries()
-            .Where(e =>
-                e.Entity is BaseEntity || e.Entity is AggregateRoot || e.Entity is IBaseAuditable
-            )
-            .ToList();
+        var entities = context.ChangeTracker.Entries().ToList();
 
         foreach (var entry in entities)
         {
@@ -79,14 +74,29 @@ public class UpdateAuditableEntityInterceptor(ICurrentAccount currentUser, IIdGe
 
     private void SetAuditOnCreate(EntityEntry entry, DateTimeOffset currentTime)
     {
-        entry.Property(nameof(IAuditable.CreatedBy)).CurrentValue =
-            currentUser.Id?.ToString() ?? ANONYMOUS_CREATED_BY;
+        if (
+            entry.Entity is BaseEntity
+            || entry.Entity is AggregateRoot
+            || entry.Entity is IBaseAuditable
+        )
+        {
+            entry.Property(nameof(IAuditable.CreatedBy)).CurrentValue =
+                currentUser.Id?.ToString() ?? ANONYMOUS_CREATED_BY;
+        }
 
         entry.Property(nameof(DefaultEntity.CreatedAt)).CurrentValue = currentTime;
     }
 
     private void SetAuditOnUpdate(EntityEntry entry, DateTimeOffset currentTime)
     {
+        if (
+            entry.Entity is BaseEntity
+            || entry.Entity is AggregateRoot
+            || entry.Entity is IBaseAuditable
+        )
+        {
+            return;
+        }
         entry.Property(nameof(IAuditable.UpdatedBy)).CurrentValue =
             currentUser.Id?.ToString() ?? ANONYMOUS_CREATED_BY;
 

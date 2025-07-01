@@ -61,6 +61,7 @@ public class PubSubBackgroundService(
         ISender sender,
         ILogger logger,
         IPubSubService queueService,
+        string eventName,
         CancellationToken cancellationToken
     )
         where TRequest : class
@@ -132,7 +133,7 @@ public class PubSubBackgroundService(
                 "Push request {payloadId} into dead letter queue for maximum attempts",
                 queueResponse.PayloadId
             );
-            await queueService.PublishAsync(request);
+            await queueService.PublishAsync(request, eventName);
             await sender.Send(
                 new CreatePubSubLogCommand()
                 {

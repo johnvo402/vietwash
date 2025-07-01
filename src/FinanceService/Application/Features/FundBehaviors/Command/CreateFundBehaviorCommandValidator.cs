@@ -7,23 +7,14 @@ namespace Application.Features.FundBehaviors.Command
 {
     public class CreateFundBehaviorCommandValidator : AbstractValidator<CreateFundBehaviorCommand>
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IActionAccessorService _accessorService;
-
-        public CreateFundBehaviorCommandValidator(
-            IUnitOfWork unitOfWork,
-            IActionAccessorService accessorService
-        )
+        public CreateFundBehaviorCommandValidator()
         {
-            _unitOfWork = unitOfWork;
-            _accessorService = accessorService;
-
             ApplyRules();
         }
 
         private void ApplyRules()
         {
-            Include(new FundBehaviorValidator(_unitOfWork, _accessorService));
+            Include(new FundBehaviorValidator());
         }
     }
 }

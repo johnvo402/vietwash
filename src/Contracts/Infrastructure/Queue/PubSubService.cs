@@ -1,7 +1,7 @@
 using Application.Common.Interfaces.Services.DistributedCache;
-using Shared.Kernel.Extensions;
 using Microsoft.Extensions.Options;
 using Serilog;
+using Shared.Kernel.Extensions;
 using StackExchange.Redis;
 
 namespace Infrastructure.Services.DistributedCache;
@@ -15,13 +15,13 @@ public class PubSubService(
     private readonly ISubscriber subscriber = redis.GetSubscriber();
     private readonly PubSubSettings settings = options.Value;
 
-    public async Task<bool> PublishAsync<T>(T payload)
+    public async Task<bool> PublishAsync<T>(T payload, string publicName)
     {
         ArgumentNullException.ThrowIfNull(payload);
         try
         {
             var message = SerializerExtension.Serialize(payload).StringJson;
-            var channel = GetChannelName(typeof(T));
+            var channel = GetChannelName(publicName);
 
             var result = await subscriber.PublishAsync(RedisChannel.Literal(channel), message);
 
@@ -54,9 +54,9 @@ public class PubSubService(
         }
     }
 
-    public void Subscribe<T>(Func<T, Task> handler)
+    public void Subscribe<T>(Func<T, Task> handler, string publicName)
     {
-        var channel = GetChannelName(typeof(T));
+        var channel = GetChannelName(publicName);
 
         subscriber.Subscribe(
             RedisChannel.Literal(channel),
@@ -96,5 +96,5 @@ public class PubSubService(
         }
     }
 
-    private string GetChannelName(Type type) => $"{settings.ChannelPrefix}:{type.Name}";
+    private string GetChannelName(string name) => $"{settings.ChannelPrefix}:{name}";
 }
