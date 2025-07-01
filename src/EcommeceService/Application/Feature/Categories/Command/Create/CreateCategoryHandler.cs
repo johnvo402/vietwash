@@ -45,18 +45,18 @@ public class CreateCategoryHandler(IUnitOfWork unitOfWork)
 
     private async Task<string> GenerateCategoryPathAsync(
         string id,
-        string? parentId,
+        long? parentId,
         CancellationToken cancellationToken
     )
     {
-        if (string.IsNullOrEmpty(parentId))
+        if (parentId == null || parentId <= 0)
         {
             return id.ToLower();
         }
 
         var parent = await unitOfWork
             .Repository<Category>()
-            .FindByIdAsync(parentId, cancellationToken);
+            .FindByIdAsync((long)parentId, cancellationToken);
 
         if (parent == null || string.IsNullOrEmpty(parent.Path))
         {

@@ -10,7 +10,10 @@ public class CreateCategoryCommandValidator : AbstractValidator<CreateCategoryCo
     private readonly IUnitOfWork unitOfWork;
     private readonly IActionAccessorService accessorService;
 
-    public CreateCategoryCommandValidator(IUnitOfWork unitOfWork, IActionAccessorService accessorService)
+    public CreateCategoryCommandValidator(
+        IUnitOfWork unitOfWork,
+        IActionAccessorService accessorService
+    )
     {
         this.unitOfWork = unitOfWork;
         this.accessorService = accessorService;
