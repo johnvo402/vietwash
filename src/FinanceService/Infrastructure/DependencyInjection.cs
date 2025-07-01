@@ -4,7 +4,6 @@ using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Infrastructure.PubSub;
 using Contracts.Infrastructure.Services.Cache.MemoryCache;
-using Contracts.Infrastructure.Services.GenIdLong;
 using Infrastructure.Common;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
@@ -37,6 +36,7 @@ public static class DependencyInjection
     )
     {
         services.AddDetection();
+
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
         services.Configure<DatabaseSettings>(options =>
@@ -120,8 +120,7 @@ public static class DependencyInjection
             .AddMemoryCaching(configuration)
             .AddHangfireConfiguration(configuration)
             .AddGrpcServices()
-            .AddScoped<JobScheduler>()
-            .AddSnowflakeIdGenerator(configuration);
+            .AddScoped<JobScheduler>();
 
         return services;
     }

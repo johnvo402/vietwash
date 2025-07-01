@@ -1,4 +1,4 @@
-    using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Validators.Accounts;
 using Contracts.Common.Messages;
@@ -14,7 +14,7 @@ public class UpdateAccountCommandValidator : AbstractValidator<UpdateAccountComm
         IActionAccessorService accessorService
     )
     {
-        _ = Ulid.TryParse(accessorService.Id, out Ulid id);
+        _ = long.TryParse(accessorService.Id, out long id);
 
         RuleFor(x => x.Account)
             .NotEmpty()

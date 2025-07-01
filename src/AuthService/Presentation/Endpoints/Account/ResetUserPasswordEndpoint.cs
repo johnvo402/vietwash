@@ -1,6 +1,5 @@
 using Application.Features.Accounts.Commands.ResetPassword;
 using Ardalis.ApiEndpoints;
-using Ardalis.Result.AspNetCore;
 using Contracts.RouteResults;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;

@@ -4,7 +4,6 @@ using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Infrastructure.PubSub;
 using Contracts.Infrastructure.Services.Cache.MemoryCache;
-using Contracts.Infrastructure.Services.GenIdLong;
 using Domain.Otp;
 using Infrastructure.Common;
 using Infrastructure.Data;
@@ -120,8 +119,7 @@ public static class DependencyInjection
             .AddMemoryCaching(configuration)
             .AddHangfireConfiguration(configuration)
             .AddScoped<JobScheduler>()
-            .AddScoped<ISmsOtpClient, SmsOtpClient>()
-            .AddSnowflakeIdGenerator(configuration);
+            .AddScoped<ISmsOtpClient, SmsOtpClient>();
 
         return services;
     }

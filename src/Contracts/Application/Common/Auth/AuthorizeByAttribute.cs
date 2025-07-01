@@ -1,6 +1,6 @@
 using Application.Common.Security;
-using Shared.Kernel.Extensions;
 using Microsoft.AspNetCore.Authorization;
+using Shared.Kernel.Extensions;
 
 namespace Application.Common.Auth;
 
@@ -17,15 +17,14 @@ public class AuthorizeByAttribute : AuthorizeAttribute
         Value = string.Empty;
         if (!string.IsNullOrWhiteSpace(roles) || !string.IsNullOrWhiteSpace(permissions))
         {
-            AuthorizeModel authorizeModel =
-                new()
-                {
-                    Roles = roles?.Trim()?.Split(',', StringSplitOptions.TrimEntries)?.ToList(),
-                    //Permissions = permissions
-                    //    ?.Trim()
-                    //    ?.Split(',', StringSplitOptions.TrimEntries)
-                    //    ?.ToList(),
-                };
+            AuthorizeModel authorizeModel = new()
+            {
+                Roles = roles?.Trim()?.Split(',', StringSplitOptions.TrimEntries)?.ToList(),
+                //Permissions = permissions
+                //    ?.Trim()
+                //    ?.Split(',', StringSplitOptions.TrimEntries)
+                //    ?.ToList(),
+            };
             Value = SerializerExtension.Serialize(authorizeModel).StringJson;
         }
     }

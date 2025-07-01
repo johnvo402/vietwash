@@ -1,5 +1,4 @@
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.Application.Common.Interfaces.GenIdLong;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Users;

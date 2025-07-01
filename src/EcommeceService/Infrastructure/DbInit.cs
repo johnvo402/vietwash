@@ -1,6 +1,5 @@
 using System.Linq.Expressions;
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.Application.Common.Interfaces.GenIdLong;
 using Contracts.Dtos.Requests;
 using Contracts.Utils;
 using Domain.Aggregates.Enums;
@@ -28,7 +27,6 @@ public class DbInitializer
     {
         var unitOfWork = provider.GetRequiredService<IUnitOfWork>();
         var logger = provider.GetRequiredService<ILogger>();
-        var idGenerator = provider.GetRequiredService<IIdGenerator>();
         using var dbTransaction = await unitOfWork.BeginTransactionAsync();
 
         try
@@ -87,7 +85,7 @@ public class DbInitializer
             {
                 logger.Information("Bắt đầu khởi tạo dữ liệu đơn hàng...");
 
-                await InitializeOrdersAsync(unitOfWork, idGenerator, logger, cancellationToken);
+                await InitializeOrdersAsync(unitOfWork, logger, cancellationToken);
 
                 logger.Information("Hoàn tất khởi tạo dữ liệu đơn hàng...");
             }
@@ -111,7 +109,6 @@ public class DbInitializer
 
     private static async Task InitializeOrdersAsync(
         IUnitOfWork unitOfWork,
-        IIdGenerator idGenerator, // Thêm vào đây
         ILogger logger,
         CancellationToken cancellationToken
     )
@@ -228,7 +225,6 @@ public class DbInitializer
 
                 var orderItem = new OrderItem
                 {
-                    Id = idGenerator.GenerateId(), // ✅ Thêm dòng này
                     ServiceId = serviceId,
                     UnitRelationId = unitRelationId,
                     Price = quantity * unitPrice,
@@ -276,7 +272,6 @@ public class DbInitializer
                 note: $"Đơn hàng tự động {i}",
                 deliveryTime: DateTimeOffset.UtcNow.AddDays(1)
             );
-            order.Id = idGenerator.GenerateId(); // ✅ Thêm dòng này
             order.PublicId = Ulid.NewUlid();
             foreach (var orderItem in orderItems)
             {
@@ -288,7 +283,6 @@ public class DbInitializer
                 var paymentMethod = paymentMethods[random.Next(paymentMethods.Length)];
                 var orderPayment = new OrderPayment
                 {
-                    Id = idGenerator.GenerateId(), // ✅ Thêm dòng này
                     Amount = order.Total,
                     PaymentMethod = paymentMethod,
                     PaymentDate = DateTimeOffset.UtcNow,

@@ -23,7 +23,7 @@ namespace Application.Feature.Common.Validators.Orders
 
         private void ApplyRules()
         {
-            _ = Ulid.TryParse(_accessorService.Id, out Ulid id);
+            _ = long.TryParse(_accessorService.Id, out long id);
 
             RuleFor(x => x.DiscountValue)
                 .LessThanOrEqualTo(100)
