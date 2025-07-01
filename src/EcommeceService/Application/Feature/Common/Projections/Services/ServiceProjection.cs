@@ -10,6 +10,7 @@ namespace Application.Feature.Common.Projections.Services
     {
         public string Name { get; set; } = default!;
         public TypeStatus Type { get; set; } = default!;
+        public string? CategoryId { get; set; }
 
         [File]
         public string? Image { get; set; }
@@ -21,6 +22,7 @@ namespace Application.Feature.Common.Projections.Services
             Type = service.Type;
             Image = service.Image;
             Status = service.Status;
+            CategoryId = service.CategoryId;
         }
     }
 }

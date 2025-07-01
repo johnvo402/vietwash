@@ -20,8 +20,7 @@ public static class GRPCRegisterExtension
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapGrpcService<PubSubLogServiceHandler>();
-            endpoints.MapGrpcReflectionService();        
-
+            endpoints.MapGrpcReflectionService();
         });
 
         return app;

@@ -23,6 +23,7 @@ namespace Domain.Aggregates.Orders
         public DateTimeOffset DeliveryTime { get; set; } = default!;
         public User? Staff { get; set; }
         public User? Customer { get; set; }
+        public string? Receipt { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; } = [];
         public ICollection<OrderPayment> OrderPayments { get; set; } = [];
 
@@ -36,7 +37,9 @@ namespace Domain.Aggregates.Orders
                     return false;
             }
         }
+
         private Order() { }
+
         public Order(
             long branchId,
             long staffId,
@@ -115,6 +118,7 @@ namespace Domain.Aggregates.Orders
                 OrderDate = orderDate.Value;
             if (deliveryTime.HasValue)
                 DeliveryTime = deliveryTime.Value;
+            Receipt = null;
         }
 
         public void UpdateStatus(OrderStatus status)

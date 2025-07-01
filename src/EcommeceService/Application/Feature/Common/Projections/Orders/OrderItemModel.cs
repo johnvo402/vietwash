@@ -2,7 +2,6 @@
 {
     public class OrderItemModel
     {
-        public long OrderId { get; set; }
         public long ServiceId { get; set; }
         public long UnitRelationId { get; set; }
         public decimal Price { get; set; }

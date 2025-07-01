@@ -1,4 +1,5 @@
-﻿using Contracts.Extensions;
+﻿using Application.Common.Interfaces.Services;
+using Contracts.Extensions;
 using Contracts.Utils;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
@@ -7,14 +8,14 @@ namespace Application.Feature.Orders.Command.Create
 {
     public static class CreateOrderMapping
     {
-        public static Order ToEntity(this CreateOrderCommand command)
+        public static Order ToEntity(this CreateOrderCommand command, long staffId)
         {
             string code = Generator.GenerateCode("OD", 6);
             decimal amount = command.OrderItems.Sum(i => i.Price * i.Quantity);
             var response = new Order(
                 customerId: command.CustomerId,
                 branchId: command.BranchId,
-                staffId: command.StaffId,
+                staffId: staffId,
                 code: code,
                 amount: amount,
                 total: CalculationTotal(amount, command.DiscountFixed, command.DiscountValue),
@@ -27,7 +28,6 @@ namespace Application.Feature.Orders.Command.Create
             );
             response.OrderItems = command.OrderItems.ToListMapping(x => new OrderItem
             {
-                OrderId = x.OrderId,
                 ServiceId = x.ServiceId,
                 UnitRelationId = x.UnitRelationId,
                 Price = x.Price,

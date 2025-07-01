@@ -20,6 +20,7 @@ namespace Application.Feature.Orders.Queries.Detail
                 .DynamicReadOnlyRepository<Order>()
                 .FindByConditionAsync(
                     new GetOrderByIdSpecification(request.OrderId),
+                    o => o.ToOrderDetailResponse(),
                     cancellationToken
                 );
             if (order == null)
@@ -36,8 +37,7 @@ namespace Application.Feature.Orders.Queries.Detail
                 );
             }
 
-            var response = order.ToOrderDetailResponse();
-            return Result<GetOrderDetailResponse>.Success(response);
+            return Result<GetOrderDetailResponse>.Success(order);
         }
     }
 }

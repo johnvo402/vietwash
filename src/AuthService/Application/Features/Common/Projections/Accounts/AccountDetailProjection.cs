@@ -13,6 +13,8 @@ public class AccountDetailProjection : AccountProjection
     public override void MappingFrom(Account account)
     {
         base.MappingFrom(account);
+        BirthDay = account.BirthDay;
+        Gender = account.Gender ?? Gender.Other;
         AccountContacts = account
             .AccountContacts?.Select(accountContact =>
             {

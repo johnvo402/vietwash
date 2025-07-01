@@ -1,7 +1,7 @@
 using Application.Common.Interfaces.Services.DistributedCache;
-using Shared.Kernel.Extensions;
 using Microsoft.Extensions.Options;
 using Serilog;
+using Shared.Kernel.Extensions;
 using StackExchange.Redis;
 
 namespace Infrastructure.Services.DistributedCache;

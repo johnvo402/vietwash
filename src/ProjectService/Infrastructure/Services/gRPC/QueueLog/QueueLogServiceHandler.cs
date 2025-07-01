@@ -1,9 +1,9 @@
 ﻿using Application.Features.PubSubLogs;
 using Grpc.Core;
-using Shared.Kernel.Extensions;
 using Mediator;
 using ProjectService_gRPC;
 using Serilog;
+using Shared.Kernel.Extensions;
 
 namespace Presentation.Services.gRPC.PubSubLog
 {

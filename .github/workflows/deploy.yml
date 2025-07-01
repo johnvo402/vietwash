@@ -1,0 +1,96 @@
+name: Auto Deploy Service to VPS
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - "src/ApiGateway/**"
+      - "src/AuthService/**"
+      - "src/EcommerceService/**"
+      - "src/FinanceService/**"
+      - "src/ProjectService/**"
+      - "src/Contracts/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Lấy full history để diff
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Detect changed services
+        id: detect
+        run: |
+          echo "Detecting changed services..."
+
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          SERVICES=()
+
+          for DIR in src/ApiGateway src/AuthService src/EcommerceService src/FinanceService src/ProjectService; do
+            if echo "$CHANGED_FILES" | grep -q "^${DIR}/"; then
+              case $DIR in
+                src/ApiGateway)
+                  SERVICES+=("gateway")
+                  ;;
+                src/AuthService)
+                  SERVICES+=("auth")
+                  ;;
+                src/EcommerceService)
+                  SERVICES+=("ecommerce")
+                  ;;
+                src/FinanceService)
+                  SERVICES+=("finance")
+                  ;;
+                src/ProjectService)
+                  SERVICES+=("project")
+                  ;;
+              esac
+            fi
+          done
+
+          # Nếu Contracts bị thay đổi thì deploy tất cả
+          if echo "$CHANGED_FILES" | grep -q "^src/Contracts/"; then
+            SERVICES=(gateway auth ecommerce finance project)
+          fi
+
+          if [ ${#SERVICES[@]} -eq 0 ]; then
+            echo "No relevant services changed. Exiting."
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Services to deploy: ${SERVICES[@]}"
+          echo "services=${SERVICES[@]}" >> $GITHUB_OUTPUT
+
+      - name: Skip if no service changed
+        if: steps.detect.outputs.skip == 'true'
+        run: echo "No services need deployment."
+
+      - name: Make deploy script executable
+        if: steps.detect.outputs.skip != 'true'
+        run: chmod +x ./scripts/deploy.sh
+      - name: Add VPS to known hosts
+        run: |
+          ssh-keyscan -p ${{ secrets.REMOTE_SERVER_PORT }} ${{ secrets.REMOTE_SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Run deploy script
+        if: steps.detect.outputs.skip != 'true'
+        env:
+          REMOTE_SERVER_USER: ${{ secrets.REMOTE_SERVER_USER }}
+          REMOTE_SERVER_IP: ${{ secrets.REMOTE_SERVER_IP }}
+          REMOTE_SERVER_PORT: ${{ secrets.REMOTE_SERVER_PORT }}
+        run: |
+          ./scripts/deploy.sh ${{ steps.detect.outputs.services }}

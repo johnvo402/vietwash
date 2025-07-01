@@ -1,46 +1,52 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-      {
-        "label": "build ProjectService",
-        "command": "dotnet",
-        "type": "process",
-        "args": [
-          "build",
-          "${workspaceFolder}/src/ProjectService/Presentation/Presentation.csproj"
-        ],
-        "problemMatcher": "$msCompile"
-      },
-      {
-        "label": "build ApiGateway",
-        "command": "dotnet",
-        "type": "process",
-        "args": [
-          "build",
-          "${workspaceFolder}/src/ApiGateway/ApiGateway.csproj"
-        ],
-        "problemMatcher": "$msCompile"
-      },
-      {
-        "label": "build AuthService",
-        "command": "dotnet",
-        "type": "process",
-        "args": [
-          "build",
-          "${workspaceFolder}/src/AuthService/Presentation/Presentation.csproj"
-        ],
-        "problemMatcher": "$msCompile"
-      },
-      {
-        "label": "build EcommeceService",
-        "command": "dotnet",
-        "type": "process",
-        "args": [
-          "build",
-          "${workspaceFolder}/src/EcommeceService/Presentation/Presentation.csproj"
-        ],
-        "problemMatcher": "$msCompile"
-      }
-    ]
-  }
-  
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build ProjectService",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/ProjectService/Presentation/Presentation.csproj"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build ApiGateway",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["build", "${workspaceFolder}/src/ApiGateway/ApiGateway.csproj"],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build AuthService",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/AuthService/Presentation/Presentation.csproj"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build EcommeceService",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/EcommeceService/Presentation/Presentation.csproj"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build FinanceService",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/FinanceService/Presentation/Presentation.csproj"
+      ],
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}

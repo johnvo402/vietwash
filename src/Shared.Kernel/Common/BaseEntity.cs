@@ -1,14 +1,18 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Shared.Kernel.Common;
 
 public abstract class DefaultEntity
 {
-    public long Id { get; set; } = default!;
-    public Ulid PublicId { get; set; } = Ulid.NewUlid();
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    public long Id { get; set; }
+    public Ulid PublicId { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 
 public abstract class DefaultEntity<T>
 {
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public T Id { get; set; } = default!;
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
