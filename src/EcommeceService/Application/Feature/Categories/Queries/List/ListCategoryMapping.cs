@@ -16,6 +16,7 @@ public class ListCategoryMapping
             UpdatedBy = c.UpdatedBy,
 
             Name = c.Name,
+            Code = c.Code,
             Path = c.Path,
             ParentId = c.ParentId,
             Status = c.Status,

@@ -11,6 +11,7 @@ namespace Application.Feature.Common.Mapping.Categories
             {
                 Id = category.Id,
                 Name = category.Name,
+                Code = category.Code,
                 Path = category.Path,
                 ParentId = category.ParentId,
                 Status = category.Status,
