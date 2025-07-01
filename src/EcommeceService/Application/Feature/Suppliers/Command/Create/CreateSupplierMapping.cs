@@ -1,6 +1,6 @@
 ﻿using Application.Feature.Common.Projections.Suppliers;
+using Domain.Aggregates.Enums;
 using Domain.Aggregates.Suppliers;
-using Domain.Aggregates.Suppliers.Enum;
 
 namespace Application.Feature.Suppliers.Command.Create
 {
@@ -11,7 +11,7 @@ namespace Application.Feature.Suppliers.Command.Create
             return new Supplier(
                 name: model.Name,
                 code: model.Code ?? string.Empty,
-                status: model.Status ?? SupplierStatus.Active,
+                status: model.Status ?? ActivationStatus.Active,
                 email: model.Email,
                 address: model.Address,
                 phone: model.Phone,

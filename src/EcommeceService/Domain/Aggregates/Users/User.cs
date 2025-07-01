@@ -1,4 +1,5 @@
 using Ardalis.GuardClauses;
+using Domain.Aggregates.Enums;
 using Domain.Aggregates.Users.Enums;
 using Shared.Kernel.Common;
 
@@ -16,7 +17,8 @@ public class User : BaseEntity
     public string Role { get; private set; }
     public bool Disabled { get; set; }
     public CustomerGroup? CustomerGroup { get; set; }
-    public UserStatus Status { get; set; }
+    public ActivationStatus Status { get; set; }
+    public ICollection<BranchUser>? BranchUsers { get; set; } = [];
 
     public User(string displayName, string email, string phoneNumber, string role, string code)
     {
@@ -34,7 +36,7 @@ public class User : BaseEntity
         DateOnly? birthDay = null,
         Gender? gender = null,
         string? role = null,
-        UserStatus? status = null
+        ActivationStatus? status = null
     )
     {
         if (!string.IsNullOrWhiteSpace(displayName))

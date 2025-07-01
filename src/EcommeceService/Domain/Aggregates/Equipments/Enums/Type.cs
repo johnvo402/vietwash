@@ -11,6 +11,5 @@ namespace Domain.Aggregates.Equipments.Enums
         Washer = 1,
         Dryer = 2,
         //etc......................
-
     }
 }

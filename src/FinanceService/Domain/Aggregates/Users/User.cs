@@ -1,5 +1,5 @@
 using Ardalis.GuardClauses;
-using Domain.Aggregates.Funds;
+using Domain.Aggregates.Enums;
 using Domain.Aggregates.Users.Enums;
 using Shared.Kernel.Common;
 
@@ -17,14 +17,15 @@ public class User : BaseEntity
     public string Role { get; private set; }
     public bool Disabled { get; set; }
     public CustomerGroup? CustomerGroup { get; set; }
-    public UserStatus Status { get; set; }
+    public ActivationStatus Status { get; set; }
+    public ICollection<BranchUser>? BranchUsers { get; set; } = [];
 
     public void Update(
         string? displayName = null,
         string? email = null,
         string? phoneNumber = null,
         DateOnly? birthDay = null,
-        UserStatus? status = null,
+        ActivationStatus? status = null,
         string? role = null,
         string? avtUrl = null
     )

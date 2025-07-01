@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Domain.Aggregates.Branches.Enums;
+using Domain.Aggregates.Enums;
 using Shared.Kernel.Common;
 
 namespace Application.Features.Common.Projections.Branches.Branch
@@ -13,7 +13,7 @@ namespace Application.Features.Common.Projections.Branches.Branch
         public string Name { get; set; } = default!;
         public string Code { get; set; } = default!;
         public bool Main { get; set; } = default!;
-        public BranchStatus Status { get; set; }
+        public ActivationStatus Status { get; set; }
         public string? Email { get; set; }
         public string? PhoneCode { get; set; }
         public string? PhoneNumber { get; set; }

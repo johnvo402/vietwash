@@ -4,6 +4,7 @@ using Contracts.Common.QueryStringProcessing;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
+using Infrastructure.Constants;
 using Mediator;
 
 namespace Application.Features.Users.Queries.List;
@@ -24,8 +25,8 @@ public class ListUserHandler(IUnitOfWork unitOfWork)
         }
         var response = await unitOfWork
             .DynamicReadOnlyRepository<User>()
-            .PagedListAsync<ListUserResponse>(
-                new ListUserSpecification(),
+            .PagedListAsync(
+                new ListUserSpecification([ROLE.CUSTOMER]),
                 query,
                 ListUserMapping.Selector(),
                 cancellationToken

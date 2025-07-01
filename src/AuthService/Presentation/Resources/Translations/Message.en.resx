@@ -145,10 +145,6 @@
     <value>Value</value>
     <comment/>
   </data>
-  <data name="User" xml:space="preserve">
-    <value>user</value>
-    <comment> </comment>
-  </data>
   <data name="FirstName" xml:space="preserve">
     <value>First name</value>
     <comment> </comment>
@@ -284,5 +280,17 @@
   <data name="UserClaims" xml:space="preserve">
     <value>Claims</value>
     <comment>isPlural=true</comment>
+  </data>
+  <data name="OldPassword" xml:space="preserve">
+    <value>Old password</value>
+    <comment></comment>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>New password</value>
+    <comment></comment>
+  </data>
+ <data name="Account" xml:space="preserve">
+    <value>Account</value>
+    <comment></comment>
   </data>
 </root>

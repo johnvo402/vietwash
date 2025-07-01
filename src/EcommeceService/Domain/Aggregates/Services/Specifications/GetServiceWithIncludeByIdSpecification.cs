@@ -1,7 +1,9 @@
 ﻿using Domain.Aggregates.Services;
 using Specification;
 using Specification.Builders;
+
 namespace Domain.Aggregates.Services.Specifications;
+
 public class GetServiceWithIncludeByIdSpecification : Specification<Service>
 {
     public GetServiceWithIncludeByIdSpecification(long id)

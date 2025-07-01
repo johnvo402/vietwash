@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.Aggregates.Enums;
 using Domain.Aggregates.Warehouses;
-using Domain.Aggregates.Warehouses.Enums;
 using Shared.Kernel.Common;
 
 namespace Application.Features.Common.Projections.Warehouses
@@ -16,7 +16,7 @@ namespace Application.Features.Common.Projections.Warehouses
         public string Description { get; set; } = default!;
         public int ReorderLevel { get; set; } = default!;
         public long BranchId { get; set; } = default!;
-        public WarehouseStatus Status { get; set; }
+        public ActivationStatus Status { get; set; }
 
         public virtual void MappingFrom(Warehouse entity)
         {

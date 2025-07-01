@@ -6,7 +6,7 @@ namespace Application.Features.Common.Projections.FundBehaviors
 {
     public class FundBehaviorProjection : BaseResponse<long>
     {
-        public string Name { get; set; } = default!;
+        public object Name { get; set; } = default!;
 
         public FundType Type { get; set; } = default!;
 

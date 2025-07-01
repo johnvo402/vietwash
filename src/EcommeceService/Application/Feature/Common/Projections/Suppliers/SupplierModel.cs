@@ -1,5 +1,5 @@
 ﻿
-using Domain.Aggregates.Suppliers.Enum;
+using Domain.Aggregates.Enums;
 
 namespace Application.Feature.Common.Projections.Suppliers
 {
@@ -11,7 +11,7 @@ namespace Application.Feature.Common.Projections.Suppliers
         public string? Address { get; set; }
         public string? Phone { get; set; }
         public string? Description { get; set; }
-        public SupplierStatus? Status { get; set; }
+        public ActivationStatus? Status { get; set; }
 
     }
 }

@@ -1,7 +1,7 @@
-﻿using Domain.Aggregates.Products.Enums;
-using Shared.Kernel.Common;
+﻿using Shared.Kernel.Common;
 using Mediator;
 using Ardalis.GuardClauses;
+using Domain.Aggregates.Enums;
 
 namespace Domain.Aggregates.Products
 {
@@ -12,13 +12,13 @@ namespace Domain.Aggregates.Products
 		public string Sku { get; set; }
 		public string Barcode { get; set; }
 		public string? Image { get; set; }
-		public ProductStatus Status { get; set; }
+		public ActivationStatus Status { get; set; }
 		public decimal RecommendedPrice { get; set; }
 		public bool Disable { get; set; } = false;
 
 		public Product() { }
 
-		public Product(string name, string sku, ProductStatus status, string? description = null, string barcode = null, decimal? recommendedPrice = null, string? image = null)
+		public Product(string name, string sku, ActivationStatus status, string? description = null, string barcode = null, decimal? recommendedPrice = null, string? image = null)
 		{
 			Name = Guard.Against.NullOrWhiteSpace(name, nameof(name));
 			Sku = Guard.Against.NullOrWhiteSpace(sku, nameof(sku));
@@ -32,7 +32,7 @@ namespace Domain.Aggregates.Products
 		public void Update(
 		   string? name = null,
 		   string? sku = null,
-		   ProductStatus? status = null,
+		   ActivationStatus? status = null,
 		   string? description = null,
 		   string? barcode = null,
 		   decimal? recommendedPrice = null,

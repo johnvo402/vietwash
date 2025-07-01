@@ -61,10 +61,7 @@ try
     var serviceProvider = scope.ServiceProvider;
     var jobScheduler = scope.ServiceProvider.GetRequiredService<JobScheduler>();
     jobScheduler.ScheduleJobs();
-    if (!isProduction)
-    {
-        await DbInitializer.InitializeAsync(serviceProvider);
-    }
+
     #endregion
 
     app.UseHangfireDashboard(configuration);
@@ -91,6 +88,10 @@ try
     app.BlackListContext();
     app.MapControllers();
     app.ApplyMigrations();
+    if (!isProduction)
+    {
+        await DbInitializer.InitializeAsync(serviceProvider);
+    }
     Log.Logger.Information(
         "Application is launching with {environment}",
         app.Environment.EnvironmentName

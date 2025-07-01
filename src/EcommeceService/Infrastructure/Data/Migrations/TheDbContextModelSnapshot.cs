@@ -1035,9 +1035,14 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Services.Category", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("text")
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1059,8 +1064,8 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("citext")
                         .HasColumnName("name");
 
-                    b.Property<string>("ParentId")
-                        .HasColumnType("text")
+                    b.Property<long?>("ParentId")
+                        .HasColumnType("bigint")
                         .HasColumnName("parent_id");
 
                     b.Property<string>("Path")
@@ -1195,9 +1200,8 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("branch_id");
 
-                    b.Property<string>("CategoryId")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<long>("CategoryId")
+                        .HasColumnType("bigint")
                         .HasColumnName("category_id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
@@ -1615,6 +1619,50 @@ namespace Infrastructure.Data.Migrations
                         .HasDatabaseName("ix_tariff_id");
 
                     b.ToTable("tariff", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Users.BranchUser", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<long>("BranchId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("branch_id");
+
+                    b.Property<string>("BranchName")
+                        .HasColumnType("text")
+                        .HasColumnName("branch_name");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_branch_user");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_branch_user_user_id");
+
+                    b.ToTable("branch_user", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
@@ -2212,6 +2260,16 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("UnitRelation");
                 });
 
+            modelBuilder.Entity("Domain.Aggregates.Users.BranchUser", b =>
+                {
+                    b.HasOne("Domain.Aggregates.Users.User", null)
+                        .WithMany("BranchUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_branch_user_user_user_id");
+                });
+
             modelBuilder.Entity("Domain.Aggregates.Vouchers.VoucherCustomer", b =>
                 {
                     b.HasOne("Domain.Aggregates.Users.User", "Customer")
@@ -2311,6 +2369,11 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("ServicePriceTariffHistories");
 
                     b.Navigation("ServiceTariffs");
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
+                {
+                    b.Navigation("BranchUsers");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Vouchers.Voucher", b =>

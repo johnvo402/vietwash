@@ -17,7 +17,7 @@ public class DeleteCategoryHandler(IUnitOfWork unitOfWork)
     {
         Category? getCategory = await unitOfWork
             .Repository<Category>()
-            .FindByIdAsync(command.CategoryId);
+            .FindByIdAsync(long.Parse(command.CategoryId), cancellationToken);
         if (getCategory == null)
         {
             return Result.Failure(

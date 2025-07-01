@@ -4,7 +4,4 @@ using Mediator;
 
 namespace Application.Feature.Categories.Command.Create;
 
-public class CreateCategoryCommand : CategoryModel, IRequest<Result>
-{
-    public string? Id { get; set; }
-}
+public class CreateCategoryCommand : CategoryModel, IRequest<Result>;

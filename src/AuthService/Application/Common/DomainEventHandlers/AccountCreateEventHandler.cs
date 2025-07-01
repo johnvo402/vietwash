@@ -19,7 +19,9 @@ public class AccountCreateEventHandler(ILogger logger, IPubSubFactory queueFacto
         CreateAccountEvent mappingUser = new CreateAccountEvent();
         mappingUser.MappingFrom(notification.Account);
 
-        var check = await queueFactory.GetPubSub(PubSubType.Origin).PublishAsync(mappingUser);
+        var check = await queueFactory
+            .GetPubSub(PubSubType.Origin)
+            .PublishAsync(mappingUser, "CreateAccountEvent");
         if (!check)
         {
             logger.Error("UserCreateEventHandler: {@User} enqueue failed", notification.Account.Id);

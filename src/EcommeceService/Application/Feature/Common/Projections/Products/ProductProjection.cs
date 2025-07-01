@@ -1,10 +1,10 @@
 ﻿using Contracts.Application.Common;
-using Domain.Aggregates.Products.Enums;
 using Domain.Aggregates.Suppliers;
 using FluentEmail.Core.Models;
 using FluentEmail.Core;
 using Domain.Aggregates.Products;
 using Application.Common.Security;
+using Domain.Aggregates.Enums;
 
 
 namespace Application.Feature.Common.Projections.Products
@@ -14,7 +14,7 @@ namespace Application.Feature.Common.Projections.Products
 		public string Name { get; set; }
 		public string Description { get; set; }
 		public string Sku { get; set; }
-		public ProductStatus Status { get; set; }
+		public ActivationStatus Status { get; set; }
 		[File]
 		public string? Image { get; set; }
 		public string Barcode { get; set; }

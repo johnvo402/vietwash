@@ -1,15 +1,16 @@
 using Application.Common.Interfaces.Services.DistributedCache;
+using Application.Features.BranchUsers;
 using Application.Features.Users.Commands.Create;
 using Contracts.Application.Common.Interfaces.Services.PubSub;
 using Contracts.Dtos.Responses;
 using Infrastructure.Services.Queue;
-using Shared.Kernel.Extensions;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using ProjectService_gRPC;
 using Serilog;
+using Shared.Kernel.Extensions;
 
 namespace Infrastructure.Services.DistributedCache;
 
@@ -55,24 +56,57 @@ public class PubSubBackgroundService : BackgroundService
         _logger.Information("PubSubBackgroundService started, subscribing to CreateAccountEvent.");
 
         // Subscribe to CreateAccountEvent
-        _pubSubService.Subscribe<CreateAccountEvent>(async message =>
-        {
-            using var scope = _serviceProvider.CreateScope();
-            var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-            var pubSubLogService = scope.ServiceProvider.GetRequiredService<IPubSubLogService>();
-            var deadLetterPubSub = scope.ServiceProvider.GetRequiredService<IPubSubService>();
+        _pubSubService.Subscribe<CreateAccountEvent>(
+            async message =>
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+                var pubSubLogService =
+                    scope.ServiceProvider.GetRequiredService<IPubSubLogService>();
+                var deadLetterPubSub = scope.ServiceProvider.GetRequiredService<IPubSubService>();
 
-            var request = new CreateAccountCommand { Payload = message };
+                var request = new CreateAccountCommand { Payload = message };
 
-            await ProcessMessageAsync<CreateAccountCommand, PubSubResponse<CreateAccountCommand>>(
-                request,
-                sender,
-                pubSubLogService,
-                deadLetterPubSub,
-                stoppingToken
-            );
-        });
+                await ProcessMessageAsync<
+                    CreateAccountCommand,
+                    PubSubResponse<CreateAccountCommand>
+                >(
+                    request,
+                    sender,
+                    pubSubLogService,
+                    deadLetterPubSub,
+                    "CreateAccountEvent",
+                    stoppingToken
+                );
+            },
+            "CreateAccountEvent"
+        );
+        _pubSubService.Subscribe<BranchCreateEvent>(
+            async message =>
+            {
+                _logger.Information(
+                    "PubSubBackgroundService started, subscribing to CreateAccountEvent."
+                );
 
+                using var scope = _serviceProvider.CreateScope();
+                var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+                var pubSubLogService =
+                    scope.ServiceProvider.GetRequiredService<IPubSubLogService>();
+                var deadLetterPubSub = scope.ServiceProvider.GetRequiredService<IPubSubService>();
+
+                var request = new BranchUserCommand { Payload = message };
+
+                await ProcessMessageAsync<BranchUserCommand, PubSubResponse<BranchUserCommand>>(
+                    request,
+                    sender,
+                    pubSubLogService,
+                    deadLetterPubSub,
+                    "branch-create-event",
+                    stoppingToken
+                );
+            },
+            "branch-create-event"
+        );
         // Keep service running until cancellation
         await Task.Delay(Timeout.Infinite, stoppingToken);
     }
@@ -82,6 +116,7 @@ public class PubSubBackgroundService : BackgroundService
         ISender sender,
         IPubSubLogService pubSubLogService,
         IPubSubService deadLetterPubSub,
+        string eventName,
         CancellationToken cancellationToken
     )
         where TRequest : class
@@ -114,6 +149,7 @@ public class PubSubBackgroundService : BackgroundService
                 null,
                 pubSubLogService,
                 deadLetterPubSub,
+                eventName,
                 cancellationToken
             );
             return;
@@ -130,6 +166,7 @@ public class PubSubBackgroundService : BackgroundService
             response,
             pubSubLogService,
             deadLetterPubSub,
+            eventName,
             cancellationToken
         );
     }
@@ -139,6 +176,7 @@ public class PubSubBackgroundService : BackgroundService
         TResponse? response,
         IPubSubLogService pubSubLogService,
         IPubSubService deadLetterPubSub,
+        string eventName,
         CancellationToken cancellationToken
     )
         where TRequest : class
@@ -189,7 +227,7 @@ public class PubSubBackgroundService : BackgroundService
                 )
                 .StringJson;
 
-            var pushed = await deadLetterPubSub.PublishAsync(request);
+            var pushed = await deadLetterPubSub.PublishAsync(request, eventName);
             if (pushed)
             {
                 _logger.Information(

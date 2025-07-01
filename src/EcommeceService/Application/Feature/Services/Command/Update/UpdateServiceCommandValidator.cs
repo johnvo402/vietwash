@@ -1,5 +1,6 @@
 ﻿using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Services;
 using FluentValidation;
 using Infrastructure.UnitOfWorks;
@@ -8,20 +9,20 @@ using Application.Feature.BranchProducts.Command.Update;
 
 namespace Application.Feature.Services.Command.Update
 {
-	public class UpdateServiceCommandValidator : AbstractValidator<UpdateServiceCommand>
-	{
-		private readonly IUnitOfWork unitOfWork;
-		private readonly IActionAccessorService accessorService;
+    public class UpdateServiceCommandValidator : AbstractValidator<UpdateServiceCommand>
+    {
+        private readonly IUnitOfWork unitOfWork;
+        private readonly IActionAccessorService accessorService;
 
-		public UpdateServiceCommandValidator(
-			IUnitOfWork unitOfWork,
-			IActionAccessorService accessorService
-		)
-		{
-			this.unitOfWork = unitOfWork;
-			this.accessorService = accessorService;
-			ApplyRules();
-		}
+        public UpdateServiceCommandValidator(
+            IUnitOfWork unitOfWork,
+            IActionAccessorService accessorService
+        )
+        {
+            this.unitOfWork = unitOfWork;
+            this.accessorService = accessorService;
+            ApplyRules();
+        }
 
 		private void ApplyRules()
 		{

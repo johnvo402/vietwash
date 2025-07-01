@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Domain.Aggregates.Warehouses.Enums;
+using Domain.Aggregates.Enums;
 using Mediator;
 using Shared.Kernel.Common;
 
@@ -16,7 +16,7 @@ namespace Domain.Aggregates.Warehouses
         public string Description { get; set; } = default!;
         public int ReorderLevel { get; set; } = default!;
         public long BranchId { get; set; } = default!;
-        public WarehouseStatus Status { get; set; } = default!;
+        public ActivationStatus Status { get; set; } = default!;
 
         //public ICollection<InventoryRequest> InventoryRequests { get; set; } = [];
         //public ICollection<InventoryDocument> InventoryDocuments { get; set; } = [];
@@ -24,7 +24,7 @@ namespace Domain.Aggregates.Warehouses
             string? name,
             string? code,
             string? description,
-            WarehouseStatus? status,
+            ActivationStatus? status,
             int? reorderLevel = 1
         )
         {

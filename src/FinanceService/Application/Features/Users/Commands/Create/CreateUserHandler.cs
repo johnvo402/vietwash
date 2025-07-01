@@ -48,7 +48,7 @@ public class CreateUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService media
             return new PubSubResponse<CreateUserCommand>
             {
                 Error = ex.Message,
-                ErrorType = Contracts.Dtos.Responses.PubSubErrorType.Transient,
+                ErrorType = PubSubErrorType.Transient,
                 IsSuccess = false,
                 ResponseData = command,
                 LastAttemptTime = DateTime.UtcNow,
