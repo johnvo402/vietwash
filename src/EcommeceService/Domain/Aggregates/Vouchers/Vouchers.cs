@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Domain.Aggregates.Equipments.Enums;
-using Domain.Aggregates.Vouchers.Enums;
 using Shared.Kernel.Common;
 using Mediator;
+using Domain.Aggregates.Enums;
 
 namespace Domain.Aggregates.Vouchers
 {
@@ -21,7 +21,7 @@ namespace Domain.Aggregates.Vouchers
         public string? Description { get; set; } = default!;
         public DateTimeOffset StartAt { get; set; } = default!;
         public DateTimeOffset EndAt { get; set; } = default!;
-        public VoucherStatus Status { get; set; } = default!;
+        public ActivationStatus Status { get; set; } = default!;
 
         public ICollection<VoucherCustomer> VoucherCustomers { get; set; } =
             new List<VoucherCustomer>();

@@ -3,10 +3,10 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Projections.Warehouses;
 using Domain.Aggregates.Branches;
 using Domain.Aggregates.Warehouses;
-using Domain.Aggregates.Warehouses.Enums;
 using FluentValidation;
 using Infrastructure.UnitOfWorks;
 using Contracts.Common.Messages;
+using Domain.Aggregates.Enums;
 
 namespace Application.Features.Common.Validators.Warehouses
 {
@@ -82,7 +82,7 @@ namespace Application.Features.Common.Validators.Warehouses
 
            
             RuleFor(x => x.Status)
-                .Must(status => Enum.IsDefined(typeof(WarehouseStatus), (WarehouseStatus)status))
+                .Must(status => Enum.IsDefined(typeof(ActivationStatus), (ActivationStatus)status))
                 .WithState(x =>
                     Messager
                         .Create<Warehouse>()

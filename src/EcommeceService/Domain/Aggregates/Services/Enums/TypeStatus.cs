@@ -8,7 +8,7 @@ namespace Domain.Aggregates.Services.Enums
 {
 	public enum TypeStatus
 	{
-		SingleService = 0,
-		Combo = 1,
+		SingleService = 1,
+		Combo = 2,
 	}
 }

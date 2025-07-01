@@ -285,4 +285,12 @@
     <value>Các thông tin xác nhận</value>
     <comment>  </comment>
   </data>
+  <data name="Branch" xml:space="preserve">
+    <value>Chi nhánh</value>
+    <comment></comment>
+  </data>
+  <data name="Warehouse" xml:space="preserve">
+    <value>Kho</value>
+    <comment></comment>
+  </data>
 </root>

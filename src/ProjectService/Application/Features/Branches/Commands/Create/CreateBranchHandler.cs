@@ -2,8 +2,8 @@
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Contracts.Utils;
+using Domain.Aggregates.Enums;
 using Domain.Aggregates.Warehouses;
-using Domain.Aggregates.Warehouses.Enums;
 using Mediator;
 
 namespace Application.Features.Branches.Commands.Create
@@ -39,7 +39,7 @@ namespace Application.Features.Branches.Commands.Create
                     Description = $"Kho mặc định được tạo cùng chi nhánh {branch.Name}.",
                     BranchId = branch.Id,
                     ReorderLevel = 0,
-                    Status = WarehouseStatus.Active,
+                    Status = ActivationStatus.Active,
                 };
                 branch.Warehouses.Add(warehouse);
                 await unitOfWork.SaveAsync(cancellationToken);

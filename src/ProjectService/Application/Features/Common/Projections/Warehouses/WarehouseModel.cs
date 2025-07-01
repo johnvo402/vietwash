@@ -1,4 +1,6 @@
-﻿using Domain.Aggregates.Warehouses.Enums;
+﻿
+
+using Domain.Aggregates.Enums;
 
 namespace Application.Features.Common.Projections.Warehouses
 {
@@ -7,6 +9,6 @@ namespace Application.Features.Common.Projections.Warehouses
         public string Name { get; set; } = default!;
         public string Code { get; set; } = default!;
         public string Description { get; set; } = default!;
-        public WarehouseStatus Status { get; set; } = default!;
+        public ActivationStatus Status { get; set; } = default!;
     }
 }

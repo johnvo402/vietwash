@@ -1,6 +1,6 @@
 ﻿using Ardalis.GuardClauses;
-using Domain.Aggregates.Branches.Enums;
 using Domain.Aggregates.Branches.Events;
+using Domain.Aggregates.Enums;
 using Domain.Aggregates.Warehouses;
 using Mediator;
 using Shared.Kernel.Common;
@@ -13,7 +13,7 @@ namespace Domain.Aggregates.Branches
         public string Code { get; set; } = default!;
         public bool Main { get; set; } = default!;
         public bool Disable { get; set; } = default!;
-        public BranchStatus Status { get; set; } = default!;
+        public ActivationStatus Status { get; set; } = default!;
         public string? Email { get; set; }
         public string? PhoneCode { get; set; }
         public string? PhoneNumber { get; set; }
@@ -34,7 +34,7 @@ namespace Domain.Aggregates.Branches
             string name,
             string? code,
             bool main,
-            BranchStatus status,
+            ActivationStatus status,
             string? email,
             string? phoneCode,
             string? phoneNumber,
@@ -70,7 +70,7 @@ namespace Domain.Aggregates.Branches
             string? name,
             string? code,
             bool main,
-            BranchStatus status,
+            ActivationStatus status,
             string? email,
             string? phoneCode,
             string? phoneNumber,

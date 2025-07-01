@@ -285,4 +285,12 @@
     <value>Claims</value>
     <comment>isPlural=true</comment>
   </data>
+  <data name="Branch" xml:space="preserve">
+    <value>Branch</value>
+    <comment></comment>
+  </data>
+  <data name="Warehouse" xml:space="preserve">
+    <value>Warehouse</value>
+    <comment></comment>
+  </data>
 </root>

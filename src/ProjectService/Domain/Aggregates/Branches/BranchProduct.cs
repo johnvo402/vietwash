@@ -1,4 +1,4 @@
-﻿using Domain.Aggregates.Branches.Enums;
+﻿using Domain.Aggregates.Enums;
 using Shared.Kernel.Common;
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ namespace Domain.Aggregates.Branches
         public long BranchId { get; set; }
         public string? Description { get; set; }
         public string? Sku { get; set; }
-        public BranchStatus Status { get; set; }
+        public ActivationStatus Status { get; set; }
         public string? Barcode { get; set; }
         public string? ImgUrl { get; set; }
         public virtual Branch Branch { get; set; } = default!;

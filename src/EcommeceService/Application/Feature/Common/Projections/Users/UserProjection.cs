@@ -1,5 +1,6 @@
 using Application.Common.Security;
 using Contracts.Application.Common;
+using Domain.Aggregates.Enums;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Enums;
 
@@ -20,7 +21,7 @@ public class UserProjection : BaseResponse
     [File]
     public string? Avatar { get; set; }
     public CustomerGroup? CustomerGroup { get; set; }
-    public UserStatus Status { get; set; }
+    public ActivationStatus Status { get; set; }
     public string Role { get; set; }
 
     public virtual void MappingFrom(User user)

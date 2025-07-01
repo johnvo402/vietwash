@@ -1,6 +1,7 @@
 using Application.Features.Common.Projections.Users;
 using Contracts.ApiWrapper;
 using Contracts.Routers;
+using Domain.Aggregates.Enums;
 using Domain.Aggregates.Users.Enums;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +23,7 @@ public class UpdateAccount : UserModel
 
     public Gender? Gender { get; set; }
 
-    public UserStatus Status { get; set; }
+    public ActivationStatus Status { get; set; }
 
     public string Role { get; set; }
     public CustomerGroup? CustomerGroup { get; set; }

@@ -1,4 +1,4 @@
-﻿using Ardalis.GuardClauses;
+using Ardalis.GuardClauses;
 using Domain.Aggregates.Enums;
 using Shared.Kernel.Common;
 

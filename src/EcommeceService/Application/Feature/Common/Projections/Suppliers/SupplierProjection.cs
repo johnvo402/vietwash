@@ -1,6 +1,6 @@
 ﻿using Contracts.Application.Common;
+using Domain.Aggregates.Enums;
 using Domain.Aggregates.Suppliers;
-using Domain.Aggregates.Suppliers.Enum;
 
 namespace Application.Feature.Common.Projections.Suppliers
 {
@@ -12,7 +12,7 @@ namespace Application.Feature.Common.Projections.Suppliers
         public string? Address { get; set; }
         public string? Phone { get; set; }
         public string? Description { get; set; }
-        public SupplierStatus Status { get; set; }
+        public ActivationStatus Status { get; set; }
 
         public virtual void MappingFrom(Supplier supplier)
         {

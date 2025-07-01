@@ -1,5 +1,6 @@
+using Domain.Aggregates.Enums;
 using Domain.Aggregates.Inventories;
-using Domain.Aggregates.Suppliers.Enum;
+
 using Mediator;
 using Shared.Kernel.Common;
 
@@ -10,7 +11,7 @@ namespace Domain.Aggregates.Suppliers
         // Required properties - private set để đảm bảo bất biến sau khi khởi tạo
         public string Name { get; private set; } = default!;
         public string Code { get; set; }
-        public SupplierStatus Status { get; private set; } = default!;
+        public ActivationStatus Status { get; private set; } = default!;
 
         // Optional or mutable properties
         public string Email { get; set; } = string.Empty;
@@ -23,7 +24,7 @@ namespace Domain.Aggregates.Suppliers
         public ICollection<EquipmentSupplying> EquipmentSupplyings { get; set; } = [];
 
         // Constructor khởi tạo đầy đủ các trường bắt buộc
-        public Supplier(string name, string code, SupplierStatus status)
+        public Supplier(string name, string code, ActivationStatus status)
         {
             Name = name.Trim();
             Code = code.Trim();
@@ -34,7 +35,7 @@ namespace Domain.Aggregates.Suppliers
         public Supplier(
             string name,
             string code,
-            SupplierStatus status,
+            ActivationStatus status,
             string? email = null,
             string? address = null,
             string? phone = null,
@@ -56,7 +57,7 @@ namespace Domain.Aggregates.Suppliers
             string? address = null,
             string? phone = null,
             string? description = null,
-            SupplierStatus? status = null,
+            ActivationStatus? status = null,
             bool? disable = null
         )
         {

@@ -11,7 +11,5 @@ namespace Domain.Aggregates.Funds.Enums
         PendingConfirmation = 1,
         Confirmed = 2,
         Cancelled = 3
-
-
     }
 }

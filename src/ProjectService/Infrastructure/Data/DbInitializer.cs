@@ -1,8 +1,7 @@
 using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Aggregates.Branches;
-using Domain.Aggregates.Branches.Enums;
+using Domain.Aggregates.Enums;
 using Domain.Aggregates.Warehouses;
-using Domain.Aggregates.Warehouses.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -56,7 +55,7 @@ public class DbInitializer
                 name: "Chi nhánh Cái Răng",
                 code: "CNCR",
                 main: false,
-                status: BranchStatus.Inactive,
+                status: ActivationStatus.Active,
                 email: "ct@laundry.com",
                 phoneCode: null,
                 phoneNumber: null,
@@ -79,7 +78,7 @@ public class DbInitializer
                 name: "Chi nhánh Bình Thủy",
                 code: "CNBT",
                 main: false,
-                status: BranchStatus.Inactive,
+                status: ActivationStatus.Active,
                 email: "ct@laundry.com",
                 phoneCode: null,
                 phoneNumber: null,
@@ -101,7 +100,7 @@ public class DbInitializer
                 name: "Chi nhánh Ô Môn",
                 code: "CNOM",
                 main: false,
-                status: BranchStatus.Inactive,
+                status: ActivationStatus.Active,
                 email: "ct@laundry.com",
                 phoneCode: null,
                 phoneNumber: null,
@@ -123,7 +122,7 @@ public class DbInitializer
                 name: "Chi nhánh Ninh Kiều",
                 code: "CNNK",
                 main: true,
-                status: BranchStatus.Inactive,
+                status: ActivationStatus.Active,
                 email: "ct@laundry.com",
                 phoneCode: null,
                 phoneNumber: null,
@@ -152,7 +151,7 @@ public class DbInitializer
                 Description = $"Kho mặc định được tạo cùng chi nhánh {branch.Name}.",
                 BranchId = branch.Id,
                 ReorderLevel = 0,
-                Status = WarehouseStatus.Active,
+                Status = ActivationStatus.Active,
             };
             branch.Warehouses.Add(warehouse);
             branch.CreateEvent();
