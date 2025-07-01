@@ -4,6 +4,7 @@ using Contracts.Converters;
 using Contracts.Extensions;
 using HealthChecks.UI.Client;
 using Infrastructure;
+using Infrastructure.Data;
 using Infrastructure.Services.BackgroundJobs;
 using Infrastructure.Services.gRPC;
 using Infrastructure.Services.Hangfires;
@@ -35,6 +36,7 @@ builder.AddOpenTelemetryTracing(configuration);
 builder.AddSerialogs();
 services.AddHealthChecks();
 services.AddDatabaseHealthCheck(configuration);
+
 #endregion
 
 #region layers dependencies
@@ -90,6 +92,7 @@ try
         "/api/health",
         new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }
     );
+
     Log.Logger.Information(
         "Application is launching with {environment}",
         app.Environment.EnvironmentName

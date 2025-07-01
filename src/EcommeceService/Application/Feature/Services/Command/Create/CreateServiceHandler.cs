@@ -19,6 +19,7 @@ namespace Application.Feature.Services.Command.Create
         )
         {
             Service mappingService = request.ToEntity();
+
             mappingService.Slug = Generator.GenerateSlug(mappingService.Name);
             string? serviceImage = null;
             try

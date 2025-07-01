@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-
 namespace Infrastructure.Data.Configurations.Identity
 {
     public class AccountActivityConfiguration : IEntityTypeConfiguration<AccountActivity>
@@ -17,5 +16,4 @@ namespace Infrastructure.Data.Configurations.Identity
                 .HasForeignKey(x => x.AccountId);
         }
     }
-
 }

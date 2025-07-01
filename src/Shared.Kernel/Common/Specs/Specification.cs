@@ -108,3 +108,8 @@ public class Specification<T, TResponse> : Specification<T>, ISpecification<T, T
 
     public Expression<Func<T, TResponse>> Selector { get; internal set; } = null!;
 }
+
+public class ListIds
+{
+    public long Id { get; set; }
+}

@@ -1,10 +1,8 @@
-using Application.Features.Common.Projections.Users;
 using Contracts.Dtos.Models;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Enums;
 using Domain.Aggregates.Users.Enums;
 using Mediator;
-using Microsoft.AspNetCore.Http;
 
 namespace Application.Features.Users.Commands.Create;
 

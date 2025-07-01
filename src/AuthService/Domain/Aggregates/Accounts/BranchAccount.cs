@@ -2,7 +2,7 @@
 
 namespace Domain.Aggregates.Accounts
 {
-    public class BranchAccount : DefaultEntity<long>
+    public class BranchAccount : BaseEntity<long>
     {
         public long AccountId { get; set; }
         public long BranchId { get; set; }

@@ -11,5 +11,6 @@ namespace Application.Feature.Orders.Command.UpdateStatus
         [FromRoute(Name = RouterBase.Id)]
         public string OrderId { get; set; } = string.Empty;
         public OrderStatus? Status { get; set; }
+        public PaymentMethod? PaymentMethod { get; set; }
     }
 }

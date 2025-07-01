@@ -1,4 +1,5 @@
 ﻿using Ardalis.GuardClauses;
+using Domain.Aggregates.Branches.Events;
 using Domain.Aggregates.Enums;
 using Domain.Aggregates.Warehouses;
 using Mediator;
@@ -115,9 +116,20 @@ namespace Domain.Aggregates.Branches
                 Street = street;
         }
 
+        public void CreateEvent()
+        {
+            Emit(new BranchCreateEvent() { BranchId = Id, Name = Name });
+        }
+
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
-            throw new NotImplementedException();
+            switch (domainEvent)
+            {
+                case BranchCreateEvent:
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }

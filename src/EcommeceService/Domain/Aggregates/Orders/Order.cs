@@ -131,10 +131,14 @@ namespace Domain.Aggregates.Orders
                         new UpdateStatusOrderEvent()
                         {
                             TypeId = "income",
-                            BehaviorId = "order",
-                            Amount = Total,
+                            OrderId = Id,
+                            Amount = OrderPayments.Sum(x => x.Amount),
                             PaymentMethod = OrderPayments.FirstOrDefault()!.PaymentMethod,
-                            ReferenceId = Id,
+                            Code = Code,
+                            BranchId = BranchId,
+                            CustomerId = CustomerId,
+                            BehaviorId = 1,
+                            PublicId = PublicId,
                         }
                     );
                     break;
@@ -143,11 +147,15 @@ namespace Domain.Aggregates.Orders
                     Emit(
                         new UpdateStatusOrderEvent()
                         {
-                            TypeId = "expense",
-                            BehaviorId = "order_cancelled",
-                            Amount = Total,
+                            TypeId = "spend",
+                            OrderId = Id,
+                            Amount = OrderPayments.Sum(x => x.Amount),
                             PaymentMethod = OrderPayments.FirstOrDefault()!.PaymentMethod,
-                            ReferenceId = Id,
+                            Code = Code,
+                            BranchId = BranchId,
+                            CustomerId = CustomerId,
+                            BehaviorId = 2,
+                            PublicId = PublicId,
                         }
                     );
                     break;

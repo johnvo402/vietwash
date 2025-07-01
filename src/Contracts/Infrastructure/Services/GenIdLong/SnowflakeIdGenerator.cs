@@ -6,11 +6,11 @@ namespace Contracts.Infrastructure.Services.GenIdLong
     {
         private readonly object _lock = new();
         private readonly long _workerId;
-        private readonly long _maxWorkerId = -1L ^ (-1L << 10);
-        private readonly long _sequenceMask = -1L ^ (-1L << 12);
+        private readonly long _maxWorkerId = -1L ^ (-1L << 6); // 6 bits => max 63
+        private readonly long _sequenceMask = -1L ^ (-1L << 6); // 6 bits => max 63
 
-        private readonly int _workerIdShift = 12;
-        private readonly int _timestampLeftShift = 12 + 10;
+        private readonly int _workerIdShift = 6; // Shift 6 bits
+        private readonly int _timestampLeftShift = 6 + 6; // Shift 12 bits
 
         private const long Twepoch = 1288834974657L;
 

@@ -126,6 +126,10 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
+                    b.Property<bool>("Automatic")
+                        .HasColumnType("boolean")
+                        .HasColumnName("automatic");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -135,9 +139,13 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
-                    b.Property<string>("Name")
+                    b.Property<bool>("Generate")
+                        .HasColumnType("boolean")
+                        .HasColumnName("generate");
+
+                    b.Property<object>("Name")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("jsonb")
                         .HasColumnName("name");
 
                     b.Property<string>("PublicId")
@@ -218,6 +226,50 @@ namespace Infrastructure.Data.Migrations
                         .HasName("pk_transaction");
 
                     b.ToTable("transaction", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Users.BranchUser", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<long>("BranchId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("branch_id");
+
+                    b.Property<string>("BranchName")
+                        .HasColumnType("text")
+                        .HasColumnName("branch_name");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_branch_user");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_branch_user_user_id");
+
+                    b.ToTable("branch_user", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
@@ -326,6 +378,21 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("FundBehavior");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Users.BranchUser", b =>
+                {
+                    b.HasOne("Domain.Aggregates.Users.User", null)
+                        .WithMany("BranchUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_branch_user_user_user_id");
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
+                {
+                    b.Navigation("BranchUsers");
                 });
 #pragma warning restore 612, 618
         }
