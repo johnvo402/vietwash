@@ -1,9 +1,7 @@
-using Application.Common.Auth;
 using Application.Feature.Services.Command.Update;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
-using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
@@ -23,6 +21,6 @@ public class UpdateServiceEndpoint(ISender sender)
     )
     {
         var result = await sender.Send(request);
-        return result.ToCreatedResult();
+        return result.ToActionResult();
     }
 }
