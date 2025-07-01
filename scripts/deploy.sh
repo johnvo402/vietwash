@@ -29,5 +29,8 @@ ssh -p ${REMOTE_SERVER_PORT} ${REMOTE_SERVER_USER}@${REMOTE_SERVER_IP} bash << E
   
     echo "Make staging SERVICE=${SERVICES}..."
     make staging SERVICE="${SERVICES}" || exit 1
+
+    make dev SERVICE="database" || exit 1
+    
     echo "Triển khai hoàn tất cho services: ${SERVICES}"
 EOF
