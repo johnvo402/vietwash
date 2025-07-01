@@ -100,7 +100,7 @@ namespace Application.Feature.Services.Command.Update
 			return await unitOfWork.Repository<Service>().AnyAsync(s => s.Id == serviceId, cancellation);
 		}
 
-		private async Task<bool> IsCategoryExistsAsync(string categoryId, CancellationToken cancellation)
+		private async Task<bool> IsCategoryExistsAsync(long categoryId, CancellationToken cancellation)
 		{
 			return await unitOfWork.Repository<Category>().AnyAsync(c => c.Id == categoryId, cancellation);
 		}
