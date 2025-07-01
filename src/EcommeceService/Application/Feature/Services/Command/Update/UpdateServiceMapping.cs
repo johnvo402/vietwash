@@ -1,4 +1,5 @@
-﻿using Application.Feature.Common.Projections.Services;
+﻿using Application.Feature.Common.Mapping.Units;
+using Application.Feature.Common.Projections.Services;
 using Application.Feature.Common.Projections.Units;
 using Domain.Aggregates.Services;
 
@@ -17,6 +18,7 @@ namespace Application.Feature.Services.Command.Update
                 description: model.Description,
                 image: model.Image
             );
+            entity.UnitRelations = model.UnitRelations.ToListUnitRelation() ?? [];
         }
     }
 }
