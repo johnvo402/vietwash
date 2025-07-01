@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Aggregates.Branches
 {
-    public class BranchProduct : DefaultEntity<long>
+    public class BranchProduct : DefaultEntity
     {
         public long BranchId { get; set; }
         public string? Description { get; set; }

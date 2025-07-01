@@ -8,7 +8,7 @@ using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Tariffs
 {
-    public class ServicePriceTariffHistory : BaseEntity<long>
+    public class ServicePriceTariffHistory : BaseEntity
     {
         public long ServiceId { get; set; } = default!;
         public long TariffId { get; set; } = default!;

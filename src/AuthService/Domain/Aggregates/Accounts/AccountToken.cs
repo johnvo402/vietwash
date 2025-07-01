@@ -2,7 +2,7 @@ using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Accounts;
 
-public class AccountToken : BaseEntity<long>
+public class AccountToken : BaseEntity
 {
     public string? Token { get; set; }
     public string? ClientIp { get; set; }

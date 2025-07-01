@@ -3,7 +3,7 @@ using Shared.Kernel.Common;
 
 namespace Application.Feature.Common.Projections.Categories;
 
-public class CategoryProjection : BaseEntity<long>
+public class CategoryProjection : BaseEntity
 {
     public string? Name { get; set; }
     public string? Code { get; set; }

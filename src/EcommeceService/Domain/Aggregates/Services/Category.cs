@@ -4,7 +4,7 @@ using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Services
 {
-    public class Category : BaseEntity<long>
+    public class Category : BaseEntity
     {
         public string Code { get; set; } = default!;
         public string Name { get; set; } = default!;

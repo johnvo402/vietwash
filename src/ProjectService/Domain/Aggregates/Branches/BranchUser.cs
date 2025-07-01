@@ -2,7 +2,7 @@
 
 namespace Domain.Aggregates.Branches
 {
-    public class BranchUser : BaseEntity<long>
+    public class BranchUser : BaseEntity
     {
         public long UserId { get; set; }
         public long BranchId { get; set; }

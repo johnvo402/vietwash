@@ -3,7 +3,7 @@ using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Orders
 {
-    public class OrderItem : DefaultEntity<long>
+    public class OrderItem : DefaultEntity
     {
         public long OrderId { get; set; }
         public long ServiceId { get; set; }
