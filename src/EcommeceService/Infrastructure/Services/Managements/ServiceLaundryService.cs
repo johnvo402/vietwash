@@ -91,7 +91,7 @@ namespace Infrastructure.Services.Managements
 				// Cập nhật hoặc thêm mới UnitRelation
 				foreach (var unitRelation in unitRelations)
 				{
-					unitRelation.ReferenceId = service.Id;
+					unitRelation.ServiceId = service.Id;
 					var existingUnitRelation = existingUnitRelations.FirstOrDefault(ur => ur.Id == unitRelation.Id);
 					if (existingUnitRelation != null)
 					{
@@ -296,13 +296,13 @@ namespace Infrastructure.Services.Managements
                 {
                     // Make sure relation has both IDs
                     //Guard.Against.Default(relation.UnitId, nameof(relation.UnitId));
-                    Guard.Against.Default(relation.ReferenceId, nameof(relation.ReferenceId));
+                    Guard.Against.Default(relation.ServiceId, nameof(relation.ServiceId));
 
                     // Check if relation already exists
                     var existingRelation = await _unitRelationContext
                         .FirstOrDefaultAsync(ur =>
                             //ur.UnitId == relation.UnitId &&
-                            ur.ReferenceId == relation.ReferenceId);
+                            ur.ServiceId == relation.ServiceId);
 
                     if (existingRelation == null)
                     {

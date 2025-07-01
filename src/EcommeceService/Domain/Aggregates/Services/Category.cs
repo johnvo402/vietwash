@@ -1,4 +1,4 @@
-﻿using Domain.Aggregates.Services.Enums;
+﻿using Domain.Aggregates.Enums;
 using Mediator;
 using Shared.Kernel.Common;
 

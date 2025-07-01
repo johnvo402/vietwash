@@ -1,4 +1,5 @@
 ﻿using Application.Feature.Common.Projections.Services;
+using Contracts.Extensions;
 using Domain.Aggregates.Services;
 
 namespace Application.Feature.Services.Command.Create
@@ -15,7 +16,19 @@ namespace Application.Feature.Services.Command.Create
                 type: model.Type,
                 description: model.Description,
                 image: model.Image
-            );
-        }
+            )
+			{
+				UnitRelations = model.UnitRelations.ToListMapping(x => new UnitRelation
+				{
+					Name = x.Name,
+					BaseUnit = x.BaseUnit,
+					Price = x.Price,
+					Multiple = x.Multiple,
+					ProcessingTime = x.ProcessingTime,
+					Status = x.Status
+				})
+			};
+
+		}
     }
 }

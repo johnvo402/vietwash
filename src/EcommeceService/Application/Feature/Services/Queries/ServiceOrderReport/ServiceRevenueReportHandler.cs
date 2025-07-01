@@ -38,17 +38,21 @@ namespace Application.Feature.Services.Queries.ServiceOrderReport
 
                 // Nhóm OrderItem theo UnitId (từ UnitRelation) và ServiceId
                 var serviceOrderItems = orderItems
-                    .GroupBy(oi => new { oi.UnitRelation.ReferenceId, oi.ServiceId })
-                    .Select(g => new
-                    {
-                        UnitId = g.Key.ReferenceId,
-                        ServiceId = g.Key.ServiceId,
-                        OrderItems = g.ToList(),
-                        Orders = orders
-                            .Where(o => g.Select(oi => oi.OrderId).Distinct().Contains(o.Id))
-                            .ToList(),
-                    })
-                    .ToList();
+					.GroupBy(oi => new
+					{
+						UnitRelationServiceId = oi.UnitRelation.ServiceId,
+						ServiceId = oi.ServiceId
+					})
+	                .Select(g => new
+	                {
+		                UnitId = g.Key.UnitRelationServiceId, 
+		                ServiceId = g.Key.ServiceId,
+		                OrderItems = g.ToList(),
+		                Orders = orders
+			                .Where(o => g.Select(oi => oi.OrderId).Distinct().Contains(o.Id))
+			                .ToList(),
+	                })
+					.ToList();
 
                 var reports = new List<ServiceRevenueReportResponse>();
                 foreach (var serviceOrderItem in serviceOrderItems)
@@ -66,7 +70,7 @@ namespace Application.Feature.Services.Queries.ServiceOrderReport
                     var firstOrderItem = serviceOrderItem.OrderItems.First();
                     var service = firstOrderItem.Service;
                     var unitRelation = firstOrderItem.UnitRelation;
-                    var unit = unitRelation?.ReferenceId;
+                    var unit = unitRelation?.ServiceId;
 
                     // Tính các giá trị
                     // Doanh thu trước giảm giá của từng item trong order

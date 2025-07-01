@@ -4,6 +4,7 @@ using Domain.Aggregates.Services;
 using FluentValidation;
 using Infrastructure.UnitOfWorks;
 using Contracts.Common.Messages;
+using Application.Feature.BranchProducts.Command.Update;
 
 namespace Application.Feature.Services.Command.Update
 {
@@ -80,6 +81,18 @@ namespace Application.Feature.Services.Command.Update
 							.Negative()
 							.Build()
 				);
+			RuleForEach(x => x.Service.UnitRelations)
+					.MustAsync(async (command, unit, cancellationToken) =>
+						unit.Id == 0 // UnitRelation mới thì bỏ qua
+						|| await IsUnitRelationBelongToServiceAsync(command, unit.Id, cancellationToken)
+					)
+					.WithState(_ =>
+						Messager.Create<UnitRelation>()
+							.Property(x => x.Id)
+							.Message(MessageType.Found)
+							.Negative()
+							.Build()
+					);
 		}
 		private async Task<bool> IsServiceExistsAsync(long serviceId, CancellationToken cancellation)
 		{
@@ -89,6 +102,11 @@ namespace Application.Feature.Services.Command.Update
 		private async Task<bool> IsCategoryExistsAsync(string categoryId, CancellationToken cancellation)
 		{
 			return await unitOfWork.Repository<Category>().AnyAsync(c => c.Id == categoryId, cancellation);
+		}
+		private async Task<bool> IsUnitRelationBelongToServiceAsync(UpdateServiceCommand command, long unitRelationId, CancellationToken cancellation)
+		{
+			return await unitOfWork.Repository<UnitRelation>()
+				.AnyAsync(x => x.Id == unitRelationId && x.ServiceId == command.ServiceId, cancellation);
 		}
 	}
 }

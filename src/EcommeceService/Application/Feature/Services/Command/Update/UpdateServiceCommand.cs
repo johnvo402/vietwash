@@ -12,5 +12,5 @@ public class UpdateServiceCommand : IRequest<Result>
     public long ServiceId { get; set; } = default!;
 
     [FromBody]
-    public ServiceModel Service { get; set; } = default!;
+    public UpdateServiceModel Service { get; set; } = default!;
 }

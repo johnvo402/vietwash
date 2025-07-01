@@ -111,5 +111,17 @@ namespace Presentation.Routes
 				+ RouterBase.Id
 				+ "}";
 		}
+		public static class BranchProductRoute
+		{
+			public const string Tags = $"{nameof(BranchProductRoute)} endpoint";
+			public const string BranchProducts = $"{Ecommerce}/{RouterBase.prefix}{nameof(BranchProducts)}";
+			public const string GetUpdateDelete =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(BranchProducts)}/" + "{" + RouterBase.Id + "}";
+			public const string GetDetail =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(BranchProducts)}/detail/"
+				+ "{"
+				+ RouterBase.Id
+				+ "}";
+		}
 	}
 }

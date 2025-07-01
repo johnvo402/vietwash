@@ -1,21 +1,23 @@
-﻿using Application.Feature.Common.Projections.Services;
+﻿using Application.Feature.Common.Projections.BranchProducts;
+using Domain.Aggregates.Products;
 using Domain.Aggregates.Services;
 
-namespace Application.Feature.Services.Command.Update
+
+namespace Application.Feature.BranchProducts.Command.Update
 {
-    public static class UpdateServiceMapping
-    {
-        public static void FromUpdateModel(this Service entity, UpdateServiceModel model)
-        {
-            entity.Update(
-                name: model.Name,
-                status: model.Status,
-                categoryId: model.CategoryId,
-                branchId: model.BranchId,
-                type: model.Type,
-                description: model.Description,
-                image: model.Image
-            );
+	public static class UpdateBranchProductMapping
+	{
+		public static void FromUpdateModel(this BranchProduct entity, UpdateBranchProductModel model)
+		{
+			entity.Update(
+				branchId: model.BranchId,
+				name: model.Name,
+				description: model.Description,
+				sku: model.Sku,
+				barcode: model.Barcode,
+				image: model.Image,
+				status: model.Status
+			);
 			if (model.UnitRelations?.Any() == true)
 			{
 				foreach (var item in model.UnitRelations)
@@ -40,14 +42,13 @@ namespace Application.Feature.Services.Command.Update
 							Multiple = item.Multiple,
 							ProcessingTime = item.ProcessingTime,
 							Status = item.Status,
-							ServiceId = entity.Id
+							BranchProductId = entity.Id
 						});
 					}
 
 				}
 
 			}
-
-		}
 		}
 	}
+}
