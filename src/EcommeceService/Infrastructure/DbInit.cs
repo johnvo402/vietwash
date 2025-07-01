@@ -10,7 +10,6 @@ using Domain.Aggregates.Services;
 using Domain.Aggregates.Services.Enums;
 using Domain.Aggregates.Services.Specifications;
 using Domain.Aggregates.Suppliers;
-using Domain.Aggregates.Suppliers.Enum;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Infrastructure.Constants;
@@ -313,7 +312,7 @@ public class DbInitializer
             new Supplier(
                 name: "Điện Máy Xanh",
                 code: "DMX",
-                status: SupplierStatus.Active,
+                status: ActivationStatus.Active,
                 email: "cskh@thegioididong.com",
                 address: "172B Đường 3/2, Phường Hưng Lợi, Quận Ninh Kiều, Thành phố Cần Thơ",
                 phone: "02838125960",
@@ -325,7 +324,7 @@ public class DbInitializer
             new Supplier(
                 name: "Siêu Thị Điện Máy Chợ Lớn",
                 code: "STDMCL",
-                status: SupplierStatus.Active,
+                status: ActivationStatus.Active,
                 email: "dienmaycantho2@dienmaycholon.com.vn",
                 address: "161 Đường 3/2, Phường Hưng Lợi, Quận Ninh Kiều, TP.Cần Thơ",
                 phone: "02839505060",
@@ -337,7 +336,7 @@ public class DbInitializer
             new Supplier(
                 name: "Siêu Thị GO! VIETNAM",
                 code: "STG",
-                status: SupplierStatus.Active,
+                status: ActivationStatus.Active,
                 email: "crv.dvkh@vn.centralretail.com",
                 address: "Lô số 1, KDC Hưng Phú 1, Phường Hưng Phú, Quận Cái Răng, TP. Cần Thơ",
                 phone: "02923737575",
