@@ -16,16 +16,12 @@ namespace Infrastructure.Data.Migrations
                 type: "numeric(20,0)",
                 nullable: false,
                 oldClrType: typeof(decimal),
-                oldType: "numeric");
+                oldType: "numeric"
+            );
 
-            migrationBuilder.AlterColumn<long>(
-                name: "parent_id",
-                table: "category",
-                type: "bigint",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "text",
-                oldNullable: true);
+            migrationBuilder.Sql(
+                @"ALTER TABLE category ALTER COLUMN parent_id TYPE bigint USING parent_id::bigint;"
+            );
         }
 
         /// <inheritdoc />
@@ -37,16 +33,16 @@ namespace Infrastructure.Data.Migrations
                 type: "numeric",
                 nullable: false,
                 oldClrType: typeof(decimal),
-                oldType: "numeric(20,0)");
+                oldType: "numeric(20,0)"
+            );
 
-            migrationBuilder.AlterColumn<string>(
-                name: "parent_id",
-                table: "category",
-                type: "text",
-                nullable: true,
-                oldClrType: typeof(long),
-                oldType: "bigint",
-                oldNullable: true);
+            migrationBuilder.Sql(
+                @"
+        ALTER TABLE category 
+        ALTER COLUMN parent_id TYPE text 
+        USING parent_id::text;
+    "
+            );
         }
     }
 }
