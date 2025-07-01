@@ -1,7 +1,9 @@
-﻿using Application.Feature.BranchProducts.Command.Create;
+﻿using Application.Common.Auth;
+using Application.Feature.BranchProducts.Command.Create;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
+using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
@@ -14,7 +16,7 @@ namespace Presentation.Endpoints.BranchProducts
 	{
 		[HttpPost(Router.BranchProductRoute.BranchProducts)]
 		[SwaggerOperation(Tags = [Router.BranchProductRoute.Tags], Summary = "Create branch product")]
-		//[AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.branchproduct}")]
+		[AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.branchproduct}")]
 		public override async Task<ActionResult<ApiResponse>> HandleAsync(
 			[FromBody] CreateBranchProductCommand request,
 			CancellationToken cancellationToken = default

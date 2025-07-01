@@ -1,7 +1,9 @@
-﻿using Application.Feature.BranchProducts.Command.Update;
+﻿using Application.Common.Auth;
+using Application.Feature.BranchProducts.Command.Update;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
+using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
@@ -14,7 +16,7 @@ namespace Presentation.Endpoints.BranchProducts
 	{
 		[HttpPut(Router.BranchProductRoute.GetUpdateDelete)]
 		[SwaggerOperation(Tags = [Router.BranchProductRoute.Tags], Summary = "Update branch product")]
-		//[AuthorizeBy(permissions: $"{ActionPermission.update}:{ObjectPermission.branchproduct}")]
+		[AuthorizeBy(permissions: $"{ActionPermission.update}:{ObjectPermission.branchproduct}")]
 		public override async Task<ActionResult<ApiResponse>> HandleAsync(
 			UpdateBranchProductCommand request,
 			CancellationToken cancellationToken = default
