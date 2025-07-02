@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Application.Common.Auth;
 using Application.Feature.Tariffs.Commands.Update;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
-using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
@@ -22,7 +17,7 @@ namespace Presentation.Endpoints.Tariffs
     {
         [HttpPut(Router.TariffRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.TariffRoute.Tags], Summary = "Update Tariff")]
-        //[AuthorizeBy(permissions: $"{ActionPermission.update}:{ObjectPermission.tariff}")]
+        [AuthorizeBy]
         public override async Task<ActionResult<ApiResponse<UpdateTariffResponse>>> HandleAsync(
             [FromBody] UpdateTariffCommand request,
             CancellationToken cancellationToken = default

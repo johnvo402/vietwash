@@ -1,3 +1,4 @@
+using Application.Common.Auth;
 using Application.Feature.Orders.Queries.GetReceipt;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
@@ -16,7 +17,7 @@ namespace Presentation.Endpoints.Orders
     {
         [HttpGet(Router.OrderRoute.GetReceipt, Name = Router.OrderRoute.GetReceipt)]
         [SwaggerOperation(Tags = [Router.OrderRoute.Tags], Summary = "Get Receipt Order")]
-        // [AuthorizeBy(permissions: $"{ActionPermission.detail}:{ObjectPermission.order}")]
+        [AuthorizeBy]
         public override async Task<ActionResult<ApiResponse<GetReceiptResponse>>> HandleAsync(
             GetReceiptQuery request,
             CancellationToken cancellationToken = default

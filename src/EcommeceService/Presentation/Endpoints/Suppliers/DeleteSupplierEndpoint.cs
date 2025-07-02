@@ -1,10 +1,8 @@
 ﻿using Application.Common.Auth;
-using Application.Feature.Services.Command.Delete;
 using Application.Feature.Suppliers.Command.Delete;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.Routers;
-using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
@@ -17,7 +15,7 @@ namespace Presentation.Endpoints.Suppliers
     {
         [HttpDelete(Router.SupplierRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.SupplierRoute.Tags], Summary = "Delete supplier")]
-        //[AuthorizeBy(permissions: $"{ActionPermission.delete}:{ObjectPermission.supplier}")]
+        [AuthorizeBy]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             [FromRoute(Name = RouterBase.Id)] long supplierId,
             CancellationToken cancellationToken = default

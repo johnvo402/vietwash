@@ -1,14 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Application.Common.Auth;
 using Application.Feature.Tariffs.Queries;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
 using Contracts.RouteResults;
-using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
@@ -23,8 +18,8 @@ namespace Presentation.Endpoints.Tariffs
     {
         [HttpGet(Router.TariffRoute.Tariffs)]
         [SwaggerOperation(Tags = [Router.TariffRoute.Tags], Summary = "List Tariff")]
-        //[AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.tariff}")]
-        public async override Task<
+        [AuthorizeBy]
+        public override async Task<
             ActionResult<ApiResponse<PaginationResponse<ListTariffResponse>>>
         > HandleAsync(
             [FromQuery] ListTariffQuery request,

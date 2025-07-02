@@ -1,4 +1,5 @@
-﻿using Application.Feature.Suppliers.Query.List;
+﻿using Application.Common.Auth;
+using Application.Feature.Suppliers.Query.List;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
@@ -17,7 +18,7 @@ namespace Presentation.Endpoints.Suppliers
     {
         [HttpGet(Router.SupplierRoute.Suppliers)]
         [SwaggerOperation(Tags = [Router.SupplierRoute.Tags], Summary = "Supplier list")]
-        //[AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.supplier}")]
+        [AuthorizeBy]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<ListSupplierResponse>>>
         > HandleAsync(

@@ -1,4 +1,5 @@
-﻿using Application.Feature.Suppliers.Command.Update;
+﻿using Application.Common.Auth;
+using Application.Feature.Suppliers.Command.Update;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -14,7 +15,7 @@ namespace Presentation.Endpoints.Suppliers
     {
         [HttpPut(Router.SupplierRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.SupplierRoute.Tags], Summary = "Update supplier")]
-        //[AuthorizeBy(permissions: $"{ActionPermission.update}:{ObjectPermission.supplier}")]
+        [AuthorizeBy]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             UpdateSupplierCommand request,
             CancellationToken cancellationToken = default

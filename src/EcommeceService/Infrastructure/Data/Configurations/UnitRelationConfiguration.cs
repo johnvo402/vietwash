@@ -14,8 +14,10 @@ namespace Infrastructure.Data.Configurations
 			builder.Property(x => x.Price).HasColumnType("numeric");
 			builder.Property(x => x.ProcessingTime).HasColumnType("numeric");
 			//builder.HasOne(x => x.Product).WithMany(x => x.UnitRelations).HasForeignKey(x => x.ReferenceId);
-			builder.HasOne(x => x.Service).WithMany(x => x.UnitRelations).HasForeignKey(x => x.ReferenceId);
-            
-        }
-    }
+			builder.HasOne(x => x.Service).WithMany(x => x.UnitRelations).HasForeignKey(x => x.ServiceId);
+			builder.HasOne(x => x.BranchProduct).WithMany(x => x.UnitRelations).HasForeignKey(x => x.BranchProductId);
+
+
+		}
+	}
 }

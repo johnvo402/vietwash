@@ -1,5 +1,6 @@
 ﻿using Application.Feature.Common.Mapping.Units;
 using Application.Feature.Common.Projections.Services;
+using Contracts.Extensions;
 using Domain.Aggregates.Services;
 
 namespace Application.Feature.Services.Command.Create

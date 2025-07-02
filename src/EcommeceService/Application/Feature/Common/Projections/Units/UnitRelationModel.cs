@@ -1,5 +1,6 @@
 ﻿using Domain.Aggregates.Enums;
 using Domain.Aggregates.Services;
+using Domain.Aggregates.Services.Enums;
 
 namespace Application.Feature.Common.Projections.Units
 {

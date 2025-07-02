@@ -564,7 +564,6 @@ public class DbInitializer
             // Add UnitRelation
             var unitRelation = new UnitRelation
             {
-                ReferenceId = unit.Id,
                 Name = unit.Name,
                 BaseUnit = true,
                 Price = random.Next(1000, 100000),

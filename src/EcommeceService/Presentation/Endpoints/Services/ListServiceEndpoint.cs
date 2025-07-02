@@ -4,11 +4,9 @@ using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
 using Contracts.RouteResults;
-using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
-using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Presentation.Endpoints.Services;
@@ -20,7 +18,7 @@ public class ListServiceEndpoint(ISender sender)
 {
     [HttpGet(Router.ServiceRoute.Services)]
     [SwaggerOperation(Tags = [Router.ServiceRoute.Tags], Summary = "Service list")]
-    //[AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.service}")]
+    [AuthorizeBy]
     public override async Task<
         ActionResult<ApiResponse<PaginationResponse<ListServiceResponse>>>
     > HandleAsync(

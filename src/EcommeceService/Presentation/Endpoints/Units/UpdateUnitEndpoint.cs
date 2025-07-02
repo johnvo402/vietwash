@@ -1,4 +1,5 @@
-﻿using Application.Feature.Units.Command.Update;
+﻿using Application.Common.Auth;
+using Application.Feature.Units.Command.Update;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -16,7 +17,7 @@ namespace Presentation.Endpoints.Units
     {
         [HttpPut(Router.UnitRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.UnitRoute.Tags], Summary = "Update Unit")]
-        //[AuthorizeBy(permissions: $"{ActionPermission.update}:{ObjectPermission.unit}")]
+        [AuthorizeBy]
         public override async Task<ActionResult<ApiResponse<UpdateUnitResponse>>> HandleAsync(
             UpdateUnitCommand request,
             CancellationToken cancellationToken = default

@@ -4,7 +4,6 @@ using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Contracts.Routers;
-using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
@@ -17,7 +16,7 @@ namespace Presentation.Endpoints.Units
     {
         [HttpDelete(Router.UnitRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.UnitRoute.Tags], Summary = "Delete Unit")]
-        //[AuthorizeBy(permissions: $"{ActionPermission.delete}:{ObjectPermission.unit}")]
+        [AuthorizeBy]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             [FromRoute(Name = RouterBase.Id)] long unitId,
             CancellationToken cancellationToken = default

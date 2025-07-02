@@ -106,18 +106,29 @@ namespace Presentation.Routes
                 + RouterBase.Id
                 + "}";
         }
-
-        public static class ProductRoute
-        {
-            public const string Tags = $"{nameof(ProductRoute)} endpoint";
-            public const string Products = $"{Ecommerce}/{RouterBase.prefix}{nameof(Products)}";
-            public const string GetUpdateDelete =
-                $"{Ecommerce}/{RouterBase.prefix}{nameof(Products)}/" + "{" + RouterBase.Id + "}";
-            public const string GetDetail =
-                $"{Ecommerce}/{RouterBase.prefix}{nameof(Products)}/detail/"
-                + "{"
-                + RouterBase.Id
-                + "}";
-        }
-    }
+		public static class ProductRoute
+		{
+			public const string Tags = $"{nameof(ProductRoute)} endpoint";
+			public const string Products = $"{Ecommerce}/{RouterBase.prefix}{nameof(Products)}";
+			public const string GetUpdateDelete =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(Products)}/" + "{" + RouterBase.Id + "}";
+			public const string GetDetail =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(Products)}/detail/"
+				+ "{"
+				+ RouterBase.Id
+				+ "}";
+		}
+		public static class BranchProductRoute
+		{
+			public const string Tags = $"{nameof(BranchProductRoute)} endpoint";
+			public const string BranchProducts = $"{Ecommerce}/{RouterBase.prefix}{nameof(BranchProducts)}";
+			public const string GetUpdateDelete =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(BranchProducts)}/" + "{" + RouterBase.Id + "}";
+			public const string GetDetail =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(BranchProducts)}/detail/"
+				+ "{"
+				+ RouterBase.Id
+				+ "}";
+		}
+	}
 }

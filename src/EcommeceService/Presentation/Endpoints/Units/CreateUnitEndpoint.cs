@@ -1,4 +1,5 @@
-﻿using Application.Feature.Units.Command.Create;
+﻿using Application.Common.Auth;
+using Application.Feature.Units.Command.Create;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -14,7 +15,7 @@ namespace Presentation.Endpoints.Units
     {
         [HttpPost(UnitRoute.Units)]
         [SwaggerOperation(Tags = [UnitRoute.Tags], Summary = "Create a new unit")]
-        //[AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.user}")]
+        [AuthorizeBy]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             [FromBody] CreateUnitCommand request,
             CancellationToken cancellationToken = default

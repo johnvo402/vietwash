@@ -31,5 +31,7 @@ public static class ObjectPermission
     public const string customer = nameof(customer);
     public const string supplier = nameof(supplier);
 	public const string product = nameof(product);
+	public const string branchproduct = nameof(branchproduct);
+
 
 }

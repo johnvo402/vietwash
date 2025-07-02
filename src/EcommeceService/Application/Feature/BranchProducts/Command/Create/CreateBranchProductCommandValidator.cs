@@ -1,0 +1,75 @@
+﻿
+using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.UnitOfWorks;
+using Application.Feature.Common.Projections.BranchProducts;
+using Application.Feature.Common.Validators.BranchProducts;
+using Contracts.Common.Messages;
+using Domain.Aggregates.Products;
+using FluentValidation;
+
+namespace Application.Feature.BranchProducts.Command.Create
+{
+	public class CreateBranchProductCommandValidator : AbstractValidator<CreateBranchProductCommand>
+	{
+		private readonly IUnitOfWork unitOfWork;
+		private readonly IActionAccessorService accessorService;
+
+		public CreateBranchProductCommandValidator(IUnitOfWork unitOfWork, IActionAccessorService accessorService)
+		{
+			this.unitOfWork = unitOfWork;
+			this.accessorService = accessorService;
+			ApplyRules();
+		}
+
+		private void ApplyRules()
+		{
+			Include(new BranchProductValidator(unitOfWork, accessorService));
+			RuleFor(x => x.Sku)
+					.NotEmpty()
+					.WithState(x =>
+							Messager
+								.Create<BranchProduct>()
+								.Property(x => x.Sku)
+								.Message(MessageType.Null)
+								.Negative()
+								.Build()
+					)
+					.MustAsync(IsSkuExistsAsync)
+					.WithState(_ =>
+							Messager
+								.Create<BranchProduct>()
+								.Property(x => x.Sku)
+								.Message(MessageType.Found)
+								.Negative()
+								.Build()
+					);
+			RuleFor(x => x.Barcode)
+					.NotEmpty()
+					.WithState(x =>
+							Messager
+								.Create<BranchProduct>()
+								.Property(x => x.Barcode)
+								.Message(MessageType.Null)
+								.Negative()
+								.Build()
+					)
+					.MustAsync(IsBarcodeExistsAsync)
+					.WithState(_ =>
+							Messager
+								.Create<BranchProduct>()
+								.Property(x => x.Barcode)
+								.Message(MessageType.Found)
+								.Negative()
+								.Build()
+					);
+		}
+		private async Task<bool> IsSkuExistsAsync(string sku, CancellationToken cancellation)
+		{
+			return !await unitOfWork.Repository<BranchProduct>().AnyAsync(p => p.Sku == sku, cancellation);
+		}
+		private async Task<bool> IsBarcodeExistsAsync(string barcode, CancellationToken cancellation)
+		{
+			return !await unitOfWork.Repository<BranchProduct>().AnyAsync(p => p.Barcode == barcode, cancellation);
+		}
+	}
+}

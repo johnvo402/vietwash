@@ -1,3 +1,4 @@
+using Application.Common.Auth;
 using Application.Feature.Services.Command.Update;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
@@ -14,7 +15,7 @@ public class UpdateServiceEndpoint(ISender sender)
 {
     [HttpPut(Router.ServiceRoute.GetUpdateDelete)]
     [SwaggerOperation(Tags = [Router.ServiceRoute.Tags], Summary = "Update service")]
-    //[AuthorizeBy(permissions: $"{ActionPermission.update}:{ObjectPermission.service}")]
+    [AuthorizeBy]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         UpdateServiceCommand request,
         CancellationToken cancellationToken = default
