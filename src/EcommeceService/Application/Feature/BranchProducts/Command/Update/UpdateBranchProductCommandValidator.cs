@@ -24,7 +24,7 @@ namespace Application.Feature.BranchProducts.Command.Update
 		private void ApplyRules()
 		{
 			RuleFor(x => x.BranchProduct)
-				.SetValidator(new UpdateBranchProductValidator(unitOfWork, accessorService));
+				.SetValidator(new BranchProductValidator(unitOfWork, accessorService));
 			RuleFor(x => x.BranchProduct.Sku)
 					.NotEmpty()
 					.WithState(x =>
@@ -63,18 +63,6 @@ namespace Application.Feature.BranchProducts.Command.Update
 								.Negative()
 								.Build()
 					);
-			RuleForEach(x => x.BranchProduct.UnitRelations)
-					.MustAsync(async (command, unit, cancellationToken) =>
-						unit.Id == 0 // UnitRelation mới thì bỏ qua
-						|| await IsUnitRelationBelongToBranchProductAsync(command, unit.Id, cancellationToken)
-					)
-					.WithState(_ =>
-						Messager.Create<UnitRelation>()
-							.Property(x => x.Id)
-							.Message(MessageType.Found)
-							.Negative()
-							.Build()
-					);
 		}
 		private async Task<bool> IsSkuExistsAsync(UpdateBranchProductCommand command, string sku, CancellationToken cancellation)
 		{
@@ -84,11 +72,5 @@ namespace Application.Feature.BranchProducts.Command.Update
 		{
 			return !await unitOfWork.Repository<BranchProduct>().AnyAsync(bp => bp.Barcode == barcode && bp.Id != command.BranchProductId, cancellation);
 		}
-		private async Task<bool> IsUnitRelationBelongToBranchProductAsync(UpdateBranchProductCommand command, long unitRelationId, CancellationToken cancellation)
-		{
-			return await unitOfWork.Repository<UnitRelation>()
-				.AnyAsync(x => x.Id == unitRelationId && x.BranchProductId == command.BranchProductId, cancellation);
-		}
-
 	}
 }

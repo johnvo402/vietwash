@@ -3,7 +3,6 @@ using Application.Feature.Services.Command.Create;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
-using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
@@ -16,7 +15,7 @@ namespace Presentation.Endpoints.Services
     {
         [HttpPost(Router.ServiceRoute.Services)]
         [SwaggerOperation(Tags = [Router.ServiceRoute.Tags], Summary = "create Service")]
-        //[AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.service}")]
+        [AuthorizeBy]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             [FromBody] CreateServiceCommand request,
             CancellationToken cancellationToken = default

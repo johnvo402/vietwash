@@ -2,7 +2,7 @@
 
 namespace Domain.Aggregates.Accounts
 {
-    public class AccountContact : BaseEntity<long>
+    public class AccountContact : BaseEntity
     {
         public long AccountId { get; set; }
         public string PhoneNumber { get; set; } = default!;

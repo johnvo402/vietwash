@@ -4,7 +4,7 @@ using Domain.Aggregates.Funds.Enums;
 
 namespace Application.Features.Common.Projections.FundBehaviors
 {
-    public class FundBehaviorProjection : BaseResponse<long>
+    public class FundBehaviorProjection : BaseResponse
     {
         public object Name { get; set; } = default!;
 

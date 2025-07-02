@@ -14,7 +14,7 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
         IActionAccessorService accessorService
     )
     {
-        _ = Ulid.TryParse(accessorService.Id, out Ulid id);
+        _ = long.TryParse(accessorService.Id, out long id);
 
         RuleFor(x => x.User)
             .NotEmpty()
@@ -27,6 +27,5 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
                     .Build()
             )
             .SetValidator(new UserValidator(unitOfWork, accessorService)!);
-
     }
 }

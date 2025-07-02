@@ -17,7 +17,7 @@
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" />
     <PackageReference Include="Ardalis.GuardClauses" />
-    <PackageReference Include="Ardalis.Result.AspNetCore" />
+    <!-- <PackageReference Include="Ardalis.Result.AspNetCore" /> -->
     <PackageReference Include="CaseConverter" />
     <PackageReference Include="CSharpFunctionalExtensions" />
     <PackageReference Include="PuppeteerSharp" />

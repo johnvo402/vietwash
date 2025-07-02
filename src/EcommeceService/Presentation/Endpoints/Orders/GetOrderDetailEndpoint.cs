@@ -1,4 +1,5 @@
-﻿using Application.Feature.Orders.Queries.Detail;
+﻿using Application.Common.Auth;
+using Application.Feature.Orders.Queries.Detail;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -16,7 +17,7 @@ namespace Presentation.Endpoints.Orders
     {
         [HttpGet(Router.OrderRoute.GetUpdateDelete, Name = Router.OrderRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.OrderRoute.Tags], Summary = "Detail Order")]
-        // [AuthorizeBy(permissions: $"{ActionPermission.detail}:{ObjectPermission.order}")]
+        [AuthorizeBy]
         public override async Task<ActionResult<ApiResponse<GetOrderDetailResponse>>> HandleAsync(
             GetOrderDetailQuery request,
             CancellationToken cancellationToken = default

@@ -1,15 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Application.Common.Auth;
 using Application.Feature.Tariffs.Commands.Create;
-using Application.Feature.Tariffs.Commands.Delete;
-using Application.Feature.Tariffs.Commands.Update;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
-using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
@@ -22,7 +15,7 @@ namespace Presentation.Endpoints.Tariffs
     {
         [HttpPost(Router.TariffRoute.Tariffs)]
         [SwaggerOperation(Tags = [Router.TariffRoute.Tags], Summary = "Create Tariff")]
-        //[AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.tariff}")]
+        [AuthorizeBy]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             [FromBody] CreateTariffCommand request,
             CancellationToken cancellationToken = default

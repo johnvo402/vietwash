@@ -1,12 +1,13 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Shared.Kernel.Exceptions;
 
 namespace Shared.Kernel.Common;
 
 public abstract class DefaultEntity
 {
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
-    public long Id { get; set; }
-    public Ulid PublicId { get; set; }
+    public long Id { get; set; } = IdGenerator.NewId();
+    public Ulid PublicId { get; set; } = Ulid.NewUlid();
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 

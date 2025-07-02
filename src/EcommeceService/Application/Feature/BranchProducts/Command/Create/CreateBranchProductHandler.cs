@@ -1,17 +1,9 @@
 ﻿using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Feature.Services.Command.Create;
 using Contracts.ApiWrapper;
-using Contracts.Utils;
 using Domain.Aggregates.Products;
-using Domain.Aggregates.Services;
 using Mediator;
-using System;
-using System.Collections.Generic;
 using System.Data.Common;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Feature.BranchProducts.Command.Create
 {
@@ -21,12 +13,12 @@ namespace Application.Feature.BranchProducts.Command.Create
 	) : IRequestHandler<CreateBranchProductCommand, Result>
 	{
 		public async ValueTask<Result> Handle(
-			CreateBranchProductCommand request, 
+			CreateBranchProductCommand request,
 			CancellationToken cancellationToken
 		)
 		{
 			BranchProduct mappingBranchProduct = request.ToEntity();
-			string? Image = null;
+			string? image = null;
 			try
 			{
 				DbTransaction transaction = await unitOfWork.BeginTransactionAsync(
@@ -36,7 +28,7 @@ namespace Application.Feature.BranchProducts.Command.Create
 				BranchProduct branchProduct = await unitOfWork
 					.Repository<BranchProduct>()
 					.AddAsync(mappingBranchProduct, cancellationToken);
-				Image = branchProduct.Image;
+				image = branchProduct.Image;
 
 				await unitOfWork.SaveAsync(cancellationToken);
 				await unitOfWork.CommitAsync(cancellationToken);
@@ -44,9 +36,9 @@ namespace Application.Feature.BranchProducts.Command.Create
 			}
 			catch (Exception)
 			{
-				if (!string.IsNullOrEmpty(Image))
+				if (!string.IsNullOrEmpty(image))
 				{
-					await mediaUpdateService.DeleteAvatarAsync(Image);
+					await mediaUpdateService.DeleteAvatarAsync(image);
 				}
 				await unitOfWork.RollbackAsync(cancellationToken);
 				throw;

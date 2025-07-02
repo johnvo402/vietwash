@@ -1,7 +1,6 @@
 using Application.Common.Auth;
 using Application.Features.Accounts.Commands.ChangePassword;
 using Ardalis.ApiEndpoints;
-using Ardalis.Result.AspNetCore;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Mediator;

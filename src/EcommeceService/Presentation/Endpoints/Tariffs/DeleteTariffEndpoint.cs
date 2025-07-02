@@ -1,14 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Application.Common.Auth;
 using Application.Feature.Tariffs.Commands.Delete;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Contracts.Routers;
-using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
@@ -21,7 +16,7 @@ namespace Presentation.Endpoints.Tariffs
     {
         [HttpDelete(Router.TariffRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.TariffRoute.Tags], Summary = "Delete Tariff")]
-        //[AuthorizeBy(permissions: $"{ActionPermission.delete}:{ObjectPermission.tariff}")]
+        [AuthorizeBy]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             [FromRoute(Name = RouterBase.Id)] long tariffId,
             CancellationToken cancellationToken = default

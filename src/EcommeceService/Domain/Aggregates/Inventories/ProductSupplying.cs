@@ -4,7 +4,7 @@ using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Inventories
 {
-    public class ProductSupplying : DefaultEntity<long>
+    public class ProductSupplying : DefaultEntity
     {
         public long ProductId { get; set; } = default!;
         public long SupplierId { get; set; } = default!;

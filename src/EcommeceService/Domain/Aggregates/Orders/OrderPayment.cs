@@ -3,7 +3,7 @@ using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Orders
 {
-    public class OrderPayment : DefaultEntity<long>
+    public class OrderPayment : DefaultEntity
     {
         public long OrderId { get; set; } = default!;
         public PaymentMethod PaymentMethod { get; set; }

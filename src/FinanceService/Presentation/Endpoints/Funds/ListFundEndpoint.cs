@@ -4,7 +4,6 @@ using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
 using Contracts.RouteResults;
-using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
@@ -19,7 +18,7 @@ namespace Presentation.Endpoints.Funds
     {
         [HttpGet(Router.FundRoute.Funds)]
         [SwaggerOperation(Tags = [Router.FundRoute.Tags], Summary = "list Fund")]
-        //[AuthorizeBy(permissions: $"{ActionPermission.list}:{ObjectPermission.fund}")]
+        [AuthorizeBy]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<ListFundResponse>>>
         > HandleAsync(

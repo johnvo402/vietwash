@@ -1,4 +1,5 @@
-﻿using Application.Feature.Common.Projections.Services;
+﻿using Application.Feature.Common.Mapping.Units;
+using Application.Feature.Common.Projections.Services;
 using Contracts.Extensions;
 using Domain.Aggregates.Services;
 
@@ -8,7 +9,7 @@ namespace Application.Feature.Services.Command.Create
     {
         public static Service ToEntity(this ServiceModel model)
         {
-            return new Service(
+            var result = new Service(
                 name: model.Name,
                 status: model.Status,
                 categoryId: model.CategoryId,
@@ -16,19 +17,9 @@ namespace Application.Feature.Services.Command.Create
                 type: model.Type,
                 description: model.Description,
                 image: model.Image
-            )
-			{
-				UnitRelations = model.UnitRelations.ToListMapping(x => new UnitRelation
-				{
-					Name = x.Name,
-					BaseUnit = x.BaseUnit,
-					Price = x.Price,
-					Multiple = x.Multiple,
-					ProcessingTime = x.ProcessingTime,
-					Status = x.Status
-				})
-			};
-
+            ); 
+			result.UnitRelations = model.UnitRelations.ToListUnitRelation() ?? [];
+			return result;
 		}
     }
 }

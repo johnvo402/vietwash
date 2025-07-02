@@ -1,4 +1,5 @@
-﻿using Application.Feature.Suppliers.Command.Create;
+﻿using Application.Common.Auth;
+using Application.Feature.Suppliers.Command.Create;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -14,7 +15,7 @@ namespace Presentation.Endpoints.Suppliers
     {
         [HttpPost(Router.SupplierRoute.Suppliers)]
         [SwaggerOperation(Tags = [Router.SupplierRoute.Tags], Summary = "create Supplier")]
-        //[AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.supplier}")]
+        [AuthorizeBy]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             [FromBody] CreateSupplierCommand request,
             CancellationToken cancellationToken = default

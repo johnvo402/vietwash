@@ -10,8 +10,7 @@ namespace Domain.Aggregates.Products.Specifications
 		{
 			Query
 				.Where(x => x.Id == id && !x.Disable)
-				.Include(x => x.UnitRelations)
-				.AsNoTracking();
+				.Include(x => x.UnitRelations);
 		}
 	}
 }

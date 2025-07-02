@@ -1,4 +1,5 @@
-﻿using Application.Feature.Suppliers.Query.Detail;
+﻿using Application.Common.Auth;
+using Application.Feature.Suppliers.Query.Detail;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -19,7 +20,7 @@ namespace Presentation.Endpoints.Suppliers
             Tags = [Presentation.Routes.Router.SupplierRoute.Tags],
             Summary = "Detail supplier"
         )]
-        //[AuthorizeBy(permissions: $"{ActionPermission.detail}:{ObjectPermission.supplier}")]
+        [AuthorizeBy]
         public override async Task<
             ActionResult<ApiResponse<GetSupplierDetailResponse>>
         > HandleAsync(

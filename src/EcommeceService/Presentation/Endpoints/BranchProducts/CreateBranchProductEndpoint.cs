@@ -16,7 +16,7 @@ namespace Presentation.Endpoints.BranchProducts
 	{
 		[HttpPost(Router.BranchProductRoute.BranchProducts)]
 		[SwaggerOperation(Tags = [Router.BranchProductRoute.Tags], Summary = "Create branch product")]
-		[AuthorizeBy(permissions: $"{ActionPermission.create}:{ObjectPermission.branchproduct}")]
+		[AuthorizeBy]
 		public override async Task<ActionResult<ApiResponse>> HandleAsync(
 			[FromBody] CreateBranchProductCommand request,
 			CancellationToken cancellationToken = default

@@ -1,14 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Common.Validators.Tariffs;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Tariffs;
 using FluentValidation;
-using Contracts.Common.Messages;
-using Wangkanai.Extensions;
 
 namespace Application.Feature.Tariffs.Commands.Create
 {
@@ -16,7 +11,6 @@ namespace Application.Feature.Tariffs.Commands.Create
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly IActionAccessorService accessorService;
-
 
         public CreateTariffCommandValidator(
             IUnitOfWork unitOfWork,
@@ -27,6 +21,7 @@ namespace Application.Feature.Tariffs.Commands.Create
             this.accessorService = accessorService;
             ApplyRules();
         }
+
         private void ApplyRules()
         {
             Include(new TariffValidator(unitOfWork, accessorService));
@@ -38,7 +33,8 @@ namespace Application.Feature.Tariffs.Commands.Create
                         .Property(x => x.Name)
                         .Message(MessageType.Valid)
                         .Negative()
-                        .Build());
+                        .Build()
+                );
         }
     }
 }

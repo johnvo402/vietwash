@@ -5,7 +5,7 @@ using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Inventories;
 
-public class EquipmentSupplying : DefaultEntity<long>
+public class EquipmentSupplying : DefaultEntity
 {
     public string Name { get; set; } = default!;
     public string Code { get; set; } = default!;

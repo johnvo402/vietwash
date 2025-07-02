@@ -3,7 +3,7 @@ using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Accounts
 {
-    public class AccountActivity : BaseEntity<long>
+    public class AccountActivity : BaseEntity
     {
         public long AccountId { get; set; }
         public string? Ip { get; set; }

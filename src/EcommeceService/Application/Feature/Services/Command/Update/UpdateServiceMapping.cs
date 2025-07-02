@@ -1,53 +1,25 @@
-﻿using Application.Feature.Common.Projections.Services;
+﻿using Application.Feature.Common.Mapping.Units;
+using Application.Feature.Common.Projections.Services;
 using Domain.Aggregates.Services;
 
 namespace Application.Feature.Services.Command.Update
 {
     public static class UpdateServiceMapping
     {
-        public static void FromUpdateModel(this Service entity, UpdateServiceModel model)
+        public static void FromUpdateModel(this Service entity, ServiceModel model)
         {
-            entity.Update(
-                name: model.Name,
-                status: model.Status,
-                categoryId: model.CategoryId,
-                branchId: model.BranchId,
-                type: model.Type,
-                description: model.Description,
-                image: model.Image
-            );
-			if (model.UnitRelations?.Any() == true)
-			{
-				foreach (var item in model.UnitRelations)
-				{
-					var existingUnit = entity.UnitRelations.FirstOrDefault(u => u.Id == item.Id);
-					if (existingUnit != null)
-					{
-						existingUnit.Name = item.Name;
-						existingUnit.BaseUnit = item.BaseUnit;
-						existingUnit.Price = item.Price;
-						existingUnit.Multiple = item.Multiple;
-						existingUnit.ProcessingTime = item.ProcessingTime;
-						existingUnit.Status = item.Status;
-					}
-					else
-					{
-						entity.UnitRelations.Add(new UnitRelation
-						{
-							Name = item.Name,
-							BaseUnit = item.BaseUnit,
-							Price = item.Price,
-							Multiple = item.Multiple,
-							ProcessingTime = item.ProcessingTime,
-							Status = item.Status,
-							ServiceId = entity.Id
-						});
-					}
-
-				}
-
-			}
-
-		}
+			entity.Update(
+				name: model.Name,
+				status: model.Status,
+				categoryId: model.CategoryId,
+				branchId: model.BranchId,
+				type: model.Type,
+				description: model.Description,
+				image: model.Image
+			);
+			entity.UnitRelations = model.UnitRelations.ToListUnitRelation() ?? [];
 		}
 	}
+}
+
+

@@ -13,6 +13,6 @@ namespace Application.Feature.BranchProducts.Command.Update
 		public long BranchProductId { get; set; } = default!;
 
 		[FromBody]
-		public UpdateBranchProductModel BranchProduct { get; set; } = default!;
+		public BranchProductModel BranchProduct { get; set; } = default!;
 	}
 }

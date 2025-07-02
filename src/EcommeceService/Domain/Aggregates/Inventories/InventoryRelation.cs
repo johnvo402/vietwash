@@ -7,7 +7,7 @@ using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Inventories
 {
-    public class InventoryRelation : DefaultEntity<long>
+    public class InventoryRelation : DefaultEntity
     {
         public long? InventoryDocumentId { get; set; }
         public long? InventoryInvoiceId { get; set; }
