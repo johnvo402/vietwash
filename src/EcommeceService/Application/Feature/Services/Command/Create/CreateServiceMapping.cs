@@ -17,9 +17,9 @@ namespace Application.Feature.Services.Command.Create
                 type: model.Type,
                 description: model.Description,
                 image: model.Image
-            ); 
-			result.UnitRelations = model.UnitRelations.ToListUnitRelation() ?? [];
-			return result;
-		}
+            );
+            result.UnitRelations = model.UnitRelations.ToListUnitRelation() ?? [];
+            return result;
+        }
     }
 }

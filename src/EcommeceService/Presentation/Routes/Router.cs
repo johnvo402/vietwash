@@ -17,6 +17,8 @@ namespace Presentation.Routes
                 + "{"
                 + RouterBase.Id
                 + "}";
+            public const string TopService =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Services)}/{nameof(TopService)}";
         }
 
         public static class TariffRoute

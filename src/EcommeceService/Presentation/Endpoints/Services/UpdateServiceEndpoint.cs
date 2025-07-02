@@ -1,4 +1,3 @@
-using Application.Common.Auth;
 using Application.Feature.Services.Command.Update;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;

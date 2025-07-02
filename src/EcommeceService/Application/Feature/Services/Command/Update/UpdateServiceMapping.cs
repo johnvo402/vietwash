@@ -8,18 +8,18 @@ namespace Application.Feature.Services.Command.Update
     {
         public static void FromUpdateModel(this Service entity, ServiceModel model)
         {
-			entity.Update(
-				name: model.Name,
-				status: model.Status,
-				categoryId: model.CategoryId,
-				branchId: model.BranchId,
-				type: model.Type,
-				description: model.Description,
-				image: model.Image
-			);
-			entity.UnitRelations = model.UnitRelations.ToListUnitRelation() ?? [];
-		}
-	}
+            entity.Update(
+                name: model.Name,
+                status: model.Status,
+                categoryId: model.CategoryId,
+                branchId: model.BranchId,
+                type: model.Type,
+                description: model.Description,
+                image: model.Image
+            );
+            entity.UnitRelations = model.UnitRelations.ToListUnitRelation() ?? [];
+        }
+    }
 }
 
 
