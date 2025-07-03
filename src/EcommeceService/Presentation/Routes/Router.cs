@@ -130,5 +130,18 @@ namespace Presentation.Routes
 				+ RouterBase.Id
 				+ "}";
 		}
+
+		public static class EquipmentRoute
+		{
+			public const string Tags = $"{nameof(EquipmentRoute)} endpoint";
+			public const string Equipments = $"{Ecommerce}/{RouterBase.prefix}{nameof(Equipments)}";
+			public const string GetUpdateDelete =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(Equipments)}/" + "{" + RouterBase.Id + "}";
+			public const string GetDetail =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(Equipments)}/detail/"
+				+ "{"
+				+ RouterBase.Id
+				+ "}";
+		}
 	}
 }
