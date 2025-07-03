@@ -10,10 +10,16 @@ namespace Application.Feature.Services.Queries.TopService
             return group => new TopServiceResponse
             {
                 Id = group.Key,
-                Name = group.First().Service.Name,
-                Description = group.First().Service.Description,
-                Image = group.First().Service.Image,
+                Name = group.Select(x => x.Service.Name).FirstOrDefault() ?? string.Empty,
+                Description =
+                    group.Select(x => x.Service.Description).FirstOrDefault() ?? string.Empty,
+                Image = group.Select(x => x.Service.Image).FirstOrDefault(),
                 TotalUsed = group.Sum(x => x.Quantity),
+                BasePrice = group
+                    .SelectMany(x => x.Service.UnitRelations)
+                    .Where(x => x.BaseUnit)
+                    .Select(x => x.Price)
+                    .FirstOrDefault(),
             };
         }
     }

@@ -19,10 +19,13 @@ namespace Application.Feature.Services.Queries.TopService
                 .Repository<Order>()
                 .QueryAsync()
                 .SelectMany(order => order.OrderItems)
+                .Include(x => x.Service)
+                .ThenInclude(x => x.UnitRelations)
                 .GroupBy(x => x.ServiceId)
                 .Select(TopServiceMapping.Selector())
                 .OrderByDescending(x => x.TotalUsed)
                 .Take(10)
+                .AsSplitQuery()
                 .ToListAsync(cancellationToken);
 
             return Result<IEnumerable<TopServiceResponse>>.Success(query);

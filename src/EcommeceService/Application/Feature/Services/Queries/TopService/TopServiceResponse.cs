@@ -11,6 +11,8 @@ namespace Application.Feature.Services.Queries.TopService
         [File]
         public string? Image { get; set; }
 
+        public decimal BasePrice { get; set; }
+
         public int TotalUsed { get; set; }
     }
 }
