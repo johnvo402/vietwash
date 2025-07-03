@@ -3,7 +3,7 @@ using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Services
 {
-    public class Unit : BaseEntity
+    public class Unit : BaseEntity<long>
     {
         public string Name { get; set; } = default!;
         public ActivationStatus Status { get; set; } = default!;

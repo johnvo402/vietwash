@@ -9,7 +9,7 @@ using Shared.Kernel.Common;
 
 namespace Application.Features.Common.Projections.Warehouses
 {
-    public class WarehouseProjection : BaseEntity
+    public class WarehouseProjection : BaseEntity<long>
     {
         public string Name { get; set; } = default!;
         public string Code { get; set; } = default!;

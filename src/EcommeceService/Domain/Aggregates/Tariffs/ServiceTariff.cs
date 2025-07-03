@@ -3,7 +3,7 @@ using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Tariffs
 {
-    public class ServiceTariff : BaseEntity
+    public class ServiceTariff : BaseEntity<long>
     {
         public long TariffId { get; set; } = default!;
         public long ServiceId = default!;

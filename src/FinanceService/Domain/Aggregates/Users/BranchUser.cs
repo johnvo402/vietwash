@@ -2,7 +2,7 @@ using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Users
 {
-    public class BranchUser : BaseEntity
+    public class BranchUser : BaseEntity<long>
     {
         public long UserId { get; set; }
         public long BranchId { get; set; }

@@ -9,7 +9,7 @@ using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Warehouses
 {
-    public class Warehouse : BaseEntity
+    public class Warehouse : BaseEntity<long>
     {
         public string Name { get; set; } = default!;
         public string Code { get; set; } = default!;

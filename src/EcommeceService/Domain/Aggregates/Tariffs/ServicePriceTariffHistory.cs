@@ -1,14 +1,9 @@
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Domain.Aggregates.Services;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Tariffs
 {
-    public class ServicePriceTariffHistory : BaseEntity
+    public class ServicePriceTariffHistory : BaseEntity<long>
     {
         public long ServiceId { get; set; } = default!;
         public long TariffId { get; set; } = default!;
@@ -19,4 +14,3 @@ namespace Domain.Aggregates.Tariffs
         public Tariff Tariff { get; set; } = default!;
     }
 }
-

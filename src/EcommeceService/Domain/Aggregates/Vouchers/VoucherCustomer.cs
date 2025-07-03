@@ -3,7 +3,7 @@ using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Vouchers
 {
-    public class VoucherCustomer : DefaultEntity
+    public class VoucherCustomer : DefaultEntity<long>
     {
         public long CustomerId { get; set; } = default!;
         public long VoucherId { get; set; } = default!;

@@ -14,8 +14,20 @@ public abstract class DefaultEntity
 public abstract class DefaultEntity<T>
 {
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
-    public T Id { get; set; } = default!;
+    public T Id { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+
+    protected DefaultEntity()
+    {
+        if (typeof(T) == typeof(long))
+        {
+            Id = (T)(object)IdGenerator.NewId();
+        }
+        else
+        {
+            Id = default!;
+        }
+    }
 }
 
 public abstract class BaseEntity : DefaultEntity, IAuditable
