@@ -1,7 +1,7 @@
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Orders.Enums;
-using Domain.Aggregates.Orders.Events;
 using Domain.Aggregates.Users;
+using Domain.Events;
 using Mediator;
 using Shared.Kernel.Common;
 
@@ -31,7 +31,7 @@ namespace Domain.Aggregates.Orders
         {
             switch (domainEvent)
             {
-                case UpdateStatusOrderEvent:
+                case CreateFundEvent:
                     return true;
                 default:
                     return false;
@@ -128,34 +128,40 @@ namespace Domain.Aggregates.Orders
                 case OrderStatus.Completed:
                     Status = OrderStatus.Completed;
                     Emit(
-                        new UpdateStatusOrderEvent()
+                        new CreateFundEvent()
                         {
                             TypeId = "income",
-                            OrderId = Id,
+                            ReferenceId = Id,
                             Amount = OrderPayments.Sum(x => x.Amount),
                             PaymentMethod = OrderPayments.FirstOrDefault()!.PaymentMethod,
-                            Code = Code,
                             BranchId = BranchId,
-                            CustomerId = CustomerId,
+                            ObjectId = CustomerId,
                             BehaviorId = 1,
-                            PublicId = PublicId,
+                            Metadata = new Dictionary<string, object>
+                            {
+                                ["code"] = Code,
+                                ["publicId"] = PublicId.ToString(),
+                            },
                         }
                     );
                     break;
                 case OrderStatus.Cancelled:
                     Status = OrderStatus.Cancelled;
                     Emit(
-                        new UpdateStatusOrderEvent()
+                        new CreateFundEvent()
                         {
-                            TypeId = "spend",
-                            OrderId = Id,
+                            TypeId = "Spend",
+                            ReferenceId = Id,
                             Amount = OrderPayments.Sum(x => x.Amount),
                             PaymentMethod = OrderPayments.FirstOrDefault()!.PaymentMethod,
-                            Code = Code,
                             BranchId = BranchId,
-                            CustomerId = CustomerId,
+                            ObjectId = CustomerId,
                             BehaviorId = 2,
-                            PublicId = PublicId,
+                            Metadata = new Dictionary<string, object>
+                            {
+                                ["code"] = Code,
+                                ["publicId"] = PublicId.ToString(),
+                            },
                         }
                     );
                     break;

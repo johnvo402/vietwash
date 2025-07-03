@@ -174,11 +174,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("position");
 
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
-
                     b.Property<byte>("Type")
                         .HasColumnType("smallint")
                         .HasColumnName("type");
@@ -261,11 +256,6 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("province_code");
-
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
 
                     b.Property<string>("Street")
                         .HasColumnType("text")
@@ -372,11 +362,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("family_id");
 
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
-
                     b.Property<string>("Token")
                         .HasColumnType("text")
                         .HasColumnName("token");
@@ -424,11 +409,6 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("created_by");
-
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")

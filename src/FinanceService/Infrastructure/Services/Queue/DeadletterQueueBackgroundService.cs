@@ -120,7 +120,7 @@ public class DeadletterPubSubBackgroundService : BackgroundService
             },
             "CreateAccountEvent"
         );
-        pubSubService.Subscribe<UpdateStatusOrderEventPayload>(
+        pubSubService.Subscribe<CreateFundEventPayload>(
             async message =>
             {
                 // Limit concurrent tasks
@@ -177,7 +177,7 @@ public class DeadletterPubSubBackgroundService : BackgroundService
                     _logger.Error(ex, "Error cleaning up tasks.");
                 }
             },
-            "UpdateStatusOrderEvent"
+            "CreateFundEvent"
         );
         pubSubService.Subscribe<BranchCreateEvent>(
             async message =>

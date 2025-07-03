@@ -4,7 +4,7 @@ using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Inventories
 {
-    public class ProductSupplying : DefaultEntity
+    public class ProductSupplying : DefaultEntity<long>
     {
         public long ProductId { get; set; } = default!;
         public long SupplierId { get; set; } = default!;
@@ -13,12 +13,10 @@ namespace Domain.Aggregates.Inventories
         public string LotNumber { get; set; } = default!;
         public string Sku { get; set; } = default!;
         public decimal Price { get; set; } = default!;
-        public short Type { get; set; } = default!;
         public long UnitRelationId { get; set; } = default!;
-        public DateTimeOffset ExperyDate { get; set; } = DateTimeOffset.UtcNow;
-        public DateTimeOffset ArriveAt { get; set; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset? ExpiryDate { get; set; }
         public UnitRelation UnitRelation { get; set; } = default!;
-        public Supplier Suppliers { get; set; } = default!;
-        public InventoryDocument InventoryDocuments { get; set; } = default!;
+        public Supplier Supplier { get; set; } = default!;
+        public InventoryDocument InventoryDocument { get; set; } = default!;
     }
 }

@@ -82,11 +82,11 @@ public class PubSubBackgroundService : BackgroundService
             "CreateAccountEvent"
         );
 
-        _pubSubService.Subscribe<UpdateStatusOrderEventPayload>(
+        _pubSubService.Subscribe<CreateFundEventPayload>(
             async message =>
             {
                 _logger.Information(
-                    "PubSubBackgroundService started, subscribing to CreateAccountEvent."
+                    "PubSubBackgroundService started, subscribing to CreateFundEvent."
                 );
 
                 using var scope = _serviceProvider.CreateScope();
@@ -103,17 +103,17 @@ public class PubSubBackgroundService : BackgroundService
                     sender,
                     pubSubLogService,
                     deadLetterPubSub,
-                    "UpdateStatusOrderEvent",
+                    "CreateFundEvent",
                     stoppingToken
                 );
             },
-            "UpdateStatusOrderEvent"
+            "CreateFundEvent"
         );
         _pubSubService.Subscribe<BranchCreateEvent>(
             async message =>
             {
                 _logger.Information(
-                    "PubSubBackgroundService started, subscribing to CreateAccountEvent."
+                    "PubSubBackgroundService started, subscribing to BranchCreateEvent."
                 );
 
                 using var scope = _serviceProvider.CreateScope();

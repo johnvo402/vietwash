@@ -1,3 +1,4 @@
+using Contracts.Utils;
 using Domain.Aggregates.Funds;
 using Domain.Aggregates.Funds.Enums;
 
@@ -5,8 +6,9 @@ namespace Application.Features.Funds.Events
 {
     public static class UpdateStatusOrderEventMapping
     {
-        public static Fund ToFund(this UpdateStatusOrderEventPayload command, string code)
+        public static Fund ToFund(this CreateFundEventPayload command)
         {
+            string code = Generator.GenerateCode("FU-", 6);
             return new Fund(
                 code: code,
                 name: null, // Assuming CreateFundCommand has a Name property
@@ -18,13 +20,9 @@ namespace Application.Features.Funds.Events
                 paymentMethod: command.PaymentMethod,
                 branchId: command.BranchId,
                 note: null, // Assuming no note is provided in UpdateStatusOrderEvent
-                referenceId: command.OrderId, // TODO: Replace 0 with the actual referenceId as required
-                objectId: command.CustomerId, // Provide a value or null for objectId as required
-                metadata: new Dictionary<string, object>
-                {
-                    ["code"] = command.Code,
-                    ["publicId"] = command.PublicId.ToString(),
-                } // Provide a value or null for metadata as required
+                referenceId: command.ReferenceId, // TODO: Replace 0 with the actual referenceId as required
+                objectId: command.ObjectId, // Provide a value or null for objectId as required
+                metadata: command.Metadata // Provide a value or null for metadata as required
             );
         }
     }

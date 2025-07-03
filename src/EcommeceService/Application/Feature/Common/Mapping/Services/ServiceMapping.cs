@@ -1,4 +1,15 @@
-﻿namespace Application.Feature.Common.Mapping.Services
+﻿using Application.Feature.Common.Projections.Suppliers;
+using Domain.Aggregates.Suppliers;
+
+namespace Application.Feature.Common.Mapping.Services
 {
-    public class ServiceMapping { }
+    public static class ServiceMapping
+    {
+        public static SupplierProjection ToSupplierProjection(this Supplier supplier)
+        {
+            var response = new SupplierProjection();
+            response.MappingFrom(supplier);
+            return response;
+        }
+    }
 }

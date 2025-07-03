@@ -1,6 +1,5 @@
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Dtos.Responses;
-using Contracts.Utils;
 using Domain.Aggregates.Funds;
 using Domain.Aggregates.Funds.Enums;
 using Mediator;
@@ -15,8 +14,7 @@ namespace Application.Features.Funds.Events
             CancellationToken cancellationToken
         )
         {
-            string code = Generator.GenerateCode("FU-", 6);
-            Fund fund = request.Payload!.ToFund(code);
+            Fund fund = request.Payload!.ToFund();
 
             if (fund.Status == FundStatus.Confirmed)
             {

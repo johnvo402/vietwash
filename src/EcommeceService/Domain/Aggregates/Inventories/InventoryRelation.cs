@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Shared.Kernel.Common;
+﻿using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Inventories
 {
-    public class InventoryRelation : DefaultEntity
+    public class InventoryRelation : DefaultEntity<long>
     {
         public long? InventoryDocumentId { get; set; }
         public long? InventoryInvoiceId { get; set; }

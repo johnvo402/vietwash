@@ -1,18 +1,17 @@
 ﻿using Domain.Aggregates.Orders.Enums;
 using Mediator;
 
-namespace Domain.Aggregates.Orders.Events
+namespace Domain.Events
 {
-    public class UpdateStatusOrderEvent : INotification
+    public class CreateFundEvent : INotification
     {
         public string TypeId { get; set; } = default!;
         public long BehaviorId { get; set; } = default!;
-        public long OrderId { get; set; } = default!;
-        public Ulid PublicId { get; set; } = default!;
+        public long ReferenceId { get; set; } = default!;
         public decimal Amount { get; set; } = default!;
         public PaymentMethod PaymentMethod { get; set; } = default!;
-        public string? Code { get; set; }
+        public Dictionary<string, object>? Metadata { get; set; }
         public long BranchId { get; set; } = default!;
-        public long? CustomerId { get; set; }
+        public long? ObjectId { get; set; }
     }
 }

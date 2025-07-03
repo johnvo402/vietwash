@@ -1,29 +1,29 @@
 ﻿using Application.Common.Interfaces.Services.DistributedCache;
-using Domain.Aggregates.Orders.Events;
 using Domain.Aggregates.PubSubLogs;
+using Domain.Events;
 using Mediator;
 using Serilog;
 
 namespace Application.Common.HandleEventDomains
 {
-    public class UpdateStatusOrderEventHandler(ILogger logger, IPubSubFactory queueFactory)
-        : INotificationHandler<UpdateStatusOrderEvent>
+    public class CreateFundEventHandler(ILogger logger, IPubSubFactory queueFactory)
+        : INotificationHandler<CreateFundEvent>
     {
         public async ValueTask Handle(
-            UpdateStatusOrderEvent notification,
+            CreateFundEvent notification,
             CancellationToken cancellationToken
         )
         {
-            logger.Information("UpdateStatusOrderEventHandler: {@Id}", notification.OrderId);
+            logger.Information("CreateFundEventHandler: {@Id}", notification.ReferenceId);
 
             var check = await queueFactory
                 .GetPubSub(PubSubType.Origin)
-                .PublishAsync(notification, "UpdateStatusOrderEvent");
+                .PublishAsync(notification, "CreateFundEvent");
             if (!check)
             {
                 logger.Error(
-                    "UpdateStatusOrderEventHandler: {@User} enqueue failed",
-                    notification.OrderId
+                    "CreateFundEventHandler: {@User} enqueue failed",
+                    notification.ReferenceId
                 );
             }
 

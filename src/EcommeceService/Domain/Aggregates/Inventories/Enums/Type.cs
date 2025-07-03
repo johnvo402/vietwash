@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Domain.Aggregates.Inventories.Enums
+﻿namespace Domain.Aggregates.Inventories.Enums
 {
-    public enum Type
+    public enum InventoryType
     {
+        Import = 1,
+        Export = 2,
+    }
+
+    public enum InventoryRequestType
+    {
+        Check = 1,
+        Transfer = 2,
     }
 }

@@ -15,7 +15,7 @@ namespace Infrastructure.Data.Configurations
                 .WithMany(x => x.ProductSupplyings)
                 .HasForeignKey(x => x.UnitRelationId);
             builder
-                .HasOne(x => x.Suppliers)
+                .HasOne(x => x.Supplier)
                 .WithMany(x => x.ProductSupplyings)
                 .HasForeignKey(x => x.SupplierId);
         }

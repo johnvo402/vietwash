@@ -157,11 +157,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("manager");
 
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
-
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -273,11 +268,6 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
-
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
 
                     b.Property<int>("ReorderLevel")
                         .HasColumnType("integer")
