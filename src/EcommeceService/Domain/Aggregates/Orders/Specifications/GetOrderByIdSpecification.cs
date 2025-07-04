@@ -10,6 +10,7 @@ namespace Domain.Aggregates.Orders.Specifications
             Query
                 .Where(x => x.Id == id)
                 .Include(x => x.OrderItems)
+                .ThenInclude(x => x.Service)
                 .Include(x => x.Customer)
                 .Include(x => x.OrderPayments)
                 .AsSplitQuery();

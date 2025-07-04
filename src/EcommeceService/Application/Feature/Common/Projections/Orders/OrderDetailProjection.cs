@@ -1,4 +1,5 @@
-﻿using Application.Feature.Common.Mapping.Orders;
+﻿using Application.Common.Security;
+using Application.Feature.Common.Mapping.Orders;
 using Contracts.Extensions;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
@@ -40,6 +41,7 @@ namespace Application.Feature.Common.Projections.Orders
                     Id = item.Id,
                     OrderId = item.OrderId,
                     ServiceId = item.ServiceId,
+                    ServiceImage = item.Service.Image,
                     UnitRelationId = item.UnitRelationId,
                     Price = item.Price,
                     Quantity = item.Quantity,
@@ -69,6 +71,9 @@ namespace Application.Feature.Common.Projections.Orders
         public long Id { get; set; }
         public long OrderId { get; set; }
         public long ServiceId { get; set; }
+
+        [File]
+        public string? ServiceImage { get; set; }
         public long UnitRelationId { get; set; }
         public decimal Price { get; set; }
         public int Quantity { get; set; }

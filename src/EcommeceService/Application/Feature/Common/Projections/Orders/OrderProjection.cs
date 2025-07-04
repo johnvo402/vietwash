@@ -1,6 +1,5 @@
 using Application.Feature.Services.Queries.Detail;
 using Contracts.Application.Common;
-using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
 
 namespace Application.Feature.Common.Projections.Orders
