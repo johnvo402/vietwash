@@ -19,7 +19,7 @@ public class BranchAccountCommandHandler(IUnitOfWork unitOfWork)
         var response = await unitOfWork
             .DynamicReadOnlyRepository<Account>()
             .ListAsync(
-                new ListAccountSpecification([ROLE.ADMIN]),
+                new ListAccountSpecification([ROLE.ADMIN, ROLE.CUSTOMER]),
                 new QueryParamRequest(),
                 cancellationToken: cancellationToken
             );
