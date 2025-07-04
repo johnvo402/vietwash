@@ -6,7 +6,6 @@ EXPOSE 8080
 # Copy the published application from the workflow
 FROM base AS final
 WORKDIR /app
-COPY src/FinanceService/Presentation/app/publish .
-COPY src/FinanceService/Presentation/Resources/Translations Resources/Translations
+COPY src/FinanceService/app/publish .
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 ENTRYPOINT ["dotnet", "Presentation.dll"]

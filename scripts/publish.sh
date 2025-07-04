@@ -5,7 +5,7 @@ echo "Starting service publication..."
 publish_service() {
     local service_name=$1
     local service_path=$2
-    local output_path="app/publish"
+    local output_path="../app/publish"
 
     echo "--------------------------------------"
     echo "Publishing $service_name..."

@@ -5,6 +5,7 @@ using Contracts.Common.QueryStringProcessing;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Specifications;
+using Infrastructure.Constants;
 using Mediator;
 
 namespace Application.Feature.Orders.Queries.List
@@ -25,6 +26,11 @@ namespace Application.Feature.Orders.Queries.List
             }
 
             var listBranchUser = currentUser.Session!.Branches!.ToList();
+            long? customerId = null;
+            if (currentUser.Session.Role == ROLE.CUSTOMER)
+            {
+                customerId = currentUser.Id;
+            }
             var response = await unitOfWork
                 .DynamicReadOnlyRepository<Order>(false)
                 .CursorPagedListAsync(
@@ -32,7 +38,8 @@ namespace Application.Feature.Orders.Queries.List
                         query.From,
                         query.To,
                         query.BranchId,
-                        listBranchUser
+                        listBranchUser,
+                        customerId: customerId
                     ),
                     query,
                     ListOrderMapping.Selector(),

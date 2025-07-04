@@ -12,7 +12,8 @@ namespace Domain.Aggregates.Orders.Specifications
             string? from,
             string? to,
             string? branchId,
-            List<string> branchs
+            List<string> branchs,
+            long? customerId = null
         )
         {
             Expression<Func<Order, bool>> criteria = x => branchs.Contains(x.BranchId.ToString());
@@ -25,6 +26,10 @@ namespace Domain.Aggregates.Orders.Specifications
             if (!string.IsNullOrEmpty(branchId) && long.TryParse(branchId, out var bid))
             {
                 criteria = criteria.And(x => x.BranchId == bid);
+            }
+            if (customerId != null)
+            {
+                criteria = criteria.And(x => x.CustomerId == customerId);
             }
 
             Query

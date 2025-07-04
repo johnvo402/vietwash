@@ -541,27 +541,96 @@ public class DbInitializer
 
         for (int i = 1; i <= 20; i++)
         {
-            // Randomly select Category and Branch
+            // Chọn ngẫu nhiên Category, Branch và Unit
             var category = categories[random.Next(categories.Count)];
             var branch = branches[random.Next(branches.Count)];
             var unit = units[random.Next(units.Count)];
             var type = random.Next(2) == 0 ? TypeStatus.SingleService : TypeStatus.Combo;
 
-            // Generate Service
+            // Định nghĩa tên dịch vụ và mô tả dựa trên loại dịch vụ
+            string serviceName;
+            string description;
+            if (type == TypeStatus.SingleService)
+            {
+                string[] singleServiceNames =
+                {
+                    "Giặt và Gấp",
+                    "Giặt Hấp",
+                    "Ủi Áo Sơ Mi",
+                    "Giặt Chăn Ga",
+                    "Giặt Quần Áo Mỏng",
+                    "Tẩy Vết Bẩn",
+                    "Dịch Vụ Ủi",
+                    "Giặt Rèm Cửa",
+                    "Giặt Đồng Phục",
+                    "Giặt Thảm",
+                };
+                string[] singleServiceDescriptions =
+                {
+                    "Giặt và gấp quần áo thông thường chuyên nghiệp.",
+                    "Giặt hấp cho vải tinh xảo và đặc biệt.",
+                    "Ủi áo sơ mi để có vẻ ngoài sắc nét.",
+                    "Làm sạch kỹ lưỡng cho chăn, ga, gối.",
+                    "Giặt nhẹ nhàng cho quần áo mỏng để bảo vệ chất lượng.",
+                    "Xử lý vết bẩn cứng đầu trên quần áo.",
+                    "Ủi quần áo cẩn thận để không còn nếp nhăn.",
+                    "Làm sạch chuyên sâu cho rèm cửa.",
+                    "Giặt và ủi đồng phục chuyên nghiệp.",
+                    "Làm sạch sâu cho thảm trải sàn.",
+                };
+                int index = (i - 1) % singleServiceNames.Length;
+                serviceName = singleServiceNames[index];
+                description = singleServiceDescriptions[index];
+            }
+            else
+            {
+                string[] comboServiceNames =
+                {
+                    "Gói Giặt và Ủi",
+                    "Gói Giặt Hấp và Ủi",
+                    "Gói Giặt Toàn Diện",
+                    "Gói Chăn Ga và Khăn",
+                    "Gói Giặt Gia Đình",
+                    "Gói Giặt Nhanh",
+                    "Gói Giặt Hấp Cao Cấp",
+                    "Gói Rèm và Chăn Ga",
+                    "Gói Đồng Phục và Áo Sơ Mi",
+                    "Gói Thảm và Nội Thất",
+                };
+                string[] comboServiceDescriptions =
+                {
+                    "Dịch vụ giặt và ủi toàn diện cho quần áo.",
+                    "Giặt hấp và ủi cho vẻ ngoài chuyên nghiệp.",
+                    "Dịch vụ giặt toàn bộ đồ dùng trong nhà.",
+                    "Làm sạch chăn ga và khăn trong một gói.",
+                    "Gói giặt cho số lượng lớn của gia đình.",
+                    "Giặt và ủi nhanh chóng cho nhu cầu gấp.",
+                    "Giặt hấp cao cấp cho quần áo cao cấp.",
+                    "Làm sạch kết hợp cho rèm và chăn ga.",
+                    "Làm sạch chuyên sâu cho đồng phục và áo sơ mi.",
+                    "Làm sạch sâu cho thảm và nội thất bọc vải.",
+                };
+                int index = (i - 1) % comboServiceNames.Length;
+                serviceName = comboServiceNames[index];
+                description = comboServiceDescriptions[index];
+            }
+
+            // Tạo dịch vụ
             var service = new Service(
                 categoryId: category.Id,
                 branchId: branch,
-                name: type == TypeStatus.SingleService ? $"Service {i}" : $"Combo {i}",
+                name: serviceName,
                 type: type,
                 status: ActivationStatus.Active,
-                description: $"Description for service {i}",
+                description: description,
                 image: null
             )
             {
                 Disable = false,
             };
             service.Slug = Generator.GenerateSlug(service.Name);
-            // Add UnitRelation
+
+            // Thêm UnitRelation
             var unitRelation = new UnitRelation
             {
                 Name = unit.Name,
@@ -575,10 +644,8 @@ public class DbInitializer
 
             services.Add(service);
         }
-        foreach (var service1 in services)
-        {
-            await unitOfWork.Repository<Service>().AddAsync(service1, cancellationToken);
-            await unitOfWork.SaveAsync(cancellationToken);
-        }
+
+        await unitOfWork.Repository<Service>().AddRangeAsync(services, cancellationToken);
+        await unitOfWork.SaveAsync(cancellationToken);
     }
 }
