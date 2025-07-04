@@ -1,22 +1,18 @@
 using System.Text.RegularExpressions;
 using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Projections.Accounts;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Accounts;
 using FluentValidation;
-using Contracts.Common.Messages;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Common.Validators.Accounts;
 
 public partial class AccountValidator : AbstractValidator<AccountModel>
 {
-    private readonly IUnitOfWork unitOfWork;
     private readonly IActionAccessorService accessorService;
 
-    public AccountValidator(IUnitOfWork unitOfWork, IActionAccessorService accessorService)
+    public AccountValidator(IActionAccessorService accessorService)
     {
-        this.unitOfWork = unitOfWork;
         this.accessorService = accessorService;
         ApplyRules();
     }

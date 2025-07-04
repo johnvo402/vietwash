@@ -27,7 +27,7 @@ public partial class CreateAccountCommandValidator : AbstractValidator<CreateAcc
 
     private void ApplyRules()
     {
-        Include(new AccountValidator(unitOfWork, accessorService));
+        Include(new AccountValidator(accessorService));
         _ = long.TryParse(accessorService.Id, out long id);
         RuleFor(x => x.Email)
             .NotEmpty()

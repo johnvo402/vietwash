@@ -7,11 +7,8 @@ namespace Application.Features.Accounts.Commands.Profiles;
 
 public class UpdateAccountProfileCommandValidator : AbstractValidator<UpdateAccountProfileCommand>
 {
-    public UpdateAccountProfileCommandValidator(
-        IUnitOfWork unitOfWork,
-        IActionAccessorService accessorService
-    )
+    public UpdateAccountProfileCommandValidator(IActionAccessorService accessorService)
     {
-        Include(new AccountValidator(unitOfWork, accessorService));
+        Include(new AccountValidator(accessorService));
     }
 }
