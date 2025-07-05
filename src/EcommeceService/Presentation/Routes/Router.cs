@@ -1,4 +1,5 @@
 ﻿using Contracts.Routers;
+using Domain.Aggregates.Equipments;
 
 namespace Presentation.Routes
 {
@@ -27,7 +28,12 @@ namespace Presentation.Routes
             public const string Tariffs = $"{Ecommerce}/{RouterBase.prefix}{nameof(Tariffs)}";
             public const string GetUpdateDelete =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Tariffs)}/" + "{" + RouterBase.Id + "}";
-        }
+			public const string GetDetail =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(Tariffs)}/detail/"
+				+ "{"
+				+ RouterBase.Id
+				+ "}";
+		}
 
         public static class UnitRoute
         {
