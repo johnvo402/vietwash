@@ -19,6 +19,9 @@ namespace Application.Feature.BranchProducts.Queries.List
                 CategoryId = products.CategoryId,
                 Description = products.Description,
                 BranchId = products.BranchId,
+                Sku = products.Sku,
+                Barcode = products.Barcode,
+                CapitalPrice = products.CapitalPrice,
 
                 Category = products.Category.ToCategoryService(),
                 UnitRelations = products
