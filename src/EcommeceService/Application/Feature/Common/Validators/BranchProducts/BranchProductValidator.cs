@@ -47,12 +47,12 @@ namespace Application.Feature.Common.Validators.BranchProducts
                         .Negative()
                         .Build()
                 )
-                .LessThan(0)
+                .GreaterThanOrEqualTo(0)
                 .WithState(x =>
                     Messager
                         .Create<BranchProduct>()
                         .Property(x => x.CapitalPrice)
-                        .Message(MessageType.LessThan)
+                        .Message(MessageType.GreaterThanEqual)
                         .Negative()
                         .Build()
                 );
