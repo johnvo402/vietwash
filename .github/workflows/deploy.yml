@@ -7,7 +7,7 @@ on:
     paths:
       - "src/ApiGateway/**"
       - "src/AuthService/**"
-      - "src/EcommerceService/**"
+      - "src/EcommeceService/**"
       - "src/FinanceService/**"
       - "src/ProjectService/**"
       - "src/Contracts/**"
@@ -39,7 +39,7 @@ jobs:
 
           SERVICES=()
 
-          for DIR in src/ApiGateway src/AuthService src/EcommerceService src/FinanceService src/ProjectService; do
+          for DIR in src/ApiGateway src/AuthService src/EcommeceService src/FinanceService src/ProjectService; do
             if echo "$CHANGED_FILES" | grep -q "^${DIR}/"; then
               case $DIR in
                 src/ApiGateway)
@@ -48,7 +48,7 @@ jobs:
                 src/AuthService)
                   SERVICES+=("auth")
                   ;;
-                src/EcommerceService)
+                src/EcommeceService)
                   SERVICES+=("ecommerce")
                   ;;
                 src/FinanceService)
