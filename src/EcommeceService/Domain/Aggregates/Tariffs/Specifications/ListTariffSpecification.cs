@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Specification;
 using Specification.Builders;
 
@@ -11,7 +7,10 @@ namespace Domain.Aggregates.Tariffs.Specifications
     {
         public ListTariffSpecification()
         {
-            Query.AsNoTracking().AsSplitQuery();
+            Query
+                .Where(x => !x.Disable)
+                .AsNoTracking()
+                .AsSplitQuery();
             string key = GetUniqueCachedKey();
             Query.EnableCache(key);
         }
