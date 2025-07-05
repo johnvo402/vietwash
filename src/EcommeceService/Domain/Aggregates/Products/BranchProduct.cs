@@ -1,11 +1,13 @@
 ﻿using Ardalis.GuardClauses;
 using Domain.Aggregates.Enums;
+using Domain.Aggregates.Products.Events;
 using Domain.Aggregates.Services;
+using Mediator;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Products
 {
-    public class BranchProduct : BaseEntity<long>
+    public class BranchProduct : AggregateRoot
     {
         public long BranchId { get; set; }
         public string Name { get; set; }
@@ -23,7 +25,7 @@ namespace Domain.Aggregates.Products
             string sku,
             ActivationStatus status,
             string? description = null,
-            string barcode = null,
+            string? barcode = null,
             string? image = null
         )
         {
@@ -35,6 +37,9 @@ namespace Domain.Aggregates.Products
             Image = image;
             Status = Guard.Against.EnumOutOfRange(status, nameof(status));
         }
+
+        public void BranchCreateEvent() =>
+            Emit(new BranchProductCreateEvent() { BranchProduct = this });
 
         public void Update(
             long? branchId = null,
@@ -70,6 +75,11 @@ namespace Domain.Aggregates.Products
 
             if (disable.HasValue)
                 Disable = disable.Value;
+        }
+
+        protected override bool TryApplyDomainEvent(INotification domainEvent)
+        {
+            throw new NotImplementedException();
         }
     }
 }

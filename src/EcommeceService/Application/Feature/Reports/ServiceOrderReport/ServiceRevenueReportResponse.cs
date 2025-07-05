@@ -1,4 +1,4 @@
-﻿namespace Application.Feature.Services.Queries.ServiceOrderReport
+﻿namespace Application.Feature.Reports.Queries.ServiceOrderReport
 {
     public class ServiceRevenueReportResponse
     {

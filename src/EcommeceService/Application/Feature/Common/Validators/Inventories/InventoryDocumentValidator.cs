@@ -253,7 +253,7 @@ namespace Application.Feature.Common.Validators.Inventories
         )
         {
             return await _unitOfWork
-                .Repository<Product>()
+                .Repository<BranchProduct>()
                 .AnyAsync(p => p.Id == productId, cancellationToken);
         }
 

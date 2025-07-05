@@ -2,7 +2,6 @@
 using Contracts.ApiWrapper;
 using Mediator;
 
-
 namespace Application.Feature.BranchProducts.Command.Create;
 
 public class CreateBranchProductCommand : BranchProductModel, IRequest<Result>;

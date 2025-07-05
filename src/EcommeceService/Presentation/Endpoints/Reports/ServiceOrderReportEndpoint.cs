@@ -1,11 +1,9 @@
 ﻿using Application.Common.Auth;
-using Application.Feature.Services.Queries.List;
-using Application.Feature.Services.Queries.ServiceOrderReport;
+using Application.Feature.Reports.Queries.ServiceOrderReport;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
 using Contracts.RouteResults;
-using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
@@ -15,14 +13,14 @@ namespace Presentation.Endpoints.Reports
 {
     public class ServiceOrderReportEndpoint(ISender sender)
         : EndpointBaseAsync.WithRequest<ServiceRevenueReportQuery>.WithActionResult<
-            ApiResponse<List<ServiceRevenueReportResponse>>
+            ApiResponse<PaginationResponse<ServiceRevenueReportResponse>>
         >
     {
         [HttpGet(Router.ReportRoute.ReportServiceOrder)]
         [SwaggerOperation(Tags = [Router.ReportRoute.Tags], Summary = "Report service order")]
-        [AuthorizeBy]
+        // [AuthorizeBy]
         public override async Task<
-            ActionResult<ApiResponse<List<ServiceRevenueReportResponse>>>
+            ActionResult<ApiResponse<PaginationResponse<ServiceRevenueReportResponse>>>
         > HandleAsync(
             [FromQuery] ServiceRevenueReportQuery request,
             CancellationToken cancellationToken = default
