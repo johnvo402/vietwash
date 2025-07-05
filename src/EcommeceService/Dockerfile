@@ -7,6 +7,6 @@ EXPOSE 8080
 FROM base AS final
 WORKDIR /app
 COPY src/EcommeceService/app/publish .
-COPY src/EcommeceService/Resources/wwwroot wwwroot
+COPY src/EcommeceService/Presentation/wwwroot wwwroot
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 ENTRYPOINT ["dotnet", "Presentation.dll"]
