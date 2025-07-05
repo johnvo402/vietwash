@@ -1,15 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Shared.Kernel.Common;
+using Domain.Aggregates.Enums;
+namespace Application.Feature.Common.Projections.Tariffs;
 
-namespace Application.Feature.Common.Projections.Tariffs
+public class TariffModel
 {
-    public class TariffModel
-    {
-        public string Name { get; set; }
-        public bool Disable { get; set; }
-        public long BranchId { get; set; }
-    }
+    public long BranchId { get; set; }
+    public string Name { get; set; }
+	public ActivationStatus Status { get; set; } = ActivationStatus.Active;
+	public DateTimeOffset? StartAt { get; set; }
+	public DateTimeOffset? EndAt { get; set; }
+
 }

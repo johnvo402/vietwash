@@ -6,12 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Feature.Tariffs.Commands.Update
 {
-    public class UpdateTariffCommand : IRequest<Result<UpdateTariffResponse>>
-    {
-        [FromRoute(Name = RouterBase.Id)]
-        public string TariffId { get; set; } = string.Empty;
+	public class UpdateTariffCommand : IRequest<Result>
+	{
+		[FromRoute(Name = RouterBase.Id)]
+		public long TariffId { get; set; } = default!;
 
-        [FromBody]
-        public TariffModel? Tariff { get; set; }
-    }
+		[FromBody]
+		public TariffModel Tariff { get; set; } = default!;
+	}
 }

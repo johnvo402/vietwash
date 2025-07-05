@@ -1,14 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Common.Projections.Tariffs;
 using FluentValidation;
 using Domain.Aggregates.Tariffs;
 using Contracts.Common.Messages;
-using Org.BouncyCastle.Math.EC.Rfc7748;
 
 namespace Application.Feature.Common.Validators.Tariffs
 {
@@ -41,16 +36,6 @@ namespace Application.Feature.Common.Validators.Tariffs
                     .Property(x => x.Name)
                     .Message(MessageType.MaximumLength)
                     .Build());
-            RuleFor(t => t.Disable)
-                .NotNull()
-                .WithState(x =>
-                    Messager
-                        .Create<Tariff>()
-                        .Property(x => x.Disable)
-                        .Message(MessageType.Null)
-                        .Negative()
-                        .Build()
-        );
         }
     }
 }

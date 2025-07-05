@@ -1,8 +1,6 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Common.Validators.Tariffs;
-using Contracts.Common.Messages;
-using Domain.Aggregates.Tariffs;
 using FluentValidation;
 
 namespace Application.Feature.Tariffs.Commands.Create
@@ -25,16 +23,6 @@ namespace Application.Feature.Tariffs.Commands.Create
         private void ApplyRules()
         {
             Include(new TariffValidator(unitOfWork, accessorService));
-            RuleFor(t => t.Disable)
-                .Equal(false)
-                .WithState(x =>
-                    Messager
-                        .Create<Tariff>()
-                        .Property(x => x.Name)
-                        .Message(MessageType.Valid)
-                        .Negative()
-                        .Build()
-                );
         }
     }
 }

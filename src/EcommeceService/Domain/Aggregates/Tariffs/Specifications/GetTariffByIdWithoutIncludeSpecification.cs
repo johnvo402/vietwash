@@ -7,7 +7,7 @@ namespace Domain.Aggregates.Tariffs.Specifications
     {
         public GetTariffByIdWithoutIncludeSpecification(long id)
         {
-            Query.Where(x => x.Id == id).AsNoTracking();
+            Query.Where(x => x.Id == id && !x.Disable);
         }
     }
 }

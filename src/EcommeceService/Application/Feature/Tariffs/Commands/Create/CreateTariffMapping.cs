@@ -8,9 +8,11 @@ public static class CreateTariffMapping
     public static Tariff ToEntityCreate(this TariffModel model)
     {
         return new Tariff(
-            name: model.Name.Trim(),
+            name: model.Name,
             branchId: model.BranchId,
-            disable: model.Disable
-        );
+            status: model.Status,
+			startAt: model.StartAt,
+			endAt: model.EndAt
+		);
     }
 }
