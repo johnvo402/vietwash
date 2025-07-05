@@ -11,20 +11,18 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Presentation.Endpoints.Tariffs
 {
     public class UpdateTariffEndpoint(ISender sender)
-        : EndpointBaseAsync.WithRequest<UpdateTariffCommand>.WithActionResult<
-            ApiResponse<UpdateTariffResponse>
-        >
-    {
-        [HttpPut(Router.TariffRoute.GetUpdateDelete)]
-        [SwaggerOperation(Tags = [Router.TariffRoute.Tags], Summary = "Update Tariff")]
-        [AuthorizeBy]
-        public override async Task<ActionResult<ApiResponse<UpdateTariffResponse>>> HandleAsync(
-            [FromBody] UpdateTariffCommand request,
-            CancellationToken cancellationToken = default
-        )
-        {
-            var response = await sender.Send(request, cancellationToken);
-            return response.ToActionResult();
-        }
-    }
+		: EndpointBaseAsync.WithRequest<UpdateTariffCommand>.WithActionResult<ApiResponse>
+	{
+		[HttpPut(Router.TariffRoute.GetUpdateDelete)]
+		[SwaggerOperation(Tags = [Router.TariffRoute.Tags], Summary = "Update tariff")]
+		[AuthorizeBy]
+		public override async Task<ActionResult<ApiResponse>> HandleAsync(
+			UpdateTariffCommand request,
+			CancellationToken cancellationToken = default
+		)
+		{
+			var result = await sender.Send(request);
+			return result.ToActionResult();
+		}
+	}
 }

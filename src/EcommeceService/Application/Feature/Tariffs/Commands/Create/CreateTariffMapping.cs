@@ -9,8 +9,7 @@ public static class CreateTariffMapping
     {
         return new Tariff(
             name: model.Name.Trim(),
-            branchId: model.BranchId,
-            disable: model.Disable
+            branchId: model.BranchId
         );
     }
 }

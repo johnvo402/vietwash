@@ -7,7 +7,7 @@ namespace Application.Feature.Tariffs.Commands.Update
     {
         public static Tariff FromUpdateTariff(this Tariff tariff, TariffModel update)
         {
-            tariff.Update(name: update.Name, disable: update.Disable, branchId: update.BranchId);
+            tariff.Update(name: update.Name, branchId: update.BranchId);
             return tariff;
         }
     }

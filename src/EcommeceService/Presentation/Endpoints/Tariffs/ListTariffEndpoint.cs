@@ -1,5 +1,5 @@
 using Application.Common.Auth;
-using Application.Feature.Tariffs.Queries;
+using Application.Feature.Tariffs.Queries.List;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
@@ -11,7 +11,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Presentation.Endpoints.Tariffs
 {
-    public class ListTariffEndpoint(ISender sender)
+	public class ListTariffEndpoint(ISender sender)
         : EndpointBaseAsync.WithRequest<ListTariffQuery>.WithActionResult<
             ApiResponse<PaginationResponse<ListTariffResponse>>
         >

@@ -1,31 +1,27 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Common.Validators.Tariffs;
 using FluentValidation;
-using Contracts.Common.Messages;
+
 
 namespace Application.Feature.Tariffs.Commands.Update
 {
     public class UpdateTariffCommandValidator : AbstractValidator<UpdateTariffCommand>
-    {
-        public UpdateTariffCommandValidator(IUnitOfWork unitOfWork, IActionAccessorService accessorService)
-        {
-            RuleFor(t => t.Tariff)
-                .SetValidator(new TariffValidator(unitOfWork, accessorService));
-            RuleFor(x => x.Tariff)
-            .NotEmpty()
-            .WithState(x =>
-                Messager
-                    .Create<UpdateTariffCommand>()
-                    .Property(x => x.Tariff!)
-                    .Message(MessageType.Null)
-                    .Negative()
-                    .Build()
-            );
-        }
-    }
+	{
+		private readonly IUnitOfWork unitOfWork;
+		private readonly IActionAccessorService accessorService;
+
+		public UpdateTariffCommandValidator(IUnitOfWork unitOfWork, IActionAccessorService accessorService)
+		{
+			this.unitOfWork = unitOfWork;
+			this.accessorService = accessorService;
+			ApplyRules();
+		}
+
+		private void ApplyRules()
+		{
+			RuleFor(x => x.Tariff)
+				.SetValidator(new TariffValidator(unitOfWork, accessorService));
+		}
+	}
 }
