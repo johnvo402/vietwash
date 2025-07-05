@@ -14,8 +14,10 @@ namespace Application.Feature.BranchProducts.Command.Create
                 description: model.Description,
                 sku: model.Sku,
                 barcode: model.Barcode,
+                capitalPrice: model.CapitalPrice,
                 image: model.Image,
-                status: model.Status
+                status: model.Status,
+                categoryId: model.CategoryId
             );
             result.UnitRelations = model.UnitRelations.ToListUnitRelation() ?? [];
             return result;

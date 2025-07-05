@@ -7,12 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Feature.BranchProducts.Command.Update
 {
-	public class UpdateBranchProductCommand : IRequest<Result>
-	{
-		[FromRoute(Name = RouterBase.Id)]
-		public long BranchProductId { get; set; } = default!;
+    public class UpdateBranchProductCommand : IRequest<Result>
+    {
+        [FromRoute(Name = RouterBase.Id)]
+        public long BranchProductId { get; set; } = default!;
 
-		[FromBody]
-		public BranchProductModel BranchProduct { get; set; } = default!;
-	}
+        [FromBody]
+        public BranchProductModel BranchProduct { get; set; } = default!;
+    }
 }

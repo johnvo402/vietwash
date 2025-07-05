@@ -15,15 +15,20 @@ namespace Domain.Aggregates.Products
         public string? Sku { get; set; }
         public string? Barcode { get; set; }
         public string? Image { get; set; }
+        public decimal CapitalPrice { get; set; }
         public ActivationStatus Status { get; set; }
+        public long CategoryId { get; set; }
         public bool Disable { get; set; } = default!;
         public ICollection<UnitRelation> UnitRelations { get; set; } = [];
+        public Category Category { get; set; } = default!;
 
         public BranchProduct(
             long branchId,
             string name,
             string sku,
             ActivationStatus status,
+            decimal capitalPrice,
+            long categoryId,
             string? description = null,
             string? barcode = null,
             string? image = null
@@ -36,6 +41,8 @@ namespace Domain.Aggregates.Products
             Barcode = Guard.Against.NullOrWhiteSpace(barcode, nameof(barcode));
             Image = image;
             Status = Guard.Against.EnumOutOfRange(status, nameof(status));
+            CapitalPrice = Guard.Against.Negative(capitalPrice, nameof(capitalPrice));
+            CategoryId = Guard.Against.Negative(categoryId, nameof(categoryId));
         }
 
         public void BranchCreateEvent() =>
@@ -48,6 +55,8 @@ namespace Domain.Aggregates.Products
             string? sku = null,
             string? barcode = null,
             string? image = null,
+            decimal? capitalPrice = null,
+            long? categoryId = null,
             ActivationStatus? status = null,
             bool? disable = null
         )
@@ -64,7 +73,7 @@ namespace Domain.Aggregates.Products
             if (!string.IsNullOrWhiteSpace(sku))
                 Sku = sku.Trim();
 
-            if (!string.IsNullOrWhiteSpace(sku))
+            if (!string.IsNullOrWhiteSpace(barcode))
                 Barcode = barcode.Trim();
 
             if (image != null)
@@ -75,6 +84,10 @@ namespace Domain.Aggregates.Products
 
             if (disable.HasValue)
                 Disable = disable.Value;
+            if (capitalPrice != null)
+                CapitalPrice = (long)capitalPrice;
+            if (categoryId != null)
+                CategoryId = (long)categoryId;
         }
 
         protected override bool TryApplyDomainEvent(INotification domainEvent)

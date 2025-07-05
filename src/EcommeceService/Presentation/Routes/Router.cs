@@ -140,11 +140,6 @@ namespace Presentation.Routes
                 + "{"
                 + RouterBase.Id
                 + "}";
-            public const string GetDetail =
-                $"{Ecommerce}/{RouterBase.prefix}{nameof(BranchProducts)}/detail/"
-                + "{"
-                + RouterBase.Id
-                + "}";
         }
 
         public static class EquipmentRoute

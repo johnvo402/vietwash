@@ -519,4 +519,14 @@
         <value>Cancel Reason</value>
         <comment />
     </data>
+  <data name="CapitalPrice"
+    xml:space="preserve">
+        <value>Capital Price</value>
+        <comment />
+    </data>
+  <data name="BranchProduct"
+    xml:space="preserve">
+        <value>Product</value>
+        <comment />
+    </data>
 </root>

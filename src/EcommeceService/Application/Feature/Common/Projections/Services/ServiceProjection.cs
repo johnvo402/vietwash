@@ -18,6 +18,13 @@ namespace Application.Feature.Common.Projections.Services
 
         public virtual void MappingFrom(Service service)
         {
+            Id = service.Id;
+            PublicId = service.PublicId;
+            CreatedAt = service.CreatedAt;
+            CreatedBy = service.CreatedBy;
+            UpdatedAt = service.UpdatedAt;
+            UpdatedBy = service.UpdatedBy;
+
             Name = service.Name;
             Type = service.Type;
             Image = service.Image;

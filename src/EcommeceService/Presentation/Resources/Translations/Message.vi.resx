@@ -522,4 +522,14 @@
         <value>lý do hủy</value>
         <comment />
     </data>
+  <data name="CapitalPrice"
+    xml:space="preserve">
+        <value>Giá vốn</value>
+        <comment />
+    </data>
+  <data name="BranchProduct"
+    xml:space="preserve">
+        <value>Vật tư</value>
+        <comment />
+    </data>
 </root>
