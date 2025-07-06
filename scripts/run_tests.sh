@@ -1,84 +1,197 @@
 #!/bin/bash
 
+# Gán giá trị từ tham số dòng lệnh nếu có
+if [ -n "$1" ]; then
+  NAME="$1"
+fi
+if [ -n "$2" ]; then
+  SERVICE="$2"
+fi
+
 # Chuyển đến thư mục gốc của dự án
-ROOT="$(dirname "${BASH_SOURCE[0]}")/.."
-cd "$ROOT" || { echo "Lỗi: Không thể chuyển đến thư mục gốc $ROOT"; exit 1; }
-
-
-# Kiểm tra xem biến NAME có được truyền vào không
-if [ -z "$NAME" ]; then
-  echo "Lỗi: Vui lòng cung cấp biến NAME với danh sách tên hàm test."
-  echo "Ví dụ: NAME=\"AuthService.Tests.Accounts.CreateAccountCommandValidatorTests.Validate_WhenEmailNullOrEmpty_ShouldReturnNullFailure AuthService.Tests.Accounts.CreateAccountCommandValidatorTests.Validate_WhenEmailInvalidFormat_ShouldReturnInvalidFailure\" ./run_tests_with_coverlet.sh"
+ROOT="$(pwd)"
+cd "$ROOT" || {
+  echo "Lỗi: Không thể chuyển đến thư mục gốc $ROOT"
   exit 1
-fi
-TEST_PROJECT_DIR="$ROOT/tests/UnitTest/AuthSerivce.Tests"
-if [ ! -d "$TEST_PROJECT_DIR" ]; then
-  echo "Lỗi: Thư mục dự án test '$TEST_PROJECT_DIR' không tồn tại."
-  exit 1
-fi
-cd "$TEST_PROJECT_DIR" || { echo "Lỗi: Không thể chuyển đến thư mục dự án test $TEST_PROJECT_DIR"; exit 1; }
-# Chuyển đổi chuỗi NAME thành mảng các tên hàm test
-IFS=' ' read -r -a TEST_NAMES <<< "$NAME"
+}
 
-# Tạo bộ lọc cho dotnet test
-FILTER=""
-for i in "${!TEST_NAMES[@]}"; do
-  if [ $i -eq 0 ]; then
-    FILTER="FullyQualifiedName~${TEST_NAMES[$i]}"
-  else
-    FILTER="$FILTER|FullyQualifiedName~${TEST_NAMES[$i]}"
+# Thư mục kết quả chung
+OUTPUT_DIR="TestResults"
+
+
+# Nếu truyền SERVICE thì chạy test theo từng service
+if [ -n "$SERVICE" ]; then
+  if [[ ! "$SERVICE" =~ ^[a-zA-Z0-9_,_-]*$ ]]; then
+    echo "Lỗi: Biến SERVICE chứa ký tự không hợp lệ."
+    exit 1
   fi
-done
 
-# Thư mục đầu ra cho báo cáo kết quả test
-OUTPUT_DIR="../TestResults"
-mkdir -p "$OUTPUT_DIR"
+  IFS=',' read -r -a SERVICES <<<"$SERVICE"
+  declare -a COVERAGE_FILES
 
-# Chạy lệnh dotnet test với logger JUnit
-echo "Đang chạy các test: $NAME và tạo báo cáo kết quả..."
-dotnet test --filter "$FILTER" \
-  --collect:"XPlat Code Coverage;Format=cobertura" \
-  --logger "junit;LogFilePath=$OUTPUT_DIR/test-results.xml" \
-  --results-directory "$OUTPUT_DIR" \
-  --logger "console;verbosity=normal"
+  for svc in "${SERVICES[@]}"; do
+    TEST_PROJECT_DIR="$ROOT/tests/UnitTest/${svc}.Tests"
 
-# Kiểm tra kết quả của lệnh dotnet test
-if [ $? -eq 0 ]; then
-  echo "Chạy test thành công!"
-else
-  echo "Chạy test thất bại. Vui lòng kiểm tra lại bộ lọc hoặc dự án test."
-  echo "Bạn có thể chạy lệnh sau để debug: dotnet test --filter \"$FILTER\" --logger \"junit;LogFilePath=$OUTPUT_DIR/test-results.xml\" --logger \"console;verbosity=detailed\""
-  exit 1
-fi
+    # Kiểm tra lỗi chính tả trong tên thư mục
+    if [ ! -d "$TEST_PROJECT_DIR" ]; then
+      echo "Lỗi: Thư mục dự án test '$TEST_PROJECT_DIR' không tồn tại."
+      echo "Kiểm tra xem tên thư mục có đúng không (ví dụ: AuthService.Tests, không phải AuthSerivce.Tests)."
+      exit 1
+    fi
 
-if command -v reportgenerator >/dev/null 2>&1; then
-  echo "Tạo báo cáo coverage dạng HTML và hợp nhất file coverage..."
-  reportgenerator -reports:"$OUTPUT_DIR/**/*.cobertura.xml" \
-    -targetdir:"$OUTPUT_DIR/html" \
-    -reporttypes:"HtmlInline_AzurePipelines_Dark;Cobertura" \
-    -filefilters:"-*\obj\*" \
-    -verbosity:Error
-  if [ $? -eq 0 ]; then
-    echo "Báo cáo HTML được lưu tại: $OUTPUT_DIR/html"
-    # Di chuyển file Cobertura.xml sang UnitTestResults/coverage.cobertura.xml
-    if [ -f "$OUTPUT_DIR/html/Cobertura.xml" ]; then
-      mv "$OUTPUT_DIR/html/Cobertura.xml" "$OUTPUT_DIR/coverage.cobertura.xml"
-      if [ $? -eq 0 ]; then
-        echo "File coverage hợp nhất được lưu tại: $OUTPUT_DIR/coverage.cobertura.xml"
-      else
-        echo "Lỗi: Không thể di chuyển file Cobertura.xml sang $OUTPUT_DIR/coverage.cobertura.xml."
+    cd "$TEST_PROJECT_DIR" || {
+      echo "Lỗi: Không thể chuyển đến thư mục dự án test $TEST_PROJECT_DIR"
+      exit 1
+    }
+
+    if [ -n "$NAME" ]; then
+      if [[ ! "$NAME" =~ ^[a-zA-Z0-9_,_-]*$ ]]; then
+        echo "Lỗi: Biến NAME chứa ký tự không hợp lệ."
+        exit 1
+      fi
+
+      IFS=',' read -r -a TEST_NAMES <<<"$NAME"
+      FILTER=""
+      for i in "${!TEST_NAMES[@]}"; do
+        if [ $i -eq 0 ]; then
+          FILTER="FullyQualifiedName~${TEST_NAMES[$i]}"
+        else
+          FILTER="$FILTER|FullyQualifiedName~${TEST_NAMES[$i]}"
+        fi
+      done
+
+      echo "Đang chạy test cho service: $svc các test: $NAME..."
+      TEST_OUTPUT=$(dotnet test --filter "$FILTER" \
+        --collect:"XPlat Code Coverage;Format=cobertura" \
+        --logger "junit;LogFilePath=$OUTPUT_DIR/test-results-$svc.xml" \
+        --results-directory "$OUTPUT_DIR" \
+        --logger "console;verbosity=detailed" 2>&1)
+      if echo "$TEST_OUTPUT" | grep -q "No test is available"; then
+        echo "Lỗi: Không tìm thấy test nào khớp với bộ lọc '$FILTER' cho service '$svc'."
         exit 1
       fi
     else
-      echo "Lỗi: File $OUTPUT_DIR/html/Cobertura.xml không tồn tại."
+      echo "Đang chạy test cho service: $svc..."
+      dotnet test "$TEST_PROJECT_DIR" \
+        --collect:"XPlat Code Coverage;Format=cobertura" \
+        --logger "junit;LogFilePath=$OUTPUT_DIR/test-results-$svc.xml" \
+        --results-directory "$OUTPUT_DIR" \
+        --logger "console;verbosity=detailed"
+    fi
+
+    if [ $? -ne 0 ]; then
+      echo "Chạy test thất bại cho service: $svc"
       exit 1
     fi
-  else
-    echo "Lỗi: Không thể tạo báo cáo HTML hoặc hợp nhất file coverage. Kiểm tra cài đặt reportgenerator và file coverage."
+
+    # Thu thập file coverage từ thư mục TestResults của dự án test
+    TEST_PROJECT_RESULTS="$TEST_PROJECT_DIR/TestResults"
+    if [ -d "$TEST_PROJECT_RESULTS" ]; then
+      # Tìm file .cobertura.xml trong thư mục con có GUID
+      NEW_FILES=("$TEST_PROJECT_RESULTS"/*/*.cobertura.xml)
+      if [ -e "${NEW_FILES[0]}" ]; then
+        for file in "${NEW_FILES[@]}"; do
+          # Di chuyển file coverage sang $OUTPUT_DIR với tên duy nhất
+          mv "$file" "$OUTPUT_DIR/coverage-$svc-$(basename "$file")" || {
+            echo "Lỗi: Không thể di chuyển file $file sang $OUTPUT_DIR"
+            exit 1
+          }
+        done
+        COVERAGE_FILES+=("$OUTPUT_DIR/coverage-$svc-"*.cobertura.xml)
+      else
+        echo "Lỗi: Không tìm thấy file .cobertura.xml trong $TEST_PROJECT_RESULTS"
+        exit 1
+      fi
+    else
+      echo "Lỗi: Thư mục $TEST_PROJECT_RESULTS không tồn tại"
+      exit 1
+    fi
+  done
+
+  # Tạo báo cáo coverage
+  if [ ${#COVERAGE_FILES[@]} -eq 0 ]; then
+    echo "Lỗi: Không tìm thấy file coverage nào."
     exit 1
   fi
+
+  if dotnet tool list --global | grep -q "dotnet-reportgenerator-globaltool" || dotnet tool list --local | grep -q "dotnet-reportgenerator-globaltool"; then
+    echo "Tạo báo cáo coverage..."
+    REPORT_FILES_STR=$(
+      IFS=';'
+      echo "${COVERAGE_FILES[*]}"
+    )
+    dotnet tool run reportgenerator -reports:"$REPORT_FILES_STR" \
+      -targetdir:"$OUTPUT_DIR/result" \
+      -reporttypes:"Html;TextSummary" \
+      -filefilters:"-*\obj\*" \
+      -sourcedirs:"$ROOT" \
+      -verbosity:Error
+    if [ $? -ne 0 ]; then
+      echo "Lỗi: Tạo báo cáo coverage thất bại."
+      exit 1
+    fi
+    echo "Báo cáo được lưu tại: $OUTPUT_DIR/result"
+  else
+    echo "Lỗi: reportgenerator không được cài đặt."
+    echo "Vui lòng cài bằng: dotnet new tool-manifest (nếu chưa có) và dotnet tool install dotnet-reportgenerator-globaltool"
+    exit 1
+  fi
+
+# Nếu không truyền gì thì chạy full solution
 else
-  echo "Lỗi: reportgenerator không được cài đặt. Vui lòng cài đặt để tạo báo cáo HTML và hợp nhất file coverage."
-  echo "Cài đặt bằng: dotnet tool install -g dotnet-reportgenerator-globaltool"
-  exit 1
+  echo "Đang chạy toàn bộ solution..."
+  dotnet test \
+    --collect:"XPlat Code Coverage;Format=cobertura" \
+    --logger "junit;LogFilePath=$OUTPUT_DIR/test-results-full.xml" \
+    --results-directory "$OUTPUT_DIR" \
+    --logger "console;verbosity=detailed"
+
+  if [ $? -ne 0 ]; then
+    echo "Chạy test toàn bộ solution thất bại."
+    exit 1
+  fi
+
+  # Thu thập file coverage từ tất cả các thư mục TestResults trong tests/UnitTest
+  REPORT_FILES=("$ROOT"/*/*/coverage.cobertura.xml)
+  if [ ! -e "${REPORT_FILES[0]}" ]; then
+    echo "Lỗi: Không tìm thấy file coverage nào trong $ROOT/tests/UnitTest"
+    exit 1
+  fi
+
+  # Di chuyển file coverage sang $OUTPUT_DIR
+  for file in "${REPORT_FILES[@]}"; do
+    mv "$file" "$OUTPUT_DIR/coverage-$(basename "$file")" || {
+      echo "Lỗi: Không thể di chuyển file $file sang $OUTPUT_DIR"
+      exit 1
+    }
+  done
+  REPORT_FILES=("$OUTPUT_DIR/coverage-"*.cobertura.xml)
+
+  if [ ! -e "${REPORT_FILES[0]}" ]; then
+    echo "Lỗi: Không tìm thấy file coverage nào trong $OUTPUT_DIR."
+    exit 1
+  fi
+
+  if dotnet tool list --global | grep -q "dotnet-reportgenerator-globaltool" || dotnet tool list --local | grep -q "dotnet-reportgenerator-globaltool"; then
+    echo "Tạo báo cáo coverage..."
+    REPORT_FILES_STR=$(
+      IFS=';'
+      echo "${REPORT_FILES[*]}"
+    )
+    dotnet tool run reportgenerator -reports:"$REPORT_FILES_STR" \
+      -targetdir:"$OUTPUT_DIR/result" \
+      -reporttypes:"Html;TextSummary" \
+      -filefilters:"-*\obj\*" \
+      -sourcedirs:"$ROOT" \
+      -verbosity:Error
+    if [ $? -ne 0 ]; then
+      echo "Lỗi: Tạo báo cáo coverage thất bại."
+      exit 1
+    fi
+    echo "Báo cáo được lưu tại: $OUTPUT_DIR/result"
+  else
+    echo "Lỗi: reportgenerator không được cài đặt."
+    echo "Vui lòng cài bằng: dotnet new tool-manifest (nếu chưa có) và dotnet tool install dotnet-reportgenerator-globaltool"
+    exit 1
+  fi
 fi

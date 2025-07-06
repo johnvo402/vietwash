@@ -1,7 +1,7 @@
 using System.Collections;
 using Contracts.Common.Messages;
 
-namespace AuthSerivce.Tests
+namespace AuthService.Tests
 {
     public class MessageResultComparer : IEqualityComparer
     {

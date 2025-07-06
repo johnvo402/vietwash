@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Application.Features.Accounts.Commands.Create;
-using AuthSerivce.Tests;
+using AuthService.Tests;
 using AutoFixture;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Accounts;
