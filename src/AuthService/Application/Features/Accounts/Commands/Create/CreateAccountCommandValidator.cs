@@ -27,9 +27,10 @@ public partial class CreateAccountCommandValidator : AbstractValidator<CreateAcc
 
     private void ApplyRules()
     {
-        Include(new AccountValidator(accessorService));
+        Include(new AccountValidator(accessorService, unitOfWork));
         _ = long.TryParse(accessorService.Id, out long id);
         RuleFor(x => x.Email)
+            .Cascade(CascadeMode.Stop) //Dừng khi NotEmpty() fail
             .NotEmpty()
             .WithState(x =>
                 Messager
@@ -83,6 +84,16 @@ public partial class CreateAccountCommandValidator : AbstractValidator<CreateAcc
             );
 
         RuleFor(x => x.Password)
+            // .Cascade(CascadeMode.Stop) //Dừng khi NotEmpty() fail
+            // .NotEmpty()
+            // .WithState(x =>
+            //     Messager
+            //         .Create<CreateAccountCommand>(nameof(Account))
+            //         .Property(x => x.Password!)
+            //         .Message(MessageType.Null)
+            //         .Negative()
+            //         .Build()
+            // )
             .Must(
                 (_, x) =>
                 {

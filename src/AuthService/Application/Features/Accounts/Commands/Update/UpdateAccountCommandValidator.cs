@@ -9,7 +9,7 @@ namespace Application.Features.Accounts.Commands.Update;
 
 public class UpdateAccountCommandValidator : AbstractValidator<UpdateAccountCommand>
 {
-    public UpdateAccountCommandValidator(IActionAccessorService accessorService)
+    public UpdateAccountCommandValidator(IActionAccessorService accessorService, IUnitOfWork unitOfWork)
     {
         _ = long.TryParse(accessorService.Id, out long id);
 
@@ -23,7 +23,7 @@ public class UpdateAccountCommandValidator : AbstractValidator<UpdateAccountComm
                     .Negative()
                     .Build()
             )
-            .SetValidator(new AccountValidator(accessorService)!);
+            .SetValidator(new AccountValidator(accessorService, unitOfWork)!);
 
         RuleFor(x => x.Account!.Role)
             .NotEmpty()
