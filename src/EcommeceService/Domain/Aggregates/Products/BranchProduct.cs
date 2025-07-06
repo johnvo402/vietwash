@@ -1,5 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using Domain.Aggregates.Enums;
+using Domain.Aggregates.Inventories;
 using Domain.Aggregates.Products.Events;
 using Domain.Aggregates.Services;
 using Mediator;
@@ -20,6 +21,7 @@ namespace Domain.Aggregates.Products
         public long CategoryId { get; set; }
         public bool Disable { get; set; } = default!;
         public ICollection<UnitRelation> UnitRelations { get; set; } = [];
+        public ICollection<ProductSupplying> ProductSupplyings { get; set; } = [];
         public Category Category { get; set; } = default!;
 
         public BranchProduct(

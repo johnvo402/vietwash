@@ -7,7 +7,6 @@ using Application.Feature.Services.Queries.List;
 using Contracts.Application.Common;
 using Domain.Aggregates.Enums;
 using Domain.Aggregates.Products;
-using Domain.Aggregates.Users;
 
 namespace Application.Feature.Common.Projections.BranchProducts
 {
@@ -22,6 +21,8 @@ namespace Application.Feature.Common.Projections.BranchProducts
         [File]
         public string? Image { get; set; }
         public decimal CapitalPrice { get; set; }
+
+        public decimal StockQuantity { get; set; } = 0;
         public ActivationStatus Status { get; set; }
 
         public long CategoryId { get; set; }

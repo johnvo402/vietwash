@@ -1,5 +1,4 @@
-﻿using System.Data;
-using Ardalis.GuardClauses;
+﻿using Ardalis.GuardClauses;
 using Domain.Aggregates.Inventories.Enums;
 using Domain.Aggregates.Orders.Enums;
 using Mediator;
