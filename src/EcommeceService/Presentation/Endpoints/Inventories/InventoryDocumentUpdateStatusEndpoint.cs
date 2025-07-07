@@ -12,7 +12,7 @@ namespace Presentation.Endpoints.Inventories
     public class InventoryDocumentUpdateStatusEndpoint(ISender sender)
         : EndpointBaseAsync.WithRequest<InventoryDocumentUpdateStatusCommand>.WithActionResult
     {
-        [HttpPatch(Router.InventoryRoute.UpdateStatus)]
+        [HttpPut(Router.InventoryRoute.UpdateStatus)]
         [SwaggerOperation(
             Tags = [Router.InventoryRoute.Tags],
             Summary = "Inventory Document update status"
