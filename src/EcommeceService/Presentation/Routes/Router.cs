@@ -28,12 +28,12 @@ namespace Presentation.Routes
             public const string Tariffs = $"{Ecommerce}/{RouterBase.prefix}{nameof(Tariffs)}";
             public const string GetUpdateDelete =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Tariffs)}/" + "{" + RouterBase.Id + "}";
-			public const string GetDetail =
-				$"{Ecommerce}/{RouterBase.prefix}{nameof(Tariffs)}/detail/"
-				+ "{"
-				+ RouterBase.Id
-				+ "}";
-		}
+            public const string GetDetail =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Tariffs)}/detail/"
+                + "{"
+                + RouterBase.Id
+                + "}";
+        }
 
         public static class UnitRoute
         {
@@ -80,7 +80,7 @@ namespace Presentation.Routes
                 + RouterBase.Id
                 + "}";
             public const string UpdateStatus =
-                $"{Ecommerce}/{RouterBase.prefix}{nameof(Inventories)}/{nameof(UpdateStatus)}"
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Inventories)}/{nameof(UpdateStatus)}/"
                 + "{"
                 + RouterBase.Id
                 + "}";
