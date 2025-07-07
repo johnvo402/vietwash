@@ -1,6 +1,7 @@
 ﻿using Application.Common.Auth;
 using Application.Feature.InventoryDocuments.Commands.UpdateStatus;
 using Ardalis.ApiEndpoints;
+using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +11,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Presentation.Endpoints.Inventories
 {
     public class InventoryDocumentUpdateStatusEndpoint(ISender sender)
-        : EndpointBaseAsync.WithRequest<InventoryDocumentUpdateStatusCommand>.WithActionResult
+        : EndpointBaseAsync.WithRequest<InventoryDocumentUpdateStatusCommand>.WithActionResult<ApiResponse>
     {
         [HttpPut(Router.InventoryRoute.UpdateStatus)]
         [SwaggerOperation(
@@ -18,7 +19,7 @@ namespace Presentation.Endpoints.Inventories
             Summary = "Inventory Document update status"
         )]
         [AuthorizeBy]
-        public override async Task<ActionResult> HandleAsync(
+        public override async Task<ActionResult<ApiResponse>> HandleAsync(
             InventoryDocumentUpdateStatusCommand request,
             CancellationToken cancellationToken = default
         )
