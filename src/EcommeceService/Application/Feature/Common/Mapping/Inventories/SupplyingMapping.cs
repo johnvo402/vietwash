@@ -1,5 +1,6 @@
 using Application.Feature.Common.Projections.Inventories;
 using Contracts.Extensions;
+using Contracts.Utils;
 using Domain.Aggregates.Inventories;
 
 namespace Application.Feature.Common.Mapping.Inventories
@@ -8,18 +9,25 @@ namespace Application.Feature.Common.Mapping.Inventories
     {
         public static ICollection<ProductSupplying>? ToListProductSupplying(
             this ICollection<ProductSupplyingModel>? productSupplyings
-        ) =>
-            productSupplyings?.ToListMapping(x => new ProductSupplying
+        )
+        {
+            return productSupplyings?.ToListMapping(x =>
             {
-                ProductId = x.ProductId,
-                SupplierId = x.SupplierId,
-                Quantity = x.Quantity,
-                LotNumber = x.LotNumber,
-                Sku = x.Sku,
-                Price = x.Price,
-                UnitRelationId = x.UnitRelationId,
-                ExpiryDate = x.ExpiryDate,
+                string lotNumber = "UNKNOWN";
+                if (x.IsLot)
+                    lotNumber = Generator.GenerateCode("LO", 6);
+                return new ProductSupplying
+                {
+                    ProductId = x.ProductId,
+                    SupplierId = x.SupplierId,
+                    Quantity = x.Quantity,
+                    LotNumber = lotNumber,
+                    Price = x.Price,
+                    UnitRelationId = x.UnitRelationId,
+                    ExpiryDate = x.ExpiryDate,
+                };
             });
+        }
 
         public static ICollection<EquipmentSupplying>? ToListEquipmentSupplying(
             this ICollection<EquipmentSupplyingModel>? equipmentSupplyings
@@ -28,7 +36,6 @@ namespace Application.Feature.Common.Mapping.Inventories
             {
                 Name = x.Name,
                 Code = x.Code,
-                Sku = x.Sku,
                 Price = x.Price,
                 Capacity = x.Capacity,
                 UnitRelationId = x.UnitRelationId,
