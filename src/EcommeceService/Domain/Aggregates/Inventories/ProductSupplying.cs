@@ -11,7 +11,6 @@ namespace Domain.Aggregates.Inventories
         public long InventoryDocumentId { get; set; } = default!;
         public int Quantity { get; set; } = default!;
         public string LotNumber { get; set; } = default!;
-        public string Sku { get; set; } = default!;
         public decimal Price { get; set; } = default!;
         public long UnitRelationId { get; set; } = default!;
         public DateTimeOffset? ExpiryDate { get; set; }

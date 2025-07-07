@@ -29,7 +29,6 @@ namespace Application.Feature.Common.Projections.Inventories
             InventoryDocumentId = supplying.InventoryDocumentId;
             Quantity = supplying.Quantity;
             LotNumber = supplying.LotNumber;
-            Sku = supplying.Sku;
             Price = supplying.Price;
             UnitRelationId = supplying.UnitRelationId;
             ExpiryDate = supplying.ExpiryDate;
@@ -60,7 +59,6 @@ namespace Application.Feature.Common.Projections.Inventories
             InventoryDocumentId = supplying.InventoryDocumentId;
             Quantity = supplying.Quantity;
             Code = supplying.Code;
-            Sku = supplying.Sku;
             Price = supplying.Price;
             UnitRelationId = supplying.UnitRelationId;
             Capacity = supplying.Capacity;

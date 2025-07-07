@@ -8,7 +8,6 @@ public class EquipmentSupplying : DefaultEntity<long>
 {
     public string Name { get; set; } = default!;
     public string Code { get; set; } = default!;
-    public string Sku { get; set; } = default!;
     public decimal Price { get; set; } = default!;
     public decimal Capacity { get; set; } = default!;
     public long UnitRelationId { get; set; } = default!;
