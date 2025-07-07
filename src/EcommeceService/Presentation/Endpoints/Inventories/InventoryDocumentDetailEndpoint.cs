@@ -16,7 +16,10 @@ namespace Presentation.Endpoints.Inventories
         >
     {
         [HttpGet(Router.InventoryRoute.GetUpdateDelete)]
-        [SwaggerOperation(Tags = [Router.OrderRoute.Tags], Summary = "Inventory Document detail")]
+        [SwaggerOperation(
+            Tags = [Router.InventoryRoute.Tags],
+            Summary = "Inventory Document detail"
+        )]
         [AuthorizeBy]
         public override async Task<
             ActionResult<ApiResponse<InventoryDocumentDetailResponse>>

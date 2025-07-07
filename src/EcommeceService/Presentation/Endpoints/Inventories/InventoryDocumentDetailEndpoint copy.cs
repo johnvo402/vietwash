@@ -14,7 +14,7 @@ namespace Presentation.Endpoints.Inventories
     {
         [HttpPatch(Router.InventoryRoute.UpdateStatus)]
         [SwaggerOperation(
-            Tags = [Router.OrderRoute.Tags],
+            Tags = [Router.InventoryRoute.Tags],
             Summary = "Inventory Document update status"
         )]
         [AuthorizeBy]
