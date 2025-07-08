@@ -17,5 +17,6 @@ namespace Application.Feature.Services.Queries.Detail
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
         public CustomerGroup? CustomerGroup { get; set; }
-    }
+		public string? Avatar { get; set; } 
+	}
 }

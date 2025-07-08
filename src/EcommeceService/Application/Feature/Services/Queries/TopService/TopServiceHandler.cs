@@ -1,7 +1,6 @@
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Orders;
-using Domain.Aggregates.Services;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
 
