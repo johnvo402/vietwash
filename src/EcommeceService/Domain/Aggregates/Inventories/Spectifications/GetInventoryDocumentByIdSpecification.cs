@@ -11,10 +11,14 @@ namespace Domain.Aggregates.Inventories.Spectifications
                 .Where(x => x.Id == id)
                 .Include(x => x.ProductSupplyings)
                 .ThenInclude(x => x.UnitRelation)
-                .ThenInclude(x => x.Service)
+                .Include(x => x.ProductSupplyings)
+                .ThenInclude(x => x.Supplier)
+                .Include(x => x.ProductSupplyings)
+                .ThenInclude(x => x.Supplier)
                 .Include(x => x.EquipmentSupplyings)
                 .ThenInclude(x => x.UnitRelation)
-                .ThenInclude(x => x.Service)
+                .Include(x => x.EquipmentSupplyings)
+                .ThenInclude(x => x.Supplier)
                 .AsSplitQuery()
                 .AsNoTracking();
         }
