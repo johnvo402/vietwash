@@ -1,8 +1,8 @@
-﻿using Domain.Aggregates.Equipments.Enums;
-using Shared.Kernel.Common;
+﻿using Ardalis.GuardClauses;
+using Domain.Aggregates.Equipments.Enums;
 using Mediator;
-using Ardalis.GuardClauses;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Equipments
 {
@@ -10,13 +10,11 @@ namespace Domain.Aggregates.Equipments
     {
         public long BranchId { get; set; } = default!;
         public string Name { get; set; } = default!;
-		public string? Image { get; set; } = default!;
+        public string? Image { get; set; } = default!;
 
-		public string Description { get; set; } = default!;
+        public string Description { get; set; } = default!;
 
         public string Code { get; set; } = default!;
-
-        public EquipmentType Type { get; set; } = default!;
 
         public decimal Price { get; set; } = default!;
 
@@ -28,65 +26,70 @@ namespace Domain.Aggregates.Equipments
 
         public EquipmentStatus Status { get; set; } = default!;
 
-
         public ICollection<MaintenanceHistory> MaintenanceHistories { get; set; } = [];
         public ICollection<RepairHistory> RepairHistories { get; set; } = [];
 
+        public Equipment(
+            long branchId,
+            string name,
+            string code,
+            decimal price,
+            decimal capacity,
+            EquipmentStatus status,
+            string? image = null,
+            string? description = null,
+            DateTimeOffset? lastMaintenanceDate = null,
+            DateTimeOffset? nextMaintenanceDate = null
+        )
+        {
+            BranchId = Guard.Against.NegativeOrZero(branchId, nameof(branchId));
+            Name = Guard.Against.NullOrWhiteSpace(name, nameof(name));
+            Code = Guard.Against.NullOrWhiteSpace(code, nameof(code));
+            Price = price;
+            Capacity = capacity;
+            Status = Guard.Against.EnumOutOfRange(status, nameof(status));
+            Image = image?.Trim();
+            Description = description?.Trim();
+            LastMaintenanceDate = lastMaintenanceDate;
+            NextMaintenanceDate = nextMaintenanceDate;
+        }
 
-		public Equipment(
-			long branchId,
-			string name,
-			string code,
-			EquipmentType type,
-			decimal price,
-			decimal capacity,
-			EquipmentStatus status,
-			string? image = null,
-			string? description = null,
-			DateTimeOffset? lastMaintenanceDate = null,
-			DateTimeOffset? nextMaintenanceDate = null
-		)
-		{
-			BranchId = Guard.Against.NegativeOrZero(branchId, nameof(branchId));
-			Name = Guard.Against.NullOrWhiteSpace(name, nameof(name));
-			Code = Guard.Against.NullOrWhiteSpace(code, nameof(code));
-			Type = type;
-			Price = price;
-			Capacity = capacity;
-			Status = Guard.Against.EnumOutOfRange(status, nameof(status));
-			Image = image?.Trim();
-			Description = description?.Trim();
-			LastMaintenanceDate = lastMaintenanceDate;
-			NextMaintenanceDate = nextMaintenanceDate;
-		}
-		public void Update(
-			long? branchId = null,
-			string? name = null,
-			string? description = null,
-			string? image = null,
-			string? code = null,
-			EquipmentType? type = null,
-			decimal? price = null,
-			decimal? capacity = null,
-			EquipmentStatus? status = null,
-			DateTimeOffset? lastMaintenanceDate = null,
-			DateTimeOffset? nextMaintenanceDate = null
-		)
-		{
-			if (branchId.HasValue && branchId.Value > 0) BranchId = branchId.Value;
-			if (!string.IsNullOrWhiteSpace(name)) Name = name.Trim();
-			if (!string.IsNullOrWhiteSpace(code)) Code = code.Trim();
-			if (description != null) Description = description.Trim();
-			if (image != null) Image = image.Trim();
-			if (type.HasValue) Type = type.Value;
-			if (price.HasValue) Price = price.Value;
-			if (capacity.HasValue) Capacity = capacity.Value;
-			if (status.HasValue) Status = status.Value;
-			if (lastMaintenanceDate.HasValue) LastMaintenanceDate = lastMaintenanceDate;
-			if (nextMaintenanceDate.HasValue) NextMaintenanceDate = nextMaintenanceDate;
-		}
+        public void Update(
+            long? branchId = null,
+            string? name = null,
+            string? description = null,
+            string? image = null,
+            string? code = null,
+            decimal? price = null,
+            decimal? capacity = null,
+            EquipmentStatus? status = null,
+            DateTimeOffset? lastMaintenanceDate = null,
+            DateTimeOffset? nextMaintenanceDate = null
+        )
+        {
+            if (branchId.HasValue && branchId.Value > 0)
+                BranchId = branchId.Value;
+            if (!string.IsNullOrWhiteSpace(name))
+                Name = name.Trim();
+            if (!string.IsNullOrWhiteSpace(code))
+                Code = code.Trim();
+            if (description != null)
+                Description = description.Trim();
+            if (image != null)
+                Image = image.Trim();
+            if (price.HasValue)
+                Price = price.Value;
+            if (capacity.HasValue)
+                Capacity = capacity.Value;
+            if (status.HasValue)
+                Status = status.Value;
+            if (lastMaintenanceDate.HasValue)
+                LastMaintenanceDate = lastMaintenanceDate;
+            if (nextMaintenanceDate.HasValue)
+                NextMaintenanceDate = nextMaintenanceDate;
+        }
 
-		protected override bool TryApplyDomainEvent(INotification domainEvent)
+        protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
             throw new NotImplementedException();
         }
