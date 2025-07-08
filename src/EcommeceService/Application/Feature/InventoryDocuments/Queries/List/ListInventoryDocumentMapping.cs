@@ -23,7 +23,6 @@ namespace Application.Feature.InventoryDocuments.Queries.List
                 TransactionAt = document.TransactionAt,
                 Code = document.Code,
                 Status = document.Status,
-                ArrivedAt = document.ArrivedAt,
                 Type = document.Type,
             };
     }

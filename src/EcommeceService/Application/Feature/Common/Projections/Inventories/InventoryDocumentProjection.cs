@@ -33,7 +33,6 @@ namespace Application.Feature.Common.Projections.Inventories
             TransactionAt = document.TransactionAt;
             Code = document.Code;
             Status = document.Status;
-            ArrivedAt = document.ArrivedAt;
             Type = document.Type;
         }
     }

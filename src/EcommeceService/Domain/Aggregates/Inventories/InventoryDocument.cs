@@ -17,7 +17,6 @@ namespace Domain.Aggregates.Inventories
         public DateTimeOffset? TransactionAt { get; set; }
         public string Code { get; set; } = null!;
         public InventoryStatus Status { get; set; }
-        public string? ArrivedAt { get; set; }
         public InventoryType Type { get; set; }
         public string? Note { get; set; }
         public string? CancelReason { get; set; }
@@ -30,6 +29,10 @@ namespace Domain.Aggregates.Inventories
         {
             if (status != Status)
                 Status = status;
+            if (status == InventoryStatus.Completed)
+            {
+                TransactionAt = DateTimeOffset.UtcNow;
+            }
             CancelReason = cancelReason;
         }
 
