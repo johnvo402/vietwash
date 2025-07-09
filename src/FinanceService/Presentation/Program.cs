@@ -61,10 +61,7 @@ try
     var serviceProvider = scope.ServiceProvider;
     var jobScheduler = scope.ServiceProvider.GetRequiredService<JobScheduler>();
     jobScheduler.ScheduleJobs();
-    if (!isProduction)
-    {
-        await DbInitializer.InitializeAsync(serviceProvider);
-    }
+
     #endregion
 
     app.UseHangfireDashboard(configuration);

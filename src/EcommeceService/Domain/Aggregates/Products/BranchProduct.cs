@@ -47,7 +47,7 @@ namespace Domain.Aggregates.Products
             CategoryId = Guard.Against.Negative(categoryId, nameof(categoryId));
         }
 
-        public void BranchCreateEvent() =>
+        public void BranchProductCreateEvent() =>
             Emit(new BranchProductCreateEvent() { BranchProduct = this });
 
         public void Update(

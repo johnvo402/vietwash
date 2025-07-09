@@ -5,8 +5,11 @@ using Contracts.Utils;
 using Domain.Aggregates.Enums;
 using Domain.Aggregates.Equipments;
 using Domain.Aggregates.Equipments.Enums;
+using Domain.Aggregates.Inventories;
+using Domain.Aggregates.Inventories.Enums;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
+using Domain.Aggregates.Products;
 using Domain.Aggregates.Services;
 using Domain.Aggregates.Services.Enums;
 using Domain.Aggregates.Services.Specifications;
@@ -107,6 +110,22 @@ public class DbInitializer
             else
             {
                 logger.Information("Dữ liệu thiết bị đã tồn tại, bỏ qua khởi tạo.");
+            }
+            if (!await unitOfWork.Repository<BranchProduct>().AnyAsync())
+            {
+                logger.Information("Bắt đầu khởi tạo dữ liệu sản phẩm chi nhánh...");
+
+                await InitializeBranchProductsAsync(unitOfWork, logger, cancellationToken);
+
+                logger.Information("Hoàn tất khởi tạo dữ liệu sản phẩm chi nhánh...");
+            }
+            if (!await unitOfWork.Repository<InventoryDocument>().AnyAsync())
+            {
+                logger.Information("Bắt đầu khởi tạo phiếu nhập kho...");
+
+                await InitializeInventoryDocumentsAsync(unitOfWork, logger, cancellationToken);
+
+                logger.Information("Hoàn tất khởi tạo phiếu nhập kho.");
             }
 
             await unitOfWork.CommitAsync();
@@ -540,14 +559,11 @@ public class DbInitializer
             logger.Error("Không tìm thấy người dùng có vai trò ADMIN.");
             throw new InvalidOperationException("Admin user not found.");
         }
-        var branches = user.BranchUsers?.Select(bu => bu.BranchId).Distinct().ToList();
         var units = (await unitOfWork.Repository<Unit>().ListAsync(cancellationToken)).ToList();
 
-        if (!categories.Any() || !(branches?.Any() ?? false) || !units.Any())
+        if (!categories.Any() || !units.Any())
         {
-            logger.Error(
-                "Không thể khởi tạo dịch vụ: Thiếu dữ liệu danh mục, chi nhánh hoặc đơn vị tính."
-            );
+            logger.Error("Không thể khởi tạo dịch vụ: Thiếu dữ liệu danh mục hoặc đơn vị tính.");
             throw new InvalidOperationException("Missing required Category, Branch, or Unit data.");
         }
 
@@ -558,7 +574,6 @@ public class DbInitializer
         {
             // Chọn ngẫu nhiên Category, Branch và Unit
             var category = categories[random.Next(categories.Count)];
-            var branch = branches[random.Next(branches.Count)];
             var unit = units[random.Next(units.Count)];
             var type = random.Next(2) == 0 ? TypeStatus.SingleService : TypeStatus.Combo;
 
@@ -629,7 +644,7 @@ public class DbInitializer
                 serviceName = comboServiceNames[index];
                 description = comboServiceDescriptions[index];
             }
-
+            var branch = 1L;
             // Tạo dịch vụ
             var service = new Service(
                 categoryId: category.Id,
@@ -688,6 +703,236 @@ public class DbInitializer
         foreach (var equipment in equipments)
         {
             await unitOfWork.Repository<Equipment>().AddAsync(equipment, cancellationToken);
+            await unitOfWork.SaveAsync(cancellationToken);
+        }
+    }
+
+    private static async Task InitializeBranchProductsAsync(
+        IUnitOfWork unitOfWork,
+        ILogger logger,
+        CancellationToken cancellationToken
+    )
+    {
+        var categories = await unitOfWork.Repository<Category>().ListAsync(cancellationToken);
+        var units = await unitOfWork.Repository<Unit>().ListAsync(cancellationToken);
+
+        if (!categories.Any() || !units.Any())
+        {
+            logger.Warning("Thiếu danh mục hoặc đơn vị tính để khởi tạo sản phẩm.");
+            return;
+        }
+
+        var branchId = 1L; // Chi nhánh mặc định
+        var random = new Random();
+        var products = new List<BranchProduct>();
+
+        string[] productNames =
+        {
+            "Bột giặt Omo",
+            "Nước xả Downy",
+            "Túi giặt lưới",
+            "Chất tẩy Javel",
+            "Xịt thơm quần áo",
+            "Nước giặt Ariel",
+            "Viên giặt Tide",
+            "Nước vệ sinh máy",
+            "Chổi lông gà",
+            "Găng tay cao su",
+        };
+
+        for (int i = 0; i < 10; i++)
+        {
+            var name = productNames[i];
+            var sku = $"SP-{i + 1:D4}";
+            var barcode = $"893850{i + 1000}";
+            var price = random.Next(10000, 100000);
+            var categoriesList = categories.ToList();
+            var categoryId = categoriesList[random.Next(categoriesList.Count)].Id;
+            var unitList = units.ToList();
+            var unit = unitList[random.Next(unitList.Count)];
+
+            var product = new BranchProduct(
+                branchId: branchId,
+                name: name,
+                sku: sku,
+                status: ActivationStatus.Active,
+                capitalPrice: price,
+                categoryId: categoryId,
+                description: $"Sản phẩm dùng trong giặt ủi: {name}",
+                barcode: barcode,
+                image: null
+            );
+
+            var unitRelation = new UnitRelation
+            {
+                Name = unit.Name,
+                BaseUnit = true,
+                Price = price + random.Next(1000, 5000),
+                Multiple = 1,
+                ProcessingTime = (decimal)(random.NextDouble() * 3 + 1), // 1 -> 4 giờ
+                Status = ActivationStatus.Active,
+                BranchProductId = null,
+                ServiceId = null,
+            };
+
+            product.UnitRelations.Add(unitRelation);
+            products.Add(product);
+        }
+
+        await unitOfWork.Repository<BranchProduct>().AddRangeAsync(products, cancellationToken);
+        await unitOfWork.SaveAsync(cancellationToken);
+    }
+
+    private static async Task InitializeInventoryDocumentsAsync(
+        IUnitOfWork unitOfWork,
+        ILogger logger,
+        CancellationToken cancellationToken
+    )
+    {
+        var suppliers = await unitOfWork.Repository<Supplier>().ListAsync(cancellationToken);
+        var products = await unitOfWork.Repository<BranchProduct>().ListAsync(cancellationToken);
+        var units = await unitOfWork.Repository<Unit>().ListAsync(cancellationToken);
+        var random = new Random();
+
+        if (!suppliers.Any() || !products.Any() || !units.Any())
+        {
+            logger.Warning("Thiếu nhà cung cấp, sản phẩm hoặc đơn vị tính.");
+            return;
+        }
+
+        var supplierList = suppliers.ToList();
+        var supplier = supplierList[random.Next(supplierList.Count)];
+        var branchId = 1L;
+        var toWarehouseId = 1L;
+
+        decimal totalProductAmount = 0;
+        var productSupplyings = new List<ProductSupplying>();
+
+        foreach (var product in products)
+        {
+            var unitRelation = product.UnitRelations.FirstOrDefault();
+            if (unitRelation == null)
+            {
+                logger.Warning($"Sản phẩm {product.Name} chưa có đơn vị tính.");
+                continue;
+            }
+
+            int quantity = 10;
+            decimal amount = unitRelation.Price * quantity;
+
+            totalProductAmount += amount;
+
+            productSupplyings.Add(
+                new ProductSupplying
+                {
+                    ProductId = product.Id,
+                    SupplierId = supplier.Id,
+                    Quantity = quantity,
+                    LotNumber = $"LOT-{Generator.GenerateCode("P", 4)}",
+                    Price = unitRelation.Price,
+                    UnitRelationId = unitRelation.Id,
+                    ExpiryDate = DateTimeOffset.UtcNow.AddMonths(12),
+                }
+            );
+        }
+
+        decimal totalEquipmentAmount = 0;
+        var equipmentSupplyings = new List<EquipmentSupplying>();
+
+        for (int i = 1; i <= 20; i++)
+        {
+            var unitList = units.ToList();
+            var unit = unitList[random.Next(unitList.Count)];
+            decimal price = 1500000 + i * 100000;
+            int capacity = 7 + (i % 3);
+
+            totalEquipmentAmount += price;
+
+            equipmentSupplyings.Add(
+                new EquipmentSupplying
+                {
+                    Name = $"Máy {(i % 2 == 0 ? "Sấy" : "Giặt")} {i}",
+                    Code = $"EQP-{i:D4}",
+                    Price = price,
+                    Capacity = capacity,
+                    Quantity = 1,
+                    UnitRelation = new UnitRelation
+                    {
+                        Name = unit.Name,
+                        BaseUnit = true,
+                        Multiple = 1,
+                        Price = price,
+                        ProcessingTime = 0,
+                        Status = ActivationStatus.Active,
+                    },
+                    SupplierId = supplier.Id,
+                }
+            );
+        }
+
+        decimal totalAmount = totalProductAmount + totalEquipmentAmount;
+        decimal paidAmount = totalAmount;
+
+        var document = new InventoryDocument(
+            code: Generator.GenerateCode("IM", 6),
+            amount: totalAmount,
+            type: InventoryType.Import,
+            fromWarehouseId: null,
+            toWarehouseId: toWarehouseId,
+            branchId: branchId,
+            note: "Nhập hàng khởi tạo"
+        )
+        {
+            PaidAmount = paidAmount,
+            PaymentMethod = PaymentMethod.Cash,
+        };
+
+        foreach (var p in productSupplyings)
+        {
+            document.ProductSupplyings.Add(p);
+        }
+
+        foreach (var e in equipmentSupplyings)
+        {
+            document.EquipmentSupplyings.Add(e);
+        }
+
+        foreach (var p in productSupplyings)
+        {
+            p.InventoryDocument = document;
+        }
+        foreach (var e in equipmentSupplyings)
+        {
+            e.InventoryDocument = document;
+        }
+
+        await unitOfWork.Repository<InventoryDocument>().AddAsync(document, cancellationToken);
+        await unitOfWork.SaveAsync(cancellationToken);
+
+        // 👉 Update status và phát event
+        document.UpdateStatus(InventoryStatus.Completed);
+        await unitOfWork.SaveAsync(cancellationToken);
+
+        if (paidAmount > 0)
+        {
+            var invoice = new InventoryInvoice
+            {
+                Amount = paidAmount,
+                Status = ActivationStatus.Active,
+                SupplierId = supplier.Id,
+                TransactionAt = DateTimeOffset.UtcNow,
+            };
+
+            var relation = new InventoryRelation
+            {
+                Amount = paidAmount,
+                InventoryDocument = document,
+                InventoryInvoice = invoice,
+            };
+
+            invoice.InventoryRelationships.Add(relation);
+
+            await unitOfWork.Repository<InventoryInvoice>().AddAsync(invoice, cancellationToken);
             await unitOfWork.SaveAsync(cancellationToken);
         }
     }

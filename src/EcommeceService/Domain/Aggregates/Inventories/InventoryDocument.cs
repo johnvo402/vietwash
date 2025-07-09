@@ -1,5 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using Domain.Aggregates.Inventories.Enums;
+using Domain.Aggregates.Inventories.Events;
 using Domain.Aggregates.Orders.Enums;
 using Mediator;
 using Shared.Kernel.Common;
@@ -32,6 +33,10 @@ namespace Domain.Aggregates.Inventories
             if (status == InventoryStatus.Completed)
             {
                 TransactionAt = DateTimeOffset.UtcNow;
+                if (EquipmentSupplyings.Any())
+                {
+                    Emit(new InventoryDocumentCompletedEvent { InventoryDocument = this });
+                }
             }
             CancelReason = cancelReason;
         }
@@ -63,7 +68,15 @@ namespace Domain.Aggregates.Inventories
 
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
-            throw new NotImplementedException();
+            switch (domainEvent)
+            {
+                case InventoryDocumentCompletedEvent:
+                    return true;
+
+                // Các event khác nếu có
+                default:
+                    return false;
+            }
         }
     }
 }
