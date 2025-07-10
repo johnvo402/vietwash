@@ -180,6 +180,8 @@ namespace Presentation.Routes
 				+ "{"
 				+ RouterBase.Id
 				+ "}";
+			public const string React = $"{Ecommerce}/{RouterBase.prefix}{nameof(Feedbacks)}/" + "{" + RouterBase.Id + "}/" + $"{nameof(React)}";
+
 		}
 	}
 }

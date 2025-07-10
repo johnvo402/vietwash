@@ -1,5 +1,5 @@
 ﻿using Application.Common.Auth;
-using Application.Feature.Feedbacks.Command.React;
+using Application.Feature.Feedbacks.Command.Update;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -10,14 +10,14 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Presentation.Endpoints.Feedbacks
 {
-	public class ReactFeedbackEndpoint(ISender sender)
-	: EndpointBaseAsync.WithRequest<ReactFeedbackCommand>.WithActionResult<ApiResponse>
+	public class UpdateFeedbackEndpoint(ISender sender)
+		: EndpointBaseAsync.WithRequest<UpdateFeedbackCommand>.WithActionResult<ApiResponse>
 	{
-		[HttpPut(Router.FeedbackRoute.React)]
-		[SwaggerOperation(Tags = [Router.FeedbackRoute.Tags], Summary = "React to feedback")]
+		[HttpPut(Router.FeedbackRoute.GetUpdateDelete)]
+		[SwaggerOperation(Tags = [Router.FeedbackRoute.Tags], Summary = "Update feedback")]
 		[AuthorizeBy]
 		public override async Task<ActionResult<ApiResponse>> HandleAsync(
-			ReactFeedbackCommand request,
+			UpdateFeedbackCommand request,
 			CancellationToken cancellationToken = default
 		)
 		{

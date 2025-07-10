@@ -4,5 +4,5 @@ using Mediator;
 
 namespace Application.Feature.Feedbacks.Command.Create
 {
-	public class CreateFeedbackCommand : CreateFeedbackModel, IRequest<Result>;
+	public class CreateFeedbackCommand : FeedbackModel, IRequest<Result>;
 }

@@ -22,7 +22,7 @@ namespace Application.Feature.Feedbacks.Command.Create
 
 		private void ApplyRules()
 		{
-			Include(new CreateFeedbackValidator(_unitOfWork, _accessorService));
+			Include(new FeedbackValidator(_unitOfWork, _accessorService));
 		}
 	}
 }

@@ -1,5 +1,4 @@
 ﻿using Ardalis.GuardClauses;
-using Domain.Aggregates.Enums;
 using Domain.Aggregates.Users;
 using Shared.Kernel.Common;
 
@@ -54,6 +53,21 @@ namespace Domain.Aggregates.Feedbacks
 			}
 			Likes = 0;
 			Dislikes = 0;
+		}
+
+		public void Update(
+			long? branchId,
+			long? serviceId,
+			string? comment,
+			long? customerId = null,
+			int? rating = null
+		)
+		{
+			if (branchId.HasValue && branchId.Value > 0) BranchId = branchId.Value;
+			if (serviceId.HasValue && serviceId.Value > 0) ServiceId = serviceId.Value;
+			if (!string.IsNullOrWhiteSpace(comment)) Comment = comment;
+			if (customerId.HasValue && customerId.Value > 0) CustomerId = customerId.Value;
+			if (rating.HasValue) Rating = rating.Value;
 		}
 	}
 }

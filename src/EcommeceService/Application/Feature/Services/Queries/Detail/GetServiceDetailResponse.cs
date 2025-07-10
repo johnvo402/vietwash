@@ -1,4 +1,5 @@
-﻿using Application.Feature.Common.Projections.Services;
+﻿using Application.Common.Security;
+using Application.Feature.Common.Projections.Services;
 using Domain.Aggregates.Users.Enums;
 
 namespace Application.Feature.Services.Queries.Detail
@@ -17,6 +18,7 @@ namespace Application.Feature.Services.Queries.Detail
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
         public CustomerGroup? CustomerGroup { get; set; }
+		[File]
 		public string? Avatar { get; set; } 
 	}
 }

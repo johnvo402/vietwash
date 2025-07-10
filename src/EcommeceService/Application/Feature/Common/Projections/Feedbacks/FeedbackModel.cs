@@ -1,7 +1,7 @@
 ﻿
 namespace Application.Feature.Common.Projections.Feedbacks
 {
-	public class CreateFeedbackModel
+	public class FeedbackModel
 	{
 		public long BranchId { get; set; }
 		public long CustomerId { get; set; }

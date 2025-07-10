@@ -5,7 +5,7 @@ namespace Application.Feature.Feedbacks.Command.Create
 {
 	public static class CreateFeedbackMapping
 	{
-		public static Feedback ToEntityCreate(this CreateFeedbackModel model)
+		public static Feedback ToEntityCreate(this FeedbackModel model)
 		{
 			return new Feedback(
 				branchId: model.BranchId,

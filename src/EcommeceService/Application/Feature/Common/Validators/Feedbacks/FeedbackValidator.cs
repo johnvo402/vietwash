@@ -9,12 +9,12 @@ using FluentValidation;
 
 namespace Application.Feature.Common.Validators.Feedbacks
 {
-	public class CreateFeedbackValidator : AbstractValidator<CreateFeedbackModel>
+	public class FeedbackValidator : AbstractValidator<FeedbackModel>
 	{
 		private readonly IUnitOfWork unitOfWork;
 		private readonly IActionAccessorService accessorService;
 
-		public CreateFeedbackValidator(IUnitOfWork unitOfWork, IActionAccessorService accessorService)
+		public FeedbackValidator(IUnitOfWork unitOfWork, IActionAccessorService accessorService)
 		{
 			this.unitOfWork = unitOfWork;
 			this.accessorService = accessorService;
@@ -27,7 +27,7 @@ namespace Application.Feature.Common.Validators.Feedbacks
 				.NotEmpty()
 				.WithState(x =>
 					Messager
-						.Create<CreateFeedbackModel>(nameof(Feedback))
+						.Create<FeedbackModel>(nameof(Feedback))
 						.Property(x => x.Comment)
 						.Message(MessageType.Null)
 						.Negative()
@@ -36,7 +36,7 @@ namespace Application.Feature.Common.Validators.Feedbacks
 				.MaximumLength(500)
 				.WithState(x =>
 					Messager
-						.Create<CreateFeedbackModel>(nameof(Feedback))
+						.Create<FeedbackModel>(nameof(Feedback))
 						.Property(x => x.Comment)
 						.Message(MessageType.MaximumLength)
 						.Build()
@@ -45,7 +45,7 @@ namespace Application.Feature.Common.Validators.Feedbacks
 				.GreaterThan(0)
 				.WithState(x =>
 					Messager
-						.Create<CreateFeedbackModel>(nameof(Feedback))
+						.Create<FeedbackModel>(nameof(Feedback))
 						.Property(x => x.Rating)
 						.Message(MessageType.GreaterThan)
 						.Negative()
@@ -54,7 +54,7 @@ namespace Application.Feature.Common.Validators.Feedbacks
 				.LessThanOrEqualTo(5)
 				.WithState(x =>
 					Messager
-						.Create<CreateFeedbackModel>(nameof(Feedback))
+						.Create<FeedbackModel>(nameof(Feedback))
 						.Property(x => x.Rating)
 						.Message(MessageType.LessThanEqual)
 						.Negative()
@@ -64,7 +64,7 @@ namespace Application.Feature.Common.Validators.Feedbacks
 				.NotEmpty()
 				.WithState(x =>
 					Messager
-						.Create<CreateFeedbackModel>(nameof(Feedback))
+						.Create<FeedbackModel>(nameof(Feedback))
 						.Property(x => x.ServiceId)
 						.Message(MessageType.Null)
 						.Negative()
@@ -74,7 +74,7 @@ namespace Application.Feature.Common.Validators.Feedbacks
 				.NotEmpty()
 				.WithState(x =>
 					Messager
-						.Create<CreateFeedbackModel>(nameof(Feedback))
+						.Create<FeedbackModel>(nameof(Feedback))
 						.Property(x => x.CustomerId)
 						.Message(MessageType.Null)
 						.Negative()
@@ -85,7 +85,7 @@ namespace Application.Feature.Common.Validators.Feedbacks
 					IsCustomerUseServiceAsync(model.CustomerId, model.ServiceId, cancellationToken))
 				.WithState(x =>
 					Messager
-						.Create<CreateFeedbackModel>(nameof(Feedback))
+						.Create<FeedbackModel>(nameof(Feedback))
 						.Property(x => x.CustomerId)
 						.Message(MessageType.Existence)
 						.Negative()
