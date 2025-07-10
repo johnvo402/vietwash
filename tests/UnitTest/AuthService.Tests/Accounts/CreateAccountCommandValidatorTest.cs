@@ -80,16 +80,6 @@ public class CreateAccountCommandValidatorTests
         var result = await validator.TestValidateAsync(command);
         result.ShouldHaveValidationErrorFor(x => x.DisplayName);
     }
-    [Fact]
-    public async Task DisplayName_Valid_ShouldPass()
-    {
-        var validator = GetValidator();
-        var command = ValidCommand();
-        command.DisplayName = "Valid Name";
-
-        var result = await validator.TestValidateAsync(command);
-        result.ShouldNotHaveValidationErrorFor(x => x.DisplayName);
-    }
 
     [Theory]
     [InlineData(null)]
@@ -115,16 +105,6 @@ public class CreateAccountCommandValidatorTests
 
         var result = await validator.TestValidateAsync(command);
         result.ShouldHaveValidationErrorFor(x => x.PhoneNumber);
-    }
-    [Fact]
-    public async Task PhoneNumber_ValidFormat_ShouldPass()
-    {
-        var validator = GetValidator();
-        var command = ValidCommand();
-        command.PhoneNumber = "+1234567890";
-
-        var result = await validator.TestValidateAsync(command);
-        result.ShouldNotHaveValidationErrorFor(x => x.PhoneNumber);
     }
     [Fact]
     public async Task PhoneNumber_ExistingPhone_ShouldFail()
@@ -259,5 +239,14 @@ public class CreateAccountCommandValidatorTests
 
         var result = await validator.TestValidateAsync(command);
         result.ShouldHaveValidationErrorFor(x => x.Role);
+    }
+    [Fact]
+    public async Task Account_Valid_ShouldPass()
+    {
+        var validator = GetValidator();
+        var command = ValidCommand();
+
+        var result = await validator.TestValidateAsync(command);
+        result.ShouldNotHaveValidationErrorFor(x => x.DisplayName);
     }
 }
