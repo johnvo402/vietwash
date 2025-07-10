@@ -323,6 +323,107 @@ Each microservice (AuthService, EcommerceService, FinanceService, ProjectService
   make sql
   ```
 
+## Basic Usage
+
+### Step run
+
+- Open the terminal in the root of the project
+- Run `make dev SERVICE="redis database" `
+- Run `make external`
+- Run project
+
+### Filter
+
+To do filter in this template, we use LHS Brackets.
+
+LHS is the way to encode operators is the use of square brackets [] on the key name.
+
+For example
+
+```
+GET api/accounts?accounts[birthDay][$gt]=1990-10-01
+```
+
+This example indicates filtering out accounts whose birthdays are after 1990/10/01
+
+All support operations:
+
+| Operator      | Description                         |
+| ------------- | ----------------------------------- |
+| $eq           | Equal                               |
+| $eqi          | Equal (case-insensitive)            |
+| $ne           | Not equal                           |
+| $nei          | Not equal (case-insensitive)        |
+| $in           | Included in an array                |
+| $notin        | Not included in an array            |
+| $lt           | Less than                           |
+| $lte          | Less than or equal to               |
+| $gt           | Greater than                        |
+| $gte          | Greater than or equal to            |
+| $between      | Is between                          |
+| $notcontains  | Does not contain                    |
+| $notcontainsi | Does not contain (case-insensitive) |
+| $contains     | Contains                            |
+| $containsi    | Contains (case-insensitive)         |
+| $startswith   | Starts with                         |
+| $endswith     | Ends with                           |
+
+Some Examples:
+
+```
+GET /api/accounts?filter[gender][$in][0]=Male&filter[gender][$in][1]=Female
+```
+
+```
+GET /api/accounts?filter[gender][$between][0]=Male&filter[gender][$between][1]=Female
+```
+
+```
+GET /api/accounts?filter[displayName][$contains]=abc
+```
+
+$and and $or operator:
+
+```
+GET /api/accounts/filter[$and][0][displayName][$containsi]=sa&filter[$and][1][email][$eq]=thu@gmail.com
+```
+
+```JSON
+{
+  "filter": {
+    "$and": {
+      "displayName": {
+        "$eq": "sa"
+      },
+      "email": {
+        "$eq": "thu@gmail.com"
+      }
+    }
+  }
+}
+```
+
+```
+GET /api/accounts/filter[$or][0][$and][0][role][$eq]=ADMIN&filter[$or][1][displayName][$eq]=Thu
+```
+
+```JSON
+{
+    "filter": {
+        "$or": {
+            "$and":{
+                "role": {
+                    "$eq": "ADMIN"
+                }
+            },
+            "displayName": {
+                    "$eq": "Thu"
+                }
+        }
+    }
+}
+```
+
 ## Contributing
 
 1. Fork the repository.

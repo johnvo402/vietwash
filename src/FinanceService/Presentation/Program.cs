@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Application;
+using Application.Common.Extensions;
 using Application.Jobs;
 using Contracts.Converters;
 using Contracts.Extensions;
@@ -78,7 +79,7 @@ try
         app.AddLog(Log.Logger, "docs", "/api/health");
     }
     app.UseStatusCodePages();
-    app.UseExceptionHandler();
+    app.UseCustomExceptionHandler();
     app.UseAuthentication();
     app.CurrentUser();
     app.UseAuthorization();

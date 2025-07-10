@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Application;
+using Application.Common.Extensions;
 using Contracts.Converters;
 using Contracts.Extensions;
 using HealthChecks.UI.Client;
@@ -77,7 +78,7 @@ try
     }
 
     app.UseStatusCodePages();
-    app.UseExceptionHandler();
+    app.UseCustomExceptionHandler();
     app.UseAuthentication();
     app.CurrentUser();
     app.UseAuthorization();
