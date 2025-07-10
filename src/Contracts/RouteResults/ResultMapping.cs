@@ -64,7 +64,7 @@ public static class ResultMapping
 
     public static ActionResult<ApiResponse<T>> ToCreatedResult<T>(
         this Result<T> result,
-        object id,
+        object routeValues,
         string route
     )
         where T : class
@@ -72,7 +72,7 @@ public static class ResultMapping
         return result.Match(
             onSuccess: data => new CreatedAtRouteResult(
                 route,
-                new { id },
+                routeValues,
                 new ApiResponse<T>(data, Message.SUCCESS)
             ),
             onFailure: error => new ObjectResult(error.ToProblemDetails())

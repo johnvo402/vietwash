@@ -5,7 +5,6 @@ using Contracts.Converters;
 using Contracts.Extensions;
 using HealthChecks.UI.Client;
 using Infrastructure;
-using Infrastructure.Data;
 using Infrastructure.Services.BackgroundJobs;
 using Infrastructure.Services.Hangfires;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
