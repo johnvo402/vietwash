@@ -4,6 +4,8 @@
     <ProjectReference Include="..\..\..\src\Contracts\Contracts.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="JunitXml.TestLogger" />
+    <PackageReference Include="Ardalis.ApiEndpoints" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="AutoFixture" />
     <PackageReference Include="moq" />

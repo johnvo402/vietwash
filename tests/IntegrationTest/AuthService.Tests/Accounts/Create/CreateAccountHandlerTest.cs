@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Application.Features.Accounts.Commands.Create;
 using AutoFixture;
 using Contracts.ApiWrapper;
@@ -33,7 +34,11 @@ namespace AuthService.Test.Accounts.Create
             var json = await responseApi.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<ApiResponse<CreateAccountResponse>>(
                 json,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    Converters = { new JsonStringEnumConverter() },
+                }
             );
             result.ShouldNotBeNull();
             result.Status.ShouldBe(200);
