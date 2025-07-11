@@ -4,13 +4,12 @@ using Contracts.Routers;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Application.Feature.Feedbacks.Command.Update
+namespace Application.Feature.Feedbacks.Command.Update;
+
+public class UpdateFeedbackCommand : IRequest<Result>
 {
-	public class UpdateFeedbackCommand : IRequest<Result>
-	{
-		[FromRoute(Name = RouterBase.Id)]
-		public long FeedbackId { get; set; } = default!;
-		[FromBody]
-		public FeedbackModel Feedback { get; set; } = default!;
-	}
+	[FromRoute(Name = RouterBase.Id)]
+	public long FeedbackId { get; set; } = default!;
+	[FromBody]
+	public FeedbackModel Feedback { get; set; } = default!;
 }
