@@ -20,6 +20,8 @@ namespace Domain.Aggregates.Feedbacks
 		public User? Customer { get; set; }
 		public User? Staff { get; set; }
 		public bool Disable { get; set; } = false;
+		public ICollection<FeedbackReaction> Reactions { get; set; } = [];
+
 		public Feedback() { }
 
 		public Feedback(

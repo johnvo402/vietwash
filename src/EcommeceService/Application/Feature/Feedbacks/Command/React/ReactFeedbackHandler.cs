@@ -18,8 +18,10 @@ namespace Application.Feature.Feedbacks.Command.React
 			CancellationToken cancellationToken
 		)
 		{
-			Feedback? existingFeedback = await unitOfWork
-				.Repository<Feedback>()
+			var feedbackRepo = unitOfWork.Repository<Feedback>();
+			var reactionRepo = unitOfWork.Repository<FeedbackReaction>();
+
+			Feedback? existingFeedback = await feedbackRepo
 				.FindByConditionAsync(
 					s => s.Id == request.FeedbackId && !s.Disable,
 					cancellationToken
@@ -38,14 +40,54 @@ namespace Application.Feature.Feedbacks.Command.React
 				);
 			}
 
-			if (request.IsLike) existingFeedback.Likes++; else existingFeedback.Dislikes++;
 			try
 			{
 				DbTransaction transaction = await unitOfWork.BeginTransactionAsync(
 					cancellationToken
 				);
 
-				await unitOfWork.Repository<Feedback>().UpdateAsync(existingFeedback);
+				var reaction = await unitOfWork
+				.Repository<FeedbackReaction>()
+				.FindByConditionAsync(r =>
+					r.FeedbackId == request.FeedbackId &&
+					r.CustomerId == request.FeedbackReaction.CustomerId,
+					cancellationToken
+				);
+				if (reaction == null)
+				{
+					await reactionRepo.AddAsync(new FeedbackReaction
+					{
+						FeedbackId = request.FeedbackId,
+						CustomerId = request.FeedbackReaction.CustomerId,
+						IsLike = request.FeedbackReaction.IsLike
+					});
+
+					if (request.FeedbackReaction.IsLike) existingFeedback.Likes++;
+					else existingFeedback.Dislikes++;
+				}
+				else if (reaction.IsLike != request.FeedbackReaction.IsLike)
+				{
+					if (request.FeedbackReaction.IsLike)
+					{
+						existingFeedback.Likes++;
+						existingFeedback.Dislikes--;
+					}
+					else
+					{
+						existingFeedback.Dislikes++;
+						existingFeedback.Likes--;
+					}
+
+					reaction.IsLike = request.FeedbackReaction.IsLike;
+					await reactionRepo.UpdateAsync(reaction);
+				}
+				else
+				{
+					return Result.Success();
+				} 
+					
+
+				await feedbackRepo.UpdateAsync(existingFeedback);
 				await unitOfWork.SaveAsync(cancellationToken);
 				await unitOfWork.CommitAsync(cancellationToken);
 
