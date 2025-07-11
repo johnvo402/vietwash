@@ -2,7 +2,6 @@
 using Contracts.ApiWrapper;
 using Mediator;
 
-namespace Application.Feature.Feedbacks.Command.Create
-{
-	public class CreateFeedbackCommand : FeedbackModel, IRequest<Result>;
-}
+namespace Application.Feature.Feedbacks.Command.Create;
+
+public class CreateFeedbackCommand : FeedbackModel, IRequest<Result>;
