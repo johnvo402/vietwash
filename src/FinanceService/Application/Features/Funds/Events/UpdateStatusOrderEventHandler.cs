@@ -1,7 +1,6 @@
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Funds;
-using Domain.Aggregates.Funds.Enums;
 using Mediator;
 
 namespace Application.Features.Funds.Events
@@ -15,21 +14,14 @@ namespace Application.Features.Funds.Events
         )
         {
             Fund fund = request.Payload!.ToFund();
-
-            if (fund.Status == FundStatus.Confirmed)
-            {
-                fund.TransactionDate = DateTimeOffset.UtcNow;
-            }
-            else
-            {
-                fund.TransactionDate = null;
-            }
-
+            Transaction transaction = request.Payload!.ToTransaction();
             try
             {
                 _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
 
                 await unitOfWork.Repository<Fund>().AddAsync(fund, cancellationToken);
+
+                await unitOfWork.Repository<Transaction>().AddAsync(transaction, cancellationToken);
 
                 await unitOfWork.SaveAsync(cancellationToken);
 

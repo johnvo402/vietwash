@@ -13,12 +13,28 @@ namespace Presentation.Routes
             public const string GetUpdateDelete =
                 $"{Finance}/{RouterBase.prefix}{nameof(Funds)}/" + "{" + RouterBase.Id + "}";
         }
+
         public static class FundBehaviorRoute
         {
             public const string Tags = $"{nameof(FundBehaviorRoute)} endpoint";
-            public const string FundBehaviors = $"{Finance}/{RouterBase.prefix}{nameof(FundBehaviors)}";
+            public const string FundBehaviors =
+                $"{Finance}/{RouterBase.prefix}{nameof(FundBehaviors)}";
             public const string GetUpdateDelete =
-                $"{Finance}/{RouterBase.prefix}{nameof(FundBehaviors)}/" + "{" + RouterBase.Id + "}";
+                $"{Finance}/{RouterBase.prefix}{nameof(FundBehaviors)}/"
+                + "{"
+                + RouterBase.Id
+                + "}";
+        }
+
+        public static class TransactionRoute
+        {
+            public const string Tags = $"{nameof(TransactionRoute)} endpoint";
+            public const string Transaction = $"{Finance}/{RouterBase.prefix}{nameof(Transaction)}";
+            public const string GetCustomerPoint =
+                $"{Finance}/{RouterBase.prefix}{nameof(Transaction)}/{nameof(GetCustomerPoint)}"
+                + "{"
+                + RouterBase.Id
+                + "}";
         }
     }
 }
