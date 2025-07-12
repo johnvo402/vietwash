@@ -12,21 +12,26 @@ namespace Application.Feature.Feedbacks.Command.Update
 	{
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly IActionAccessorService _accessorService;
+		private readonly ICurrentAccount _currentCustomer;
+
 
 		public UpdateFeedbackCommandValidator(
 			IUnitOfWork unitOfWork,
-			IActionAccessorService accessorService
+			IActionAccessorService accessorService,
+			ICurrentAccount currentCustomer
+
 		)
 		{
 			_unitOfWork = unitOfWork;
 			_accessorService = accessorService;
+			_currentCustomer = currentCustomer;
 			ApplyRules();
 		}
 
 		private void ApplyRules()
 		{
 			RuleFor(x => x.Feedback)
-				.SetValidator(new FeedbackValidator(_unitOfWork, _accessorService));
+				.SetValidator(new FeedbackValidator(_unitOfWork, _accessorService, _currentCustomer));
 			RuleFor(x => x.FeedbackId)
 				.NotEmpty()
 				.WithState(x =>
@@ -48,7 +53,7 @@ namespace Application.Feature.Feedbacks.Command.Update
 				);
 			RuleFor(x => x)
 				.MustAsync((command, cancellation) =>
-					IsEditableAsync(command.FeedbackId, command.Feedback.CustomerId, cancellation))
+					IsEditableAsync(command.FeedbackId, _currentCustomer.Session.Id, cancellation))
 				.WithState(x =>
 						Messager
 							.Create<Feedback>()

@@ -9,20 +9,23 @@ namespace Application.Feature.Feedbacks.Command.Create
 	{
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly IActionAccessorService _accessorService;
+		private readonly ICurrentAccount _currentCustomer;
 
 		public CreateFeedbackCommandValidator(
 			IUnitOfWork unitOfWork,
-			IActionAccessorService accessorService
+			IActionAccessorService accessorService,
+			ICurrentAccount currentCustomer
 		)
 		{
 			_unitOfWork = unitOfWork;
 			_accessorService = accessorService;
+			_currentCustomer = currentCustomer;
 			ApplyRules();
 		}
 
 		private void ApplyRules()
 		{
-			Include(new FeedbackValidator(_unitOfWork, _accessorService));
+			Include(new FeedbackValidator(_unitOfWork, _accessorService, _currentCustomer));
 		}
 	}
 }

@@ -1,13 +1,16 @@
 ﻿using Application.Feature.Common.Projections.Feedbacks;
 using Application.Feature.Services.Queries.Detail;
 using Domain.Aggregates.Feedbacks;
+using Domain.Aggregates.Feedbacks.Enums;
 using System.Linq.Expressions;
 
 namespace Application.Feature.Feedbacks.Queries.List
 {
 	public class ListFeedbackMapping
 	{
-		public static Expression<Func<Feedback, ListFeedbackResponse>> Selector()
+		public static Expression<Func<Feedback, ListFeedbackResponse>> Selector(
+			IReadOnlyDictionary<long, bool?> userReactions
+		)
 		{
 			return feedback => new ListFeedbackResponse
 			{
@@ -20,6 +23,12 @@ namespace Application.Feature.Feedbacks.Queries.List
 				Rating = feedback.Rating,
 				Likes = feedback.Likes,
 				Dislikes = feedback.Dislikes,
+
+				ReactionStatus = userReactions.ContainsKey(feedback.Id)
+				? (userReactions[feedback.Id] == true
+					? ReactionStatus.Liked
+					: ReactionStatus.Disliked)
+				: ReactionStatus.None,
 
 				CreatedUser = feedback.Customer != null
 					? new UserDTO

@@ -5,11 +5,12 @@ using Contracts.ApiWrapper;
 using Contracts.Common.QueryStringProcessing;
 using Domain.Aggregates.Feedbacks;
 using Domain.Aggregates.Feedbacks.Specifications;
+using Application.Common.Interfaces.Services;
 
 
 namespace Application.Feature.Feedbacks.Queries.List
 {
-	public class ListFeedbackHandler(IUnitOfWork unitOfWork)
+	public class ListFeedbackHandler(IUnitOfWork unitOfWork, ICurrentAccount currentCustomer)
 	: IRequestHandler<ListFeedbackQuery, Result<PaginationResponse<ListFeedbackResponse>>>
 	{
 		public async ValueTask<Result<PaginationResponse<ListFeedbackResponse>>> Handle(
@@ -26,12 +27,25 @@ namespace Application.Feature.Feedbacks.Queries.List
 					return validation;
 				}
 
+				var userReactions = await unitOfWork
+					.DynamicReadOnlyRepository<FeedbackReaction>()
+					.ListAsync(
+						new FeedbackReactionByCustomerSpec(currentCustomer.Id), 
+						query, 
+						cancellationToken
+					);
+				var reactionDict = userReactions.ToDictionary(
+					r => r.FeedbackId,
+					r => (bool?)r.IsLike
+				);
+
+
 				var response = await unitOfWork
 					.DynamicReadOnlyRepository<Feedback>()
 					.PagedListAsync(
 						new ListFeedbackSpecification(),
 						query,
-						ListFeedbackMapping.Selector(),
+						ListFeedbackMapping.Selector(reactionDict),
 						cancellationToken
 					);
 

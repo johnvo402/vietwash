@@ -1,4 +1,5 @@
 ﻿using Application.Feature.Services.Queries.Detail;
+using Domain.Aggregates.Feedbacks.Enums;
 
 namespace Application.Feature.Common.Projections.Feedbacks
 {
@@ -14,6 +15,7 @@ namespace Application.Feature.Common.Projections.Feedbacks
 		public int Dislikes { get; set; }
 		public UserDTO? CreatedUser { get; set; }
 		public List<ReplyProjection>? Replies { get; set; }
+		public ReactionStatus ReactionStatus{ get; set; }
 	}
 
 	public class ReplyProjection

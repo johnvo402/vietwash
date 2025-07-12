@@ -9,7 +9,6 @@ namespace Application.Feature.Feedbacks.Command.Create
 		{
 			return new Feedback(
 				branchId: model.BranchId,
-				customerId: model.CustomerId,
 				serviceId: model.ServiceId,
 				comment: model.Comment,
 				rating: model.Rating

@@ -28,7 +28,6 @@ namespace Domain.Aggregates.Feedbacks
 			long branchId,
 			long serviceId,
 			string comment,
-			long? customerId = null,
 			int? rating = null,
 			long? staffId = null,
 			long? parentId = null
@@ -41,7 +40,6 @@ namespace Domain.Aggregates.Feedbacks
 			// Nếu là Feedback gốc từ Customer
 			if (parentId == null)
 			{
-				CustomerId = Guard.Against.NegativeOrZero(customerId ?? 0, nameof(customerId));
 				Rating = Guard.Against.NegativeOrZero(rating ?? 0, nameof(rating));
 				StaffId = null;
 			}
@@ -50,7 +48,6 @@ namespace Domain.Aggregates.Feedbacks
 			{
 				ParentId = Guard.Against.NegativeOrZero(parentId.Value, nameof(parentId));
 				StaffId = Guard.Against.NegativeOrZero(staffId ?? 0, nameof(staffId));
-				CustomerId = null;
 				Rating = null;
 			}
 			Likes = 0;

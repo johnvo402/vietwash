@@ -11,7 +11,6 @@ public static class UpdateFeedbackMapping
 			branchId: model.BranchId,
 			serviceId: model.ServiceId,
 			comment: model.Comment,
-			customerId: model.CustomerId,
 			rating: model.Rating
 		);
 	}

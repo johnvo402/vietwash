@@ -1,4 +1,5 @@
-﻿using Application.Common.Interfaces.UnitOfWorks;
+﻿using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Feedbacks;
 using Mediator;
@@ -6,7 +7,7 @@ using System.Data.Common;
 
 namespace Application.Feature.Feedbacks.Command.Create
 {
-	public class CreateFeedbackHandler(IUnitOfWork unitOfWork)
+	public class CreateFeedbackHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
 		: IRequestHandler<CreateFeedbackCommand, Result>
 	{
 		public async ValueTask<Result> Handle(
@@ -15,7 +16,7 @@ namespace Application.Feature.Feedbacks.Command.Create
 		)
 		{
 			Feedback mappingFeedback = request.ToEntityCreate();
-
+			mappingFeedback.CustomerId = currentUser.Session!.Id!;
 			try
 			{
 				DbTransaction transaction = await unitOfWork.BeginTransactionAsync(

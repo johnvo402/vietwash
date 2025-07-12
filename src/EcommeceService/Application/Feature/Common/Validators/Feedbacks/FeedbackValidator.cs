@@ -13,11 +13,13 @@ namespace Application.Feature.Common.Validators.Feedbacks
 	{
 		private readonly IUnitOfWork unitOfWork;
 		private readonly IActionAccessorService accessorService;
+		private readonly ICurrentAccount currentCustomer;
 
-		public FeedbackValidator(IUnitOfWork unitOfWork, IActionAccessorService accessorService)
+		public FeedbackValidator(IUnitOfWork unitOfWork, IActionAccessorService accessorService, ICurrentAccount currentCustomer)
 		{
 			this.unitOfWork = unitOfWork;
 			this.accessorService = accessorService;
+			this.currentCustomer = currentCustomer;
 			ApplyRules();
 		}
 
@@ -60,21 +62,12 @@ namespace Application.Feature.Common.Validators.Feedbacks
 						.Negative()
 						.Build()
 				);
-			RuleFor(x => x.ServiceId)
+			
+			RuleFor(x => currentCustomer.Session.Id)
 				.NotEmpty()
 				.WithState(x =>
 					Messager
-						.Create<FeedbackModel>(nameof(Feedback))
-						.Property(x => x.ServiceId)
-						.Message(MessageType.Null)
-						.Negative()
-						.Build()
-				);
-			RuleFor(x => x.CustomerId)
-				.NotEmpty()
-				.WithState(x =>
-					Messager
-						.Create<FeedbackModel>(nameof(Feedback))
+						.Create<Feedback>()
 						.Property(x => x.CustomerId)
 						.Message(MessageType.Null)
 						.Negative()
@@ -82,11 +75,11 @@ namespace Application.Feature.Common.Validators.Feedbacks
 				);
 			RuleFor(x => x)
 				.MustAsync((model, cancellationToken) =>
-					IsCustomerUseServiceAsync(model.CustomerId, model.ServiceId, cancellationToken))
+					IsCustomerUseServiceAsync(currentCustomer.Session.Id, model.ServiceId, cancellationToken))
 				.WithState(x =>
 					Messager
 						.Create<FeedbackModel>(nameof(Feedback))
-						.Property(x => x.CustomerId)
+						.Property(x => currentCustomer.Session.Id)
 						.Message(MessageType.Existence)
 						.Negative()
 						.Build()
