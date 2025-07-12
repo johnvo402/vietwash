@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    partial class TheDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250712112654_20250712182647_Ecommerce_Migration")]
+    partial class _20250712182647_Ecommerce_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -85,6 +88,10 @@ namespace Infrastructure.Data.Migrations
                     b.Property<byte>("Status")
                         .HasColumnType("smallint")
                         .HasColumnName("status");
+
+                    b.Property<byte>("Type")
+                        .HasColumnType("smallint")
+                        .HasColumnName("type");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -383,9 +390,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("feedback_id");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer")
-                        .HasColumnName("type");
+                    b.Property<bool>("IsLike")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_like");
 
                     b.HasKey("Id")
                         .HasName("pk_feedback_reaction");
@@ -436,6 +443,11 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("quantity");
 
+                    b.Property<string>("Sku")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("sku");
+
                     b.Property<long>("SupplierId")
                         .HasColumnType("bigint")
                         .HasColumnName("supplier_id");
@@ -468,6 +480,10 @@ namespace Infrastructure.Data.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric")
                         .HasColumnName("amount");
+
+                    b.Property<string>("ArrivedAt")
+                        .HasColumnType("text")
+                        .HasColumnName("arrived_at");
 
                     b.Property<long?>("BranchId")
                         .HasColumnType("bigint")
@@ -755,6 +771,11 @@ namespace Infrastructure.Data.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer")
                         .HasColumnName("quantity");
+
+                    b.Property<string>("Sku")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("sku");
 
                     b.Property<long>("SupplierId")
                         .HasColumnType("bigint")
@@ -2134,13 +2155,6 @@ namespace Infrastructure.Data.Migrations
                         .HasForeignKey("ParentId")
                         .HasConstraintName("fk_feedback_feedback_parent_id");
 
-                    b.HasOne("Domain.Aggregates.Services.Service", "Service")
-                        .WithMany()
-                        .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_feedback_service_service_id");
-
                     b.HasOne("Domain.Aggregates.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -2149,8 +2163,6 @@ namespace Infrastructure.Data.Migrations
                         .HasConstraintName("fk_feedback_user_user_id");
 
                     b.Navigation("Parent");
-
-                    b.Navigation("Service");
 
                     b.Navigation("User");
                 });
