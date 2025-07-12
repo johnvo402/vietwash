@@ -42,7 +42,7 @@ namespace Application.Feature.Feedbacks.Command.React
             var react = existingFeedback.Reactions.FirstOrDefault(r => r.CustomerId == customerId);
             if (react is not null)
             {
-                react.IsLike = request.FeedbackReaction.IsLike;
+                react.Type = request.FeedbackReaction.ReactionType;
             }
             else
             {
@@ -50,7 +50,7 @@ namespace Application.Feature.Feedbacks.Command.React
                     new FeedbackReaction
                     {
                         CustomerId = customerId,
-                        IsLike = request.FeedbackReaction.IsLike,
+                        Type = request.FeedbackReaction.ReactionType,
                     }
                 );
             }

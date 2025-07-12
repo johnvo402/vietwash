@@ -19,11 +19,11 @@ namespace Application.Feature.Feedbacks.Queries.List
 
                 Comment = feedback.Comment,
                 Rating = feedback.Rating,
-                Likes = feedback.Reactions.Where(r => r.IsLike).Count(),
-                Dislikes = feedback.Reactions.Where(r => !r.IsLike).Count(),
+                Likes = feedback.Reactions.Where(r => r.Type == ReactionType.Liked).Count(),
+                Dislikes = feedback.Reactions.Where(r => r.Type == ReactionType.Disliked).Count(),
                 ReactionType = feedback
                     .Reactions.Where(r => r.CustomerId == customerId)
-                    .Select(r => r.IsLike ? ReactionType.Liked : ReactionType.Disliked)
+                    .Select(r => r.Type)
                     .FirstOrDefault(),
                 CreatedUser = feedback.User != null ? feedback.User.UserDTOResponse() : null,
                 Replies = feedback
