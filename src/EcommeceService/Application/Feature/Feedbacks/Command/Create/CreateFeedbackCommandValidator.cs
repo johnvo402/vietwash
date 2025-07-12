@@ -5,27 +5,31 @@ using FluentValidation;
 
 namespace Application.Feature.Feedbacks.Command.Create
 {
-	public class CreateFeedbackCommandValidator : AbstractValidator<CreateFeedbackCommand>
-	{
-		private readonly IUnitOfWork _unitOfWork;
-		private readonly IActionAccessorService _accessorService;
-		private readonly ICurrentAccount _currentCustomer;
+    public class CreateFeedbackCommandValidator : AbstractValidator<CreateFeedbackCommand>
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrentAccount _currentCustomer;
 
-		public CreateFeedbackCommandValidator(
-			IUnitOfWork unitOfWork,
-			IActionAccessorService accessorService,
-			ICurrentAccount currentCustomer
-		)
-		{
-			_unitOfWork = unitOfWork;
-			_accessorService = accessorService;
-			_currentCustomer = currentCustomer;
-			ApplyRules();
-		}
+        IActionAccessorService _accessorService;
 
-		private void ApplyRules()
-		{
-			Include(new FeedbackValidator(_unitOfWork, _accessorService, _currentCustomer));
-		}
-	}
+        public CreateFeedbackCommandValidator(
+            IUnitOfWork unitOfWork,
+            ICurrentAccount currentCustomer,
+            IActionAccessorService accessorService
+        )
+        {
+            _accessorService = accessorService;
+            _unitOfWork = unitOfWork;
+            _currentCustomer = currentCustomer;
+            ApplyRules();
+        }
+
+        private void ApplyRules()
+        {
+            RuleFor(x => x.FeedbackModel)
+                .SetValidator(
+                    new FeedbackValidator(_unitOfWork, _currentCustomer, _accessorService)
+                );
+        }
+    }
 }

@@ -1,5 +1,6 @@
 ﻿using Application.Common.Security;
 using Application.Feature.Common.Mapping.Orders;
+using Application.Features.Common.Mapping.Users;
 using Contracts.Extensions;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
@@ -62,7 +63,7 @@ namespace Application.Feature.Common.Projections.Orders
                 })
                 .ToList();
 
-            Customer = order.Customer.MappingFrom();
+            Customer = order.Customer?.UserDTOResponse() ?? null;
         }
     }
 

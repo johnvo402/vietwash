@@ -1,8 +1,8 @@
 ﻿namespace Domain.Aggregates.Feedbacks.Enums;
 
-public enum ReactionStatus
+public enum ReactionType
 {
-	None = 0,
-	Liked = 1,
-	Disliked = 2
+    None = 0,
+    Liked = 1,
+    Disliked = 2,
 }

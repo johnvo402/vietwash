@@ -5,13 +5,8 @@ namespace Application.Feature.Feedbacks.Command.Update;
 
 public static class UpdateFeedbackMapping
 {
-	public static void FromUpdateModel(this Feedback entity, FeedbackModel model)
-	{
-		entity.Update(
-			branchId: model.BranchId,
-			serviceId: model.ServiceId,
-			comment: model.Comment,
-			rating: model.Rating
-		);
-	}
+    public static void FromUpdateModel(this Feedback entity, UpdateFeedbackModel model)
+    {
+        entity.Update(comment: model.Comment, rating: model.Rating);
+    }
 }

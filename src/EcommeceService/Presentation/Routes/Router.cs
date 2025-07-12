@@ -20,15 +20,19 @@ namespace Presentation.Routes
                 + "}";
             public const string TopService =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Services)}/{nameof(TopService)}";
-			public const string Feedbacks =
-	            $"{Ecommerce}/{RouterBase.prefix}{nameof(Services)}/" +
-	            "{" + RouterBase.Id + "}/" +
-	            $"{nameof(Feedbacks)}";
-			public const string CreateFeedback =
-				$"{Ecommerce}/{RouterBase.prefix}{nameof(Services)}/" +
-				"{" + RouterBase.Id + "}/" +
-				$"{nameof(CreateFeedback)}";
-		}
+            public const string Feedbacks =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Services)}/"
+                + "{"
+                + RouterBase.Id
+                + "}/"
+                + $"{nameof(Feedbacks)}";
+            public const string CreateFeedback =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Services)}/"
+                + "{"
+                + RouterBase.Id
+                + "}/"
+                + $"{nameof(CreateFeedback)}";
+        }
 
         public static class TariffRoute
         {
@@ -36,12 +40,12 @@ namespace Presentation.Routes
             public const string Tariffs = $"{Ecommerce}/{RouterBase.prefix}{nameof(Tariffs)}";
             public const string GetUpdateDelete =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Tariffs)}/" + "{" + RouterBase.Id + "}";
-			public const string GetDetail =
-				$"{Ecommerce}/{RouterBase.prefix}{nameof(Tariffs)}/detail/"
-				+ "{"
-				+ RouterBase.Id
-				+ "}";
-		}
+            public const string GetDetail =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Tariffs)}/detail/"
+                + "{"
+                + RouterBase.Id
+                + "}";
+        }
 
         public static class UnitRoute
         {
@@ -168,20 +172,30 @@ namespace Presentation.Routes
                 + RouterBase.Id
                 + "}";
         }
-		public static class FeedbackRoute
-		{
-			public const string Tags = $"{nameof(FeedbackRoute)} endpoint";
-			public const string Feedbacks = $"{Ecommerce}/{RouterBase.prefix}{nameof(Feedbacks)}";
-			public const string FeedbackReplies = $"{Ecommerce}/{RouterBase.prefix}{nameof(Feedbacks)}/{nameof(FeedbackReplies)}";
-			public const string GetUpdateDelete =
-				$"{Ecommerce}/{RouterBase.prefix}{nameof(Feedbacks)}/" + "{" + RouterBase.Id + "}";
-			public const string GetDetail =
-				$"{Ecommerce}/{RouterBase.prefix}{nameof(Feedbacks)}/detail/"
-				+ "{"
-				+ RouterBase.Id
-				+ "}";
-			public const string React = $"{Ecommerce}/{RouterBase.prefix}{nameof(Feedbacks)}/" + "{" + RouterBase.Id + "}/" + $"{nameof(React)}";
 
-		}
-	}
+        public static class FeedbackRoute
+        {
+            public const string Tags = $"{nameof(FeedbackRoute)} endpoint";
+            public const string Feedbacks = $"{Ecommerce}/{RouterBase.prefix}{nameof(Feedbacks)}";
+            public const string FeedbackReplies =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Feedbacks)}/"
+                + "{"
+                + RouterBase.Id
+                + "}"
+                + $"/{nameof(FeedbackReplies)}";
+            public const string GetUpdateDelete =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Feedbacks)}/" + "{" + RouterBase.Id + "}";
+            public const string GetDetail =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Feedbacks)}/detail/"
+                + "{"
+                + RouterBase.Id
+                + "}";
+            public const string React =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Feedbacks)}/"
+                + "{"
+                + RouterBase.Id
+                + "}/"
+                + $"{nameof(React)}";
+        }
+    }
 }

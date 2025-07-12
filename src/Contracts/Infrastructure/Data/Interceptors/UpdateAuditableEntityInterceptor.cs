@@ -63,17 +63,20 @@ public class UpdateAuditableEntityInterceptor(ICurrentAccount currentUser) : Sav
 
     private void SetAuditOnUpdate(EntityEntry entry, DateTimeOffset currentTime)
     {
-        if (
-            entry.Entity is BaseEntity
-            || entry.Entity is AggregateRoot
-            || entry.Entity is IBaseAuditable
-        )
+        if (entry.Entity is not IAuditable)
         {
             return;
         }
-        entry.Property(nameof(IAuditable.UpdatedBy)).CurrentValue =
-            currentUser.Id?.ToString() ?? ANONYMOUS_CREATED_BY;
 
-        entry.Property(nameof(IAuditable.UpdatedAt)).CurrentValue = currentTime;
+        if (entry.Metadata.FindProperty(nameof(IAuditable.UpdatedBy)) != null)
+        {
+            entry.Property(nameof(IAuditable.UpdatedBy)).CurrentValue =
+                currentUser.Id?.ToString() ?? ANONYMOUS_CREATED_BY;
+        }
+
+        if (entry.Metadata.FindProperty(nameof(IAuditable.UpdatedAt)) != null)
+        {
+            entry.Property(nameof(IAuditable.UpdatedAt)).CurrentValue = currentTime;
+        }
     }
 }

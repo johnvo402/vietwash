@@ -5,5 +5,6 @@ using Mediator;
 
 namespace Application.Feature.Feedbacks.Queries.List;
 
-public class ListFeedbackQuery : QueryParamRequest,
-	IRequest<Result<PaginationResponse<ListFeedbackResponse>>>;
+public class ListFeedbackQuery
+    : QueryParamRequest,
+        IRequest<Result<PaginationResponse<ListFeedbackResponse>>>;

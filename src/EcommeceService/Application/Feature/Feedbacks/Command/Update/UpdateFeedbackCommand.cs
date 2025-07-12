@@ -8,8 +8,9 @@ namespace Application.Feature.Feedbacks.Command.Update;
 
 public class UpdateFeedbackCommand : IRequest<Result>
 {
-	[FromRoute(Name = RouterBase.Id)]
-	public long FeedbackId { get; set; } = default!;
-	[FromBody]
-	public FeedbackModel Feedback { get; set; } = default!;
+    [FromRoute(Name = RouterBase.Id)]
+    public long FeedbackId { get; set; } = default!;
+
+    [FromBody]
+    public UpdateFeedbackModel Feedback { get; set; } = default!;
 }

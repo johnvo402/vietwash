@@ -2,6 +2,5 @@
 
 public class FeedbackReactionModel
 {
-	public long CustomerId { get; set; }
-	public bool IsLike { get; set; }
+    public bool IsLike { get; set; }
 }

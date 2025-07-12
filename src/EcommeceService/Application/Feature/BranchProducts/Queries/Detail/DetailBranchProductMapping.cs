@@ -1,4 +1,3 @@
-using Application.Feature.Services.Queries.Detail;
 using Domain.Aggregates.Products;
 
 namespace Application.Feature.BranchProducts.Queries.Detail

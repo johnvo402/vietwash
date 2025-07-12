@@ -1,61 +1,43 @@
-﻿using Application.Feature.Common.Projections.Feedbacks;
-using Application.Feature.Services.Queries.Detail;
+﻿using System.Linq.Expressions;
+using Application.Feature.Common.Projections.Feedbacks;
+using Application.Features.Common.Mapping.Users;
 using Domain.Aggregates.Feedbacks;
 using Domain.Aggregates.Feedbacks.Enums;
-using System.Linq.Expressions;
 
 namespace Application.Feature.Feedbacks.Queries.List
 {
-	public class ListFeedbackMapping
-	{
-		public static Expression<Func<Feedback, ListFeedbackResponse>> Selector(
-			IReadOnlyDictionary<long, bool?> userReactions
-		)
-		{
-			return feedback => new ListFeedbackResponse
-			{
-				Id = feedback.Id,
-				BranchId = feedback.BranchId,
-				ServiceId = feedback.ServiceId,
-				CustomerId = feedback.CustomerId,
+    public class ListFeedbackMapping
+    {
+        public static Expression<Func<Feedback, ListFeedbackResponse>> Selector(long customerId)
+        {
+            return feedback => new ListFeedbackResponse
+            {
+                Id = feedback.Id,
+                BranchId = feedback.BranchId,
+                ServiceId = feedback.ServiceId,
+                CustomerId = feedback.UserId,
 
-				Comment = feedback.Comment,
-				Rating = feedback.Rating,
-				Likes = feedback.Likes,
-				Dislikes = feedback.Dislikes,
-
-				ReactionStatus = userReactions.ContainsKey(feedback.Id)
-				? (userReactions[feedback.Id] == true
-					? ReactionStatus.Liked
-					: ReactionStatus.Disliked)
-				: ReactionStatus.None,
-
-				CreatedUser = feedback.Customer != null
-					? new UserDTO
-					{
-						Id = feedback.Customer.Id,
-						DisplayName = feedback.Customer.DisplayName,
-						Email = feedback.Customer.Email,
-						Avatar = feedback.Customer.AvtUrl
-					}
-					: null,
-				Replies = feedback.Replies.Select(reply => new ReplyProjection
-				{
-					Id = reply.Id,
-					StaffId = reply.StaffId,
-					Comment = reply.Comment,
-					CreatedAt = reply.CreatedAt,
-					CreatedUser = reply.Staff != null
-						? new UserDTO
-						{
-							Id = reply.Staff.Id,
-							DisplayName = reply.Staff.DisplayName,
-							Email = reply.Staff.Email,
-							Avatar = reply.Staff.AvtUrl
-						}
-						: null
-				}).ToList()
-			};
-		}
-	}
+                Comment = feedback.Comment,
+                Rating = feedback.Rating,
+                Likes = feedback.Reactions.Where(r => r.IsLike).Count(),
+                Dislikes = feedback.Reactions.Where(r => !r.IsLike).Count(),
+                ReactionType = feedback
+                    .Reactions.Where(r => r.CustomerId == customerId)
+                    .Select(r => r.IsLike ? ReactionType.Liked : ReactionType.Disliked)
+                    .FirstOrDefault(),
+                CreatedUser = feedback.User != null ? feedback.User.UserDTOResponse() : null,
+                Replies = feedback
+                    .Replies.Select(reply => new ReplyProjection
+                    {
+                        Id = reply.Id,
+                        StaffId = reply.UserId,
+                        Comment = reply.Comment!,
+                        CreatedAt = reply.CreatedAt,
+                        CreatedUser = reply.User != null ? reply.User.UserDTOResponse() : null,
+                    })
+                    .OrderByDescending(x => x.CreatedAt)
+                    .ToList(),
+            };
+        }
+    }
 }

@@ -10,19 +10,19 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Presentation.Endpoints.Feedbacks
 {
-	public class ReactFeedbackEndpoint(ISender sender)
-	: EndpointBaseAsync.WithRequest<ReactFeedbackCommand>.WithActionResult<ApiResponse>
-	{
-		[HttpPut(Router.FeedbackRoute.React)]
-		[SwaggerOperation(Tags = [Router.FeedbackRoute.Tags], Summary = "React to feedback")]
-		[AuthorizeBy]
-		public override async Task<ActionResult<ApiResponse>> HandleAsync(
-			ReactFeedbackCommand request,
-			CancellationToken cancellationToken = default
-		)
-		{
-			var result = await sender.Send(request);
-			return result.ToActionResult();
-		}
-	}
+    public class ReactFeedbackEndpoint(ISender sender)
+        : EndpointBaseAsync.WithRequest<ReactFeedbackCommand>.WithActionResult<ApiResponse>
+    {
+        [HttpPut(Router.FeedbackRoute.React)]
+        [SwaggerOperation(Tags = [Router.FeedbackRoute.Tags], Summary = "React to feedback")]
+        [AuthorizeBy]
+        public override async Task<ActionResult<ApiResponse>> HandleAsync(
+            ReactFeedbackCommand request,
+            CancellationToken cancellationToken = default
+        )
+        {
+            var result = await sender.Send(request);
+            return result.ToActionResult();
+        }
+    }
 }

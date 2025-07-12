@@ -2,17 +2,21 @@
 
 namespace Application.Feature.Feedbacks.Command.Reply
 {
-	public static class CreateReyplyFeedbackMapping
-	{
-		public static Feedback ToEntityReply(this CreateReyplyFeedbackCommand model, Feedback parentFeedback)
-		{
-			return new Feedback(
-				branchId: parentFeedback.BranchId,
-				serviceId: parentFeedback.ServiceId,
-				comment: model.Comment,
-				parentId: model.ParentId,
-				staffId: model.StaffId
-			);
-		}
-	}
+    public static class CreateReyplyFeedbackMapping
+    {
+        public static Feedback ToEntityReply(
+            this Feedback parentFeedback,
+            CreateReyplyFeedbackCommand model,
+            long userId
+        )
+        {
+            return new Feedback(
+                branchId: parentFeedback.BranchId,
+                serviceId: parentFeedback.ServiceId,
+                comment: model.ReplyFeedback.Comment,
+                parentId: model.Id,
+                userId: userId
+            );
+        }
+    }
 }
