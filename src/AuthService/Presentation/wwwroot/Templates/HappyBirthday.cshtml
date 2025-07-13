@@ -1,0 +1,96 @@
+@model string
+
+@{
+    Layout = null;
+    var recipientName = Model;
+    var today = DateTime.Now.ToString("dd/MM/yyyy");
+    var logoUrl =
+    "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDIwMDEwOTA0Ly9FTiIKICJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy1TVkctMjAwMTA5MDQvRFREL3N2ZzEwLmR0ZCI+CjxzdmcgdmVyc2lvbj0iMS4wIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiB3aWR0aD0iMjU2LjAwMDAwMHB0IiBoZWlnaHQ9IjEwOS4wMDAwMDBwdCIgdmlld0JveD0iMCAwIDI1Ni4wMDAwMDAgMTA5LjAwMDAwMCIKIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIG1lZXQiPgoKPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMC4wMDAwMDAsMTA5LjAwMDAwMCkgc2NhbGUoMC4xMDAwMDAsLTAuMTAwMDAwKSIKZmlsbD0iIzAwMDAwMCIgc3Ryb2tlPSJub25lIj4KPHBhdGggZD0iTTEyMjQgNTkwIGMwIC0xODQgMiAtMjYwIDMgLTE2NyAyIDkyIDIgMjQyIDAgMzM1IC0xIDkyIC0zIDE2IC0zCi0xNjh6Ii8+CjxwYXRoIGQ9Ik0xNzU1IDgzMCBjLTggLTI2IDYgLTQzIDMxIC0zOCAxMyAyIDE5IDEyIDE5IDI4IDAgMzQgLTQwIDQxIC01MCAxMHoiLz4KPHBhdGggZD0iTTk5OCA3ODggbC02NiAtMzkgNSAtNTIgYzE1IC0xNTYgLTEzOSAtMzAzIC0yOTkgLTI4NCAtOTQgMTIgLTE4Ngo4MSAtMjIzIDE3MSAtMTYgMzggLTIxIDE1MSAtNyAxNjAgNSAzIDM4IC01NSA3MyAtMTI5IDU5IC0xMjQgNjcgLTEzNSAxMDIKLTE1MCAzOCAtMTUgMTQyIC0yMSAxNTAgLTcgMiA0IC0zMyA4NiAtNzkgMTgyIGwtODMgMTc1IC0xNTUgMyAtMTU1IDMgLTEyCi00MyBjLTYgLTI0IC05IC04MSAtNyAtMTI4IDMgLTcwIDEwIC05OCAzNiAtMTUzIDU4IC0xMjQgMTgyIC0yMTUgMzI2IC0yMzkKMjYzIC00NCA1MTUgMTgyIDQ5MyA0NDIgLTMgMzcgLTEyIDgwIC0xOSA5NyBsLTEzIDMwIC02NyAtMzl6Ii8+CjxwYXRoIGQ9Ik0xNDg1IDgwMSBjLTcgLTEzIDUzIC0xNzcgNzAgLTE5MSA4IC02IDI0IC0xMCAzNyAtOCAyOSA0IDc4IDk4IDg2CjE2NCA1IDQ1IDUgNDYgLTI0IDQyIC0yNiAtMyAtMjkgLTkgLTQ1IC03MSAtOSAtMzggLTE5IC03MCAtMjEgLTczIC0zIC0yIC0xMwoyNCAtMjMgNTggLTEwIDM1IC0yMyA2OSAtMjggNzYgLTExIDE0IC00MyAxNiAtNTIgM3oiLz4KPHBhdGggZD0iTTIxMjcgODA0IGMtNCAtNCAtNyAtNDMgLTcgLTg2IDAgLTY1IDMgLTgxIDIwIC05OCAyMSAtMjEgNTUgLTI2IDc5Ci0xMSAxOCAxMiA5IDM2IC0xNSAzNiAtMTQgMCAtMjAgOCAtMjIgMzIgLTMgMjYgMSAzMiAyMCAzNSAxNSAyIDI0IDExIDI2IDI2CjMgMTggLTEgMjIgLTIyIDIyIC0xOCAwIC0yNSA2IC0yOCAyMyAtMyAyMiAtMzYgMzYgLTUxIDIxeiIvPgo8cGF0aCBkPSJNMTc1MCA2OTYgYzAgLTc3IDEzIC0xMDQgNDUgLTkyIDEyIDQgMTUgMjMgMTUgODYgbDAgODAgLTMwIDAgLTMwIDAKMCAtNzR6Ii8+CjxwYXRoIGQ9Ik0xOTE3IDc1OCBjLTM3IC0yOSAtNDIgLTkzIC05IC0xMzAgMzIgLTM4IDEzMiAtMzUgMTMyIDMgMCAxOSAtNCAyMQotMzEgMTUgLTE3IC0zIC00MCAtMSAtNTIgNiAtMjAgMTEgLTE3IDEzIDMzIDIzIDQ1IDggNTYgMTQgNTggMzIgNyA1MCAtODUgODUKLTEzMSA1MXogbTczIC0zNyBjMCAtNSAtMTEgLTExIC0yNSAtMTMgLTI0IC01IC0zMiAyIC0xOCAxNSA5IDEwIDQzIDggNDMgLTJ6Ii8+CjxwYXRoIGQ9Ik0yMTcwIDQ1MCBsMCAtMTEwIDI1IDAgYzI0IDAgMjUgMyAyNSA2MCAwIDMzIDUgNjEgMTAgNjIgMzMgNCAzNSAxCjQwIC01NyA1IC01NyA3IC02MCAzMyAtNjMgbDI3IC0zIDAgNjUgYzAgNzkgLTE5IDEwNiAtNzUgMTA2IC0zMSAwIC0zNSAzIC0zNQoyNSAwIDIwIC01IDI1IC0yNSAyNSBsLTI1IDAgMCAtMTEweiIvPgo8cGF0aCBkPSJNMTM5MSA1NDEgYy0xNSAtMTAgLTEwIC01OSAxNSAtMTQ4IDE0IC01MiAxNSAtNTMgNTQgLTUzIDM3IDAgMzkgMgo0NiAzNSAzIDE5IDEwIDM1IDE0IDM1IDQgMCAxMSAtMTYgMTQgLTM1IDcgLTMzIDkgLTM1IDQ2IC0zNSAzNyAwIDQwIDIgNTAgMzgKNiAyMCAxMyA2NCAxNyA5OCA1IDUzIDMgNjIgLTEzIDY4IC0yNSAxMCAtNDQgLTE4IC00NCAtNjMgMCAtMjAgLTMgLTQ3IC03Ci02MSAtNiAtMjIgLTggLTE5IC0yMiAyNSAtMTMgNDIgLTIwIDUwIC00MyA1MyAtMjMgMyAtMjggLTIgLTM3IC0zNSAtNiAtMjEKLTExIC00NSAtMTEgLTUzIC0xIC0zMiAtMTcgMTUgLTI0IDcwIC04IDYzIC0yNCA4MSAtNTUgNjF6Ii8+CjxwYXRoIGQ9Ik0xNzQzIDUwMyBjLTcgLTIgLTEzIC0xNCAtMTMgLTI1IDAgLTE3IDUgLTIwIDMwIC0xNSAzMiA3IDYwIDAgNjAKLTE0IDAgLTUgLTExIC05IC0yNCAtOSAtNDkgMCAtNzYgLTE3IC03NiAtNDkgMCAtMzkgMjQgLTU2IDgyIC01NiA2NCAwIDgxIDIwCjc1IDg5IC01IDYwIC0zMiA4NiAtODYgODUgLTIwIDAgLTQyIC0zIC00OCAtNnogbTY5IC0xMjUgYy0xMiAtMTIgLTQyIC00IC00MgoxMSAwIDEyIDQ0IDE5IDQ5IDggMiAtNSAtMSAtMTMgLTcgLTE5eiIvPgo8cGF0aCBkPSJNMTk3MiA0OTQgYy0yNCAtMTcgLTI5IC01NiAtOSAtNzIgNiAtNiAyNSAtMTQgNDAgLTE3IDQ2IC0xMiA0MyAtMjcKLTQgLTI0IC0zOCAzIC00NCAxIC00NCAtMTYgMCAtMTUgMTAgLTIyIDM4IC0zMCA1MyAtMTMgOTIgOSA5MiA1MCAwIDI1IC03IDMzCi0zOCA0OCAtNDIgMjEgLTQxIDM5IDIgMzEgMzQgLTcgNDcgOCAyNSAzMCAtMjAgMjAgLTczIDIxIC0xMDIgMHoiLz4KPC9nPgo8L3N2Zz4K"
+    ;
+}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Chúc mừng sinh nhật!</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            padding: 30px;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 600px;
+            margin: auto;
+            text-align: center;
+        }
+
+        .logo img {
+            height: 60px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #ff6f61;
+            font-size: 26px;
+        }
+
+        p {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .voucher {
+            background-color: #ffe5e0;
+            border: 1px dashed #ff6f61;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #d94c3d;
+            border-radius: 8px;
+        }
+
+        .footer {
+            margin-top: 25px;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="logo">
+            <img src="@logoUrl" alt="VietWash Logo" />
+        </div>
+
+        <h1>🎉 Chúc mừng sinh nhật @recipientName! 🎂</h1>
+
+        <p>Hôm nay (@today), toàn thể đội ngũ <strong>VietWash</strong> xin gửi tới bạn lời chúc sinh nhật tràn đầy niềm
+            vui và hạnh phúc!</p>
+
+        <p>🎁 Nhân dịp đặc biệt này, bạn nhận được một <strong>voucher ưu đãi sinh nhật</strong> từ VietWash.</p>
+
+        <div class="voucher">
+            🎫 Voucher đã được thêm vào tài khoản của bạn!
+        </div>
+
+        <p>👉 Hãy mở ứng dụng <strong>VietWash</strong>, vào mục <strong>Voucher</strong> để xem và sử dụng ưu đãi nhé!
+        </p>
+
+        <div class="footer">
+            — Thân ái từ đội ngũ <strong>VietWash</strong> —
+        </div>
+    </div>
+</body>
+
+</html>

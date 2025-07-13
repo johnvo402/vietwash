@@ -33,7 +33,6 @@ builder
         );
         option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
-services.AddScoped<CheckCustomerLoyal>();
 
 services.AddErrorDetails();
 services.AddSwagger(configuration);
