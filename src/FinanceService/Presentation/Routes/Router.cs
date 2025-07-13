@@ -31,10 +31,7 @@ namespace Presentation.Routes
             public const string Tags = $"{nameof(TransactionRoute)} endpoint";
             public const string Transaction = $"{Finance}/{RouterBase.prefix}{nameof(Transaction)}";
             public const string GetCustomerPoint =
-                $"{Finance}/{RouterBase.prefix}{nameof(Transaction)}/{nameof(GetCustomerPoint)}"
-                + "{"
-                + RouterBase.Id
-                + "}";
+                $"{Finance}/{RouterBase.prefix}{nameof(Transaction)}/{nameof(GetCustomerPoint)}";
         }
     }
 }
