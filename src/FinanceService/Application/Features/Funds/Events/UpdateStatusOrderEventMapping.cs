@@ -28,9 +28,18 @@ namespace Application.Features.Funds.Events
 
         public static Transaction ToTransaction(this CreateFundEventPayload command)
         {
+            if (command.ObjectId is null)
+                throw new ArgumentNullException(nameof(command.ObjectId));
+
+            var metadata = (command.Metadata ?? new Dictionary<string, object>()).ToDictionary(
+                kvp => kvp.Key,
+                kvp => (object?)kvp.Value
+            );
+
+            metadata["id"] = command.ReferenceId;
             return new Transaction(
                 type: TransactionType.Point,
-                amount: command.Amount / 1000,
+                amount: Math.Ceiling(command.Amount / 1000),
                 transactionAt: DateTimeOffset.UtcNow, // Provide a DateTimeOffset? value as required
                 customerId: (long)command.ObjectId!, // Provide a value or null for objectId as required
                 metadata: command.Metadata // Provide a value or null for metadata as required
