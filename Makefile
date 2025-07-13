@@ -29,6 +29,9 @@ publish:
 test:
 	./scripts/run_tests.sh ${TYPE} ${NAME} ${SERVICE}
 
+run:
+	./scripts/run-services.sh ${SERVICE}
+
 
 # Mục để kiểm tra migration status
 status:

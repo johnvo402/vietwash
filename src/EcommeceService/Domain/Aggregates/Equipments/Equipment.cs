@@ -1,7 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using Domain.Aggregates.Equipments.Enums;
 using Mediator;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Equipments
