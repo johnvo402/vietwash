@@ -38,7 +38,6 @@ namespace Application.Feature.Common.Mapping.Inventories
                 Code = x.Code,
                 Price = x.Price,
                 Capacity = x.Capacity,
-                UnitRelationId = x.UnitRelationId,
                 Quantity = x.Quantity,
                 SupplierId = x.SupplierId,
             });

@@ -21,10 +21,5 @@ public class EquipmentSupplyingConfiguration : IEntityTypeConfiguration<Equipmen
             .HasOne(x => x.InventoryDocument)
             .WithMany(x => x.EquipmentSupplyings)
             .HasForeignKey(x => x.InventoryDocumentId);
-
-        builder
-            .HasOne(x => x.UnitRelation)
-            .WithMany(x => x.EquipmentSupplyings)
-            .HasForeignKey(x => x.UnitRelationId);
     }
 }

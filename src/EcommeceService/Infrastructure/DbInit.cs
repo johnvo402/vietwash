@@ -803,7 +803,6 @@ public class DbInitializer
         var supplierList = suppliers.ToList();
         var supplier = supplierList[random.Next(supplierList.Count)];
         var branchId = 1L;
-        var toWarehouseId = 1L;
 
         decimal totalProductAmount = 0;
         var productSupplyings = new List<ProductSupplying>();
@@ -828,7 +827,7 @@ public class DbInitializer
                     ProductId = product.Id,
                     SupplierId = supplier.Id,
                     Quantity = quantity,
-                    LotNumber = $"LOT-{Generator.GenerateCode("P", 4)}",
+                    LotNumber = Generator.GenerateCode("LOT", 4),
                     Price = unitRelation.Price,
                     UnitRelationId = unitRelation.Id,
                     ExpiryDate = DateTimeOffset.UtcNow.AddMonths(12),
@@ -841,8 +840,6 @@ public class DbInitializer
 
         for (int i = 1; i <= 20; i++)
         {
-            var unitList = units.ToList();
-            var unit = unitList[random.Next(unitList.Count)];
             decimal price = 1500000 + i * 100000;
             int capacity = 7 + (i % 3);
 
@@ -852,19 +849,10 @@ public class DbInitializer
                 new EquipmentSupplying
                 {
                     Name = $"Máy {(i % 2 == 0 ? "Sấy" : "Giặt")} {i}",
-                    Code = $"EQP-{i:D4}",
+                    Code = Generator.GenerateCode("EQ", 6),
                     Price = price,
                     Capacity = capacity,
                     Quantity = 1,
-                    UnitRelation = new UnitRelation
-                    {
-                        Name = unit.Name,
-                        BaseUnit = true,
-                        Multiple = 1,
-                        Price = price,
-                        ProcessingTime = 0,
-                        Status = ActivationStatus.Active,
-                    },
                     SupplierId = supplier.Id,
                 }
             );
@@ -877,8 +865,6 @@ public class DbInitializer
             code: Generator.GenerateCode("IM", 6),
             amount: totalAmount,
             type: InventoryType.Import,
-            fromWarehouseId: null,
-            toWarehouseId: toWarehouseId,
             branchId: branchId,
             note: "Nhập hàng khởi tạo"
         )

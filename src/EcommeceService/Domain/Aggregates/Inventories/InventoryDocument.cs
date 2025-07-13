@@ -9,12 +9,10 @@ namespace Domain.Aggregates.Inventories
 {
     public class InventoryDocument : AggregateRoot
     {
-        public long? ToWarehouseId { get; set; }
         public decimal Amount { get; set; }
         public PaymentMethod? PaymentMethod { get; set; }
         public decimal PaidAmount { get; set; }
         public long? BranchId { get; set; }
-        public long? FromWarehouseId { get; set; }
         public DateTimeOffset? TransactionAt { get; set; }
         public string Code { get; set; } = null!;
         public InventoryStatus Status { get; set; }
@@ -45,8 +43,6 @@ namespace Domain.Aggregates.Inventories
             string code,
             decimal amount,
             InventoryType type,
-            long? fromWarehouseId,
-            long? toWarehouseId,
             long? branchId,
             string? note = null
         )
@@ -58,10 +54,6 @@ namespace Domain.Aggregates.Inventories
 
             // Validate amount and paid amount
             Amount = Guard.Against.NegativeOrZero(amount, nameof(amount));
-
-            // Assign optional fields
-            FromWarehouseId = fromWarehouseId;
-            ToWarehouseId = toWarehouseId;
             BranchId = branchId;
             Note = note;
         }

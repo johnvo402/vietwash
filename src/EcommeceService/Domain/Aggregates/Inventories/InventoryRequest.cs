@@ -12,10 +12,9 @@ namespace Domain.Aggregates.Inventories
         public string Note { get; set; }
         public InventoryRequestType Type { get; set; }
         public DateTimeOffset? RequestAt { get; set; }
-        public long? BranchId { get; set; }
         public string? CancelReason { get; set; }
-        public long? FromWarehouseId { get; set; }
-        public long? ToWarehouseId { get; set; }
+        public long? FromBranchId { get; set; }
+        public long? ToBranchId { get; set; }
 
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
