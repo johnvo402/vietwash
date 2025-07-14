@@ -31,10 +31,19 @@ namespace Domain.Aggregates.Inventories
             if (status == InventoryStatus.Completed)
             {
                 TransactionAt = DateTimeOffset.UtcNow;
-                if (EquipmentSupplyings.Any())
+                if (Type == InventoryType.Import && EquipmentSupplyings.Any())
                 {
                     Emit(new InventoryDocumentCompletedEvent { InventoryDocument = this });
                 }
+            }
+            if (
+                (
+                    (Type == InventoryType.Export && status == InventoryStatus.Completed)
+                    || status == InventoryStatus.Canceled
+                ) && EquipmentSupplyings.Any()
+            )
+            {
+                Emit(new InventoryDocumentCanceledEvent { InventoryDocument = this });
             }
             CancelReason = cancelReason;
         }
@@ -64,7 +73,8 @@ namespace Domain.Aggregates.Inventories
             {
                 case InventoryDocumentCompletedEvent:
                     return true;
-
+                case InventoryDocumentCanceledEvent:
+                    return true;
                 // Các event khác nếu có
                 default:
                     return false;

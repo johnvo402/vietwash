@@ -1,5 +1,4 @@
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.Utils;
 using Domain.Aggregates.Equipments;
 using Domain.Aggregates.Equipments.Enums;
 using Domain.Aggregates.Inventories.Events;
