@@ -1,5 +1,4 @@
 ﻿using Application.Common.Security;
-using Application.Feature.Common.Mapping.Orders;
 using Application.Features.Common.Mapping.Users;
 using Contracts.Extensions;
 using Domain.Aggregates.Orders;
@@ -64,6 +63,7 @@ namespace Application.Feature.Common.Projections.Orders
                 .ToList();
 
             Customer = order.Customer?.UserDTOResponse() ?? null;
+            Staff = order.Staff?.UserDTOResponse() ?? null;
         }
     }
 
