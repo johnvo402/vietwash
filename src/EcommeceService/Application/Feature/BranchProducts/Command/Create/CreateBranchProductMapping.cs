@@ -13,7 +13,6 @@ namespace Application.Feature.BranchProducts.Command.Create
                 name: model.Name,
                 description: model.Description,
                 sku: model.Sku,
-                barcode: model.Barcode,
                 capitalPrice: model.CapitalPrice,
                 image: model.Image,
                 status: model.Status,

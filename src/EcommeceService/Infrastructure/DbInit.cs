@@ -3,8 +3,6 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Dtos.Requests;
 using Contracts.Utils;
 using Domain.Aggregates.Enums;
-using Domain.Aggregates.Equipments;
-using Domain.Aggregates.Equipments.Enums;
 using Domain.Aggregates.Inventories;
 using Domain.Aggregates.Inventories.Enums;
 using Domain.Aggregates.Orders;
@@ -97,19 +95,6 @@ public class DbInitializer
             else
             {
                 logger.Information("Dữ liệu đơn hàng đã tồn tại, bỏ qua khởi tạo.");
-            }
-
-            if (!await unitOfWork.Repository<Equipment>().AnyAsync())
-            {
-                logger.Information("Bắt đầu khởi tạo dữ liệu thiết bị...");
-
-                await InitializeEquipmentsAsync(unitOfWork, cancellationToken);
-
-                logger.Information("Hoàn tất khởi tạo dữ liệu thiết bị...");
-            }
-            else
-            {
-                logger.Information("Dữ liệu thiết bị đã tồn tại, bỏ qua khởi tạo.");
             }
             if (!await unitOfWork.Repository<BranchProduct>().AnyAsync())
             {
@@ -679,34 +664,6 @@ public class DbInitializer
         await unitOfWork.SaveAsync(cancellationToken);
     }
 
-    private static async Task InitializeEquipmentsAsync(
-        IUnitOfWork unitOfWork,
-        CancellationToken cancellationToken
-    )
-    {
-        var equipments = Enumerable
-            .Range(1, 10)
-            .Select(i => new Equipment(
-                branchId: 1,
-                name: $"Máy {(i % 2 == 0 ? "Sấy" : "Giặt")} {i}",
-                code: $"EQP-{i:D4}",
-                price: 1000000 + i * 500000,
-                capacity: 7 + (i % 3), // ví dụ: 7kg, 8kg, 9kg...
-                status: EquipmentStatus.Active,
-                image: null,
-                description: $"Thiết bị {(i % 2 == 0 ? "sấy" : "giặt")} công suất cao số {i}",
-                lastMaintenanceDate: DateTimeOffset.UtcNow.AddMonths(-i),
-                nextMaintenanceDate: DateTimeOffset.UtcNow.AddMonths(6 - i)
-            ))
-            .ToList();
-
-        foreach (var equipment in equipments)
-        {
-            await unitOfWork.Repository<Equipment>().AddAsync(equipment, cancellationToken);
-            await unitOfWork.SaveAsync(cancellationToken);
-        }
-    }
-
     private static async Task InitializeBranchProductsAsync(
         IUnitOfWork unitOfWork,
         ILogger logger,
@@ -743,8 +700,7 @@ public class DbInitializer
         for (int i = 0; i < 10; i++)
         {
             var name = productNames[i];
-            var sku = $"SP-{i + 1:D4}";
-            var barcode = $"893850{i + 1000}";
+            var sku = Generator.GenerateCode(10);
             var price = random.Next(10000, 100000);
             var categoriesList = categories.ToList();
             var categoryId = categoriesList[random.Next(categoriesList.Count)].Id;
@@ -759,7 +715,6 @@ public class DbInitializer
                 capitalPrice: price,
                 categoryId: categoryId,
                 description: $"Sản phẩm dùng trong giặt ủi: {name}",
-                barcode: barcode,
                 image: null
             );
 

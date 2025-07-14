@@ -11,7 +11,6 @@ namespace Application.Feature.Equipments.Command.Update
                 branchId: model.BranchId,
                 name: model.Name,
                 description: model.Description,
-                image: model.Image,
                 code: model.Code,
                 price: model.Price,
                 capacity: model.Capacity,

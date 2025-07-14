@@ -16,7 +16,6 @@ namespace Application.Feature.Common.Projections.BranchProducts
         public string Name { get; set; }
         public string? Description { get; set; }
         public string? Sku { get; set; }
-        public string? Barcode { get; set; }
 
         [File]
         public string? Image { get; set; }

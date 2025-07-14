@@ -9,9 +9,7 @@ namespace Domain.Aggregates.Equipments
     {
         public long BranchId { get; set; } = default!;
         public string Name { get; set; } = default!;
-        public string? Image { get; set; } = default!;
-
-        public string Description { get; set; } = default!;
+        public string? Description { get; set; }
 
         public string Code { get; set; } = default!;
 
@@ -35,7 +33,6 @@ namespace Domain.Aggregates.Equipments
             decimal price,
             decimal capacity,
             EquipmentStatus status,
-            string? image = null,
             string? description = null,
             DateTimeOffset? lastMaintenanceDate = null,
             DateTimeOffset? nextMaintenanceDate = null
@@ -47,7 +44,6 @@ namespace Domain.Aggregates.Equipments
             Price = price;
             Capacity = capacity;
             Status = Guard.Against.EnumOutOfRange(status, nameof(status));
-            Image = image?.Trim();
             Description = description?.Trim();
             LastMaintenanceDate = lastMaintenanceDate;
             NextMaintenanceDate = nextMaintenanceDate;
@@ -57,7 +53,6 @@ namespace Domain.Aggregates.Equipments
             long? branchId = null,
             string? name = null,
             string? description = null,
-            string? image = null,
             string? code = null,
             decimal? price = null,
             decimal? capacity = null,
@@ -74,8 +69,6 @@ namespace Domain.Aggregates.Equipments
                 Code = code.Trim();
             if (description != null)
                 Description = description.Trim();
-            if (image != null)
-                Image = image.Trim();
             if (price.HasValue)
                 Price = price.Value;
             if (capacity.HasValue)
