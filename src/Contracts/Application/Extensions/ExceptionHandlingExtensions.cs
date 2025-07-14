@@ -40,7 +40,7 @@ public static class ExceptionHandlingExtensions
                 // Fallback 500
                 context.Response.StatusCode = 500;
                 await context.Response.WriteAsJsonAsync(
-                    new ProblemDetails { Title = "Internal Server Error" }
+                    new ProblemDetails { Title = exception?.Message }
                 );
             });
         });

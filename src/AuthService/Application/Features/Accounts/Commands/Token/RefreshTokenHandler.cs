@@ -9,12 +9,14 @@ using Contracts.Application.Common.Interfaces.Services.Token;
 using Contracts.Common.Messages;
 using Contracts.Dtos.Models;
 using Contracts.Dtos.Responses;
+using Contracts.Extensions;
 using Domain.Aggregates.Accounts;
 using Domain.Aggregates.Accounts.Enums;
 using Domain.Aggregates.Accounts.Specifications;
 using Mediator;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Shared.Kernel.Extensions;
+using Wangkanai.Detection.Services;
 
 namespace Application.Features.Accounts.Commands.Token;
 
@@ -111,7 +113,7 @@ public class RefreshTokenHandler(
             accesstokenExpiredTime
         );
 
-        var refreshTokenExpiredTime = tokenFactory.RefreshtokenExpiredTime;
+        var refreshTokenExpiredTime = DateTime.UtcNow.AddDays(refresh.ExpiredTime);
 
         string refreshToken = tokenFactory.CreateToken(
             [
@@ -126,7 +128,7 @@ public class RefreshTokenHandler(
         {
             FamilyId = decodeToken.FamilyId,
             AccountId = long.Parse(decodeToken.Sub!),
-            ExpiredTime = refreshTokenExpiredTime,
+            ExpiredTime = refresh.ExpiredTime,
             Token = refreshToken,
             ClientIp = currentUser.ClientIp,
         };

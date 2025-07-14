@@ -6,6 +6,7 @@ using System.Text;
 using Contracts.Extensions;
 using Contracts.Extensions.Reflections;
 using Microsoft.AspNetCore.Http;
+using Shared.Kernel.Extensions;
 
 namespace tests.IntegrationTest.Configurations.Extensions;
 

@@ -13,8 +13,8 @@ using Domain.Aggregates.Accounts.Enums;
 using Domain.Aggregates.Accounts.Specifications;
 using Mediator;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Shared.Kernel.Extensions;
 using Wangkanai.Detection.Services;
-using SerializerExtension = Contracts.Extensions.SerializerExtension;
 
 namespace Application.Features.Accounts.Commands.Login;
 
@@ -80,12 +80,13 @@ public class LoginAccountHandler(
 
         DateTime refreshExpireTime = tokenFactory.RefreshtokenExpiredTime;
         string familyId = StringExtension.GenerateRandomString(32);
-
+        if (request.RememberMe == true)
+            refreshExpireTime = DateTime.UtcNow.AddDays(7);
         var userAgent = detectionService.UserAgent.ToString();
-
+        var expiredTime = refreshExpireTime.Day - DateTime.UtcNow.Day;
         var userToken = new AccountToken()
         {
-            ExpiredTime = refreshExpireTime,
+            ExpiredTime = expiredTime,
             AccountId = user.Id,
             FamilyId = familyId,
             ClientIp = currentAccount.ClientIp,
