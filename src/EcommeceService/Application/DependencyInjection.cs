@@ -27,7 +27,8 @@ public static class DependencyInjection
             .AddSingleton(typeof(IPipelineBehavior<,>), typeof(ProcessImagePathBehavior<,>))
             .AddValidatorsFromAssembly(currentAssembly)
             .AddSingleton<IAuthorizationPolicyProvider, AuthorizePolicyProvider>()
-            .AddSingleton<IAuthorizationHandler, AuthorizeHandler>();
+            .AddSingleton<IAuthorizationHandler, AuthorizeHandler>()
+            .AddScoped<CheckCustomerLoyal>();
         ;
     }
 }
