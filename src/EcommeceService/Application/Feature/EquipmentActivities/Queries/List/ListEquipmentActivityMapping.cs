@@ -17,7 +17,6 @@ namespace Application.Feature.EquipmentActivities.Queries.List
 
 				EquipmentId = activity.EquipmentId,
 				EquipmentName = activity.Equipment != null ? activity.Equipment.Name : null,
-				Image = activity.Equipment != null ? activity.Equipment.Image : null,
 				BranchId = activity.BranchId,
 				StaffId = activity.StaffId,
 				SupervisorCode = activity.SupervisorCode,

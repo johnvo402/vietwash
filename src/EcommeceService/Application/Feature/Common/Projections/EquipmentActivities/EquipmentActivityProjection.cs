@@ -8,8 +8,6 @@ namespace Application.Feature.Common.Projections.EquipmentActivities
 	{
 		public long EquipmentId { get; set; }
 		public string? EquipmentName { get; set; }
-		[File]
-		public string? Image { get; set; }
 		public long BranchId { get; set; }
 		public long StaffId { get; set; }
 		public string SupervisorCode { get; set; } = default!;

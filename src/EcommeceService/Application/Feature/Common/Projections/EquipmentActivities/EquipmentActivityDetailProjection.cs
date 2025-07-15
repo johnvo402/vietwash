@@ -16,7 +16,6 @@ namespace Application.Feature.Common.Projections.EquipmentActivities
 
 			EquipmentId = activity.EquipmentId;
 			EquipmentName = activity.Equipment?.Name;
-			Image = activity.Equipment?.Image;
 			BranchId = activity.BranchId;
 			StaffId = activity.StaffId;
 			Type = activity.Type;
