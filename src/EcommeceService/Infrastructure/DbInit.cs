@@ -300,13 +300,7 @@ public class DbInitializer
             if (status == OrderStatus.Completed)
             {
                 var paymentMethod = paymentMethods[random.Next(paymentMethods.Length)];
-                var orderPayment = new OrderPayment
-                {
-                    Amount = order.Total,
-                    PaymentMethod = paymentMethod,
-                    PaymentDate = DateTimeOffset.UtcNow,
-                };
-                order.OrderPayments.Add(orderPayment);
+                order.PaymentMethod = paymentMethod;
             }
 
             await unitOfWork.Repository<Order>().AddAsync(order, cancellationToken);
