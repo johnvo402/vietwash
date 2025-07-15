@@ -8,6 +8,6 @@ namespace Application.Feature.Orders.Queries.DetailByCode
     public record GetOrderDetailByCodeQuery : IRequest<Result<GetOrderDetailByCodeResponse>>
     {
         [FromRoute(Name = RouterBase.Id)]
-        public string Code { get; set; }
+        public string Code { get; set; } = default!;
     }
 }
