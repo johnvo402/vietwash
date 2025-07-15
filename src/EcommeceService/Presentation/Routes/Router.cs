@@ -84,11 +84,11 @@ namespace Presentation.Routes
                 + "}";
         }
 
-        public static class Webhooks
+        public static class Webhook
         {
-            public const string Tags = $"{nameof(Webhooks)} endpoint";
+            public const string Tags = $"{nameof(Webhook)} endpoint";
             public const string CompletedOrder =
-                $"{nameof(Webhooks)}/{RouterBase.prefix}{nameof(CompletedOrder)}";
+                $"{nameof(Webhook)}/{RouterBase.prefix}{nameof(CompletedOrder)}";
         }
 
         public static class InventoryRoute

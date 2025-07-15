@@ -16,8 +16,8 @@ namespace Presentation.Endpoints.Webhooks
     public class CompletedOrderWebhook(PayOS payOS, ISender sender)
         : EndpointBaseAsync.WithRequest<WebhookType>.WithActionResult<ApiResponse>
     {
-        [HttpPost(Router.Webhooks.CompletedOrder)]
-        [SwaggerOperation(Tags = [Router.Webhooks.Tags], Summary = "Update Status Order")]
+        [HttpPost(Router.Webhook.CompletedOrder)]
+        [SwaggerOperation(Tags = [Router.Webhook.Tags], Summary = "Update Status Order")]
         [AuthorizeBy]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             WebhookType request,
