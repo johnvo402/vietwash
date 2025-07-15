@@ -26,8 +26,7 @@ namespace Domain.Aggregates.Equipments
 
         public EquipmentStatus Status { get; set; } = default!;
 
-        public ICollection<MaintenanceHistory> MaintenanceHistories { get; set; } = [];
-        public ICollection<RepairHistory> RepairHistories { get; set; } = [];
+        public ICollection<EquipmentActivity> EquipmentActivities { get; set; } = [];
 
         public Equipment(
             long branchId,
