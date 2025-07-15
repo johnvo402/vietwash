@@ -26,6 +26,14 @@ RUN apt-get update && apt-get install -y \
     fonts-liberation \
     libappindicator3-1 \
     libxext6 \
+    # === Thêm các thư viện hỗ trợ SkiaSharp ===
+    libfontconfig1 \
+    libfreetype6 \
+    libjpeg62-turbo \
+    libpng-dev \
+    libgif-dev \
+    libgl1-mesa-dev \
+    libglu1-mesa-dev \
     --no-install-recommends && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
