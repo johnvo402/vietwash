@@ -71,10 +71,7 @@ namespace Presentation.Routes
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/" + "{" + RouterBase.Id + "}";
 
             public const string GetByCode =
-                $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(GetByCode)}/"
-                + "{"
-                + RouterBase.Id
-                + "}";
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(GetByCode)}";
             public const string UpdateStatus =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(UpdateStatus)}"
                 + "{"

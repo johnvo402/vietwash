@@ -15,13 +15,13 @@ namespace Presentation.Endpoints.Orders
             ApiResponse<GetOrderDetailByCodeResponse>
         >
     {
-        [HttpGet(Router.OrderRoute.GetByCode, Name = Router.OrderRoute.GetByCode)]
+        [HttpPost(Router.OrderRoute.GetByCode, Name = Router.OrderRoute.GetByCode)]
         [SwaggerOperation(Tags = [Router.OrderRoute.Tags], Summary = "DetailByCode Order")]
         [AuthorizeBy]
         public override async Task<
             ActionResult<ApiResponse<GetOrderDetailByCodeResponse>>
         > HandleAsync(
-            GetOrderDetailByCodeQuery request,
+            [FromBody] GetOrderDetailByCodeQuery request,
             CancellationToken cancellationToken = default
         )
         {
