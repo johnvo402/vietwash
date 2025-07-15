@@ -18,7 +18,6 @@ namespace Presentation.Endpoints.Webhooks
     {
         [HttpPost(Router.Webhook.CompletedOrder)]
         [SwaggerOperation(Tags = [Router.Webhook.Tags], Summary = "Update Status Order")]
-        [AuthorizeBy]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             WebhookType request,
             CancellationToken cancellationToken = default
