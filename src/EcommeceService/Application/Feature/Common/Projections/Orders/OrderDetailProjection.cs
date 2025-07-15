@@ -2,6 +2,7 @@
 using Application.Features.Common.Mapping.Users;
 using Contracts.Extensions;
 using Domain.Aggregates.Orders;
+using Domain.Aggregates.Orders.Enums;
 
 namespace Application.Feature.Common.Projections.Orders
 {
@@ -10,7 +11,7 @@ namespace Application.Feature.Common.Projections.Orders
         public string? Note { get; set; }
         public string? Receipt { get; set; }
         public long? StaffId { get; set; }
-
+        public PaymentMethod? PaymentMethod { get; set; }
         public string? BarcodeConfirm { get; set; }
         public ICollection<OrderItemProjection> OrderItems { get; set; } = [];
 
@@ -36,6 +37,7 @@ namespace Application.Feature.Common.Projections.Orders
             BranchId = order.BranchId;
             Receipt = order.Receipt;
             BarcodeConfirm = order.BarcodeConfirm;
+            PaymentMethod = order.PaymentMethod;
             OrderItems = order
                 .OrderItems.ToListMapping(item => new OrderItemProjection
                 {
