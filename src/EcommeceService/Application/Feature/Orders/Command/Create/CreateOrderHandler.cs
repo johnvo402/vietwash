@@ -1,15 +1,21 @@
 ﻿using System.Data.Common;
+using Application.Common.Interfaces;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
+using Contracts.Application.Common.Interfaces.Services.Encryptions;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Specifications;
 using Mediator;
 
 namespace Application.Feature.Orders.Command.Create
 {
-    public class CreateOrderHandler(IUnitOfWork unitOfWork, ICurrentAccount _currentAccount)
-        : IRequestHandler<CreateOrderCommand, Result<CreateOrderResponse>>
+    public class CreateOrderHandler(
+        IUnitOfWork unitOfWork,
+        ICurrentAccount _currentAccount,
+        IEncryptionService encryption,
+        IBarcodeGenerator barcode
+    ) : IRequestHandler<CreateOrderCommand, Result<CreateOrderResponse>>
     {
         public async ValueTask<Result<CreateOrderResponse>> Handle(
             CreateOrderCommand request,
@@ -17,6 +23,10 @@ namespace Application.Feature.Orders.Command.Create
         )
         {
             Order order = request.ToEntity((long)_currentAccount.Id!);
+
+            var codeEncrypt = encryption.Encrypt(order.Code);
+            var barcodeConfirm = barcode.GenerateBarcodeBase64(codeEncrypt);
+            order.BarcodeConfirm = barcodeConfirm;
 
             try
             {

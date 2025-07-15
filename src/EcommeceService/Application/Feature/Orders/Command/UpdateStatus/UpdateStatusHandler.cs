@@ -1,21 +1,15 @@
 ﻿using Application.Common.Errors;
-using Application.Common.Interfaces;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
-using Contracts.Application.Common.Interfaces.Services.Encryptions;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Orders;
-using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Specifications;
 using Mediator;
 
 namespace Application.Feature.Orders.Command.UpdateStatus
 {
-    public class UpdateStatusHandler(
-        IUnitOfWork unitOfWork,
-        IEncryptionService encryption,
-        IBarcodeGenerator barcode
-    ) : IRequestHandler<UpdateStatusCommand, Result>
+    public class UpdateStatusHandler(IUnitOfWork unitOfWork)
+        : IRequestHandler<UpdateStatusCommand, Result>
     {
         public async ValueTask<Result> Handle(
             UpdateStatusCommand request,
@@ -60,12 +54,6 @@ namespace Application.Feature.Orders.Command.UpdateStatus
                         );
                     order.UpdateStatus(request.Status.Value);
                     order.PaymentMethod = request.PaymentMethod;
-                    if (request.Status.Value == OrderStatus.Processed)
-                    {
-                        var codeEncrypt = encryption.Encrypt(order.Code);
-                        var barcodeConfirm = barcode.GenerateBarcodeBase64(codeEncrypt);
-                        order.BarcodeConfirm = barcodeConfirm;
-                    }
                 }
                 using var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
 
