@@ -1,7 +1,7 @@
-﻿using Application.Common.Interfaces.Registers;
+﻿using System.Data.Common;
+using Application.Common.Interfaces.Registers;
 using Domain.Aggregates.Services;
 using Microsoft.EntityFrameworkCore;
-using System.Data.Common;
 
 namespace Application.Common.Interfaces
 {
@@ -16,7 +16,11 @@ namespace Application.Common.Interfaces
 
         Task CreateServiceAsync(Service service, DbTransaction? transaction = null);
 
-        Task UpdateServiceAsync(Service service, IEnumerable<UnitRelation> unitRelations, DbTransaction? transaction = null);
+        Task UpdateServiceAsync(
+            Service service,
+            IEnumerable<UnitRelation> unitRelations,
+            DbTransaction? transaction = null
+        );
 
         Task CreateGroupAsync(Group group, DbTransaction? transaction = null);
 
@@ -24,9 +28,15 @@ namespace Application.Common.Interfaces
 
         Task UpdateUnitAsync(Unit unit, DbTransaction? transaction = null);
 
-        Task UpdateGroupAsync(Group group, IEnumerable<Service> services, DbTransaction? transaction = null);
+        Task UpdateGroupAsync(
+            Group group,
+            IEnumerable<Service> services,
+            DbTransaction? transaction = null
+        );
 
-        Task AddUnitToServiceAsync(IEnumerable<UnitRelation> units, DbTransaction? transaction = null);
-
+        Task AddUnitToServiceAsync(
+            IEnumerable<UnitRelation> units,
+            DbTransaction? transaction = null
+        );
     }
 }

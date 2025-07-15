@@ -1,12 +1,9 @@
 using System.Text.Json.Serialization;
 using Application;
-using Application.Common.Extensions;
-using Application.Jobs;
 using Contracts.Converters;
 using Contracts.Extensions;
 using HealthChecks.UI.Client;
 using Infrastructure;
-using Infrastructure.Data;
 using Infrastructure.Services.BackgroundJobs;
 using Infrastructure.Services.gRPC;
 using Infrastructure.Services.Hangfires;
@@ -33,7 +30,6 @@ builder
         );
         option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
-services.AddScoped<CheckCustomerLoyal>();
 
 services.AddErrorDetails();
 services.AddSwagger(configuration);
@@ -79,7 +75,7 @@ try
         app.AddLog(Log.Logger, "docs", "/api/health");
     }
     app.UseStatusCodePages();
-    app.UseCustomExceptionHandler();
+    app.UseExceptionHandler();
     app.UseAuthentication();
     app.CurrentUser();
     app.UseAuthorization();

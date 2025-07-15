@@ -1,5 +1,4 @@
 using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.Utils;
 using Domain.Aggregates.Equipments;
 using Domain.Aggregates.Equipments.Enums;
 using Domain.Aggregates.Inventories.Events;
@@ -30,15 +29,17 @@ public sealed class InventoryDocumentCompletedHandler
         {
             for (int i = 0; i < supplying.Quantity; i++)
             {
+                var code = supplying.Code;
+                if (i > 0)
+                    code = supplying.Code + i;
                 var equipment = new Equipment(
                     branchId: document.BranchId ?? 1,
                     name: supplying.Name,
-                    code: $"{supplying.Code}-{Generator.GenerateCode("EQ", 4)}",
+                    code: code,
                     price: supplying.Price,
                     capacity: supplying.Capacity,
                     status: EquipmentStatus.Active,
-                    image: null,
-                    description: $"Thiết bị nhập từ phiếu {document.Code}",
+                    description: document.Code,
                     lastMaintenanceDate: DateTimeOffset.UtcNow,
                     nextMaintenanceDate: DateTimeOffset.UtcNow.AddMonths(6)
                 );

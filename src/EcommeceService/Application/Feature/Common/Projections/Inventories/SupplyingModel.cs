@@ -18,7 +18,6 @@ namespace Application.Feature.Common.Projections.Inventories
         public int Quantity { get; set; } = default!;
         public decimal Price { get; set; } = default!;
         public decimal Capacity { get; set; } = default!;
-        public long UnitRelationId { get; set; } = default!;
         public long SupplierId { get; set; } = default!;
     }
 }

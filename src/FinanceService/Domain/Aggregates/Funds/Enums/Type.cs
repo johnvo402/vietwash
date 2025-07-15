@@ -1,6 +1,4 @@
-﻿
-
-namespace Domain.Aggregates.Funds.Enums
+﻿namespace Domain.Aggregates.Funds.Enums
 {
     public enum TransactionType : byte
     {

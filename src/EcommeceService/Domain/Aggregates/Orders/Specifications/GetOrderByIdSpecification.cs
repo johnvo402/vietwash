@@ -12,6 +12,7 @@ namespace Domain.Aggregates.Orders.Specifications
                 .Include(x => x.OrderItems)
                 .ThenInclude(x => x.Service)
                 .Include(x => x.Customer)
+                .Include(x => x.Staff)
                 .Include(x => x.OrderPayments)
                 .AsSplitQuery();
         }

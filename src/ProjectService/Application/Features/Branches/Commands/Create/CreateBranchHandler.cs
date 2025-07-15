@@ -2,8 +2,6 @@
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Contracts.Utils;
-using Domain.Aggregates.Enums;
-using Domain.Aggregates.Warehouses;
 using Mediator;
 
 namespace Application.Features.Branches.Commands.Create
@@ -31,17 +29,6 @@ namespace Application.Features.Branches.Commands.Create
                     .Repository<Domain.Aggregates.Branches.Branch>()
                     .AddAsync(mappingBranch, cancellationToken);
 
-                //auto add warehouse
-                var warehouse = new Warehouse
-                {
-                    Name = $"{branch.Name} kho",
-                    Code = $"WH-{branch.Code}",
-                    Description = $"Kho mặc định được tạo cùng chi nhánh {branch.Name}.",
-                    BranchId = branch.Id,
-                    ReorderLevel = 0,
-                    Status = ActivationStatus.Active,
-                };
-                branch.Warehouses.Add(warehouse);
                 await unitOfWork.SaveAsync(cancellationToken);
 
                 await unitOfWork.CommitAsync(cancellationToken);

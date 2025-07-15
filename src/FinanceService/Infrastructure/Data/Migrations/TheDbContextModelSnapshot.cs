@@ -197,6 +197,10 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("customer_id");
 
+                    b.Property<object>("Metadata")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("metadata");
+
                     b.Property<string>("PublicId")
                         .IsRequired()
                         .HasColumnType("character varying(26)")
@@ -218,12 +222,11 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.Property<long>("Version")
-                        .HasColumnType("bigint")
-                        .HasColumnName("version");
-
                     b.HasKey("Id")
                         .HasName("pk_transaction");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_transaction_customer_id");
 
                     b.ToTable("transaction", (string)null);
                 });
@@ -378,6 +381,18 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("FundBehavior");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Funds.Transaction", b =>
+                {
+                    b.HasOne("Domain.Aggregates.Users.User", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_transaction_user_customer_id");
+
+                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Users.BranchUser", b =>

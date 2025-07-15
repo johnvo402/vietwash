@@ -88,6 +88,7 @@ public static class DependencyInjection
             );
         }
         services.Configure<OtpOption>(configuration.GetSection(nameof(OtpOption)));
+        services.AddOptions<EmailSettings>().Bind(configuration.GetSection(nameof(EmailSettings)));
         services
             .AddAmazonS3(configuration)
             .AddSingleton<ICurrentAccount, CurrentUserService>()

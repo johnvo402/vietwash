@@ -14,7 +14,6 @@ namespace Application.Feature.Equipments.Command.Create
                 price: model.Price,
                 capacity: model.Capacity,
                 status: model.Status,
-                image: model.Image,
                 description: model.Description,
                 lastMaintenanceDate: model.LastMaintenanceDate,
                 nextMaintenanceDate: model.NextMaintenanceDate

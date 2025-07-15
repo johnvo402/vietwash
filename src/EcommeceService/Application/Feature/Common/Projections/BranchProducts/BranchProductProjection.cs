@@ -2,8 +2,8 @@ using Application.Common.Security;
 using Application.Feature.Common.Mapping.Categories;
 using Application.Feature.Common.Mapping.Units;
 using Application.Feature.Common.Projections.Units;
-using Application.Feature.Services.Queries.Detail;
 using Application.Feature.Services.Queries.List;
+using Application.Features.Common.Projections.Users;
 using Contracts.Application.Common;
 using Domain.Aggregates.Enums;
 using Domain.Aggregates.Products;
@@ -16,7 +16,6 @@ namespace Application.Feature.Common.Projections.BranchProducts
         public string Name { get; set; }
         public string? Description { get; set; }
         public string? Sku { get; set; }
-        public string? Barcode { get; set; }
 
         [File]
         public string? Image { get; set; }

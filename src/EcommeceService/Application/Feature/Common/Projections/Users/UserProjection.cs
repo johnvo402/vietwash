@@ -44,3 +44,27 @@ public class UserProjection : BaseResponse
         Role = user.Role;
     }
 }
+
+public class UserDTO
+{
+    public long? Id { get; set; }
+    public Ulid? PublicId { get; set; }
+    public string? DisplayName { get; set; }
+    public string? Email { get; set; }
+    public string? PhoneNumber { get; set; }
+    public CustomerGroup? CustomerGroup { get; set; }
+
+    [File]
+    public string? Avatar { get; set; }
+
+    public virtual void MappingFrom(User user)
+    {
+        Id = user.Id;
+        PublicId = user.PublicId;
+        DisplayName = user.DisplayName;
+        Email = user.Email;
+        PhoneNumber = user.PhoneNumber;
+        CustomerGroup = user.CustomerGroup;
+        Avatar = user.AvtUrl;
+    }
+}

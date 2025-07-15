@@ -3,8 +3,6 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Dtos.Requests;
 using Contracts.Utils;
 using Domain.Aggregates.Enums;
-using Domain.Aggregates.Equipments;
-using Domain.Aggregates.Equipments.Enums;
 using Domain.Aggregates.Inventories;
 using Domain.Aggregates.Inventories.Enums;
 using Domain.Aggregates.Orders;
@@ -97,19 +95,6 @@ public class DbInitializer
             else
             {
                 logger.Information("Dữ liệu đơn hàng đã tồn tại, bỏ qua khởi tạo.");
-            }
-
-            if (!await unitOfWork.Repository<Equipment>().AnyAsync())
-            {
-                logger.Information("Bắt đầu khởi tạo dữ liệu thiết bị...");
-
-                await InitializeEquipmentsAsync(unitOfWork, cancellationToken);
-
-                logger.Information("Hoàn tất khởi tạo dữ liệu thiết bị...");
-            }
-            else
-            {
-                logger.Information("Dữ liệu thiết bị đã tồn tại, bỏ qua khởi tạo.");
             }
             if (!await unitOfWork.Repository<BranchProduct>().AnyAsync())
             {
@@ -679,34 +664,6 @@ public class DbInitializer
         await unitOfWork.SaveAsync(cancellationToken);
     }
 
-    private static async Task InitializeEquipmentsAsync(
-        IUnitOfWork unitOfWork,
-        CancellationToken cancellationToken
-    )
-    {
-        var equipments = Enumerable
-            .Range(1, 10)
-            .Select(i => new Equipment(
-                branchId: 1,
-                name: $"Máy {(i % 2 == 0 ? "Sấy" : "Giặt")} {i}",
-                code: $"EQP-{i:D4}",
-                price: 1000000 + i * 500000,
-                capacity: 7 + (i % 3), // ví dụ: 7kg, 8kg, 9kg...
-                status: EquipmentStatus.Active,
-                image: null,
-                description: $"Thiết bị {(i % 2 == 0 ? "sấy" : "giặt")} công suất cao số {i}",
-                lastMaintenanceDate: DateTimeOffset.UtcNow.AddMonths(-i),
-                nextMaintenanceDate: DateTimeOffset.UtcNow.AddMonths(6 - i)
-            ))
-            .ToList();
-
-        foreach (var equipment in equipments)
-        {
-            await unitOfWork.Repository<Equipment>().AddAsync(equipment, cancellationToken);
-            await unitOfWork.SaveAsync(cancellationToken);
-        }
-    }
-
     private static async Task InitializeBranchProductsAsync(
         IUnitOfWork unitOfWork,
         ILogger logger,
@@ -743,8 +700,7 @@ public class DbInitializer
         for (int i = 0; i < 10; i++)
         {
             var name = productNames[i];
-            var sku = $"SP-{i + 1:D4}";
-            var barcode = $"893850{i + 1000}";
+            var sku = Generator.GenerateCode(10);
             var price = random.Next(10000, 100000);
             var categoriesList = categories.ToList();
             var categoryId = categoriesList[random.Next(categoriesList.Count)].Id;
@@ -759,7 +715,6 @@ public class DbInitializer
                 capitalPrice: price,
                 categoryId: categoryId,
                 description: $"Sản phẩm dùng trong giặt ủi: {name}",
-                barcode: barcode,
                 image: null
             );
 
@@ -803,7 +758,6 @@ public class DbInitializer
         var supplierList = suppliers.ToList();
         var supplier = supplierList[random.Next(supplierList.Count)];
         var branchId = 1L;
-        var toWarehouseId = 1L;
 
         decimal totalProductAmount = 0;
         var productSupplyings = new List<ProductSupplying>();
@@ -828,7 +782,7 @@ public class DbInitializer
                     ProductId = product.Id,
                     SupplierId = supplier.Id,
                     Quantity = quantity,
-                    LotNumber = $"LOT-{Generator.GenerateCode("P", 4)}",
+                    LotNumber = Generator.GenerateCode("LOT", 4),
                     Price = unitRelation.Price,
                     UnitRelationId = unitRelation.Id,
                     ExpiryDate = DateTimeOffset.UtcNow.AddMonths(12),
@@ -841,8 +795,6 @@ public class DbInitializer
 
         for (int i = 1; i <= 20; i++)
         {
-            var unitList = units.ToList();
-            var unit = unitList[random.Next(unitList.Count)];
             decimal price = 1500000 + i * 100000;
             int capacity = 7 + (i % 3);
 
@@ -852,19 +804,10 @@ public class DbInitializer
                 new EquipmentSupplying
                 {
                     Name = $"Máy {(i % 2 == 0 ? "Sấy" : "Giặt")} {i}",
-                    Code = $"EQP-{i:D4}",
+                    Code = Generator.GenerateCode("EQ", 6),
                     Price = price,
                     Capacity = capacity,
                     Quantity = 1,
-                    UnitRelation = new UnitRelation
-                    {
-                        Name = unit.Name,
-                        BaseUnit = true,
-                        Multiple = 1,
-                        Price = price,
-                        ProcessingTime = 0,
-                        Status = ActivationStatus.Active,
-                    },
                     SupplierId = supplier.Id,
                 }
             );
@@ -877,8 +820,6 @@ public class DbInitializer
             code: Generator.GenerateCode("IM", 6),
             amount: totalAmount,
             type: InventoryType.Import,
-            fromWarehouseId: null,
-            toWarehouseId: toWarehouseId,
             branchId: branchId,
             note: "Nhập hàng khởi tạo"
         )

@@ -354,8 +354,8 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
-                    b.Property<DateTimeOffset>("ExpiredTime")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<int>("ExpiredTime")
+                        .HasColumnType("integer")
                         .HasColumnName("expired_time");
 
                     b.Property<string>("FamilyId")

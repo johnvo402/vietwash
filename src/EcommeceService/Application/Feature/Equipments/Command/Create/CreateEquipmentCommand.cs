@@ -4,5 +4,5 @@ using Mediator;
 
 namespace Application.Feature.Equipments.Command.Create
 {
-	public class CreateEquipmentCommand : EquipmentModel, IRequest<Result>;
+    public class CreateEquipmentCommand : EquipmentModel, IRequest<Result>;
 }

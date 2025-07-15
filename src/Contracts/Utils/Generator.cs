@@ -46,6 +46,21 @@ public static class Generator
         return $"{prefix}{number}".Trim();
     }
 
+    public static string GenerateCode(int numberLength)
+    {
+        if (numberLength <= 0)
+            throw new ArgumentException(
+                "Number length must be greater than 0",
+                nameof(numberLength)
+            );
+
+        int maxValue = (int)Math.Pow(10, numberLength) - 1;
+        int minValue = (int)Math.Pow(10, numberLength - 1);
+
+        int number = _random.Next(minValue, maxValue + 1);
+        return $"{number}".Trim();
+    }
+
     public static string GenerateSlug(string input)
     {
         string slug = input.ToLowerInvariant().Normalize(NormalizationForm.FormD);

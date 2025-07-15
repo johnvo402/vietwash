@@ -1,10 +1,10 @@
-﻿using Application.Common.Interfaces;
+﻿using System.Data.Common;
+using Application.Common.Interfaces;
+using Application.Common.Interfaces.UnitOfWorks;
+using Ardalis.GuardClauses;
 using Domain.Aggregates.Services;
 using Microsoft.EntityFrameworkCore;
-using System.Data.Common;
-using Ardalis.GuardClauses;
 using Serilog;
-using Application.Common.Interfaces.UnitOfWorks;
 
 namespace Infrastructure.Services.Managements
 {
@@ -67,7 +67,11 @@ namespace Infrastructure.Services.Managements
             }
         }
 
-        public async Task UpdateServiceAsync(Service service, IEnumerable<UnitRelation> unitRelations, DbTransaction? transaction = null)
+        public async Task UpdateServiceAsync(
+            Service service,
+            IEnumerable<UnitRelation> unitRelations,
+            DbTransaction? transaction = null
+        )
         {
             bool hasExternalTransaction = transaction != null;
 
@@ -76,35 +80,40 @@ namespace Infrastructure.Services.Managements
                 if (!hasExternalTransaction)
                     await _context.DatabaseFacade.BeginTransactionAsync();
 
-				// Lấy danh sách UnitRelation hiện tại
-				var existingUnitRelations = service.UnitRelations.ToList();
+                // Lấy danh sách UnitRelation hiện tại
+                var existingUnitRelations = service.UnitRelations.ToList();
 
-				// Xác định UnitRelation cần xóa (không còn trong danh sách mới)
-				var unitRelationIdsToKeep = unitRelations.Select(ur => ur.Id).Where(id => id > 0).ToList();
-				var unitRelationsToRemove = existingUnitRelations
-					.Where(ur => !unitRelationIdsToKeep.Contains(ur.Id))
-					.ToList();
+                // Xác định UnitRelation cần xóa (không còn trong danh sách mới)
+                var unitRelationIdsToKeep = unitRelations
+                    .Select(ur => ur.Id)
+                    .Where(id => id > 0)
+                    .ToList();
+                var unitRelationsToRemove = existingUnitRelations
+                    .Where(ur => !unitRelationIdsToKeep.Contains(ur.Id))
+                    .ToList();
 
-				// Xóa UnitRelation không còn trong danh sách mới
-				_unitRelationContext.RemoveRange(unitRelationsToRemove);
+                // Xóa UnitRelation không còn trong danh sách mới
+                _unitRelationContext.RemoveRange(unitRelationsToRemove);
 
-				// Cập nhật hoặc thêm mới UnitRelation
-				foreach (var unitRelation in unitRelations)
-				{
-					unitRelation.ServiceId = service.Id;
-					var existingUnitRelation = existingUnitRelations.FirstOrDefault(ur => ur.Id == unitRelation.Id);
-					if (existingUnitRelation != null)
-					{
-						_unitRelationContext.Update(unitRelation); // Cập nhật
-					}
-					else if (unitRelation.Id == 0 || unitRelation.Id == null)
-					{
-						unitRelation.Id = 0; // Đảm bảo DB tự tăng
-						_unitRelationContext.Add(unitRelation); // Thêm mới
-					}
-				}
-				// Cập nhật Service
-				_serviceContext.Update(service);
+                // Cập nhật hoặc thêm mới UnitRelation
+                foreach (var unitRelation in unitRelations)
+                {
+                    unitRelation.ServiceId = service.Id;
+                    var existingUnitRelation = existingUnitRelations.FirstOrDefault(ur =>
+                        ur.Id == unitRelation.Id
+                    );
+                    if (existingUnitRelation != null)
+                    {
+                        _unitRelationContext.Update(unitRelation); // Cập nhật
+                    }
+                    else if (unitRelation.Id == 0 || unitRelation.Id == null)
+                    {
+                        unitRelation.Id = 0; // Đảm bảo DB tự tăng
+                        _unitRelationContext.Add(unitRelation); // Thêm mới
+                    }
+                }
+                // Cập nhật Service
+                _serviceContext.Update(service);
 
                 await _context.SaveChangesAsync();
 
@@ -151,7 +160,11 @@ namespace Infrastructure.Services.Managements
             }
         }
 
-        public async Task UpdateGroupAsync(Group group, IEnumerable<Service> services, DbTransaction? transaction = null)
+        public async Task UpdateGroupAsync(
+            Group group,
+            IEnumerable<Service> services,
+            DbTransaction? transaction = null
+        )
         {
             var isOwnerTransaction = transaction != null;
             try
@@ -171,7 +184,9 @@ namespace Infrastructure.Services.Managements
                         .Where(gs => gs.GroupId == group.Id)
                         .ToListAsync();
 
-                    var currentServiceIds = currentGroupServices.Select(gs => gs.ServiceId).ToList();
+                    var currentServiceIds = currentGroupServices
+                        .Select(gs => gs.ServiceId)
+                        .ToList();
                     var newServiceIds = services.Select(s => s.Id).ToList();
 
                     // Find services to add to the group
@@ -183,11 +198,9 @@ namespace Infrastructure.Services.Managements
                     // Add new group-service relationships
                     foreach (var serviceId in servicesToAdd)
                     {
-                        await _groupServiceContext.AddAsync(new GroupService
-                        {
-                            GroupId = group.Id,
-                            ServiceId = serviceId
-                        });
+                        await _groupServiceContext.AddAsync(
+                            new GroupService { GroupId = group.Id, ServiceId = serviceId }
+                        );
                     }
 
                     // Remove old group-service relationships
@@ -282,7 +295,10 @@ namespace Infrastructure.Services.Managements
             }
         }
 
-        public async Task AddUnitToServiceAsync(IEnumerable<UnitRelation> unitRelations, DbTransaction? transaction = null)
+        public async Task AddUnitToServiceAsync(
+            IEnumerable<UnitRelation> unitRelations,
+            DbTransaction? transaction = null
+        )
         {
             Guard.Against.Null(unitRelations, nameof(unitRelations));
 
@@ -299,14 +315,13 @@ namespace Infrastructure.Services.Managements
                     Guard.Against.Default(relation.ServiceId, nameof(relation.ServiceId));
 
                     // Check if relation already exists
-                    var existingRelation = await _unitRelationContext
-                        .FirstOrDefaultAsync(ur =>
-                            //ur.UnitId == relation.UnitId &&
-                            ur.ServiceId == relation.ServiceId);
+                    var existingRelation = await _unitRelationContext.FirstOrDefaultAsync(ur =>
+                        //ur.UnitId == relation.UnitId &&
+                        ur.ServiceId == relation.ServiceId
+                    );
 
                     if (existingRelation == null)
                     {
-
                         await _unitRelationContext.AddAsync(relation);
                     }
                 }
@@ -378,7 +393,5 @@ namespace Infrastructure.Services.Managements
                 .Where(g => g.GroupServices.Any(gs => gs.ServiceId == serviceId))
                 .ToListAsync();
         }
-
-
     }
 }

@@ -28,7 +28,7 @@ public static class DependencyInjection
             .AddValidatorsFromAssembly(currentAssembly)
             .AddSingleton<IAuthorizationPolicyProvider, AuthorizePolicyProvider>()
             .AddSingleton<IAuthorizationHandler, AuthorizeHandler>()
-            .AddScoped<UpdateUserStatusJob>();
+            .AddScoped<CheckBirthdayCustomerJob>();
         ;
     }
 }

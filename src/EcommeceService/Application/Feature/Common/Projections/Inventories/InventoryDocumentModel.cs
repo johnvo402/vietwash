@@ -7,8 +7,7 @@ namespace Application.Feature.Common.Projections.Inventories
     {
         public PaymentMethod? PaymentMethod { get; set; }
         public decimal PaidAmount { get; set; }
-        public long? BranchId { get; set; }
-        public long? WarehouseId { get; set; }
+        public long BranchId { get; set; }
         public InventoryType Type { get; set; }
         public string? Note { get; set; }
 

@@ -1,7 +1,6 @@
 using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Aggregates.Branches;
 using Domain.Aggregates.Enums;
-using Domain.Aggregates.Warehouses;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -143,17 +142,6 @@ public class DbInitializer
         };
         foreach (var branch in branches)
         {
-            // Create and add default warehouse
-            var warehouse = new Warehouse
-            {
-                Name = $"{branch.Name} kho",
-                Code = $"WH-{branch.Code}",
-                Description = $"Kho mặc định được tạo cùng chi nhánh {branch.Name}.",
-                BranchId = branch.Id,
-                ReorderLevel = 0,
-                Status = ActivationStatus.Active,
-            };
-            branch.Warehouses.Add(warehouse);
             branch.CreateEvent();
             await unitOfWork.Repository<Branch>().AddAsync(branch, cancellationToken);
             await unitOfWork.SaveAsync(cancellationToken);

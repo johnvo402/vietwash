@@ -6,6 +6,7 @@ using Contracts.Dtos.Requests;
 using Contracts.Extensions;
 using Contracts.Extensions.Reflections;
 using Serilog;
+using Shared.Kernel.Extensions;
 using StringExtension = Contracts.Application.Common.Extensions.StringExtension;
 
 namespace Contracts.Common.QueryStringProcessing;

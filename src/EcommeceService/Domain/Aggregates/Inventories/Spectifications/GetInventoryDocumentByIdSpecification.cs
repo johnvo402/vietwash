@@ -16,8 +16,6 @@ namespace Domain.Aggregates.Inventories.Spectifications
                 .Include(x => x.ProductSupplyings)
                 .ThenInclude(x => x.Supplier)
                 .Include(x => x.EquipmentSupplyings)
-                .ThenInclude(x => x.UnitRelation)
-                .Include(x => x.EquipmentSupplyings)
                 .ThenInclude(x => x.Supplier)
                 .AsSplitQuery()
                 .AsNoTracking();

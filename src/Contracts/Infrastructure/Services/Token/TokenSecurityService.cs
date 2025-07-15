@@ -8,6 +8,7 @@ using Infrastructure.Services.Token;
 using JWT.Algorithms;
 using JWT.Builder;
 using Microsoft.Extensions.Options;
+using Shared.Kernel.Extensions;
 using StackExchange.Redis;
 
 namespace Contracts.Infrastructure.Services.Token
