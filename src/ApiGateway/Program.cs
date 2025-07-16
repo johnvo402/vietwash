@@ -69,7 +69,11 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-                .WithOrigins("http://localhost:3000", "https://vietwash.vercel.app")
+                .WithOrigins(
+                    "http://localhost:3000",
+                    "https://vietwash.vercel.app",
+                    "https://api-app.payos.vn"
+                )
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials();
