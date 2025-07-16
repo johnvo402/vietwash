@@ -20,7 +20,7 @@ namespace Application.Feature.Tariffs.Commands.Update
             Tariff? existingTariff = await unitOfWork
                 .DynamicReadOnlyRepository<Tariff>()
                 .FindByConditionAsync(
-                    new GetTariffByIdWithoutIncludeSpecification(command.TariffId),
+                    new GetTariffByIdWithIncludeSpecification(command.TariffId),
                     cancellationToken
                 );
 			if (existingTariff == null)
