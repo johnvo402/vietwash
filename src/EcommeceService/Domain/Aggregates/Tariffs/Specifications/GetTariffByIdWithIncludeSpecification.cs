@@ -3,9 +3,9 @@ using Specification.Builders;
 
 namespace Domain.Aggregates.Tariffs.Specifications
 {
-    public class GetTariffByIdWithoutIncludeSpecification : Specification<Tariff>
+    public class GetTariffByIdWithIncludeSpecification : Specification<Tariff>
     {
-        public GetTariffByIdWithoutIncludeSpecification(long id)
+        public GetTariffByIdWithIncludeSpecification(long id)
         {
             Query
                 .Where(x => x.Id == id && !x.Disable)
