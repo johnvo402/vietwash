@@ -7,7 +7,9 @@ namespace Domain.Aggregates.Tariffs.Specifications
     {
         public GetTariffByIdWithoutIncludeSpecification(long id)
         {
-            Query.Where(x => x.Id == id && !x.Disable);
+            Query
+                .Where(x => x.Id == id && !x.Disable)
+                .Include(x => x.ServiceTariffs);
         }
     }
 }
