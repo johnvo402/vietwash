@@ -17,7 +17,6 @@ using Infrastructure.Services.DistributedCache;
 using Infrastructure.Services.Hangfires;
 using Infrastructure.Services.Identity;
 using Infrastructure.Services.Mail;
-using Infrastructure.Services.PayOs;
 using Infrastructure.Services.Token;
 using Infrastructure.UnitOfWorks;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -110,7 +109,6 @@ public static class DependencyInjection
             .AddSingleton<IActionContextAccessor, ActionContextAccessor>()
             .AddJwtAuth(configuration)
             .AddEncryption(configuration)
-            .AddPayOs(configuration)
             .AddMemoryCache()
             .AddRedis(configuration)
             .PubSubLogClient()
