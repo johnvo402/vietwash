@@ -25,7 +25,7 @@ namespace Domain.Aggregates.Orders
         public User? Staff { get; set; }
         public User? Customer { get; set; }
         public string? Receipt { get; set; }
-        public string? BarcodeConfirm { get; set; }
+        public string? CodeConfirm { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; } = [];
 
         protected override bool TryApplyDomainEvent(INotification domainEvent)

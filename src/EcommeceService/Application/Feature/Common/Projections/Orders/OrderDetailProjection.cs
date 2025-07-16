@@ -12,7 +12,7 @@ namespace Application.Feature.Common.Projections.Orders
         public string? Receipt { get; set; }
         public long? StaffId { get; set; }
         public PaymentMethod? PaymentMethod { get; set; }
-        public string? BarcodeConfirm { get; set; }
+        public string? QrCode { get; set; }
         public ICollection<OrderItemProjection> OrderItems { get; set; } = [];
 
         public virtual void MappingFrom(Order order)
@@ -36,7 +36,7 @@ namespace Application.Feature.Common.Projections.Orders
             Status = order.Status;
             BranchId = order.BranchId;
             Receipt = order.Receipt;
-            BarcodeConfirm = order.BarcodeConfirm;
+            QrCode = order.CodeConfirm;
             PaymentMethod = order.PaymentMethod;
             OrderItems = order
                 .OrderItems.ToListMapping(item => new OrderItemProjection

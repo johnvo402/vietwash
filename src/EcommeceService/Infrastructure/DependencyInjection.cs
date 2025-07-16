@@ -12,11 +12,11 @@ using Infrastructure.Data.Interceptors;
 using Infrastructure.Services;
 using Infrastructure.Services.Aws;
 using Infrastructure.Services.BackgroundJobs;
-using Infrastructure.Services.Barcodes;
 using Infrastructure.Services.DistributedCache;
 using Infrastructure.Services.Hangfires;
 using Infrastructure.Services.Identity;
 using Infrastructure.Services.Mail;
+using Infrastructure.Services.QrCodes;
 using Infrastructure.Services.Token;
 using Infrastructure.UnitOfWorks;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -92,7 +92,7 @@ public static class DependencyInjection
         services
             .AddAmazonS3(configuration)
             .AddSingleton<ICurrentAccount, CurrentUserService>()
-            .AddSingleton<IBarcodeGenerator, BarcodeGenerator>()
+            .AddSingleton<IQrGenerator, QrCodeGenerator>()
             .AddSingleton(typeof(IMediaUpdateService), typeof(MediaUpdateService))
             .Scan(scan =>
                 scan.FromCallingAssembly()

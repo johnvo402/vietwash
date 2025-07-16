@@ -14,7 +14,7 @@ namespace Application.Feature.Orders.Command.Create
         IUnitOfWork unitOfWork,
         ICurrentAccount _currentAccount,
         IEncryptionService encryption,
-        IBarcodeGenerator barcode
+        IQrGenerator barcode
     ) : IRequestHandler<CreateOrderCommand, Result<CreateOrderResponse>>
     {
         public async ValueTask<Result<CreateOrderResponse>> Handle(
@@ -25,8 +25,8 @@ namespace Application.Feature.Orders.Command.Create
             Order order = request.ToEntity((long)_currentAccount.Id!);
 
             var codeEncrypt = encryption.Encrypt(order.Code);
-            var barcodeConfirm = barcode.GenerateBarcodeBase64(codeEncrypt);
-            order.BarcodeConfirm = barcodeConfirm;
+            var barcodeConfirm = barcode.GenerateQrBase64(codeEncrypt);
+            order.CodeConfirm = barcodeConfirm;
 
             try
             {
