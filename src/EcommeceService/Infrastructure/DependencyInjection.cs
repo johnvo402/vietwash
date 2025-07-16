@@ -16,6 +16,7 @@ using Infrastructure.Services.DistributedCache;
 using Infrastructure.Services.Hangfires;
 using Infrastructure.Services.Identity;
 using Infrastructure.Services.Mail;
+using Infrastructure.Services.PayOs;
 using Infrastructure.Services.QrCodes;
 using Infrastructure.Services.Token;
 using Infrastructure.UnitOfWorks;
@@ -111,6 +112,7 @@ public static class DependencyInjection
             .AddEncryption(configuration)
             .AddMemoryCache()
             .AddRedis(configuration)
+            .AddPayOs(configuration)
             .PubSubLogClient()
             .AddHostedService<PubSubBackgroundService>()
             .AddHostedService<DeadletterPubSubBackgroundService>()
