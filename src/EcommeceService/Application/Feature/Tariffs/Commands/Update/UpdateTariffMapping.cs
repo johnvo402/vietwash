@@ -1,3 +1,4 @@
+using Application.Feature.Common.Mapping.Tariffs;
 using Application.Feature.Common.Projections.Tariffs;
 using Domain.Aggregates.Tariffs;
 
@@ -14,7 +15,8 @@ namespace Application.Feature.Tariffs.Commands.Update
 			    startAt: update.StartAt,
 			    endAt: update.EndAt
 			);
-            return tariff;
+			tariff.ServiceTariffs = update.ServiceTariffs.ToListServiceTariff() ?? [];
+			return tariff;
         }
     }
 }
