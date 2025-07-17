@@ -94,10 +94,6 @@ try
         "Application is launching with {environment}",
         app.Environment.EnvironmentName
     );
-    if (!isProduction)
-    {
-        await DbInitializer.InitializeAsync(serviceProvider);
-    }
     app.Run();
 }
 catch (Exception ex)

@@ -14,7 +14,7 @@ using Domain.Otp;
 using Infrastructure.Constants;
 using Mediator;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Wangkanai.Detection.Services;
+using Shared.Kernel.Extensions;
 
 namespace Application.Features.Accounts.Commands.VerifyOtpLoginCustomer
 {
@@ -23,7 +23,6 @@ namespace Application.Features.Accounts.Commands.VerifyOtpLoginCustomer
         ISmsOtpClient _client,
         IUnitOfWork _unitOfWork,
         ITokenFactory _tokenFactory,
-        IDetectionService detectionService,
         ITokenSecurityService _securityService
     ) : IRequestHandler<VerifyOtpCommand, Result<VerifyOtpResponse>>
     {
@@ -38,7 +37,6 @@ namespace Application.Features.Accounts.Commands.VerifyOtpLoginCustomer
                 Otp = request.Otp,
                 ClientIp = _currentAccount.ClientIp!,
             };
-
 
             // Verify OTP
             bool isValid = await _client.VerifyAsync(verifyRequest, cancellationToken);
@@ -86,8 +84,7 @@ namespace Application.Features.Accounts.Commands.VerifyOtpLoginCustomer
                 // Generate tokens
                 string familyId = StringExtension.GenerateRandomString(32);
                 var accessTokenExpireTime = _tokenFactory.AccesstokenExpiredTime;
-                var refreshExpireTime = _tokenFactory.RefreshtokenExpiredTime;
-
+                var refreshExpireTime = DateTime.UtcNow.AddDays(15);
                 string accessToken = _tokenFactory.CreateToken(
                     [
                         new("family_id", familyId),
@@ -109,7 +106,7 @@ namespace Application.Features.Accounts.Commands.VerifyOtpLoginCustomer
                 // Store refresh token
                 var userToken = new AccountToken
                 {
-                    ExpiredTime = refreshExpireTime,
+                    ExpiredTime = 15,
                     AccountId = user.Id,
                     FamilyId = familyId,
                     ClientIp = verifyRequest.ClientIp,

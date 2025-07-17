@@ -88,6 +88,7 @@ public static class DependencyInjection
             );
         }
         services.Configure<OtpOption>(configuration.GetSection(nameof(OtpOption)));
+        services.AddOptions<EmailSettings>().Bind(configuration.GetSection(nameof(EmailSettings)));
         services
             .AddAmazonS3(configuration)
             .AddSingleton<ICurrentAccount, CurrentUserService>()
@@ -112,6 +113,7 @@ public static class DependencyInjection
             .PubSubLogClient()
             .AddHostedService<PubSubBackgroundService>()
             .AddHostedService<DeadletterPubSubBackgroundService>()
+            .AddHostedService<DbInitializerBackgroundService>()
             .Configure<CacheSettings>(options =>
                 configuration.GetSection(nameof(CacheSettings)).Bind(options)
             )

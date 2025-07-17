@@ -1,10 +1,9 @@
-using System.Text.RegularExpressions;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Projections.Users;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Users;
 using FluentValidation;
-using Contracts.Common.Messages;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Common.Validators.Users;

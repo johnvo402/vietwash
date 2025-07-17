@@ -14,7 +14,6 @@ namespace Domain.Aggregates.Products
         public string Name { get; set; }
         public string? Description { get; set; }
         public string? Sku { get; set; }
-        public string? Barcode { get; set; }
         public string? Image { get; set; }
         public decimal CapitalPrice { get; set; }
         public ActivationStatus Status { get; set; }
@@ -32,7 +31,6 @@ namespace Domain.Aggregates.Products
             decimal capitalPrice,
             long categoryId,
             string? description = null,
-            string? barcode = null,
             string? image = null
         )
         {
@@ -40,14 +38,13 @@ namespace Domain.Aggregates.Products
             Name = Guard.Against.NullOrWhiteSpace(name, nameof(name));
             Description = description?.Trim();
             Sku = Guard.Against.NullOrWhiteSpace(sku, nameof(sku));
-            Barcode = Guard.Against.NullOrWhiteSpace(barcode, nameof(barcode));
             Image = image;
             Status = Guard.Against.EnumOutOfRange(status, nameof(status));
             CapitalPrice = Guard.Against.Negative(capitalPrice, nameof(capitalPrice));
             CategoryId = Guard.Against.Negative(categoryId, nameof(categoryId));
         }
 
-        public void BranchCreateEvent() =>
+        public void BranchProductCreateEvent() =>
             Emit(new BranchProductCreateEvent() { BranchProduct = this });
 
         public void Update(
@@ -55,7 +52,6 @@ namespace Domain.Aggregates.Products
             string? name = null,
             string? description = null,
             string? sku = null,
-            string? barcode = null,
             string? image = null,
             decimal? capitalPrice = null,
             long? categoryId = null,
@@ -74,9 +70,6 @@ namespace Domain.Aggregates.Products
 
             if (!string.IsNullOrWhiteSpace(sku))
                 Sku = sku.Trim();
-
-            if (!string.IsNullOrWhiteSpace(barcode))
-                Barcode = barcode.Trim();
 
             if (image != null)
                 Image = image;

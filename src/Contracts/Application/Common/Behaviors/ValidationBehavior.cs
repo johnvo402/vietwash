@@ -17,6 +17,7 @@ public sealed class ValidationBehavior<TMessage, TResponse>(
         IEnumerable<IValidator<TMessage>> validators = serviceProvider.GetRequiredService<
             IEnumerable<IValidator<TMessage>>
         >();
+
         if (validators.Any())
         {
             var context = new ValidationContext<TMessage>(message);
@@ -26,17 +27,14 @@ public sealed class ValidationBehavior<TMessage, TResponse>(
             );
 
             List<ValidationFailure> failures = validationResults
-                .Where(r => r.Errors.Count != 0)
+                .Where(r => !r.IsValid)
                 .SelectMany(r => r.Errors)
                 .ToList();
 
             if (failures.Any())
             {
-                var errors = string.Join(
-                    "\n",
-                    failures.Select(x => $"Property: {x.PropertyName}, Error: {x.ErrorMessage}")
-                );
-                throw new ValidationException($"Validation failed:\n{errors}");
+                // Ném ValidationException với danh sách ValidationFailure
+                throw new ValidationException(failures);
             }
         }
 

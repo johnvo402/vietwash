@@ -28,8 +28,8 @@ public class CreateAccountEndpoint(ISender sender)
         var result = await sender.Send(request, cancellationToken);
 
         return result.ToCreatedResult(
-            Router.AccountRoute.GetRouteName,
-            result.Value!.Id.ToString()
+            route: Router.AccountRoute.GetRouteName,
+            routeValues: new { id = result.Value!.Id }
         );
     }
 }

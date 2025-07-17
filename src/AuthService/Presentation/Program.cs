@@ -4,7 +4,6 @@ using Contracts.Converters;
 using Contracts.Extensions;
 using HealthChecks.UI.Client;
 using Infrastructure;
-using Infrastructure.Data;
 using Infrastructure.Services.BackgroundJobs;
 using Infrastructure.Services.Hangfires;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -77,20 +76,15 @@ try
     }
 
     app.UseStatusCodePages();
-    app.UseExceptionHandler();
     app.UseAuthentication();
     app.CurrentUser();
     app.UseAuthorization();
     app.UseDetection();
-
+    app.UseExceptionHandler();
     app.UseSerilogRequestLogging();
     app.BlackListContext();
     app.MapControllers();
     app.ApplyMigrations();
-    if (!isProduction)
-    {
-        await DbInitializer.InitializeAsync(serviceProvider);
-    }
     Log.Logger.Information(
         "Application is launching with {environment}",
         app.Environment.EnvironmentName

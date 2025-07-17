@@ -1,10 +1,12 @@
 ﻿using System.Data.Common;
 using Application.Common.Errors;
+using Application.Common.Interfaces;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Vouchers.Queries.Detail;
 using Contracts.ApiWrapper;
 using Contracts.Common.Messages;
+using Contracts.Application.Common.Interfaces.Services.Encryptions;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Specifications;
 using Domain.Aggregates.Users;
@@ -16,8 +18,12 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Application.Feature.Orders.Command.Create
 {
-    public class CreateOrderHandler(IUnitOfWork unitOfWork, ICurrentAccount _currentAccount)
-        : IRequestHandler<CreateOrderCommand, Result<CreateOrderResponse>>
+    public class CreateOrderHandler(
+        IUnitOfWork unitOfWork,
+        ICurrentAccount _currentAccount,
+        IEncryptionService encryption,
+        IQrGenerator barcode
+    ) : IRequestHandler<CreateOrderCommand, Result<CreateOrderResponse>>
     {
         public async ValueTask<Result<CreateOrderResponse>> Handle(
             CreateOrderCommand request,
@@ -25,6 +31,10 @@ namespace Application.Feature.Orders.Command.Create
         )
         {
             Order order = request.ToEntity((long)_currentAccount.Id!);
+
+            var codeEncrypt = encryption.Encrypt(order.Code);
+            var barcodeConfirm = barcode.GenerateQrBase64(codeEncrypt);
+            order.CodeConfirm = barcodeConfirm;
 
             try
             {

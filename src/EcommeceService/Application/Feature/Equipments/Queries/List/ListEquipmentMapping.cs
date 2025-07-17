@@ -18,7 +18,6 @@ namespace Application.Feature.Equipments.Queries.List
 
                 BranchId = equipment.BranchId,
                 Name = equipment.Name,
-                Image = equipment.Image,
                 Description = equipment.Description,
                 Code = equipment.Code,
                 Price = equipment.Price,

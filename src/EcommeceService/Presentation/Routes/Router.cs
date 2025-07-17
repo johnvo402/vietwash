@@ -20,6 +20,18 @@ namespace Presentation.Routes
                 + "}";
             public const string TopService =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Services)}/{nameof(TopService)}";
+            public const string Feedbacks =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Services)}/"
+                + "{"
+                + RouterBase.Id
+                + "}/"
+                + $"{nameof(Feedbacks)}";
+            public const string CreateFeedback =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Services)}/"
+                + "{"
+                + RouterBase.Id
+                + "}/"
+                + $"{nameof(CreateFeedback)}";
         }
 
         public static class TariffRoute
@@ -57,6 +69,14 @@ namespace Presentation.Routes
             public const string Orders = $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}";
             public const string GetUpdateDelete =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/" + "{" + RouterBase.Id + "}";
+
+            public const string GetByCode =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(GetByCode)}";
+            public const string GetLinkPayment =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(GetLinkPayment)}"
+                + "{"
+                + RouterBase.Id
+                + "}";
             public const string UpdateStatus =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(UpdateStatus)}"
                 + "{"
@@ -67,6 +87,13 @@ namespace Presentation.Routes
                 + "{"
                 + RouterBase.Id
                 + "}";
+        }
+
+        public static class Webhook
+        {
+            public const string Tags = $"{nameof(Webhook)} endpoint";
+            public const string CompletedOrder =
+                $"{nameof(Webhook)}/{RouterBase.prefix}{nameof(CompletedOrder)}";
         }
 
         public static class InventoryRoute
@@ -160,6 +187,7 @@ namespace Presentation.Routes
                 + RouterBase.Id
                 + "}";
         }
+
         public static class VoucherRoute
         {
             public const string Tags = $"{nameof(VoucherRoute)} endpoint";
@@ -173,6 +201,29 @@ namespace Presentation.Routes
                 + "}";
         }
 
-
+        public static class FeedbackRoute
+        {
+            public const string Tags = $"{nameof(FeedbackRoute)} endpoint";
+            public const string Feedbacks = $"{Ecommerce}/{RouterBase.prefix}{nameof(Feedbacks)}";
+            public const string FeedbackReplies =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Feedbacks)}/"
+                + "{"
+                + RouterBase.Id
+                + "}"
+                + $"/{nameof(FeedbackReplies)}";
+            public const string GetUpdateDelete =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Feedbacks)}/" + "{" + RouterBase.Id + "}";
+            public const string GetDetail =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Feedbacks)}/detail/"
+                + "{"
+                + RouterBase.Id
+                + "}";
+            public const string React =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Feedbacks)}/"
+                + "{"
+                + RouterBase.Id
+                + "}/"
+                + $"{nameof(React)}";
+        }
     }
 }

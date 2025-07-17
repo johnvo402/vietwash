@@ -61,14 +61,14 @@ public class RequestResetAccountPasswordHandler(
         await unitOfWork.SaveAsync(cancellationToken);
 
         string domain = configuration.GetValue<string>("ForgotPassowordUrl")!;
-        var link = new UriBuilder(domain) { Query = $"token={token}&id={user.PublicId}" };
+        var link = new UriBuilder(domain) { Query = $"token={token}&id={user.Id}" };
         string expiry = expiredTime.ToLocalTime().ToString("dd/MM/yyyy hh:mm:ss");
 
         _ = await mailer.SendWithTemplateAsync(
             new MailTemplateData()
             {
-                DisplayName = "The template Reset password",
-                Subject = "Reset password",
+                DisplayName = "VietWash",
+                Subject = "Đặt lại mật khẩu!",
                 To = [user.Email],
                 Template = new(
                     "ForgotPassword",

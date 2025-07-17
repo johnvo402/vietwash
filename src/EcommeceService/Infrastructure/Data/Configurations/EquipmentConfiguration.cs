@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Domain.Aggregates.Equipments;
+﻿using Domain.Aggregates.Equipments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,6 +10,7 @@ namespace Infrastructure.Data.Configurations
         {
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Code).HasColumnType("citext");
+            builder.HasIndex(x => x.Code);
             builder.Property(x => x.Price).HasColumnType("numeric");
             builder.Property(x => x.Capacity).HasColumnType("numeric");
         }

@@ -529,4 +529,14 @@
         <value>Product</value>
         <comment />
     </data>
+  <data name="Feedback"
+    xml:space="preserve">
+        <value>Feedback</value>
+        <comment />
+    </data>
+  <data name="ReactionType"
+    xml:space="preserve">
+        <value>Reaction Type</value>
+        <comment />
+    </data>
 </root>

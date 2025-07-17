@@ -19,11 +19,11 @@ public class GetAccountDetailEndpoint(ISender sender)
     [SwaggerOperation(Tags = [Router.AccountRoute.Tags], Summary = "Detail Account")]
     [AuthorizeBy]
     public override async Task<ActionResult<ApiResponse<GetAccountDetailResponse>>> HandleAsync(
-        [FromRoute(Name = RouterBase.Id)] long userId,
+        [FromRoute(Name = RouterBase.Id)] long id,
         CancellationToken cancellationToken = default
     )
     {
-        var result = await sender.Send(new GetAccountDetailQuery(userId), cancellationToken);
+        var result = await sender.Send(new GetAccountDetailQuery(id), cancellationToken);
         return result.ToActionResult();
     }
 }

@@ -16,12 +16,20 @@ public class ValidationError(List<ValidationFailure> invalidParams)
                     PropertyName = failureGroups.Key,
                     Reasons = failureGroups.Select(failure =>
                     {
-                        MessageResult messageResult = (MessageResult)failure.CustomState;
-                        return new ErrorReason()
+                        if (failure.CustomState is MessageResult messageResult)
                         {
-                            Message = messageResult.Message,
-                            En = messageResult.En,
-                            Vi = messageResult.Vi,
+                            return new ErrorReason
+                            {
+                                Message = messageResult.Message ?? "Invalid value",
+                                En = messageResult.En ?? "Invalid value",
+                                Vi = messageResult.Vi ?? "Giá trị không hợp lệ",
+                            };
+                        }
+                        return new ErrorReason
+                        {
+                            Message = failure.ErrorMessage ?? "Unknown error",
+                            En = failure.ErrorMessage ?? "Unknown error",
+                            Vi = failure.ErrorMessage ?? "Lỗi không xác định",
                         };
                     }),
                 }),

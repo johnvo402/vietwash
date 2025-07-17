@@ -532,4 +532,14 @@
         <value>Vật tư</value>
         <comment />
     </data>
+  <data name="Feedback"
+    xml:space="preserve">
+        <value>Đánh giá</value>
+        <comment />
+    </data>
+  <data name="ReactionType"
+    xml:space="preserve">
+        <value>loại hành động phải hồi</value>
+        <comment />
+    </data>
 </root>

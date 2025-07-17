@@ -1,5 +1,5 @@
 ﻿using Application.Common.Security;
-using Application.Feature.Common.Mapping.Orders;
+using Application.Features.Common.Mapping.Users;
 using Contracts.Extensions;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
@@ -11,8 +11,9 @@ namespace Application.Feature.Common.Projections.Orders
         public string? Note { get; set; }
         public string? Receipt { get; set; }
         public long? StaffId { get; set; }
+        public PaymentMethod? PaymentMethod { get; set; }
+        public string? QrCode { get; set; }
         public ICollection<OrderItemProjection> OrderItems { get; set; } = [];
-        public ICollection<OrderPaymentProjection> OrderPayments { get; set; } = [];
 
         public virtual void MappingFrom(Order order)
         {
@@ -35,6 +36,8 @@ namespace Application.Feature.Common.Projections.Orders
             Status = order.Status;
             BranchId = order.BranchId;
             Receipt = order.Receipt;
+            QrCode = order.CodeConfirm;
+            PaymentMethod = order.PaymentMethod;
             OrderItems = order
                 .OrderItems.ToListMapping(item => new OrderItemProjection
                 {
@@ -52,17 +55,8 @@ namespace Application.Feature.Common.Projections.Orders
                 })
                 .ToList();
 
-            OrderPayments = order
-                .OrderPayments.ToListMapping(p => new OrderPaymentProjection
-                {
-                    OrderId = p.OrderId,
-                    PaymentMethod = p.PaymentMethod,
-                    Amount = p.Amount,
-                    PaymentDate = p.PaymentDate,
-                })
-                .ToList();
-
-            Customer = order.Customer.MappingFrom();
+            Customer = order.Customer?.UserDTOResponse() ?? null;
+            Staff = order.Staff?.UserDTOResponse() ?? null;
         }
     }
 
@@ -81,15 +75,5 @@ namespace Application.Feature.Common.Projections.Orders
         public decimal ProcessingTime { get; set; }
         public string? ServiceName { get; set; }
         public decimal UnitPrice { get; set; }
-    }
-
-    public class OrderPaymentProjection
-    {
-        public long OrderId { get; set; } = default!;
-        public PaymentMethod PaymentMethod { get; set; }
-
-        public decimal Amount { get; set; } = default!;
-
-        public DateTimeOffset PaymentDate { get; set; }
     }
 }

@@ -109,6 +109,7 @@ public static class DependencyInjection
             .AddRedis(configuration)
             .AddHostedService<PubSubBackgroundService>()
             .AddHostedService<DeadletterPubSubBackgroundService>()
+            .AddHostedService<DbInitializerBackgroundService>()
             .Configure<CacheSettings>(options =>
                 configuration.GetSection(nameof(CacheSettings)).Bind(options)
             )

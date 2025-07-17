@@ -1,5 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using Domain.Aggregates.Inventories.Enums;
+using Domain.Aggregates.Inventories.Events;
 using Domain.Aggregates.Orders.Enums;
 using Mediator;
 using Shared.Kernel.Common;
@@ -8,12 +9,10 @@ namespace Domain.Aggregates.Inventories
 {
     public class InventoryDocument : AggregateRoot
     {
-        public long? ToWarehouseId { get; set; }
         public decimal Amount { get; set; }
         public PaymentMethod? PaymentMethod { get; set; }
         public decimal PaidAmount { get; set; }
         public long? BranchId { get; set; }
-        public long? FromWarehouseId { get; set; }
         public DateTimeOffset? TransactionAt { get; set; }
         public string Code { get; set; } = null!;
         public InventoryStatus Status { get; set; }
@@ -32,6 +31,19 @@ namespace Domain.Aggregates.Inventories
             if (status == InventoryStatus.Completed)
             {
                 TransactionAt = DateTimeOffset.UtcNow;
+                if (Type == InventoryType.Import && EquipmentSupplyings.Any())
+                {
+                    Emit(new InventoryDocumentCompletedEvent { InventoryDocument = this });
+                }
+            }
+            if (
+                (
+                    (Type == InventoryType.Export && status == InventoryStatus.Completed)
+                    || status == InventoryStatus.Canceled
+                ) && EquipmentSupplyings.Any()
+            )
+            {
+                Emit(new InventoryDocumentCanceledEvent { InventoryDocument = this });
             }
             CancelReason = cancelReason;
         }
@@ -40,8 +52,6 @@ namespace Domain.Aggregates.Inventories
             string code,
             decimal amount,
             InventoryType type,
-            long? fromWarehouseId,
-            long? toWarehouseId,
             long? branchId,
             string? note = null
         )
@@ -53,17 +63,22 @@ namespace Domain.Aggregates.Inventories
 
             // Validate amount and paid amount
             Amount = Guard.Against.NegativeOrZero(amount, nameof(amount));
-
-            // Assign optional fields
-            FromWarehouseId = fromWarehouseId;
-            ToWarehouseId = toWarehouseId;
             BranchId = branchId;
             Note = note;
         }
 
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
-            throw new NotImplementedException();
+            switch (domainEvent)
+            {
+                case InventoryDocumentCompletedEvent:
+                    return true;
+                case InventoryDocumentCanceledEvent:
+                    return true;
+                // Các event khác nếu có
+                default:
+                    return false;
+            }
         }
     }
 }

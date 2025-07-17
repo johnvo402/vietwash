@@ -1,11 +1,9 @@
 using System.Text.Json.Serialization;
 using Application;
-using Application.Jobs;
 using Contracts.Converters;
 using Contracts.Extensions;
 using HealthChecks.UI.Client;
 using Infrastructure;
-using Infrastructure.Data;
 using Infrastructure.Services.BackgroundJobs;
 using Infrastructure.Services.gRPC;
 using Infrastructure.Services.Hangfires;
@@ -32,7 +30,6 @@ builder
         );
         option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
-services.AddScoped<CheckCustomerLoyal>();
 
 services.AddErrorDetails();
 services.AddSwagger(configuration);
@@ -61,10 +58,7 @@ try
     var serviceProvider = scope.ServiceProvider;
     var jobScheduler = scope.ServiceProvider.GetRequiredService<JobScheduler>();
     jobScheduler.ScheduleJobs();
-    if (!isProduction)
-    {
-        await DbInitializer.InitializeAsync(serviceProvider);
-    }
+
     #endregion
 
     app.UseHangfireDashboard(configuration);

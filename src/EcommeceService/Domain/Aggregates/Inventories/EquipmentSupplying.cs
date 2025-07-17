@@ -1,4 +1,3 @@
-using Domain.Aggregates.Services;
 using Domain.Aggregates.Suppliers;
 using Shared.Kernel.Common;
 
@@ -10,12 +9,9 @@ public class EquipmentSupplying : DefaultEntity<long>
     public string Code { get; set; } = default!;
     public decimal Price { get; set; } = default!;
     public decimal Capacity { get; set; } = default!;
-    public long UnitRelationId { get; set; } = default!;
     public int Quantity { get; set; } = default!;
-
     public long SupplierId { get; set; } = default!;
     public long InventoryDocumentId { get; set; } = default!;
     public Supplier Supplier { get; set; } = default!;
-    public UnitRelation UnitRelation { get; set; } = default!;
     public InventoryDocument InventoryDocument { get; set; } = default!;
 }

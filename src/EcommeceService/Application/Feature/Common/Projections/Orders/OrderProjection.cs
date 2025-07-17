@@ -1,4 +1,5 @@
 using Application.Feature.Services.Queries.Detail;
+using Application.Features.Common.Projections.Users;
 using Contracts.Application.Common;
 using Domain.Aggregates.Orders.Enums;
 

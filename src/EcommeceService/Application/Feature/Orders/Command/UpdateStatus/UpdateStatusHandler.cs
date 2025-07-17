@@ -3,7 +3,6 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Orders;
-using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Specifications;
 using Mediator;
 
@@ -53,19 +52,9 @@ namespace Application.Feature.Orders.Command.UpdateStatus
                                     .BuildMessage()
                             )
                         );
-                    if (request.Status.Value == OrderStatus.Completed)
-                    {
-                        order.OrderPayments.Add(
-                            new OrderPayment
-                            {
-                                Amount = order.Total,
-                                PaymentMethod = (PaymentMethod)request.PaymentMethod!,
-                                PaymentDate = DateTimeOffset.UtcNow,
-                            }
-                        );
-                    }
-                    order.EmitVoucherUsageEvent();
+
                     order.UpdateStatus(request.Status.Value);
+                    order.PaymentMethod = request.PaymentMethod;
                 }
                 using var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
 

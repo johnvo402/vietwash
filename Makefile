@@ -27,7 +27,10 @@ deploy:
 publish:
 	./scripts/publish.sh $(foreach db,$(NAME),$(db))
 test:
-	./scripts/run_tests.sh ${NAME} ${SERVICE}
+	./scripts/run_tests.sh ${TYPE} ${NAME} ${SERVICE}
+
+run:
+	./scripts/run-services.sh ${SERVICE}
 
 
 # Mục để kiểm tra migration status
