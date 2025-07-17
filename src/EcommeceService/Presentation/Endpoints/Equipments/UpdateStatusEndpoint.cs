@@ -1,5 +1,5 @@
 ﻿using Application.Common.Auth;
-using Application.Feature.EquipmentActivities.Command.UpdateStatus;
+using Application.Feature.Equipments.Command.UpdateStatus;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -8,16 +8,16 @@ using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace Presentation.Endpoints.EquipmentActivities
+namespace Presentation.Endpoints.Equipments
 {
 	public class UpdateStatusEndpoint(ISender sender)
-		: EndpointBaseAsync.WithRequest<UpdateStatusEquipmentActivityCommand>.WithActionResult<ApiResponse>
+		: EndpointBaseAsync.WithRequest<UpdateStatusEquipmentCommand>.WithActionResult<ApiResponse>
 	{
-		[HttpPut(Router.EquipmentActivityRoute.UpdateStatus)]
-		[SwaggerOperation(Tags = [Router.EquipmentActivityRoute.Tags], Summary = "Update Status EquipmentActivity")]
+		[HttpPut(Router.EquipmentRoute.UpdateStatus)]
+		[SwaggerOperation(Tags = [Router.EquipmentRoute.Tags], Summary = "Update Status Equipment")]
 		[AuthorizeBy]
 		public override async Task<ActionResult<ApiResponse>> HandleAsync(
-			UpdateStatusEquipmentActivityCommand request,
+			UpdateStatusEquipmentCommand request,
 			CancellationToken cancellationToken = default
 		)
 		{

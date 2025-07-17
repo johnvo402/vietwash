@@ -166,7 +166,12 @@ namespace Presentation.Routes
             public const string Equipments = $"{Ecommerce}/{RouterBase.prefix}{nameof(Equipments)}";
             public const string GetUpdateDelete =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Equipments)}/" + "{" + RouterBase.Id + "}";
-            public const string GetDetail =
+			public const string UpdateStatus =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(Equipments)}/{nameof(UpdateStatus)}"
+				+ "{"
+				+ RouterBase.Id
+				+ "}";
+			public const string GetDetail =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Equipments)}/detail/"
                 + "{"
                 + RouterBase.Id

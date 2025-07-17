@@ -17,7 +17,7 @@ namespace Domain.Aggregates.Equipments
 
         public decimal Capacity { get; set; } = default!;
 
-        public DateTimeOffset? LastMaintenanceDate { get; set; }
+        public DateTimeOffset? LastMaintenanceOrRepairDate { get; set; }
 
         public DateTimeOffset? NextMaintenanceDate { get; set; }
 
@@ -33,7 +33,7 @@ namespace Domain.Aggregates.Equipments
             decimal capacity,
             EquipmentStatus status,
             string? description = null,
-            DateTimeOffset? lastMaintenanceDate = null,
+            DateTimeOffset? lastMaintenanceOrRepairDate = null,
             DateTimeOffset? nextMaintenanceDate = null
         )
         {
@@ -44,7 +44,7 @@ namespace Domain.Aggregates.Equipments
             Capacity = capacity;
             Status = Guard.Against.EnumOutOfRange(status, nameof(status));
             Description = description?.Trim();
-            LastMaintenanceDate = lastMaintenanceDate;
+			LastMaintenanceOrRepairDate = lastMaintenanceOrRepairDate;
             NextMaintenanceDate = nextMaintenanceDate;
         }
 
@@ -56,7 +56,7 @@ namespace Domain.Aggregates.Equipments
             decimal? price = null,
             decimal? capacity = null,
             EquipmentStatus? status = null,
-            DateTimeOffset? lastMaintenanceDate = null,
+            DateTimeOffset? lastMaintenanceOrRepairDate = null,
             DateTimeOffset? nextMaintenanceDate = null
         )
         {
@@ -74,8 +74,8 @@ namespace Domain.Aggregates.Equipments
                 Capacity = capacity.Value;
             if (status.HasValue)
                 Status = status.Value;
-            if (lastMaintenanceDate.HasValue)
-                LastMaintenanceDate = lastMaintenanceDate;
+            if (lastMaintenanceOrRepairDate.HasValue)
+				LastMaintenanceOrRepairDate = lastMaintenanceOrRepairDate;
             if (nextMaintenanceDate.HasValue)
                 NextMaintenanceDate = nextMaintenanceDate;
         }

@@ -21,12 +21,10 @@ namespace Application.Feature.EquipmentActivities.Queries.List
 				StaffId = activity.StaffId,
 				SupervisorCode = activity.SupervisorCode,
 				Type = activity.Type,
-				ReportedDate = activity.ReportedDate,
-				ScheduledDate = activity.ScheduledDate,
+				PerformedDate = activity.PerformedDate,
 				LaborCost = activity.LaborCost,
 				TotalCost = activity.TotalCost,
 				Description = activity.Description,
-				Status = activity.Status
 			};
 	}
 }

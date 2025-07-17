@@ -26,24 +26,8 @@ public sealed class EquipmentActivityCreatedHandler : INotificationHandler<Equip
 		if (equipment == null)
 			return;
 
-		switch (activity.Type)
-		{
-			case TypeActivity.Maintenance:
-				if (activity.Status == ActivityStatus.Scheduled)
-					return;
-				if (activity.Status == ActivityStatus.InProgress)
-					equipment.Status = EquipmentStatus.UnderMaintenance;
-				else
-					equipment.Status = EquipmentStatus.Active;
-				break;
-
-			case TypeActivity.Repair:
-				if (activity.Status == ActivityStatus.InProgress)
-					equipment.Status = EquipmentStatus.UnderRepair;
-				else
-					equipment.Status = EquipmentStatus.Active;
-				break;
-		}
+		equipment.Status = EquipmentStatus.Active;
+		equipment.LastMaintenanceOrRepairDate = activity.PerformedDate;
 
 		await _unitOfWork.Repository<Equipment>().UpdateAsync(equipment);
 		await _unitOfWork.SaveAsync(cancellationToken);

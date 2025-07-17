@@ -40,7 +40,7 @@ public sealed class InventoryDocumentCompletedHandler
                     capacity: supplying.Capacity,
                     status: EquipmentStatus.Active,
                     description: document.Code,
-                    lastMaintenanceDate: DateTimeOffset.UtcNow,
+                    lastMaintenanceOrRepairDate: DateTimeOffset.UtcNow,
                     nextMaintenanceDate: DateTimeOffset.UtcNow.AddMonths(6)
                 );
 
