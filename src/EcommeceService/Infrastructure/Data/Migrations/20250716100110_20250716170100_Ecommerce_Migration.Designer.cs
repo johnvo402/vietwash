@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    partial class TheDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250716100110_20250716170100_Ecommerce_Migration")]
+    partial class _20250716170100_Ecommerce_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -102,100 +105,7 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("equipment", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Equipments.EquipmentActivity", b =>
-                {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    b.Property<long>("BranchId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("branch_id");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<long>("EquipmentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("equipment_id");
-
-                    b.Property<decimal>("LaborCost")
-                        .HasColumnType("numeric")
-                        .HasColumnName("labor_cost");
-
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
-
-                    b.Property<string>("ReceivedBy")
-                        .HasColumnType("text")
-                        .HasColumnName("received_by");
-
-                    b.Property<DateTimeOffset?>("ReportedDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("reported_date");
-
-                    b.Property<DateTimeOffset?>("ScheduledDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("scheduled_date");
-
-                    b.Property<long>("StaffId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("staff_id");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
-
-                    b.Property<string>("SupervisorCode")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("supervisor_code");
-
-                    b.Property<decimal>("TotalCost")
-                        .HasColumnType("numeric")
-                        .HasColumnName("total_cost");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer")
-                        .HasColumnName("type");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by");
-
-                    b.Property<long>("Version")
-                        .HasColumnType("bigint")
-                        .HasColumnName("version");
-
-                    b.HasKey("Id")
-                        .HasName("pk_equipment_activity");
-
-                    b.HasIndex("EquipmentId")
-                        .HasDatabaseName("ix_equipment_activity_equipment_id");
-
-                    b.HasIndex("StaffId")
-                        .HasDatabaseName("ix_equipment_activity_staff_id");
-
-                    b.ToTable("equipment_activity", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Equipments.EquipmentActivityDetail", b =>
+            modelBuilder.Entity("Domain.Aggregates.Equipments.MaintenanceDetail", b =>
                 {
                     b.Property<long>("Id")
                         .HasColumnType("bigint")
@@ -209,9 +119,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<long>("EquipmentActivityId")
+                    b.Property<long>("MaintenanceHistoryId")
                         .HasColumnType("bigint")
-                        .HasColumnName("equipment_activity_id");
+                        .HasColumnName("maintenance_history_id");
 
                     b.Property<string>("PartName")
                         .IsRequired()
@@ -227,8 +137,102 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("quantity");
 
-                    b.Property<decimal>("RepairHistoryId")
-                        .HasColumnType("numeric(20,0)")
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("numeric")
+                        .HasColumnName("unit_price");
+
+                    b.HasKey("Id")
+                        .HasName("pk_maintenance_detail");
+
+                    b.HasIndex("MaintenanceHistoryId")
+                        .HasDatabaseName("ix_maintenance_detail_maintenance_history_id");
+
+                    b.ToTable("maintenance_detail", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Equipments.MaintenanceHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<long>("BranchId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("branch_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<long>("EquipmentId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("equipment_id");
+
+                    b.Property<DateTimeOffset>("MaintenanceDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("maintenance_date");
+
+                    b.Property<DateTimeOffset?>("NextMaintenanceDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("next_maintenance_date");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
+
+                    b.Property<string>("Supervisor")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("supervisor");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total");
+
+                    b.HasKey("Id")
+                        .HasName("pk_maintenance_history");
+
+                    b.HasIndex("EquipmentId")
+                        .HasDatabaseName("ix_maintenance_history_equipment_id");
+
+                    b.ToTable("maintenance_history", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Equipments.RepairDetail", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("PartName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("part_name");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("quantity");
+
+                    b.Property<long>("RepairHistoryId")
+                        .HasColumnType("bigint")
                         .HasColumnName("repair_history_id");
 
                     b.Property<decimal>("UnitPrice")
@@ -236,18 +240,18 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnName("unit_price");
 
                     b.HasKey("Id")
-                        .HasName("pk_equipment_activity_detail");
+                        .HasName("pk_repair_detail");
 
-                    b.HasIndex("EquipmentActivityId")
-                        .HasDatabaseName("ix_equipment_activity_detail_equipment_activity_id");
+                    b.HasIndex("RepairHistoryId")
+                        .HasDatabaseName("ix_repair_detail_repair_history_id");
 
                     b.ToTable("repair_detail", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Equipments.RepairHistory", b =>
                 {
-                    b.Property<decimal>("Id")
-                        .HasColumnType("numeric")
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
 
                     b.Property<long>("BranchId")
@@ -2030,37 +2034,52 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("order_summary_result", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Equipments.EquipmentActivity", b =>
+            modelBuilder.Entity("Domain.Aggregates.Equipments.MaintenanceDetail", b =>
+                {
+                    b.HasOne("Domain.Aggregates.Equipments.MaintenanceHistory", "MaintenanceHistory")
+                        .WithMany("MaintenanceDetails")
+                        .HasForeignKey("MaintenanceHistoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_maintenance_detail_maintenance_history_maintenance_history_");
+
+                    b.Navigation("MaintenanceHistory");
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Equipments.MaintenanceHistory", b =>
                 {
                     b.HasOne("Domain.Aggregates.Equipments.Equipment", "Equipment")
-                        .WithMany("EquipmentActivities")
+                        .WithMany("MaintenanceHistories")
                         .HasForeignKey("EquipmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_equipment_activity_equipment_equipment_id");
-
-                    b.HasOne("Domain.Aggregates.Users.User", "Staff")
-                        .WithMany()
-                        .HasForeignKey("StaffId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_equipment_activity_user_staff_id");
+                        .HasConstraintName("fk_maintenance_history_equipment_equipment_id");
 
                     b.Navigation("Equipment");
-
-                    b.Navigation("Staff");
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Equipments.EquipmentActivityDetail", b =>
+            modelBuilder.Entity("Domain.Aggregates.Equipments.RepairDetail", b =>
                 {
-                    b.HasOne("Domain.Aggregates.Equipments.EquipmentActivity", "EquipmentActivity")
-                        .WithMany("ActivityDetails")
-                        .HasForeignKey("EquipmentActivityId")
+                    b.HasOne("Domain.Aggregates.Equipments.RepairHistory", "RepairHistory")
+                        .WithMany("RepairDetails")
+                        .HasForeignKey("RepairHistoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_equipment_activity_detail_equipment_activity_equipment_acti");
+                        .HasConstraintName("fk_repair_detail_repair_history_repair_history_id");
 
-                    b.Navigation("EquipmentActivity");
+                    b.Navigation("RepairHistory");
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Equipments.RepairHistory", b =>
+                {
+                    b.HasOne("Domain.Aggregates.Equipments.Equipment", "Equipment")
+                        .WithMany("RepairHistories")
+                        .HasForeignKey("EquipmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_repair_history_equipment_equipment_id");
+
+                    b.Navigation("Equipment");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Feedbacks.Feedback", b =>
@@ -2398,12 +2417,19 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Equipments.Equipment", b =>
                 {
-                    b.Navigation("EquipmentActivities");
+                    b.Navigation("MaintenanceHistories");
+
+                    b.Navigation("RepairHistories");
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Equipments.EquipmentActivity", b =>
+            modelBuilder.Entity("Domain.Aggregates.Equipments.MaintenanceHistory", b =>
                 {
-                    b.Navigation("ActivityDetails");
+                    b.Navigation("MaintenanceDetails");
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Equipments.RepairHistory", b =>
+                {
+                    b.Navigation("RepairDetails");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Feedbacks.Feedback", b =>

@@ -1,5 +1,4 @@
 using System.Text;
-using Application.Common.Exceptions;
 using Contracts.Application.Common.Exceptions;
 using Contracts.Application.Common.Interfaces.Services.Token;
 using Contracts.Common.Messages;

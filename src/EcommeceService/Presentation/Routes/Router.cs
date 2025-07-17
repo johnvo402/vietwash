@@ -69,6 +69,14 @@ namespace Presentation.Routes
             public const string Orders = $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}";
             public const string GetUpdateDelete =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/" + "{" + RouterBase.Id + "}";
+
+            public const string GetByCode =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(GetByCode)}";
+            public const string GetLinkPayment =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(GetLinkPayment)}"
+                + "{"
+                + RouterBase.Id
+                + "}";
             public const string UpdateStatus =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(UpdateStatus)}"
                 + "{"
@@ -79,6 +87,13 @@ namespace Presentation.Routes
                 + "{"
                 + RouterBase.Id
                 + "}";
+        }
+
+        public static class Webhook
+        {
+            public const string Tags = $"{nameof(Webhook)} endpoint";
+            public const string CompletedOrder =
+                $"{nameof(Webhook)}/{RouterBase.prefix}{nameof(CompletedOrder)}";
         }
 
         public static class InventoryRoute

@@ -36,7 +36,6 @@ namespace Domain.Aggregates.Orders.Specifications
                 .Where(criteria)
                 .Include(x => x.OrderItems)
                 .Include(x => x.Customer)
-                .Include(x => x.OrderPayments)
                 .AsNoTracking()
                 .AsSplitQuery();
         }

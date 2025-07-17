@@ -1,5 +1,7 @@
 using System.Linq.Expressions;
+using Application.Common.Interfaces;
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.Application.Common.Interfaces.Services.Encryptions;
 using Contracts.Dtos.Requests;
 using Contracts.Utils;
 using Domain.Aggregates.Enums;
@@ -29,6 +31,8 @@ public class DbInitializer
     )
     {
         var unitOfWork = provider.GetRequiredService<IUnitOfWork>();
+        var encryption = provider.GetRequiredService<IEncryptionService>();
+        var qrGenerator = provider.GetRequiredService<IQrGenerator>();
         var logger = provider.GetRequiredService<ILogger>();
         using var dbTransaction = await unitOfWork.BeginTransactionAsync();
 
@@ -88,7 +92,13 @@ public class DbInitializer
             {
                 logger.Information("Bắt đầu khởi tạo dữ liệu đơn hàng...");
 
-                await InitializeOrdersAsync(unitOfWork, logger, cancellationToken);
+                await InitializeOrdersAsync(
+                    unitOfWork,
+                    logger,
+                    cancellationToken,
+                    encryption,
+                    qrGenerator
+                );
 
                 logger.Information("Hoàn tất khởi tạo dữ liệu đơn hàng...");
             }
@@ -129,7 +139,9 @@ public class DbInitializer
     private static async Task InitializeOrdersAsync(
         IUnitOfWork unitOfWork,
         ILogger logger,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken,
+        IEncryptionService encryption,
+        IQrGenerator barcode
     )
     {
         // Fetch customer IDs
@@ -291,6 +303,9 @@ public class DbInitializer
                 note: $"Đơn hàng tự động {i}",
                 deliveryTime: DateTimeOffset.UtcNow.AddDays(1)
             );
+            var codeEncrypt = encryption.Encrypt(order.Code);
+            var barcodeConfirm = barcode.GenerateQrBase64(codeEncrypt);
+            order.CodeConfirm = barcodeConfirm;
             order.PublicId = Ulid.NewUlid();
             foreach (var orderItem in orderItems)
             {
@@ -300,13 +315,7 @@ public class DbInitializer
             if (status == OrderStatus.Completed)
             {
                 var paymentMethod = paymentMethods[random.Next(paymentMethods.Length)];
-                var orderPayment = new OrderPayment
-                {
-                    Amount = order.Total,
-                    PaymentMethod = paymentMethod,
-                    PaymentDate = DateTimeOffset.UtcNow,
-                };
-                order.OrderPayments.Add(orderPayment);
+                order.PaymentMethod = paymentMethod;
             }
 
             await unitOfWork.Repository<Order>().AddAsync(order, cancellationToken);

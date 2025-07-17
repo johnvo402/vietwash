@@ -16,6 +16,7 @@ namespace Domain.Aggregates.Orders
         public decimal Amount { get; set; } = default!;
         public decimal Total { get; set; } = default!;
         public bool DiscountFixed { get; set; } = default!;
+        public PaymentMethod? PaymentMethod { get; set; }
         public decimal DiscountValue { get; set; } = default!;
         public string Note { get; set; } = default!;
         public OrderStatus Status { get; set; } = default!;
@@ -24,8 +25,8 @@ namespace Domain.Aggregates.Orders
         public User? Staff { get; set; }
         public User? Customer { get; set; }
         public string? Receipt { get; set; }
+        public string? CodeConfirm { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; } = [];
-        public ICollection<OrderPayment> OrderPayments { get; set; } = [];
 
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
@@ -132,8 +133,8 @@ namespace Domain.Aggregates.Orders
                         {
                             TypeId = "income",
                             ReferenceId = Id,
-                            Amount = OrderPayments.Sum(x => x.Amount),
-                            PaymentMethod = OrderPayments.FirstOrDefault()!.PaymentMethod,
+                            Amount = Total,
+                            PaymentMethod = PaymentMethod ?? Enums.PaymentMethod.Cash,
                             BranchId = BranchId,
                             ObjectId = CustomerId,
                             BehaviorId = 1,
@@ -146,24 +147,28 @@ namespace Domain.Aggregates.Orders
                     );
                     break;
                 case OrderStatus.Cancelled:
-                    Status = OrderStatus.Cancelled;
-                    Emit(
-                        new CreateFundEvent()
-                        {
-                            TypeId = "Spend",
-                            ReferenceId = Id,
-                            Amount = OrderPayments.Sum(x => x.Amount),
-                            PaymentMethod = OrderPayments.FirstOrDefault()!.PaymentMethod,
-                            BranchId = BranchId,
-                            ObjectId = CustomerId,
-                            BehaviorId = 2,
-                            Metadata = new Dictionary<string, object>
+
+                    if (Status == OrderStatus.Completed)
+                    {
+                        Emit(
+                            new CreateFundEvent()
                             {
-                                ["code"] = Code,
-                                ["publicId"] = PublicId.ToString(),
-                            },
-                        }
-                    );
+                                TypeId = "Spend",
+                                ReferenceId = Id,
+                                Amount = Total,
+                                PaymentMethod = PaymentMethod ?? Enums.PaymentMethod.Cash,
+                                BranchId = BranchId,
+                                ObjectId = CustomerId,
+                                BehaviorId = 2,
+                                Metadata = new Dictionary<string, object>
+                                {
+                                    ["code"] = Code,
+                                    ["publicId"] = PublicId.ToString(),
+                                },
+                            }
+                        );
+                    }
+                    Status = OrderStatus.Cancelled;
                     break;
                 default:
                     Status = status;

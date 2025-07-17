@@ -3,12 +3,12 @@ using Specification.Builders;
 
 namespace Domain.Aggregates.Orders.Specifications
 {
-    public class GetOrderByIdSpecification : Specification<Order>
+    public class GetOrderByCodeSpecification : Specification<Order>
     {
-        public GetOrderByIdSpecification(long id)
+        public GetOrderByCodeSpecification(string code)
         {
             Query
-                .Where(x => x.Id == id)
+                .Where(x => x.Code == code)
                 .Include(x => x.OrderItems)
                 .ThenInclude(x => x.Service)
                 .Include(x => x.Customer)
