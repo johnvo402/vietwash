@@ -8,14 +8,14 @@ public class PubSubLog : BaseEntity
     public Guid RequestId { get; set; }
     public object? Request { get; set; }
     public object? ErrorDetail { get; set; }
-    public PubSubType ProcessedBy { get; set; } = PubSubType.Origin;
+    public Type ProcessedBy { get; set; } = Type.Origin;
     public int RetryCount { get; set; }
 
     public PubSubLog(
         Guid requestId,
         object? request,
         object? errorDetail,
-        PubSubType processedBy,
+        Type processedBy,
         int retryCount
     )
     {

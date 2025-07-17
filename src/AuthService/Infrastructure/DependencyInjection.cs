@@ -110,7 +110,7 @@ public static class DependencyInjection
             .AddJwtAuth(configuration)
             .AddMemoryCache()
             .AddRedis(configuration)
-            .PubSubLogClient()
+            .PubSubLogClient(environmentName)
             .AddHostedService<PubSubBackgroundService>()
             .AddHostedService<DeadletterPubSubBackgroundService>()
             .AddHostedService<DbInitializerBackgroundService>()

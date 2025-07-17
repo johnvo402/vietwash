@@ -15,9 +15,10 @@ using Domain.Aggregates.Users.Specifications;
 
 namespace Application.Jobs
 {
-    public class UserOnlyId
+    public class OnlyId
     {
         public long Id { get; set; }
+        public string? Name { get; set; }
         public CustomerGroup? CustomerGroup { get; set; }
     }
 
@@ -37,7 +38,7 @@ namespace Application.Jobs
                 .ListAsync(
                     new ListCustomerWithoutIncludeSpecification(CustomerGroup.Normal),
                     new QueryParamRequest(),
-                    x => new UserOnlyId { Id = x.Id, CustomerGroup = x.CustomerGroup },
+                    x => new OnlyId { Id = x.Id, CustomerGroup = x.CustomerGroup },
                     cancellationToken: default
                 );
 
