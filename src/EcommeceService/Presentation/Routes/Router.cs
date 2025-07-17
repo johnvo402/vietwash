@@ -160,5 +160,19 @@ namespace Presentation.Routes
                 + RouterBase.Id
                 + "}";
         }
+        public static class VoucherRoute
+        {
+            public const string Tags = $"{nameof(VoucherRoute)} endpoint";
+            public const string Vouchers = $"{Ecommerce}/{RouterBase.prefix}{nameof(Vouchers)}";
+            public const string GetUpdateDelete =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Vouchers)}/" + "{" + RouterBase.Id + "}";
+            public const string GetDetail =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Vouchers)}/detail/"
+                + "{"
+                + RouterBase.Id
+                + "}";
+        }
+
+
     }
 }

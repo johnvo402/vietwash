@@ -1,5 +1,5 @@
 ﻿using Application.Common.Auth;
-using Application.Feature.Equipments.Command.Update;
+using Application.Feature.Vouchers.Commands.Update;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -8,16 +8,16 @@ using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace Presentation.Endpoints.Equipments
+namespace Presentation.Endpoints.Vouchers
 {
     public class UpdateVoucherEndpoint(ISender sender)
-        : EndpointBaseAsync.WithRequest<UpdateEquipmentCommand>.WithActionResult<ApiResponse>
+        : EndpointBaseAsync.WithRequest<UpdateVoucherCommand>.WithActionResult<ApiResponse>
     {
-        [HttpPut(Router.EquipmentRoute.GetUpdateDelete)]
-        [SwaggerOperation(Tags = [Router.EquipmentRoute.Tags], Summary = "Update equipment")]
-        [AuthorizeBy]
+        [HttpPut(Router.VoucherRoute.GetUpdateDelete)]
+        [SwaggerOperation(Tags = [Router.VoucherRoute.Tags], Summary = "Update voucher")]
+        //[AuthorizeBy]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
-            UpdateEquipmentCommand request,
+            UpdateVoucherCommand request,
             CancellationToken cancellationToken = default
         )
         {

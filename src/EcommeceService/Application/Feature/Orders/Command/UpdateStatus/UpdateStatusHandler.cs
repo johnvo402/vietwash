@@ -64,7 +64,7 @@ namespace Application.Feature.Orders.Command.UpdateStatus
                             }
                         );
                     }
-
+                    order.EmitVoucherUsageEvent();
                     order.UpdateStatus(request.Status.Value);
                 }
                 using var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);

@@ -13,6 +13,8 @@ using Domain.Aggregates.Services.Specifications;
 using Domain.Aggregates.Suppliers;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
+using Domain.Aggregates.Vouchers;
+using Domain.Aggregates.Vouchers.Specifications;
 using Infrastructure.Constants;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -146,17 +148,28 @@ public class DbInitializer
 
         // Fetch staff IDs
         var staffResult = await unitOfWork
-            .DynamicReadOnlyRepository<User>()
-            .ListAsync(
-                new ListUserSpecification([ROLE.STAFF]),
-                new QueryParamRequest { },
-                SelectOnlyId(),
-                cancellationToken
-            );
-
+         .DynamicReadOnlyRepository<User>()
+         .ListAsync(
+             new ListUserSpecification([ROLE.STAFF]),
+             new QueryParamRequest { },
+             SelectOnlyId(),
+             cancellationToken
+         );
         if (!staffResult.Any())
         {
             logger.Warning("Không tìm thấy nhân viên trong cơ sở dữ liệu.");
+            return;
+        }
+
+        var voucherResult = await unitOfWork
+       .DynamicReadOnlyRepository<Voucher>()
+       .ListAsync(
+           new ListVoucherSpecification(),
+           new QueryParamRequest { },
+           cancellationToken
+       ); if (!voucherResult.Any())
+        {
+            logger.Warning("Không tìm thấy voucher trong cơ sở dữ liệu.");
             return;
         }
 
@@ -167,6 +180,7 @@ public class DbInitializer
         {
             long? customerId = customerResult[random.Next(customerResult.Count())].Id;
             long staffId = staffResult[random.Next(staffResult.Count())].Id;
+            long voucherId = staffResult[random.Next(staffResult.Count())].Id;
 
             int itemCount = random.Next(1, 4); // Số lượng mục trong đơn hàng
             var orderItems = new List<OrderItem>();
@@ -276,6 +290,7 @@ public class DbInitializer
             var order = new Order(
                 branchId: 1,
                 staffId: staffId,
+                voucherId: voucherId,
                 code: code,
                 amount: totalPrice,
                 total: totalPrice,

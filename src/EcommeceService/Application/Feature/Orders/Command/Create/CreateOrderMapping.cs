@@ -3,6 +3,7 @@ using Contracts.Extensions;
 using Contracts.Utils;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
+using Domain.Aggregates.Vouchers;
 
 namespace Application.Feature.Orders.Command.Create
 {
@@ -15,6 +16,7 @@ namespace Application.Feature.Orders.Command.Create
             var response = new Order(
                 customerId: command.CustomerId,
                 branchId: command.BranchId,
+                voucherId: command.VoucherId,
                 staffId: staffId,
                 code: code,
                 amount: amount,

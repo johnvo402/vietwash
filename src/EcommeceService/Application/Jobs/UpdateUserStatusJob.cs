@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data.Common;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Dtos.Requests;
 using Domain.Aggregates.Orders;

@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    partial class TheDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250709144359_20250709214350_Ecommerce_Migration")]
+    partial class _20250709214350_Ecommerce_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -766,10 +769,6 @@ namespace Infrastructure.Data.Migrations
                     b.Property<long>("Version")
                         .HasColumnType("bigint")
                         .HasColumnName("version");
-
-                    b.Property<long?>("VoucherId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("voucher_id");
 
                     b.HasKey("Id")
                         .HasName("pk_order");
@@ -1806,11 +1805,12 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("discount_value");
 
-                    b.Property<DateTimeOffset?>("EndAt")
+                    b.Property<DateTimeOffset>("EndAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("end_at");
 
                     b.Property<string>("ImgUrl")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("img_url");
 
@@ -1819,7 +1819,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("character varying(26)")
                         .HasColumnName("public_id");
 
-                    b.Property<DateTimeOffset?>("StartAt")
+                    b.Property<DateTimeOffset>("StartAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("start_at");
 
@@ -1947,7 +1947,6 @@ namespace Infrastructure.Data.Migrations
                         .HasDatabaseName("ix_voucher_usage_customer_id");
 
                     b.HasIndex("OrderId")
-                        .IsUnique()
                         .HasDatabaseName("ix_voucher_usage_order_id");
 
                     b.HasIndex("VoucherId")
@@ -2410,9 +2409,9 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_voucher_usage_user_customer_id");
 
-                    b.HasOne("Domain.Aggregates.Orders.Order", "Order")
-                        .WithOne("VoucherUsage")
-                        .HasForeignKey("Domain.Aggregates.Vouchers.VoucherUsage", "OrderId")
+                    b.HasOne("Domain.Aggregates.Orders.Order", null)
+                        .WithMany()
+                        .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_voucher_usage_order_order_id");
@@ -2423,8 +2422,6 @@ namespace Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_voucher_usage_voucher_voucher_id");
-
-                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Equipments.Equipment", b =>
@@ -2463,8 +2460,6 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("OrderItems");
 
                     b.Navigation("OrderPayments");
-
-                    b.Navigation("VoucherUsage");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Products.BranchProduct", b =>
