@@ -48,7 +48,7 @@ services:
     build:
       context: .
       dockerfile: ./src/ProjectService/Dockerfile
-      
+
   gateway:
     # <<: *common_config
     image: gateway
@@ -68,4 +68,13 @@ services:
     build:
       context: .
       dockerfile: ./src/FinanceService/Dockerfile
-  
+  notification:
+    # <<: *common_config
+    image: notification
+    volumes:
+      - ./logs:/logs
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+    build:
+      context: .
+      dockerfile: ./src/NotificationService/Dockerfile

@@ -100,7 +100,10 @@ public class DeadletterPubSubBackgroundService(
                 // Calculate delay time with exponential jitter backoff method
                 // 1st -> 2.1s; 2nd -> 4.2; 3rd -> 8.2; 4th -> 16.1
                 double backoff = Math.Pow(PubSubExtension.InitialSubscribeDelayInSeconds, attempt); // Exponential backoff (2^attempt)
-                double jitter = PubSubExtension.GenerateJitter(0, PubSubExtension.MaximumJitterFactor); // Add jitter
+                double jitter = PubSubExtension.GenerateJitter(
+                    0,
+                    PubSubExtension.MaximumJitterFactor
+                ); // Add jitter
                 double delay = Math.Min(backoff + jitter, maximumDelay);
 
                 TimeSpan delayTime = TimeSpan.FromSeconds(delay);
@@ -135,7 +138,7 @@ public class DeadletterPubSubBackgroundService(
             ErrorDetail = response.Error,
             Request = request,
             RetryCount = response.RetryCount,
-            ProcessedBy = Domain.Aggregates.PubSubLogs.PubSubType.DeadLetter,
+            ProcessedBy = Domain.Aggregates.PubSubLogs.Type.DeadLetter,
         };
     }
 }

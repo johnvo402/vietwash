@@ -47,6 +47,16 @@
         "${workspaceFolder}/src/FinanceService/Presentation/Presentation.csproj"
       ],
       "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build NotificationService",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/NotificationService/Presentation/Presentation.csproj"
+      ],
+      "problemMatcher": "$msCompile"
     }
   ]
 }

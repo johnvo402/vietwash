@@ -113,7 +113,7 @@ public static class DependencyInjection
             .AddMemoryCache()
             .AddRedis(configuration)
             .AddPayOs(configuration)
-            .PubSubLogClient()
+            .PubSubLogClient(environmentName)
             .AddHostedService<PubSubBackgroundService>()
             .AddHostedService<DeadletterPubSubBackgroundService>()
             .AddHostedService<DbInitializerBackgroundService>()

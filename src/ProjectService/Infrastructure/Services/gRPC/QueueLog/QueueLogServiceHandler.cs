@@ -54,7 +54,7 @@ namespace Presentation.Services.gRPC.PubSubLog
                     RequestId = requestId,
                     Request = requestData,
                     ErrorDetail = errorDetail,
-                    ProcessedBy = (Domain.Aggregates.PubSubLogs.PubSubType)request.ProcessedBy,
+                    ProcessedBy = (Domain.Aggregates.PubSubLogs.Type)request.ProcessedBy,
                     RetryCount = request.RetryCount,
                 };
 

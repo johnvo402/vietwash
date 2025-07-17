@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option csharp_namespace = "Notification_Grpc";
+
+package notification_pack;
+
+service NotifyService {
+  rpc SendNotification (SendNotificationRequest) returns (SendNotificationResponse);
+}
+
+message SendNotificationRequest {
+  string template_id = 1;
+  repeated string user_ids = 2;
+  map<string, string> parameters = 3;
+  map<string, string> data = 4;
+}
+
+message SendNotificationResponse {
+  bool success = 1;
+}

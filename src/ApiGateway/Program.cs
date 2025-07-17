@@ -72,7 +72,8 @@ builder.Services.AddCors(options =>
                 .WithOrigins(
                     "http://localhost:3000",
                     "https://vietwash.vercel.app",
-                    "https://api-app.payos.vn"
+                    "https://api-app.payos.vn",
+                    "http://localhost:5500"
                 )
                 .AllowAnyMethod()
                 .AllowAnyHeader()

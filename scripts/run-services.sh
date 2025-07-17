@@ -11,6 +11,7 @@ declare -A SERVICES=(
     ["auth"]="src/AuthService/Presentation"
     ["finance"]="src/FinanceService/Presentation"
     ["project"]="src/ProjectService/Presentation"
+    ["notification"]="src/NotificationService/Presentation"
 )
 
 if [ -z "$NAME" ]; then
