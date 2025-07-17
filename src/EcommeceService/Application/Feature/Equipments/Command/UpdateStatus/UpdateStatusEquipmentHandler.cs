@@ -34,6 +34,8 @@ namespace Application.Feature.Equipments.Command.UpdateStatus
 					);
 				}
 
+				existingEquipment.Status = command.Status.Value;
+
 				using var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
 
 				await unitOfWork.Repository<Equipment>().UpdateAsync(existingEquipment);

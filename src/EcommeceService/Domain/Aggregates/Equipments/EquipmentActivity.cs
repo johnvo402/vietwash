@@ -18,7 +18,6 @@ namespace Domain.Aggregates.Equipments
 		public decimal LaborCost { get; set; } // tiền công 
 		public decimal TotalCost { get; set; } = default!;
 		public string? Description { get; set; } = default!;
-		public string? ReceivedBy { get; set; } = default!;
 		public string SupervisorCode { get; set; } = default!;
 		public Equipment? Equipment { get; set; }
 		public User? Staff { get; set; }
@@ -53,34 +52,6 @@ namespace Domain.Aggregates.Equipments
 			Emit(new EquipmentActivityCreatedEvent { EquipmentActivity = this });
 		}
 
-		public void Update(
-			long? branchId = null,
-			long? staffId = null,
-			DateTimeOffset? performedDate = null,
-			decimal? laborCost = null,
-			decimal? totalCost = null,
-			string? description = null,
-			string? supervisorCode = null
-		)
-		{
-			if (branchId.HasValue)
-				BranchId = branchId.Value;
-			if (staffId.HasValue)
-				StaffId = staffId.Value;
-			if (performedDate.HasValue)
-				PerformedDate = performedDate.Value;
-			if (laborCost.HasValue)
-				LaborCost = laborCost.Value;
-			if (totalCost.HasValue)
-				TotalCost = totalCost.Value;
-			if (supervisorCode is not null)
-				SupervisorCode = supervisorCode;
-			if (description is not null)
-				Description = description;
-
-			Emit(new EquipmentActivityCreatedEvent { EquipmentActivity = this });
-
-		}
 		protected override bool TryApplyDomainEvent(INotification domainEvent)
 		{
 			switch (domainEvent)
