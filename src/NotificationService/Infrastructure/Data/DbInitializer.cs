@@ -153,19 +153,16 @@ public class DbInitializer
                     .StringJson,
             },
         };
+        var repository = unitOfWork.Repository<NotificationTemplate>();
+
         foreach (var template in templates)
         {
-            if (
-                !await unitOfWork
-                    .Repository<NotificationTemplate>()
-                    .AnyAsync(x => x.Id == template.Id)
-            )
+            if (!await repository.AnyAsync(x => x.Id == template.Id))
             {
-                await unitOfWork
-                    .Repository<NotificationTemplate>()
-                    .AddAsync(template, cancellationToken);
-                await unitOfWork.SaveAsync(cancellationToken);
+                await repository.AddAsync(template, cancellationToken);
             }
         }
+
+        await unitOfWork.SaveAsync(cancellationToken);
     }
 }
