@@ -42,6 +42,9 @@ services:
   finance:
     depends_on:
       - "database"
+  notification:
+    depends_on:
+      - "database"
       
 volumes:
   db_data:
