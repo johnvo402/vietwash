@@ -19,7 +19,7 @@ public class DbInitializer
 
         try
         {
-            if (await unitOfWork.Repository<NotificationTemplate>().AnyAsync())
+            if (!(await unitOfWork.Repository<NotificationTemplate>().AnyAsync()))
             {
                 await InitializeNotificationTemplatesAsync(unitOfWork, cancellationToken);
             }
