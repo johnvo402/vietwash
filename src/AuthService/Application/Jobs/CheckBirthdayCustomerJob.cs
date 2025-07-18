@@ -69,10 +69,7 @@ namespace Application.Jobs
                 );
                 try
                 {
-                    var notifySend = new SendNotificationRequest
-                    {
-                        TemplateId = "inventory_import",
-                    };
+                    var notifySend = new SendNotificationRequest { TemplateId = "happy_birthday" };
                     notifySend.Parameters["customer_name"] = customer.DisplayName;
                     notifySend.Parameters["voucher_expiry"] = now.AddDays(7)
                         .ToString("HH:mm:ss dd/MM/yyyy");
