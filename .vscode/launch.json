@@ -8,7 +8,8 @@
         "EcommerceService",
         "ProjectService",
         "ApiGateway",
-        "FinanceService"
+        "FinanceService",
+        "NotificationService"
       ]
     }
   ],
@@ -65,6 +66,17 @@
       "program": "${workspaceFolder}/src/FinanceService/Presentation/bin/Debug/net8.0/Presentation.dll",
       "args": [],
       "cwd": "${workspaceFolder}/src/FinanceService/Presentation",
+      "stopAtEntry": false,
+      "console": "internalConsole"
+    },
+    {
+      "name": "NotificationService",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build NotificationService",
+      "program": "${workspaceFolder}/src/NotificationService/Presentation/bin/Debug/net8.0/Presentation.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/NotificationService/Presentation",
       "stopAtEntry": false,
       "console": "internalConsole"
     }

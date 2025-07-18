@@ -13,6 +13,7 @@
   </ItemGroup>
   <ItemGroup>
     <Protobuf Include="Protos/queue_log.proto" GrpcServices="Both" />
+    <Protobuf Include="Protos/notification.proto" GrpcServices="Both" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" />

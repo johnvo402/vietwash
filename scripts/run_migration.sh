@@ -23,14 +23,16 @@ run_migration() {
 for db in "$@"; do
     db=$(echo "$db" | xargs)  # Trim any leading/trailing spaces
 
-    if [ "$db" == "Auth" ]; then
+    if [ "$db" == "auth" ]; then
         run_migration "Auth" "src/AuthService/Infrastructure" "src/AuthService/Presentation"
-    elif [ "$db" == "Project" ]; then
+    elif [ "$db" == "project" ]; then
         run_migration "Project" "src/ProjectService/Infrastructure" "src/ProjectService/Presentation"
-    elif [ "$db" == "Ecommerce" ]; then
+    elif [ "$db" == "ecommerce" ]; then
         run_migration "Ecommerce" "src/EcommeceService/Infrastructure" "src/EcommeceService/Presentation"
-    elif [ "$db" == "Finance" ]; then
+    elif [ "$db" == "finance" ]; then
         run_migration "Finance" "src/FinanceService/Infrastructure" "src/FinanceService/Presentation"
+    elif [ "$db" == "notification" ]; then
+        run_migration "Notification" "src/NotificationService/Infrastructure" "src/NotificationService/Presentation"
     
     else
         echo "Unknown database: $db"

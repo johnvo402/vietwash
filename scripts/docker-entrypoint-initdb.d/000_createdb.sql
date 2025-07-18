@@ -2,3 +2,4 @@ CREATE DATABASE auth_service;
 CREATE DATABASE project_service;
 CREATE DATABASE ecommerce_service;
 CREATE DATABASE finance_service;
+CREATE DATABASE notification_service;

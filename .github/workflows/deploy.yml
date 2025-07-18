@@ -10,6 +10,7 @@ on:
       - "src/EcommeceService/**"
       - "src/FinanceService/**"
       - "src/ProjectService/**"
+      - "src/NotificationService/**"
       - "src/Contracts/**"
 
 jobs:
@@ -57,13 +58,16 @@ jobs:
                 src/ProjectService)
                   SERVICES+=("project")
                   ;;
+                src/NotificationService)
+                  SERVICES+=("notification")
+                  ;;
               esac
             fi
           done
 
           # Nếu Contracts bị thay đổi thì deploy tất cả
           if echo "$CHANGED_FILES" | grep -q "^src/Contracts/"; then
-            SERVICES=(gateway auth ecommerce finance project)
+            SERVICES=(gateway auth ecommerce finance project notification)
           fi
 
           if [ ${#SERVICES[@]} -eq 0 ]; then
