@@ -6,7 +6,7 @@ namespace Contracts.Application.Common.Interfaces.Services.Notifications
     {
         Task<bool> SendNotifyAsync(
             SendNotificationRequest request,
-            CancellationToken cancellationToken
+            CancellationToken cancellationToken = default
         );
     }
 }
