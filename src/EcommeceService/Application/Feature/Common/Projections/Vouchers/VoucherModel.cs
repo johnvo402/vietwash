@@ -1,10 +1,5 @@
 ﻿using Domain.Aggregates.Enums;
 using Domain.Aggregates.Users.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Feature.Common.Projections.Vouchers
 {
@@ -23,6 +18,6 @@ namespace Application.Feature.Common.Projections.Vouchers
         public DateTimeOffset StartAt { get; set; } = default!;
         public DateTimeOffset EndAt { get; set; } = default!;
         public ActivationStatus Status { get; set; } = default!;
-
+        public List<long> CustomerIds { get; set; } = new();
     }
 }

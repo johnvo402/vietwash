@@ -12,13 +12,5 @@ public class VoucherConfiguration : IEntityTypeConfiguration<Voucher>
     {
         builder.HasKey(x => x.Id);
         builder.Property(x => x.DiscountValue).HasColumnType("numeric");
-        builder
-            .Property(x => x.CustomerGroups)
-            .HasColumnType("smallint[]")
-            .HasConversion(
-                v => v.Select(e => (short)e).ToArray(),
-                v =>
-                    v == null ? new List<CustomerGroup>() : v.Select(e => (CustomerGroup)e).ToList()
-            );
     }
 }

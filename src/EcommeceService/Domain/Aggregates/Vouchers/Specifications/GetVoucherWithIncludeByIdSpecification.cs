@@ -7,7 +7,10 @@ namespace Domain.Aggregates.Vouchers.Specifications
     {
         public GetVoucherWithIncludeByIdSpecification(long id)
         {
-            Query.Where(x => x.Id == id);
+            Query
+                .Where(x => x.Id == id)
+                .Include(x => x.VoucherCustomers)
+                .Include(x => x.VoucherCustomerGroups);
         }
     }
 }

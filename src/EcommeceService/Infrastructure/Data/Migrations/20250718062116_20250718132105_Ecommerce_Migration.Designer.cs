@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    partial class TheDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250718062116_20250718132105_Ecommerce_Migration")]
+    partial class _20250718132105_Ecommerce_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1941,28 +1944,16 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Vouchers.VoucherCustomerGroup", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<long>("VoucherId")
                         .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnName("voucher_id");
 
                     b.Property<short>("Group")
                         .HasColumnType("smallint")
                         .HasColumnName("group");
 
-                    b.Property<long>("VoucherId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("voucher_id");
-
-                    b.HasKey("Id")
+                    b.HasKey("VoucherId", "Group")
                         .HasName("pk_voucher_customer_group");
-
-                    b.HasIndex("VoucherId", "Group")
-                        .IsUnique()
-                        .HasDatabaseName("ix_voucher_customer_group_voucher_id_group");
 
                     b.ToTable("voucher_customer_group", (string)null);
                 });

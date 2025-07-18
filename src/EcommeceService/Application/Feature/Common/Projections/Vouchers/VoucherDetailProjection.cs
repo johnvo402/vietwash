@@ -1,20 +1,18 @@
-﻿using Application.Feature.Common.Projections.Equipments;
-using Domain.Aggregates.Equipments;
+﻿using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Vouchers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Feature.Common.Projections.Vouchers
 {
     public class VoucherDetailProjection : VoucherProjection
     {
+        public List<CustomerGroup> CustomerGroups { get; set; } = new();
+        public List<long> CustomerIds { get; set; } = new();
+
         public override void MappingFrom(Voucher voucher)
         {
             base.MappingFrom(voucher);
-
+            CustomerGroups = voucher.VoucherCustomerGroups.Select(x => x.Group).Distinct().ToList();
+            CustomerIds = voucher.VoucherCustomers.Select(x => x.CustomerId).Distinct().ToList();
         }
     }
 }

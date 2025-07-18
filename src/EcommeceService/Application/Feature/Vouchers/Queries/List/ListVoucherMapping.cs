@@ -1,5 +1,5 @@
-﻿using Domain.Aggregates.Vouchers;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
+using Domain.Aggregates.Vouchers;
 
 namespace Application.Feature.Vouchers.Queries.List
 {
@@ -18,7 +18,7 @@ namespace Application.Feature.Vouchers.Queries.List
                 DiscountValue = voucher.DiscountValue,
                 TotalQuantity = voucher.TotalQuantity,
                 UsedQuantity = voucher.UsedQuantity,
-                CustomerGroups = voucher.CustomerGroups,
+                //VoucherCustomerGroups = voucher.VoucherCustomerGroups,
                 StartAt = voucher.StartAt,
                 EndAt = voucher.EndAt,
                 Status = voucher.Status,
