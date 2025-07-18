@@ -46,12 +46,13 @@ namespace Infrastructure.Services.Notifications
                     Title = notification.Title,
                     Content = content,
                     ContentHtml = contentHtml,
+                    Data = notification.Data,
                     CreatedAt = notification.CreatedAt,
                 };
 
                 await _hubContext
                     .Clients.Group($"user:{userId}")
-                    .SendAsync("ReceiveNotification", notificationDto);
+                    .SendAsync("ReceiveNotification", notificationDto, cancellationToken);
 
                 notifications.Add(notification);
             }

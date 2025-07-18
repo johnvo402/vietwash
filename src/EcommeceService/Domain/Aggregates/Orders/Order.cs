@@ -1,5 +1,6 @@
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Orders.Enums;
+using Domain.Aggregates.Orders.Events;
 using Domain.Aggregates.Users;
 using Domain.Events;
 using Mediator;
@@ -33,6 +34,8 @@ namespace Domain.Aggregates.Orders
             switch (domainEvent)
             {
                 case CreateFundEvent:
+                    return true;
+                case UpdateStatusOrderEvent:
                     return true;
                 default:
                     return false;
@@ -126,6 +129,10 @@ namespace Domain.Aggregates.Orders
         {
             switch (status)
             {
+                case OrderStatus.Processed:
+                    Status = OrderStatus.Processed;
+                    Emit(new UpdateStatusOrderEvent() { Order = this });
+                    break;
                 case OrderStatus.Completed:
                     Status = OrderStatus.Completed;
                     Emit(
