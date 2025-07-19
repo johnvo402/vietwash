@@ -5,7 +5,7 @@ using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Vouchers
 {
-    public class VoucherUsage : AggregateRoot
+    public class VoucherUsage : BaseEntity
     {
         public long VoucherId { get; set; }
         public long CustomerId { get; set; }
@@ -22,9 +22,5 @@ namespace Domain.Aggregates.Vouchers
             DiscountApply = Guard.Against.NegativeOrZero(discountApply, nameof(discountApply));
         }
 
-        protected override bool TryApplyDomainEvent(INotification domainEvent)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

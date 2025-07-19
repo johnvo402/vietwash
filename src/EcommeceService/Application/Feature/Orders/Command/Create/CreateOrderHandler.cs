@@ -3,18 +3,14 @@ using Application.Common.Errors;
 using Application.Common.Interfaces;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Feature.Vouchers.Queries.Detail;
 using Contracts.ApiWrapper;
 using Contracts.Application.Common.Interfaces.Services.Encryptions;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Specifications;
-using Domain.Aggregates.Users;
-using Domain.Aggregates.Users.Specifications;
 using Domain.Aggregates.Vouchers;
 using Domain.Aggregates.Vouchers.Specifications;
 using Mediator;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Application.Feature.Orders.Command.Create
 {
@@ -35,7 +31,35 @@ namespace Application.Feature.Orders.Command.Create
             var codeEncrypt = encryption.Encrypt(order.Code);
             var barcodeConfirm = barcode.GenerateQrBase64(codeEncrypt);
             order.CodeConfirm = barcodeConfirm;
+            Voucher? getVoucher = null;
+            if (order.CustomerId != null && order.VoucherCode != null)
+            {
+                getVoucher = await unitOfWork
+                    .DynamicReadOnlyRepository<Voucher>()
+                    .FindByConditionAsync(
+                        new GetVoucherByCodeSpecification(
+                            order.VoucherCode,
+                            order.CustomerId.Value
+                        ),
+                        cancellationToken
+                    );
 
+                if (getVoucher == null)
+                {
+                    return Result<CreateOrderResponse>.Failure(
+                        new NotFoundError(
+                            "Voucher not found!",
+                            Messager.Create<Voucher>().Message(MessageType.Existence).Build()
+                        )
+                    );
+                }
+                order.DiscountValue = getVoucher.DiscountValue;
+                order.DiscountFixed = getVoucher.DiscountFixed;
+                foreach (var voucherCus in getVoucher.VoucherCustomers)
+                {
+                    voucherCus.IsUsed = true;
+                }
+            }
             try
             {
                 DbTransaction transaction = await unitOfWork.BeginTransactionAsync(
@@ -45,65 +69,11 @@ namespace Application.Feature.Orders.Command.Create
                 var orderRes = await unitOfWork
                     .Repository<Order>()
                     .AddAsync(order, cancellationToken);
-
-                VoucherCustomer? voucherCustomer = null;
-                decimal discountApply = 0;
-                if (order.CustomerId != null && order.VoucherCode != null)
+                if (getVoucher != null)
                 {
-                    Voucher getVoucher = await unitOfWork
-                        .DynamicReadOnlyRepository<Voucher>()
-                        .FindByConditionAsync(
-                            new GetVoucherByCodeSpecification(order.VoucherCode),
-                            cancellationToken
-                        );
-
-                    voucherCustomer = await unitOfWork
-                        .DynamicReadOnlyRepository<VoucherCustomer>()
-                        .FindByConditionAsync(
-                            new GetIsUsedVoucherCustomerSpecification(
-                                order.CustomerId.Value,
-                                getVoucher.Id
-                            ),
-                            cancellationToken
-                        );
-
-                    if (voucherCustomer == null)
-                    {
-                        await unitOfWork.RollbackAsync(cancellationToken);
-                        return Result<CreateOrderResponse>.Failure(
-                            new BadRequestError(
-                                "Voucher is invalid!",
-                                Messager
-                                    .Create<Order>("Đơn hàng")
-                                    .Property(x => x.VoucherId)
-                                    .Message(MessageType.Existence)
-                                    .Build()
-                            )
-                        );
-                    }
-                    else
-                    {
-                        var voucher = await unitOfWork
-                            .DynamicReadOnlyRepository<Voucher>()
-                            .FindByConditionAsync(
-                                new GetVoucherWithIncludeByIdSpecification(getVoucher.Id),
-                                x => x.ToGetVoucherDetailResponse(),
-                                cancellationToken
-                            );
-                        discountApply = voucher.DiscountValue;
-                        if (voucher.DiscountFixed)
-                        {
-                            order.Total = order.Amount - voucher.DiscountValue;
-                        }
-                        else
-                        {
-                            discountApply = (voucher.DiscountValue * order.Amount) / 100;
-                            order.Total = order.Amount - discountApply;
-                        }
-                        voucherCustomer.IsUsed = true;
-                    }
+                    await unitOfWork.Repository<Voucher>().UpdateAsync(getVoucher);
                 }
-                orderRes.DiscountValue = discountApply;
+
                 await unitOfWork.SaveAsync(cancellationToken);
 
                 await unitOfWork.CommitAsync(cancellationToken);

@@ -10,7 +10,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Presentation.Endpoints.Equipments
 {
-    public class UpdateVoucherEndpoint(ISender sender)
+    public class UpdateEquipmentEndpoint(ISender sender)
         : EndpointBaseAsync.WithRequest<UpdateEquipmentCommand>.WithActionResult<ApiResponse>
     {
         [HttpPut(Router.EquipmentRoute.GetUpdateDelete)]

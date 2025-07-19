@@ -22,8 +22,8 @@ namespace Domain.Aggregates.Orders
         public long? CustomerId { get; set; }
         public long BranchId { get; set; } = default!;
         public long StaffId { get; set; } = default!;
-        public long? VoucherId { get; set; } = default!;
-        public string? VoucherCode { get; set; } = default!;
+        public long? VoucherId { get; set; }
+        public string? VoucherCode { get; set; }
         public string Code { get; set; } = default!;
         public decimal Amount { get; set; } = default!;
         public decimal Total { get; set; } = default!;
@@ -65,13 +65,13 @@ namespace Domain.Aggregates.Orders
         public Order(
             long branchId,
             long staffId,
-            long? voucherId,
-            string? voucherCode,
             string code,
             decimal amount,
             decimal total,
             OrderStatus status,
             DateTimeOffset orderDate,
+            long? voucherId = null,
+            string? voucherCode = null,
             long? customerId = null,
             bool discountFixed = false,
             decimal discountValue = 0,
