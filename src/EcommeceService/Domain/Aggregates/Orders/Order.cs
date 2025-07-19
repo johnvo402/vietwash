@@ -1,10 +1,19 @@
+using System.Threading;
+using System.Xml.Linq;
 using Ardalis.GuardClauses;
+using Domain.Aggregates.Enums;
 using Domain.Aggregates.Orders.Enums;
+using Domain.Aggregates.Products;
+using Domain.Aggregates.Products.Events;
+using Domain.Aggregates.Services;
 using Domain.Aggregates.Orders.Events;
 using Domain.Aggregates.Users;
+using Domain.Aggregates.Vouchers;
+using Domain.Aggregates.Vouchers.Events;
 using Domain.Events;
 using Mediator;
 using Shared.Kernel.Common;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Domain.Aggregates.Orders
 {
@@ -13,6 +22,8 @@ namespace Domain.Aggregates.Orders
         public long? CustomerId { get; set; }
         public long BranchId { get; set; } = default!;
         public long StaffId { get; set; } = default!;
+        public long? VoucherId { get; set; }
+        public string? VoucherCode { get; set; }
         public string Code { get; set; } = default!;
         public decimal Amount { get; set; } = default!;
         public decimal Total { get; set; } = default!;
@@ -26,7 +37,11 @@ namespace Domain.Aggregates.Orders
         public User? Staff { get; set; }
         public User? Customer { get; set; }
         public string? Receipt { get; set; }
+
+        public virtual VoucherUsage? VoucherUsage { get; set; }
+
         public string? CodeConfirm { get; set; }
+
         public ICollection<OrderItem> OrderItems { get; set; } = [];
 
         protected override bool TryApplyDomainEvent(INotification domainEvent)
@@ -34,6 +49,9 @@ namespace Domain.Aggregates.Orders
             switch (domainEvent)
             {
                 case CreateFundEvent:
+                    return true;
+
+                case VoucherUsageEvent:
                     return true;
                 case UpdateStatusOrderEvent:
                     return true;
@@ -52,6 +70,8 @@ namespace Domain.Aggregates.Orders
             decimal total,
             OrderStatus status,
             DateTimeOffset orderDate,
+            long? voucherId = null,
+            string? voucherCode = null,
             long? customerId = null,
             bool discountFixed = false,
             decimal discountValue = 0,
@@ -64,6 +84,8 @@ namespace Domain.Aggregates.Orders
 
             BranchId = branchId;
             StaffId = staffId;
+            VoucherId = voucherId;
+            VoucherCode = voucherCode;
             Code = code;
             Amount = amount;
             Total = total;
@@ -125,6 +147,23 @@ namespace Domain.Aggregates.Orders
             Receipt = null;
         }
 
+        public void EmitVoucherUsageEvent(decimal discountApply, long voucherId)
+        {
+            if (voucherId != null && CustomerId.HasValue)
+            {
+                Emit(
+                    new VoucherUsageEvent
+                    {
+                        VoucherId = voucherId,
+                        CustomerId = CustomerId.Value,
+                        BranchId = BranchId,
+                        OrderId = Id,
+                        DiscountApply = discountApply,
+                    }
+                );
+            }
+        }
+
         public void UpdateStatus(OrderStatus status)
         {
             switch (status)
@@ -135,6 +174,7 @@ namespace Domain.Aggregates.Orders
                     break;
                 case OrderStatus.Completed:
                     Status = OrderStatus.Completed;
+
                     Emit(
                         new CreateFundEvent()
                         {
@@ -152,6 +192,7 @@ namespace Domain.Aggregates.Orders
                             },
                         }
                     );
+
                     break;
                 case OrderStatus.Cancelled:
 

@@ -16,6 +16,8 @@ using Domain.Aggregates.Services.Specifications;
 using Domain.Aggregates.Suppliers;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
+using Domain.Aggregates.Vouchers;
+using Domain.Aggregates.Vouchers.Specifications;
 using Infrastructure.Constants;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -169,7 +171,6 @@ public class DbInitializer
                 SelectOnlyId(),
                 cancellationToken
             );
-
         if (!staffResult.Any())
         {
             logger.Warning("Không tìm thấy nhân viên trong cơ sở dữ liệu.");
@@ -183,11 +184,12 @@ public class DbInitializer
         {
             long? customerId = customerResult[random.Next(customerResult.Count())].Id;
             long staffId = staffResult[random.Next(staffResult.Count())].Id;
+            long voucherId = staffResult[random.Next(staffResult.Count())].Id;
 
             int itemCount = random.Next(1, 4); // Số lượng mục trong đơn hàng
             var orderItems = new List<OrderItem>();
             decimal totalPrice = 0;
-
+            string voucherCode = Generator.GenerateRandomString(9);
             var services = await unitOfWork
                 .DynamicReadOnlyRepository<Service>()
                 .ListAsync(
@@ -292,6 +294,8 @@ public class DbInitializer
             var order = new Order(
                 branchId: 1,
                 staffId: staffId,
+                voucherId: voucherId,
+                voucherCode: voucherCode,
                 code: code,
                 amount: totalPrice,
                 total: totalPrice,

@@ -1,11 +1,15 @@
 ﻿using System.Data.Common;
+using Application.Common.Errors;
 using Application.Common.Interfaces;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Contracts.Application.Common.Interfaces.Services.Encryptions;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Specifications;
+using Domain.Aggregates.Vouchers;
+using Domain.Aggregates.Vouchers.Specifications;
 using Mediator;
 
 namespace Application.Feature.Orders.Command.Create
@@ -27,7 +31,35 @@ namespace Application.Feature.Orders.Command.Create
             var codeEncrypt = encryption.Encrypt(order.Code);
             var barcodeConfirm = barcode.GenerateQrBase64(codeEncrypt);
             order.CodeConfirm = barcodeConfirm;
+            Voucher? getVoucher = null;
+            if (order.CustomerId != null && order.VoucherCode != null)
+            {
+                getVoucher = await unitOfWork
+                    .DynamicReadOnlyRepository<Voucher>()
+                    .FindByConditionAsync(
+                        new GetVoucherByCodeSpecification(
+                            order.VoucherCode,
+                            order.CustomerId.Value
+                        ),
+                        cancellationToken
+                    );
 
+                if (getVoucher == null)
+                {
+                    return Result<CreateOrderResponse>.Failure(
+                        new NotFoundError(
+                            "Voucher not found!",
+                            Messager.Create<Voucher>().Message(MessageType.Existence).Build()
+                        )
+                    );
+                }
+                order.DiscountValue = getVoucher.DiscountValue;
+                order.DiscountFixed = getVoucher.DiscountFixed;
+                foreach (var voucherCus in getVoucher.VoucherCustomers)
+                {
+                    voucherCus.IsUsed = true;
+                }
+            }
             try
             {
                 DbTransaction transaction = await unitOfWork.BeginTransactionAsync(
@@ -37,10 +69,15 @@ namespace Application.Feature.Orders.Command.Create
                 var orderRes = await unitOfWork
                     .Repository<Order>()
                     .AddAsync(order, cancellationToken);
+                if (getVoucher != null)
+                {
+                    await unitOfWork.Repository<Voucher>().UpdateAsync(getVoucher);
+                }
 
                 await unitOfWork.SaveAsync(cancellationToken);
 
                 await unitOfWork.CommitAsync(cancellationToken);
+
                 CreateOrderResponse? newOrder = await unitOfWork
                     .DynamicReadOnlyRepository<Order>()
                     .FindByConditionAsync(

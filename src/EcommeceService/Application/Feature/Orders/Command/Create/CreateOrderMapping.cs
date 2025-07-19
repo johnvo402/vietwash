@@ -3,6 +3,7 @@ using Contracts.Extensions;
 using Contracts.Utils;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
+using Domain.Aggregates.Vouchers;
 
 namespace Application.Feature.Orders.Command.Create
 {
@@ -13,19 +14,22 @@ namespace Application.Feature.Orders.Command.Create
             string code = Generator.GenerateCode("OD", 6);
             decimal amount = command.OrderItems.Sum(i => i.Price * i.Quantity);
             var response = new Order(
-                customerId: command.CustomerId,
                 branchId: command.BranchId,
                 staffId: staffId,
+                voucherId: null,
+                voucherCode: command.VoucherCode,
                 code: code,
                 amount: amount,
                 total: CalculationTotal(amount, command.DiscountFixed, command.DiscountValue),
+                status: OrderStatus.Pending,
+                orderDate: DateTimeOffset.UtcNow,
+                customerId: command.CustomerId,
                 discountFixed: command.DiscountFixed,
                 discountValue: command.DiscountValue,
                 note: command.Note,
-                status: OrderStatus.Pending,
-                orderDate: DateTimeOffset.UtcNow,
                 deliveryTime: command.DeliveryTime
             );
+
             response.OrderItems = command.OrderItems.ToListMapping(x => new OrderItem
             {
                 ServiceId = x.ServiceId,
