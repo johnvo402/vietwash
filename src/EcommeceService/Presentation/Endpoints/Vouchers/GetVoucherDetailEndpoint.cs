@@ -6,6 +6,7 @@ using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Contracts.RouteResults;
+using Application.Feature.Vouchers.Queries.VoucherUsageDetail;
 namespace Presentation.Endpoints.Vouchers
 {
     public class GetVoucherDetailEndpoint(ISender sender)

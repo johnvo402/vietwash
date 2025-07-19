@@ -164,28 +164,16 @@ public class DbInitializer
 
         // Fetch staff IDs
         var staffResult = await unitOfWork
-         .DynamicReadOnlyRepository<User>()
-         .ListAsync(
-             new ListUserSpecification([ROLE.STAFF]),
-             new QueryParamRequest { },
-             SelectOnlyId(),
-             cancellationToken
-         );
+            .DynamicReadOnlyRepository<User>()
+            .ListAsync(
+                new ListUserSpecification([ROLE.STAFF]),
+                new QueryParamRequest { },
+                SelectOnlyId(),
+                cancellationToken
+            );
         if (!staffResult.Any())
         {
             logger.Warning("Không tìm thấy nhân viên trong cơ sở dữ liệu.");
-            return;
-        }
-
-        var voucherResult = await unitOfWork
-       .DynamicReadOnlyRepository<Voucher>()
-       .ListAsync(
-           new ListVoucherSpecification(),
-           new QueryParamRequest { },
-           cancellationToken
-       ); if (!voucherResult.Any())
-        {
-            logger.Warning("Không tìm thấy voucher trong cơ sở dữ liệu.");
             return;
         }
 
@@ -201,7 +189,7 @@ public class DbInitializer
             int itemCount = random.Next(1, 4); // Số lượng mục trong đơn hàng
             var orderItems = new List<OrderItem>();
             decimal totalPrice = 0;
-
+            string voucherCode = Generator.GenerateRandomString(9);
             var services = await unitOfWork
                 .DynamicReadOnlyRepository<Service>()
                 .ListAsync(
@@ -307,6 +295,7 @@ public class DbInitializer
                 branchId: 1,
                 staffId: staffId,
                 voucherId: voucherId,
+                voucherCode: voucherCode,
                 code: code,
                 amount: totalPrice,
                 total: totalPrice,

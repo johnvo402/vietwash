@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    partial class TheDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250719060907_20250719130844_Ecommerce_Migration")]
+    partial class _20250719130844_Ecommerce_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -857,10 +860,6 @@ namespace Infrastructure.Data.Migrations
                     b.Property<long>("Version")
                         .HasColumnType("bigint")
                         .HasColumnName("version");
-
-                    b.Property<string>("VoucherCode")
-                        .HasColumnType("text")
-                        .HasColumnName("voucher_code");
 
                     b.Property<long?>("VoucherId")
                         .HasColumnType("bigint")
@@ -1909,9 +1908,6 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_voucher");
-
-                    b.HasIndex("Code")
-                        .HasDatabaseName("ix_voucher_code");
 
                     b.ToTable("voucher", (string)null);
                 });

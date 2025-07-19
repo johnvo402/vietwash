@@ -9,8 +9,7 @@ namespace Domain.Aggregates.Vouchers.Specifications
         {
             Query
                 .Where(x => x.Id == id)
-                .Include(x => x.VoucherCustomers)
-                .Include(x => x.VoucherCustomerGroups);
+                .Include(x => x.VoucherCustomers);
         }
     }
 }

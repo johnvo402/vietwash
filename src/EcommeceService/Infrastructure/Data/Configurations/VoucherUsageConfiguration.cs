@@ -12,29 +12,17 @@ namespace Infrastructure.Data.Configurations
         {
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.DiscountApply)
-                   .HasColumnType("numeric")
-                   .IsRequired();
+            builder.Property(x => x.DiscountApply).HasColumnType("numeric").IsRequired();
 
+            builder.HasOne<Voucher>().WithMany().HasForeignKey(x => x.VoucherId);
 
-            builder.HasOne<Voucher>()
-                   .WithMany()
-                   .HasForeignKey(x => x.VoucherId)
-                   ;
+            builder.HasOne<User>().WithMany().HasForeignKey(x => x.CustomerId);
 
-
-            builder.HasOne<User>()
-                   .WithMany()
-                   .HasForeignKey(x => x.CustomerId)
-                  ;
-
-
-            builder.HasOne(x => x.Order)
-            .WithOne(o => o.VoucherUsage)
-            .HasForeignKey<VoucherUsage>(x => x.OrderId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-
+            builder
+                .HasOne(x => x.Order)
+                .WithOne(o => o.VoucherUsage)
+                .HasForeignKey<VoucherUsage>(x => x.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

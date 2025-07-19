@@ -23,11 +23,8 @@ namespace Domain.Aggregates.Vouchers
         public DateTimeOffset? StartAt { get; set; }
         public DateTimeOffset? EndAt { get; set; }
         public ActivationStatus Status { get; set; }
+        public ICollection<VoucherCustomer> VoucherCustomers { get; set; } = new List<VoucherCustomer>();
 
-        public ICollection<VoucherCustomer> VoucherCustomers { get; set; } =
-            new List<VoucherCustomer>();
-        public ICollection<VoucherCustomerGroup> VoucherCustomerGroups { get; set; } =
-            new List<VoucherCustomerGroup>();
 
         public Voucher() { }
 
@@ -38,8 +35,8 @@ namespace Domain.Aggregates.Vouchers
             string barcode,
             bool discountFixed,
             decimal discountValue,
-            int totalQuantity,
-            int usedQuantity,
+            // int totalQuantity,
+            // int usedQuantity,
             DateTimeOffset? startAt,
             DateTimeOffset? endAt,
             ActivationStatus status,
@@ -52,8 +49,8 @@ namespace Domain.Aggregates.Vouchers
             Barcode = Guard.Against.NullOrWhiteSpace(barcode);
             DiscountFixed = discountFixed;
             DiscountValue = Guard.Against.NegativeOrZero(discountValue);
-            TotalQuantity = Guard.Against.NegativeOrZero(totalQuantity);
-            UsedQuantity = Guard.Against.Negative(usedQuantity);
+            // TotalQuantity = Guard.Against.NegativeOrZero(totalQuantity);
+            // UsedQuantity = Guard.Against.Negative(usedQuantity);
             StartAt = startAt;
             EndAt = endAt;
             Status = Guard.Against.EnumOutOfRange(status);
@@ -67,8 +64,8 @@ namespace Domain.Aggregates.Vouchers
             string? barcode = null,
             bool? discountFixed = null,
             decimal? discountValue = null,
-            int? totalQuantity = null,
-            int? usedQuantity = null,
+            // int? totalQuantity = null,
+            // int? usedQuantity = null,
             DateTimeOffset? startAt = null,
             DateTimeOffset? endAt = null,
             ActivationStatus? status = null,
@@ -93,11 +90,11 @@ namespace Domain.Aggregates.Vouchers
             if (discountValue.HasValue)
                 DiscountValue = Guard.Against.NegativeOrZero(discountValue.Value);
 
-            if (totalQuantity.HasValue)
-                TotalQuantity = Guard.Against.NegativeOrZero(totalQuantity.Value);
+            // if (totalQuantity.HasValue)
+            //     TotalQuantity = Guard.Against.NegativeOrZero(totalQuantity.Value);
 
-            if (usedQuantity.HasValue)
-                UsedQuantity = Guard.Against.NegativeOrZero(usedQuantity.Value);
+            // if (usedQuantity.HasValue)
+            //     UsedQuantity = Guard.Against.NegativeOrZero(usedQuantity.Value);
 
             if (startAt.HasValue)
                 StartAt = startAt;
@@ -110,35 +107,6 @@ namespace Domain.Aggregates.Vouchers
 
             if (description != null)
                 Description = description.Trim();
-        }
-
-        public void AssignToCustomerGroup(CustomerGroup group)
-        {
-            if (!VoucherCustomerGroups.Any(x => x.Group == group))
-            {
-                VoucherCustomerGroups.Add(
-                    new VoucherCustomerGroup { Voucher = this, Group = group }
-                );
-            }
-        }
-
-        public void AssignToCustomer(long customerId)
-        {
-            if (!VoucherCustomers.Any(x => x.CustomerId == customerId))
-            {
-                VoucherCustomers.Add(
-                    new VoucherCustomer { Voucher = this, CustomerId = customerId }
-                );
-            }
-        }
-
-        public void UpdateCustomerGroups(IEnumerable<CustomerGroup> newGroups)
-        {
-            VoucherCustomerGroups.Clear();
-            foreach (var group in newGroups.Distinct())
-            {
-                AssignToCustomerGroup(group);
-            }
         }
 
         protected override bool TryApplyDomainEvent(INotification domainEvent)

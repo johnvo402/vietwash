@@ -14,15 +14,15 @@ namespace Application.Feature.Vouchers.Commands.Update
                 barcode: model.Barcode,
                 discountFixed: model.DiscountFixed,
                 discountValue: model.DiscountValue,
-                totalQuantity: model.TotalQuantity,
-                usedQuantity: model.UsedQuantity,
+                // totalQuantity: model.TotalQuantity,
+                // usedQuantity: model.UsedQuantity,
                 startAt: model.StartAt,
                 endAt: model.EndAt,
                 status: model.Status,
                 description: model.Description
             );
 
-            entity.UpdateCustomerGroups(model.CustomerGroups);
+            // entity.UpdateCustomerGroups(model.CustomerGroups);
         }
     }
 }

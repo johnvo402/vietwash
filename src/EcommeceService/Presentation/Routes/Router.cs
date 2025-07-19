@@ -192,8 +192,13 @@ namespace Presentation.Routes
         {
             public const string Tags = $"{nameof(VoucherRoute)} endpoint";
             public const string Vouchers = $"{Ecommerce}/{RouterBase.prefix}{nameof(Vouchers)}";
+            public const string VoucherUsage = $"{Ecommerce}/{RouterBase.prefix}{nameof(VoucherUsage)}";
+            public const string VoucherUsageDetail = $"{Ecommerce}/{RouterBase.prefix}{nameof(VoucherUsage)}/detail/" 
+                + "{"
+                + RouterBase.Id
+                + "}";
             public const string GetUpdateDelete =
-                $"{Ecommerce}/{RouterBase.prefix}{nameof(Vouchers)}/" + "{" + RouterBase.Id + "}";
+    $"{Ecommerce}/{RouterBase.prefix}{nameof(Vouchers)}/" + "{" + RouterBase.Id + "}";
             public const string GetDetail =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Vouchers)}/detail/"
                 + "{"

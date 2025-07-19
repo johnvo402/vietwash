@@ -3,6 +3,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Orders;
+using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Specifications;
 using Mediator;
 
@@ -54,6 +55,15 @@ namespace Application.Feature.Orders.Command.UpdateStatus
                         );
 
                     order.UpdateStatus(request.Status.Value);
+
+                    if (
+                        request.Status == OrderStatus.Completed
+                        && order.Status != OrderStatus.Completed
+                    )
+                    {
+                        order.EmitVoucherUsageEvent(order.DiscountValue, order.VoucherId.Value);
+                    }
+
                     order.PaymentMethod = request.PaymentMethod;
                 }
                 using var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);

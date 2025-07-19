@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Xml.Linq;
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Enums;
@@ -20,7 +21,8 @@ namespace Domain.Aggregates.Orders
         public long? CustomerId { get; set; }
         public long BranchId { get; set; } = default!;
         public long StaffId { get; set; } = default!;
-        public long? VoucherId { get; set; }
+        public long? VoucherId { get; set; } = default!;
+        public string? VoucherCode { get; set; } = default!;
         public string Code { get; set; } = default!;
         public decimal Amount { get; set; } = default!;
         public decimal Total { get; set; } = default!;
@@ -60,6 +62,7 @@ namespace Domain.Aggregates.Orders
             long branchId,
             long staffId,
             long? voucherId,
+            string? voucherCode,
             string code,
             decimal amount,
             decimal total,
@@ -78,6 +81,7 @@ namespace Domain.Aggregates.Orders
             BranchId = branchId;
             StaffId = staffId;
             VoucherId = voucherId;
+            VoucherCode = voucherCode;
             Code = code;
             Amount = amount;
             Total = total;
@@ -139,18 +143,18 @@ namespace Domain.Aggregates.Orders
             Receipt = null;
         }
 
-        public void EmitVoucherUsageEvent()
+        public void EmitVoucherUsageEvent(decimal discountApply, long voucherId)
         {
-            if (VoucherId.HasValue && CustomerId.HasValue)
+            if (voucherId != null && CustomerId.HasValue)
             {
                 Emit(
                     new VoucherUsageEvent
                     {
-                        VoucherId = VoucherId.Value,
+                        VoucherId = voucherId,
                         CustomerId = CustomerId.Value,
                         BranchId = BranchId,
                         OrderId = Id,
-                        DiscountApply = 100,
+                        DiscountApply = discountApply,
                     }
                 );
             }
@@ -180,6 +184,7 @@ namespace Domain.Aggregates.Orders
                             },
                         }
                     );
+
                     break;
                 case OrderStatus.Cancelled:
 

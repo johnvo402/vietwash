@@ -2,7 +2,6 @@
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Vouchers;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
 using Specification;
 using Specification.Builders;
 
@@ -18,10 +17,10 @@ public class GetVoucherByCustomerSpecification : Specification<Voucher>
 
         Query.Where(x =>
             x.Id == voucherId
-            && (
-                x.VoucherCustomerGroups.Any(vcg => vcg.Group == customerGroup)
-                || x.VoucherCustomers.Any(vc => vc.CustomerId == customerId)
-            )
+            // && (
+            //     x.VoucherCustomerGroups.Any(vcg => vcg.Group == customerGroup)
+            //     || x.VoucherCustomers.Any(vc => vc.CustomerId == customerId)
+            // )
         );
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Ardalis.GuardClauses;
 using Domain.Aggregates.Orders;
-using Domain.Aggregates.Vouchers.Events;
 using Mediator;
 using Shared.Kernel.Common;
 

@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    partial class TheDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250718134150_20250718204141_Ecommerce_Migration")]
+    partial class _20250718204141_Ecommerce_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -857,10 +860,6 @@ namespace Infrastructure.Data.Migrations
                     b.Property<long>("Version")
                         .HasColumnType("bigint")
                         .HasColumnName("version");
-
-                    b.Property<string>("VoucherCode")
-                        .HasColumnType("text")
-                        .HasColumnName("voucher_code");
 
                     b.Property<long?>("VoucherId")
                         .HasColumnType("bigint")
@@ -1910,9 +1909,6 @@ namespace Infrastructure.Data.Migrations
                     b.HasKey("Id")
                         .HasName("pk_voucher");
 
-                    b.HasIndex("Code")
-                        .HasDatabaseName("ix_voucher_code");
-
                     b.ToTable("voucher", (string)null);
                 });
 
@@ -1948,70 +1944,6 @@ namespace Infrastructure.Data.Migrations
                         .HasDatabaseName("ix_voucher_customer_voucher_id");
 
                     b.ToTable("voucher_customer", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Vouchers.VoucherUsage", b =>
-                {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("created_by");
-
-                    b.Property<long>("CustomerId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("customer_id");
-
-                    b.Property<decimal>("DiscountApply")
-                        .HasColumnType("numeric")
-                        .HasColumnName("discount_apply");
-
-                    b.Property<long>("OrderId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("order_id");
-
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by");
-
-                    b.Property<long>("Version")
-                        .HasColumnType("bigint")
-                        .HasColumnName("version");
-
-                    b.Property<long>("VoucherId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("voucher_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_voucher_usage");
-
-                    b.HasIndex("CustomerId")
-                        .HasDatabaseName("ix_voucher_usage_customer_id");
-
-                    b.HasIndex("OrderId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_voucher_usage_order_id");
-
-                    b.HasIndex("VoucherId")
-                        .HasDatabaseName("ix_voucher_usage_voucher_id");
-
-                    b.ToTable("voucher_usage", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Functions.CustomerRevenueResult", b =>
@@ -2494,32 +2426,6 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Voucher");
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Vouchers.VoucherUsage", b =>
-                {
-                    b.HasOne("Domain.Aggregates.Users.User", null)
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_voucher_usage_user_customer_id");
-
-                    b.HasOne("Domain.Aggregates.Orders.Order", "Order")
-                        .WithOne("VoucherUsage")
-                        .HasForeignKey("Domain.Aggregates.Vouchers.VoucherUsage", "OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_voucher_usage_order_order_id");
-
-                    b.HasOne("Domain.Aggregates.Vouchers.Voucher", null)
-                        .WithMany()
-                        .HasForeignKey("VoucherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_voucher_usage_voucher_voucher_id");
-
-                    b.Navigation("Order");
-                });
-
             modelBuilder.Entity("Domain.Aggregates.Equipments.Equipment", b =>
                 {
                     b.Navigation("MaintenanceHistories");
@@ -2561,8 +2467,6 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Orders.Order", b =>
                 {
                     b.Navigation("OrderItems");
-
-                    b.Navigation("VoucherUsage");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Products.BranchProduct", b =>

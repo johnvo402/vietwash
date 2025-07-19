@@ -11,7 +11,6 @@ namespace Application.Feature.Common.Projections.Vouchers
         public override void MappingFrom(Voucher voucher)
         {
             base.MappingFrom(voucher);
-            CustomerGroups = voucher.VoucherCustomerGroups.Select(x => x.Group).Distinct().ToList();
             CustomerIds = voucher.VoucherCustomers.Select(x => x.CustomerId).Distinct().ToList();
         }
     }

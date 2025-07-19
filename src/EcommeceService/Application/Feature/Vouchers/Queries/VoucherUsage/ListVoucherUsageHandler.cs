@@ -1,5 +1,6 @@
 ﻿using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Feature.Vouchers.Queries.List;
 using Contracts.ApiWrapper;
 using Contracts.Common.QueryStringProcessing;
 using Contracts.Dtos.Responses;
@@ -8,19 +9,19 @@ using Domain.Aggregates.Vouchers.Specifications;
 using Infrastructure.Constants;
 using Mediator;
 
-namespace Application.Feature.Vouchers.Queries.List
+namespace Application.Feature.Vouchers.Queries.VoucherUsage
 {
-    public class ListVoucherHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
-        : IRequestHandler<ListVoucherQuery, Result<PaginationResponse<ListVoucherResponse>>>
+    public class ListVoucherUsageHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
+        : IRequestHandler<ListVoucherUsageQuery, Result<PaginationResponse<ListVoucherUsageResponse>>>
     {
-        public async ValueTask<Result<PaginationResponse<ListVoucherResponse>>> Handle(
-            ListVoucherQuery query,
+        public async ValueTask<Result<PaginationResponse<ListVoucherUsageResponse>>> Handle(
+            ListVoucherUsageQuery query,
             CancellationToken cancellationToken
         )
         {
             try
             {
-                var validation = query.Validate<ListVoucherQuery, ListVoucherResponse>();
+                var validation = query.Validate<ListVoucherUsageQuery, ListVoucherUsageResponse>();
 
                 if (validation != null)
                 {
@@ -32,15 +33,15 @@ namespace Application.Feature.Vouchers.Queries.List
                     customerId = currentUser.Id;
                 }
                 var response = await unitOfWork
-                    .DynamicReadOnlyRepository<Voucher>()
+                    .DynamicReadOnlyRepository<Domain.Aggregates.Vouchers.VoucherUsage>()
                     .PagedListAsync(
-                        new ListVoucherSpecification(customerId),
+                        new ListVoucherUsageSpecification(customerId),
                         query,
-                        ListVoucherMapping.Selector(),
+                        ListVoucherUsageMapping.Selector(),
                         cancellationToken
                     );
 
-                return Result<PaginationResponse<ListVoucherResponse>>.Success(response);
+                return Result<PaginationResponse<ListVoucherUsageResponse>>.Success(response);
             }
             catch (Exception ex)
             {
