@@ -96,7 +96,7 @@ public sealed class InventoryDocumentCompletedHandler
             notifySend.Parameters["time"] = ((DateTimeOffset)document.TransactionAt!).ToString(
                 "HH:mm:ss dd/MM/yyyy"
             );
-            notifySend.Data["id"] = document.Id.ToString();
+            notifySend.Data["import_id"] = document.Id.ToString();
             notifySend.Data["publicId"] = document.PublicId.ToString();
             var userIds = users.Select(x => x.Id.ToString()).ToList();
             notifySend.UserIds.AddRange(userIds);

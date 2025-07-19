@@ -63,8 +63,8 @@ public class DbInitializer
                     .Serialize(
                         new
                         {
-                            vi = "Phiếu nhập <strong>{{code}}</strong> vào chi nhánh <strong>{{branch_name}}</strong> đã được tạo lúc <strong>{{time}}</strong>.",
-                            en = "Inventor import <strong>{{code}}</strong> for branch <strong>{{branch_name}}</strong> has been created at <strong>{{time}}</strong>.",
+                            vi = "Phiếu nhập <strong id=\"import_id\">{{code}}</strong> vào chi nhánh <strong>{{branch_name}}</strong> đã được tạo lúc <strong>{{time}}</strong>.",
+                            en = "Inventor import <strong id=\"import_id\">{{code}}</strong> for branch <strong>{{branch_name}}</strong> has been created at <strong>{{time}}</strong>.",
                         }
                     )
                     .StringJson,
@@ -94,8 +94,8 @@ public class DbInitializer
                     .Serialize(
                         new
                         {
-                            vi = "Phiếu xuất <strong>{{code}}</strong> từ chi nhánh <strong>{{branch_name}}</strong> đã được tạo lúc <strong>{{time}}</strong>.",
-                            en = "Inventory export <strong>{{code}}</strong> from branch <strong>{{branch_name}}</strong> has been created at <strong>{{time}}</strong>.",
+                            vi = "Phiếu xuất <strong id=\"export_id\">{{code}}</strong> từ chi nhánh <strong>{{branch_name}}</strong> đã được tạo lúc <strong>{{time}}</strong>.",
+                            en = "Inventory export <strong id=\"export_id\">{{code}}</strong> from branch <strong>{{branch_name}}</strong> has been created at <strong>{{time}}</strong>.",
                         }
                     )
                     .StringJson,
@@ -121,8 +121,8 @@ public class DbInitializer
                     .Serialize(
                         new
                         {
-                            vi = "Đơn giặt <strong>{{order_code}}</strong> của bạn tại chi nhánh <strong>{{branch_name}}</strong> đã được xử lý xong.",
-                            en = "Your laundry order <strong>{{order_code}}</strong> at branch <strong>{{branch_name}}</strong> has been processed.",
+                            vi = "Đơn giặt <strong id=\"order_id\">{{order_code}}</strong> của bạn tại chi nhánh <strong>{{branch_name}}</strong> đã được xử lý xong.",
+                            en = "Your laundry order <strong id=\"order_id\">{{order_code}}</strong> at branch <strong>{{branch_name}}</strong> has been processed.",
                         }
                     )
                     .StringJson,

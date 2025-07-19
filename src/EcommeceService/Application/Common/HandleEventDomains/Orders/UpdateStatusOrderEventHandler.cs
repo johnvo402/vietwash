@@ -39,7 +39,7 @@ namespace Application.Common.HandleEventDomains.Orders
                 notifySend.Parameters["order_code"] = order.Code;
                 notifySend.Parameters["branch_name"] = branchName?.Name;
 
-                notifySend.Data["id"] = order.Id.ToString();
+                notifySend.Data["order_id"] = order.Id.ToString();
                 notifySend.Data["publicId"] = order.PublicId.ToString();
                 if (order.CustomerId != null)
                 {
