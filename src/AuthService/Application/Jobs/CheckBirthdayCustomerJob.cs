@@ -2,16 +2,19 @@
 using Application.Common.Interfaces.Registers;
 using Application.Common.Interfaces.Services.Mail;
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.Application.Common.Interfaces.Services.Notifications;
 using Contracts.Dtos.Requests;
 using Domain.Aggregates.Accounts;
 using Domain.Aggregates.Accounts.Specifications;
+using Notification_Grpc;
 
 namespace Application.Jobs
 {
-    public class UserBirthday
+    public class UserDTO
     {
-        public required string Email { get; set; }
-        public required string DisplayName { get; set; }
+        public long? Id { get; set; }
+        public string? Email { get; set; }
+        public string? DisplayName { get; set; }
     }
 
     public class CheckBirthdayCustomerJob : IJob
@@ -19,17 +22,24 @@ namespace Application.Jobs
         private readonly IUnitOfWork _unitOfWork;
 
         private readonly IMailService _mailer;
+        private readonly INotificationGrpc _notification;
 
-        public CheckBirthdayCustomerJob(IUnitOfWork unitOfWork, IMailService mailer)
+        public CheckBirthdayCustomerJob(
+            IUnitOfWork unitOfWork,
+            IMailService mailer,
+            INotificationGrpc notification
+        )
         {
             _unitOfWork = unitOfWork;
             _mailer = mailer;
+            _notification = notification;
         }
 
-        private Expression<Func<Account, UserBirthday>> Selector()
+        private Expression<Func<Account, UserDTO>> Selector()
         {
-            return account => new UserBirthday
+            return account => new UserDTO
             {
+                Id = account.Id,
                 DisplayName = account.DisplayName,
                 Email = account.Email!,
             };
@@ -46,7 +56,6 @@ namespace Application.Jobs
                     Selector(),
                     cancellationToken: default
                 );
-
             foreach (var customer in listCustomer)
             {
                 _ = await _mailer.SendWithTemplateAsync(
@@ -58,6 +67,20 @@ namespace Application.Jobs
                         Template = new("HappyBirthday", customer.DisplayName),
                     }
                 );
+                try
+                {
+                    var notifySend = new SendNotificationRequest { TemplateId = "happy_birthday" };
+                    notifySend.Parameters["customer_name"] = customer.DisplayName;
+                    notifySend.Parameters["voucher_expiry"] = now.AddDays(7)
+                        .ToString("HH:mm:ss dd/MM/yyyy");
+
+                    notifySend.UserIds.Add(customer.Id!.Value.ToString());
+                    await _notification.SendNotifyAsync(notifySend);
+                }
+                catch (System.Exception)
+                {
+                    throw;
+                }
             }
         }
     }

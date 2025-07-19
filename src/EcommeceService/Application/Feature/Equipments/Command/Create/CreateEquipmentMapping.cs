@@ -15,7 +15,7 @@ namespace Application.Feature.Equipments.Command.Create
                 capacity: model.Capacity,
                 status: model.Status,
                 description: model.Description,
-                lastMaintenanceDate: model.LastMaintenanceDate,
+				lastMaintenanceOrRepairDate: model.LastMaintenanceOrRepairDate,
                 nextMaintenanceDate: model.NextMaintenanceDate
             );
         }

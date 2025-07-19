@@ -11,7 +11,7 @@ namespace Application.Feature.Common.Projections.Equipments
         public decimal Price { get; set; } = default!;
         public decimal Capacity { get; set; } = default!;
         public EquipmentStatus Status { get; set; } = EquipmentStatus.Active;
-        public DateTimeOffset? LastMaintenanceDate { get; set; }
+        public DateTimeOffset? LastMaintenanceOrRepairDate { get; set; }
         public DateTimeOffset? NextMaintenanceDate { get; set; }
     }
 }

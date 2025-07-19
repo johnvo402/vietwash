@@ -31,7 +31,7 @@ namespace Domain.Aggregates.Inventories
             if (status == InventoryStatus.Completed)
             {
                 TransactionAt = DateTimeOffset.UtcNow;
-                if (Type == InventoryType.Import && EquipmentSupplyings.Any())
+                if (Type == InventoryType.Import)
                 {
                     Emit(new InventoryDocumentCompletedEvent { InventoryDocument = this });
                 }

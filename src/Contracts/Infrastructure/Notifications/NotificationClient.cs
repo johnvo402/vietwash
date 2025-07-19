@@ -7,7 +7,7 @@ namespace Contracts.Infrastructure.Notifications
     {
         public async Task<bool> SendNotifyAsync(
             SendNotificationRequest request,
-            CancellationToken cancellationToken
+            CancellationToken cancellationToken = default
         )
         {
             var response = await client.SendNotificationAsync(

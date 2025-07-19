@@ -6,6 +6,7 @@ using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Products;
 using Domain.Aggregates.Products.Events;
 using Domain.Aggregates.Services;
+using Domain.Aggregates.Orders.Events;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Vouchers;
 using Domain.Aggregates.Vouchers.Events;
@@ -49,7 +50,10 @@ namespace Domain.Aggregates.Orders
             {
                 case CreateFundEvent:
                     return true;
+
                 case VoucherUsageEvent:
+                    return true;
+                case UpdateStatusOrderEvent:
                     return true;
                 default:
                     return false;
@@ -164,6 +168,10 @@ namespace Domain.Aggregates.Orders
         {
             switch (status)
             {
+                case OrderStatus.Processed:
+                    Status = OrderStatus.Processed;
+                    Emit(new UpdateStatusOrderEvent() { Order = this });
+                    break;
                 case OrderStatus.Completed:
                     Status = OrderStatus.Completed;
 

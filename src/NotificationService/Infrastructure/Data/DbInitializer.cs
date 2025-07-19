@@ -19,10 +19,8 @@ public class DbInitializer
 
         try
         {
-            if (await unitOfWork.Repository<NotificationTemplate>().AnyAsync())
-            {
-                await InitializeNotificationTemplatesAsync(unitOfWork, cancellationToken);
-            }
+            await InitializeNotificationTemplatesAsync(unitOfWork, cancellationToken);
+
             await unitOfWork.CommitAsync();
         }
         catch (Exception ex)
@@ -102,14 +100,69 @@ public class DbInitializer
                     )
                     .StringJson,
             },
+            new NotificationTemplate
+            {
+                Id = "laundry_processed",
+                Title = SerializerExtension
+                    .Serialize(
+                        new { vi = "Đồ giặt đã xử lý xong", en = "Laundry has been processed" }
+                    )
+                    .StringJson,
+                Content = SerializerExtension
+                    .Serialize(
+                        new
+                        {
+                            vi = "Đơn giặt {{order_code}} của bạn tại chi nhánh {{branch_name}} đã được xử lý xong.",
+                            en = "Your laundry order {{order_code}} at branch {{branch_name}} has been processed.",
+                        }
+                    )
+                    .StringJson,
+                ContentHtml = SerializerExtension
+                    .Serialize(
+                        new
+                        {
+                            vi = "Đơn giặt <strong>{{order_code}}</strong> của bạn tại chi nhánh <strong>{{branch_name}}</strong> đã được xử lý xong.",
+                            en = "Your laundry order <strong>{{order_code}}</strong> at branch <strong>{{branch_name}}</strong> has been processed.",
+                        }
+                    )
+                    .StringJson,
+            },
+            new NotificationTemplate
+            {
+                Id = "happy_birthday",
+                Title = SerializerExtension
+                    .Serialize(new { vi = "Chúc mừng sinh nhật!", en = "Happy Birthday!" })
+                    .StringJson,
+                Content = SerializerExtension
+                    .Serialize(
+                        new
+                        {
+                            vi = "Chúc {{customer_name}} có một ngày sinh nhật thật vui vẻ và ý nghĩa! VietWash xin tặng bạn một voucher sinh nhật sử dụng đến hết ngày {{voucher_expiry}}.",
+                            en = "Wishing {{customer_name}} a joyful and meaningful birthday! VietWash would like to give you a birthday voucher valid until {{voucher_expiry}}",
+                        }
+                    )
+                    .StringJson,
+                ContentHtml = SerializerExtension
+                    .Serialize(
+                        new
+                        {
+                            vi = "🎉 Chúc <strong>{{customer_name}}</strong> có một ngày sinh nhật thật <strong>vui vẻ</strong> và <strong>ý nghĩa</strong>!<br/>🎁 VietWash xin tặng bạn một <strong>voucher sinh nhật{{voucher_value}}</strong> sử dụng đến hết ngày <strong>{{voucher_expiry}}</strong>.",
+                            en = "🎉 Wishing <strong>{{customer_name}}</strong> a <strong>joyful</strong> and <strong>meaningful</strong> birthday!<br/>🎁 VietWash would like to give you a <strong>birthday voucher{{voucher_value}}</strong> valid until the end of <strong>{{voucher_expiry}}</strong>.",
+                        }
+                    )
+                    .StringJson,
+            },
         };
+        var repository = unitOfWork.Repository<NotificationTemplate>();
 
         foreach (var template in templates)
         {
-            await unitOfWork
-                .Repository<NotificationTemplate>()
-                .AddAsync(template, cancellationToken);
-            await unitOfWork.SaveAsync(cancellationToken);
+            if (!await repository.AnyAsync(x => x.Id == template.Id))
+            {
+                await repository.AddAsync(template, cancellationToken);
+            }
         }
+
+        await unitOfWork.SaveAsync(cancellationToken);
     }
 }
