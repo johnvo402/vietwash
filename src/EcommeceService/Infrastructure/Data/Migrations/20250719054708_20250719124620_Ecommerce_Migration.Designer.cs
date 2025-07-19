@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    partial class TheDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250719054708_20250719124620_Ecommerce_Migration")]
+    partial class _20250719124620_Ecommerce_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -141,6 +144,16 @@ namespace Infrastructure.Data.Migrations
                     b.Property<long>("StaffId")
                         .HasColumnType("bigint")
                         .HasColumnName("staff_id");
+
+                    b.Property<string>("SupervisorCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("supervisor_code");
+
+                    b.Property<string>("SupervisorName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("supervisor_name");
 
                     b.Property<decimal>("TotalCost")
                         .HasColumnType("numeric")

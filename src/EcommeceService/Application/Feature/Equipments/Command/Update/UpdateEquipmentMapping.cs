@@ -15,7 +15,7 @@ namespace Application.Feature.Equipments.Command.Update
                 price: model.Price,
                 capacity: model.Capacity,
                 status: model.Status,
-                lastMaintenanceDate: model.LastMaintenanceDate,
+				lastMaintenanceOrRepairDate: model.LastMaintenanceOrRepairDate,
                 nextMaintenanceDate: model.NextMaintenanceDate
             );
         }

@@ -4,13 +4,13 @@ namespace Application.Feature.Common.Projections.Equipments
 {
 	public class EquipmentDetailProjection : EquipmentProjection
 	{
-		public DateTimeOffset? LastMaintenanceDate { get; set; }
+		public DateTimeOffset? LastMaintenanceOrRepairDate { get; set; }
 		public DateTimeOffset? NextMaintenanceDate { get; set; }
 
 		public override void MappingFrom(Equipment equipment)
 		{
 			base.MappingFrom(equipment);
-			LastMaintenanceDate = equipment.LastMaintenanceDate;
+			LastMaintenanceOrRepairDate = equipment.LastMaintenanceOrRepairDate;
 			NextMaintenanceDate = equipment.NextMaintenanceDate;
 		}
 	}
