@@ -1,5 +1,5 @@
 ﻿using Application.Common.Auth;
-using Application.Feature.EquipmentActivities.Command.Create;
+using Application.Feature.Equipments.Command.CreateActivities;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -8,21 +8,21 @@ using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace Presentation.Endpoints.EquipmentActivities
+namespace Presentation.Endpoints.Equipments
 {
 	public class CreateEquipmentActivityEndpoint(ISender sender)
 		: EndpointBaseAsync.WithRequest<CreateEquipmentActivityCommand>.WithActionResult<ApiResponse>
 	{
-		[HttpPost(Router.EquipmentActivityRoute.EquipmentActivities)]
-		[SwaggerOperation(Tags = [Router.EquipmentActivityRoute.Tags], Summary = "create quipment activities")]
+		[HttpPost(Router.EquipmentRoute.Activities)]
+		[SwaggerOperation(Tags = [Router.EquipmentRoute.Tags], Summary = "Create activities for equipment")]
 		[AuthorizeBy]
 		public override async Task<ActionResult<ApiResponse>> HandleAsync(
-			[FromBody] CreateEquipmentActivityCommand request,
+			CreateEquipmentActivityCommand request,
 			CancellationToken cancellationToken = default
 		)
 		{
-			var user = await sender.Send(request, cancellationToken);
-			return user.ToCreatedResult();
+			var tariff = await sender.Send(request, cancellationToken);
+			return tariff.ToCreatedResult();
 		}
 	}
 }

@@ -19,10 +19,10 @@ namespace Application.Feature.Common.Projections.EquipmentActivities
 			BranchId = activity.BranchId;
 			StaffId = activity.StaffId;
 			Type = activity.Type;
-			PerformedDate = activity.PerformedDate;
 			LaborCost = activity.LaborCost;
 			TotalCost = activity.TotalCost;
 			Description = activity.Description;
+			SupervisorName = activity.SupervisorName;
 			SupervisorCode = activity.SupervisorCode;
 
 			Details = activity.ActivityDetails.Select(d => new EquipmentActivityDetailItem

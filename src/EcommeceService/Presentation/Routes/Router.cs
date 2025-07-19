@@ -179,7 +179,10 @@ namespace Presentation.Routes
         {
             public const string Tags = $"{nameof(EquipmentRoute)} endpoint";
             public const string Equipments = $"{Ecommerce}/{RouterBase.prefix}{nameof(Equipments)}";
-            public const string GetUpdateDelete =
+			public const string Activities =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(Equipments)}/" + "{" + RouterBase.Id + "}"
+                + $"/{nameof(Activities)}";
+			public const string GetUpdateDelete =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Equipments)}/" + "{" + RouterBase.Id + "}";
 			public const string UpdateStatus =
 				$"{Ecommerce}/{RouterBase.prefix}{nameof(Equipments)}/{nameof(UpdateStatus)}"

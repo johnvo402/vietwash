@@ -4,7 +4,6 @@ namespace Application.Feature.Common.Projections.EquipmentActivities
 {
 	public class EquipmentActivityModel
 	{
-		public long EquipmentId { get; set; }
 		public long BranchId { get; set; }
 		public TypeActivity Type { get; set; }
 		public string? Description { get; set; }
