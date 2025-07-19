@@ -35,13 +35,6 @@ namespace Infrastructure.Data.Migrations
                 oldClrType: typeof(DateTimeOffset),
                 oldType: "timestamp with time zone");
 
-            migrationBuilder.AlterColumn<decimal>(
-                name: "id",
-                table: "repair_history",
-                type: "numeric(20,0)",
-                nullable: false,
-                oldClrType: typeof(decimal),
-                oldType: "numeric");
 
             migrationBuilder.AddColumn<long>(
                 name: "voucher_id",
@@ -87,13 +80,6 @@ namespace Infrastructure.Data.Migrations
                 oldType: "timestamp with time zone",
                 oldNullable: true);
 
-            migrationBuilder.AlterColumn<decimal>(
-                name: "id",
-                table: "repair_history",
-                type: "numeric",
-                nullable: false,
-                oldClrType: typeof(decimal),
-                oldType: "numeric(20,0)");
         }
     }
 }

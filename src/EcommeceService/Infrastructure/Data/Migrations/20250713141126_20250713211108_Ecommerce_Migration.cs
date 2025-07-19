@@ -14,13 +14,13 @@ namespace Infrastructure.Data.Migrations
                 name: "ix_voucher_usage_order_id",
                 table: "voucher_usage");
 
-            migrationBuilder.AlterColumn<decimal>(
-                name: "id",
-                table: "repair_history",
-                type: "numeric(20,0)",
-                nullable: false,
-                oldClrType: typeof(decimal),
-                oldType: "numeric");
+            // migrationBuilder.AlterColumn<decimal>(
+            //     name: "id",
+            //     table: "repair_history",
+            //     type: "numeric(20,0)",
+            //     nullable: false,
+            //     oldClrType: typeof(decimal),
+            //     oldType: "numeric");
 
             migrationBuilder.CreateIndex(
                 name: "ix_voucher_usage_order_id",
@@ -36,13 +36,13 @@ namespace Infrastructure.Data.Migrations
                 name: "ix_voucher_usage_order_id",
                 table: "voucher_usage");
 
-            migrationBuilder.AlterColumn<decimal>(
-                name: "id",
-                table: "repair_history",
-                type: "numeric",
-                nullable: false,
-                oldClrType: typeof(decimal),
-                oldType: "numeric(20,0)");
+            // migrationBuilder.AlterColumn<decimal>(
+            //     name: "id",
+            //     table: "repair_history",
+            //     type: "numeric",
+            //     nullable: false,
+            //     oldClrType: typeof(decimal),
+            //     oldType: "numeric(20,0)");
 
             migrationBuilder.CreateIndex(
                 name: "ix_voucher_usage_order_id",
