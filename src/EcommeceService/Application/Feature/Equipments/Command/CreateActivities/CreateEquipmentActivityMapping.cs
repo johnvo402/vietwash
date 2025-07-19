@@ -19,9 +19,7 @@ namespace Application.Feature.Equipments.Command.CreateActivities
 				type: cmd.EquipmentActivity.Type,
 				laborCost: cmd.EquipmentActivity.LaborCost,
 				totalCost: amount + cmd.EquipmentActivity.LaborCost,
-				description: cmd.EquipmentActivity.Description,
-				supervisorName: staff.DisplayName,
-				supervisorCode: staff.Code
+				description: cmd.EquipmentActivity.Description
 			);
 			response.ActivityDetails = cmd.EquipmentActivity.Details.ToListMapping(x => new EquipmentActivityDetail
 			{

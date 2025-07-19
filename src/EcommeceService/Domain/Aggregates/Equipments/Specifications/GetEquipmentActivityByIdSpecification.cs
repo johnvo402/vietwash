@@ -11,6 +11,7 @@ public class GetEquipmentActivityByIdSpecification : Specification<EquipmentActi
 			.Where(x => x.Id == id)
 			.Include(x => x.Equipment)
 			.Include(x => x.ActivityDetails)
+			.Include(x => x.Staff)
 			.AsSplitQuery();
 	}
 }

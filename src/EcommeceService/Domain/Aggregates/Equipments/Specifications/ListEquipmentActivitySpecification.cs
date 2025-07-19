@@ -8,8 +8,7 @@ public class ListEquipmentActivitySpecification : Specification<EquipmentActivit
 	public ListEquipmentActivitySpecification()
 	{
 		Query
-			.Include(x => x.Equipment)
-			.Include(x => x.ActivityDetails)
+			.Include(x => x.Staff)
 			.AsNoTracking()
 			.AsSplitQuery();
 		string key = GetUniqueCachedKey();

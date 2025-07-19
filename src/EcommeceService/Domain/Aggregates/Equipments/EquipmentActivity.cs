@@ -14,8 +14,6 @@ namespace Domain.Aggregates.Equipments
 		public decimal LaborCost { get; set; } // tiền công 
 		public decimal TotalCost { get; set; } = default!;
 		public string? Description { get; set; } = default!;
-		public string SupervisorName { get; set; } = default!;
-		public string SupervisorCode { get; set; } = default!;
 		public Equipment? Equipment { get; set; }
 		public User? Staff { get; set; }
 		public ICollection<EquipmentActivityDetail> ActivityDetails { get; set; } = [];
@@ -27,9 +25,7 @@ namespace Domain.Aggregates.Equipments
 			TypeActivity type,
 			decimal laborCost,
 			decimal totalCost,
-			string? description,
-			string supervisorName,
-			string supervisorCode
+			string? description
 		)
 		{
 			Guard.Against.NegativeOrZero(equipmentId, nameof(equipmentId));
@@ -43,9 +39,6 @@ namespace Domain.Aggregates.Equipments
 			LaborCost = laborCost;
 			TotalCost = totalCost;
 			Description = description;
-			SupervisorName = supervisorName;
-			SupervisorCode = supervisorCode;
-
 		}
 	}
 }

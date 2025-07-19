@@ -22,8 +22,8 @@ namespace Application.Feature.Common.Projections.EquipmentActivities
 			LaborCost = activity.LaborCost;
 			TotalCost = activity.TotalCost;
 			Description = activity.Description;
-			SupervisorName = activity.SupervisorName;
-			SupervisorCode = activity.SupervisorCode;
+			SupervisorName = activity.Staff.DisplayName;
+			SupervisorCode = activity.Staff.Code;
 
 			Details = activity.ActivityDetails.Select(d => new EquipmentActivityDetailItem
 			{
