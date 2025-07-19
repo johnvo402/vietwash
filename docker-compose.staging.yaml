@@ -7,16 +7,17 @@
 #         gelf-address: "udp://localhost:12201"
 
 services:
-  # nginx-api:
-  #   image: nginx:latest
-  #   container_name: nginx
-  #   ports:
-  #     - "80:80"
-  #   volumes:
-  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
-  #     - ./logs:/var/log/nginx
-  #   depends_on:
-  #     - gateway
+  nginx-api:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./logs:/var/log/nginx
+    depends_on:
+      - gateway
+      - gateway-2
 
   auth:
     # <<: *common_config

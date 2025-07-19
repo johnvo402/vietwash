@@ -29,6 +29,9 @@ services:
   gateway:
     depends_on:
       - "database"
+  gateway-2:
+    depends_on:
+      - "database"
 
   auth:
     depends_on:
