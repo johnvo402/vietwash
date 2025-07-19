@@ -37,6 +37,7 @@ namespace Application.Feature.Common.Mapping.Inventories
                 Name = x.Name,
                 Code = x.Code,
                 Price = x.Price,
+                Image = x.Image,
                 Capacity = x.Capacity,
                 Quantity = x.Quantity,
                 SupplierId = x.SupplierId,

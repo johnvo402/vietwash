@@ -1,12 +1,16 @@
+using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
+using Contracts.Dtos.Models;
 using Domain.Aggregates.Inventories;
 using Mediator;
 
 namespace Application.Feature.InventoryDocuments.Commands.Create
 {
-    public class CreateInventoryDocumentHandler(IUnitOfWork unitOfWork)
-        : IRequestHandler<CreateInventoryDocumentCommand, Result<CreateInventoryDocumentResponse>>
+    public class CreateInventoryDocumentHandler(
+        IUnitOfWork unitOfWork,
+        IMediaUpdateService mediaUpdateService
+    ) : IRequestHandler<CreateInventoryDocumentCommand, Result<CreateInventoryDocumentResponse>>
     {
         public async ValueTask<Result<CreateInventoryDocumentResponse>> Handle(
             CreateInventoryDocumentCommand request,
@@ -14,6 +18,7 @@ namespace Application.Feature.InventoryDocuments.Commands.Create
         )
         {
             var inventoryDocument = request.ToEntity();
+            var uploadedImages = new List<string>();
 
             try
             {
@@ -29,6 +34,10 @@ namespace Application.Feature.InventoryDocuments.Commands.Create
             }
             catch (Exception)
             {
+                foreach (var image in uploadedImages)
+                {
+                    await mediaUpdateService.DeleteAvatarAsync(image);
+                }
                 await unitOfWork.RollbackAsync(cancellationToken);
                 throw;
             }

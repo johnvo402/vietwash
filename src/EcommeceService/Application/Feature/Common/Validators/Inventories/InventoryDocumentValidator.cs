@@ -147,7 +147,6 @@ namespace Application.Feature.Common.Validators.Inventories
                                 .Negative()
                                 .Build()
                         );
-
                     item.RuleFor(x => x.Code)
                         .NotEmpty()
                         .WithState(x =>

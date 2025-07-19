@@ -1,3 +1,4 @@
+using Application.Common.Security;
 using Contracts.Application.Common;
 using Domain.Aggregates.Inventories;
 
@@ -6,6 +7,7 @@ namespace Application.Feature.Common.Projections.Inventories
     public class ProductSupplyingProjection : DefaultBaseResponse<long>
     {
         public long ProductId { get; set; } = default!;
+        public string ProductName { get; set; } = default!;
         public long SupplierId { get; set; } = default!;
         public int Quantity { get; set; } = default!;
         public string LotNumber { get; set; } = default!;
@@ -19,6 +21,7 @@ namespace Application.Feature.Common.Projections.Inventories
         {
             Id = supplying.Id;
             ProductId = supplying.ProductId;
+            ProductName = supplying.Product.Name;
             SupplierId = supplying.SupplierId;
             Quantity = supplying.Quantity;
             LotNumber = supplying.LotNumber;
@@ -34,6 +37,9 @@ namespace Application.Feature.Common.Projections.Inventories
     {
         public string Name { get; set; } = default!;
         public string Code { get; set; } = default!;
+
+        [File]
+        public string? Image { get; set; }
         public decimal Price { get; set; } = default!;
         public decimal Capacity { get; set; } = default!;
         public int Quantity { get; set; } = default!;
@@ -44,6 +50,7 @@ namespace Application.Feature.Common.Projections.Inventories
         {
             Id = supplying.Id;
             Name = supplying.Name;
+            Image = supplying.Image;
             SupplierId = supplying.SupplierId;
             Quantity = supplying.Quantity;
             Code = supplying.Code;
