@@ -38,7 +38,7 @@ namespace Application.Feature.InventoryDocuments.Queries.List
                 .ToList();
             var response = await unitOfWork
                 .DynamicReadOnlyRepository<InventoryDocument>()
-                .CursorPagedListAsync(
+                .PagedListAsync(
                     new ListInventoryDocumentSpecification(listBranchUser),
                     query,
                     ListInventoryDocumentMapping.Selector(),
