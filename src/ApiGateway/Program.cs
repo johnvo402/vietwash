@@ -85,6 +85,11 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseCors("AllowFrontend");
+
+app.UseWebSockets(new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromMinutes(2)
+});
 app.UseRateLimiter();
 app.MapGet("/", () => "Run oke!");
 

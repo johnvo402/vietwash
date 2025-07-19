@@ -13,8 +13,8 @@ namespace Infrastructure.Services.Notifications
             services.AddGrpc();
             services.AddSignalR(options =>
             {
-                options.KeepAliveInterval = TimeSpan.FromSeconds(15);
-                options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+                options.KeepAliveInterval = TimeSpan.FromMinutes(2);
+                options.ClientTimeoutInterval = TimeSpan.FromMinutes(5);
             });
             services.AddScoped<INotificationService, NotificationService>();
 
