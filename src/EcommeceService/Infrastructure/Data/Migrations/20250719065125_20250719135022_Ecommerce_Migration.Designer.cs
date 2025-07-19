@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    partial class TheDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250719065125_20250719135022_Ecommerce_Migration")]
+    partial class _20250719135022_Ecommerce_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -337,10 +340,6 @@ namespace Infrastructure.Data.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
-
-                    b.Property<string>("Image")
-                        .HasColumnType("text")
-                        .HasColumnName("image");
 
                     b.Property<long>("InventoryDocumentId")
                         .HasColumnType("bigint")
@@ -2085,7 +2084,7 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_product_supplying_inventory_document_inventory_document_id");
 
-                    b.HasOne("Domain.Aggregates.Products.BranchProduct", "Product")
+                    b.HasOne("Domain.Aggregates.Products.BranchProduct", null)
                         .WithMany("ProductSupplyings")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2107,8 +2106,6 @@ namespace Infrastructure.Data.Migrations
                         .HasConstraintName("fk_product_supplying_unit_relation_unit_relation_id");
 
                     b.Navigation("InventoryDocument");
-
-                    b.Navigation("Product");
 
                     b.Navigation("Supplier");
 

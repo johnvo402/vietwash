@@ -179,15 +179,39 @@ namespace Presentation.Routes
         {
             public const string Tags = $"{nameof(EquipmentRoute)} endpoint";
             public const string Equipments = $"{Ecommerce}/{RouterBase.prefix}{nameof(Equipments)}";
-            public const string GetUpdateDelete =
+			public const string Activities =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(Equipments)}/" + "{" + RouterBase.Id + "}"
+                + $"/{nameof(Activities)}";
+			public const string GetUpdateDelete =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Equipments)}/" + "{" + RouterBase.Id + "}";
-            public const string GetDetail =
+			public const string UpdateStatus =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(Equipments)}/{nameof(UpdateStatus)}"
+				+ "{"
+				+ RouterBase.Id
+				+ "}";
+			public const string GetDetail =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Equipments)}/detail/"
                 + "{"
                 + RouterBase.Id
                 + "}";
         }
-
+		public static class EquipmentActivityRoute
+		{
+			public const string Tags = $"{nameof(EquipmentActivityRoute)} endpoint";
+			public const string EquipmentActivities = $"{Ecommerce}/{RouterBase.prefix}{nameof(EquipmentActivities)}";
+			public const string GetUpdateDelete =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(EquipmentActivities)}/" + "{" + RouterBase.Id + "}";
+			public const string UpdateStatus =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(EquipmentActivities)}/{nameof(UpdateStatus)}"
+				+ "{"
+				+ RouterBase.Id
+				+ "}";
+			public const string GetDetail =
+				$"{Ecommerce}/{RouterBase.prefix}{nameof(EquipmentActivities)}/detail/"
+				+ "{"
+				+ RouterBase.Id
+				+ "}";
+		}
         public static class FeedbackRoute
         {
             public const string Tags = $"{nameof(FeedbackRoute)} endpoint";
