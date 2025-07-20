@@ -93,9 +93,7 @@ public sealed class InventoryDocumentCompletedHandler
             var notifySend = new SendNotificationRequest { TemplateId = "inventory_import" };
             notifySend.Parameters["code"] = document.Code;
             notifySend.Parameters["branch_name"] = branchName?.Name;
-            notifySend.Parameters["time"] = ((DateTimeOffset)document.TransactionAt!).ToString(
-                "HH:mm:ss dd/MM/yyyy"
-            );
+
             notifySend.Data["import_id"] = document.Id.ToString();
             notifySend.Data["publicId"] = document.PublicId.ToString();
             var userIds = users.Select(x => x.Id.ToString()).ToList();

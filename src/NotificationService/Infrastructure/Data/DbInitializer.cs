@@ -54,8 +54,8 @@ public class DbInitializer
                     .Serialize(
                         new
                         {
-                            vi = "Phiếu nhập {{code}} vào chi nhánh {{branch_name}} đã được tạo lúc {{time}}.",
-                            en = "Inventor import {{code}} for branch {{branch_name}} has been created at {{time}}.",
+                            vi = "Phiếu nhập {{code}} vào chi nhánh {{branch_name}} đã được tạo.",
+                            en = "Inventor import {{code}} for branch {{branch_name}}.",
                         }
                     )
                     .StringJson,
@@ -63,8 +63,8 @@ public class DbInitializer
                     .Serialize(
                         new
                         {
-                            vi = "Phiếu nhập <strong id=\"import_id\">{{code}}</strong> vào chi nhánh <strong>{{branch_name}}</strong> đã được tạo lúc <strong>{{time}}</strong>.",
-                            en = "Inventor import <strong id=\"import_id\">{{code}}</strong> for branch <strong>{{branch_name}}</strong> has been created at <strong>{{time}}</strong>.",
+                            vi = "Phiếu nhập <strong id=\"import_id\">{{code}}</strong> vào chi nhánh <strong>{{branch_name}}</strong> đã được tạo.",
+                            en = "Inventor import <strong id=\"import_id\">{{code}}</strong> for branch <strong>{{branch_name}}</strong>.",
                         }
                     )
                     .StringJson,
@@ -85,8 +85,8 @@ public class DbInitializer
                     .Serialize(
                         new
                         {
-                            vi = "Phiếu xuất {{code}} từ chi nhánh {{branch_name}} đã được tạo lúc {{time}}.",
-                            en = "Inventory export {{code}} from branch {{branch_name}} has been created at {{time}}.",
+                            vi = "Phiếu xuất {{code}} từ chi nhánh {{branch_name}} đã được tạo.",
+                            en = "Inventory export {{code}} from branch {{branch_name}}.",
                         }
                     )
                     .StringJson,
@@ -94,8 +94,8 @@ public class DbInitializer
                     .Serialize(
                         new
                         {
-                            vi = "Phiếu xuất <strong id=\"export_id\">{{code}}</strong> từ chi nhánh <strong>{{branch_name}}</strong> đã được tạo lúc <strong>{{time}}</strong>.",
-                            en = "Inventory export <strong id=\"export_id\">{{code}}</strong> from branch <strong>{{branch_name}}</strong> has been created at <strong>{{time}}</strong>.",
+                            vi = "Phiếu xuất <strong id=\"export_id\">{{code}}</strong> từ chi nhánh <strong>{{branch_name}}</strong> đã được tạo.",
+                            en = "Inventory export <strong id=\"export_id\">{{code}}</strong> from branch <strong>{{branch_name}}</strong>.",
                         }
                     )
                     .StringJson,
@@ -153,13 +153,22 @@ public class DbInitializer
                     .StringJson,
             },
         };
+
         var repository = unitOfWork.Repository<NotificationTemplate>();
 
         foreach (var template in templates)
         {
-            if (!await repository.AnyAsync(x => x.Id == template.Id))
+            var existing = await repository.FindByIdAsync(template.Id, cancellationToken);
+            if (existing is null)
             {
                 await repository.AddAsync(template, cancellationToken);
+            }
+            else
+            {
+                existing.Title = template.Title;
+                existing.Content = template.Content;
+                existing.ContentHtml = template.ContentHtml;
+                await repository.UpdateAsync(existing);
             }
         }
 
