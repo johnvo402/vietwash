@@ -48,9 +48,26 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
             return default!;
         }
 
+        if (typeof(IEnumerable).IsAssignableFrom(resultType) && resultType.IsGenericType)
+        {
+            ProcessEnumerableResponse(value);
+            return default!;
+        }
+
         // Handle non-pagination responses
         ProcessSingleResponse(value);
         return default!;
+    }
+
+    private void ProcessEnumerableResponse(object response)
+    {
+        if (response is IEnumerable dataEnumerable)
+        {
+            foreach (object data in dataEnumerable)
+            {
+                ProcessDataPropertiesWithFileAttribute(data);
+            }
+        }
     }
 
     // Processes responses of type PaginationResponse<>
