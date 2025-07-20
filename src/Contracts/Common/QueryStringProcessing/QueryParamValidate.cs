@@ -432,7 +432,7 @@ public static partial class QueryParamValidate
             .ToList();
 
         return betweenOperatorsGroup.Count == 1
-            && betweenOperatorsGroup[0].values.SequenceEqual([0, 1]);
+                && betweenOperatorsGroup[0].values.OrderBy(x => x).SequenceEqual(Enumerable.Range(0, betweenOperatorsGroup[0].values.Count));
     }
 
     private static bool IsNumericType(Type type)
