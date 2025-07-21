@@ -35,6 +35,7 @@ namespace Application.Feature.Common.Projections.Equipments
             Price = equipment.Price;
             Capacity = equipment.Capacity;
             Status = equipment.Status;
+            Image = equipment.Image;
         }
     }
 }

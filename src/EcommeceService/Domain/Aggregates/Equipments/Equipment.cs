@@ -10,7 +10,7 @@ namespace Domain.Aggregates.Equipments
         public long BranchId { get; set; } = default!;
         public string Name { get; set; } = default!;
         public string? Description { get; set; }
-
+        public string? Image { get; set; }
         public string Code { get; set; } = default!;
 
         public decimal Price { get; set; } = default!;
@@ -44,7 +44,7 @@ namespace Domain.Aggregates.Equipments
             Capacity = capacity;
             Status = Guard.Against.EnumOutOfRange(status, nameof(status));
             Description = description?.Trim();
-			LastMaintenanceOrRepairDate = lastMaintenanceOrRepairDate;
+            LastMaintenanceOrRepairDate = lastMaintenanceOrRepairDate;
             NextMaintenanceDate = nextMaintenanceDate;
         }
 
@@ -75,7 +75,7 @@ namespace Domain.Aggregates.Equipments
             if (status.HasValue)
                 Status = status.Value;
             if (lastMaintenanceOrRepairDate.HasValue)
-				LastMaintenanceOrRepairDate = lastMaintenanceOrRepairDate;
+                LastMaintenanceOrRepairDate = lastMaintenanceOrRepairDate;
             if (nextMaintenanceDate.HasValue)
                 NextMaintenanceDate = nextMaintenanceDate;
         }

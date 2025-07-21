@@ -7,5 +7,5 @@ using Mediator;
 namespace Application.Feature.Equipments.Queries.Listl;
 
 public class ListEquipmentQuery
-		: QueryParamRequest,
-			IRequest<Result<PaginationResponse<ListEquipmentResponse>>>;
+    : QueryParamRequest,
+        IRequest<Result<PaginationResponse<ListEquipmentResponse>>>;

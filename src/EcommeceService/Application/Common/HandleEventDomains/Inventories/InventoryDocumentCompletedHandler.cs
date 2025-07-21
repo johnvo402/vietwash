@@ -52,6 +52,7 @@ public sealed class InventoryDocumentCompletedHandler
                     lastMaintenanceOrRepairDate: DateTimeOffset.UtcNow,
                     nextMaintenanceDate: DateTimeOffset.UtcNow.AddMonths(6)
                 );
+                equipment.Image = supplying.Image;
 
                 newEquipments.Add(equipment);
             }
