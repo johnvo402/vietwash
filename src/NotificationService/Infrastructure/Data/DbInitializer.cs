@@ -156,20 +156,30 @@ public class DbInitializer
 
         var repository = unitOfWork.Repository<NotificationTemplate>();
 
+        var addTemplate = new List<NotificationTemplate>();
+        var updateTemplate = new List<NotificationTemplate>();
         foreach (var template in templates)
         {
             var existing = await repository.FindByIdAsync(template.Id, cancellationToken);
             if (existing is null)
             {
-                await repository.AddAsync(template, cancellationToken);
+                addTemplate.Add(template);
             }
             else
             {
                 existing.Title = template.Title;
                 existing.Content = template.Content;
                 existing.ContentHtml = template.ContentHtml;
-                await repository.UpdateAsync(existing);
+                updateTemplate.Add(existing);
             }
+        }
+        if (addTemplate.Any())
+        {
+            await repository.AddRangeAsync(addTemplate, cancellationToken);
+        }
+        if (updateTemplate.Any())
+        {
+            await repository.UpdateRangeAsync(updateTemplate);
         }
 
         await unitOfWork.SaveAsync(cancellationToken);

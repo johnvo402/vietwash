@@ -27,7 +27,7 @@ public class DbInitializerBackgroundService : BackgroundService
         if (_env.IsProduction())
             return;
 
-        await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+        await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
 
         stoppingToken.ThrowIfCancellationRequested();
 
