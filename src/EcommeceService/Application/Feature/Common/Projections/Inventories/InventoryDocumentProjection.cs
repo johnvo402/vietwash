@@ -8,7 +8,6 @@ namespace Application.Feature.Common.Projections.Inventories
     public class InventoryDocumentProjection : BaseResponse
     {
         public decimal Amount { get; set; }
-        public decimal PaidAmount { get; set; }
         public long? BranchId { get; set; }
         public DateTimeOffset? TransactionAt { get; set; }
         public string Code { get; set; } = null!;
@@ -26,7 +25,6 @@ namespace Application.Feature.Common.Projections.Inventories
             UpdatedBy = document.UpdatedBy;
 
             Amount = document.Amount;
-            PaidAmount = document.PaidAmount;
             BranchId = document.BranchId;
             TransactionAt = document.TransactionAt;
             Code = document.Code;

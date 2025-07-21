@@ -833,11 +833,7 @@ public class DbInitializer
             type: InventoryType.Import,
             branchId: branchId,
             note: "Nhập hàng khởi tạo"
-        )
-        {
-            PaidAmount = paidAmount,
-            PaymentMethod = PaymentMethod.Cash,
-        };
+        );
 
         foreach (var p in productSupplyings)
         {

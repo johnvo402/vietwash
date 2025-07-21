@@ -47,6 +47,15 @@ namespace Application.Feature.Common.Validators.Inventories
                         .Message(MessageType.MaximumLength)
                         .Build()
                 );
+            RuleFor(x => x.TransactionAt)
+                .LessThanOrEqualTo(DateTimeOffset.UtcNow)
+                .WithState(x =>
+                    Messager
+                        .Create<InventoryDocumentModel>(nameof(InventoryDocument))
+                        .Property(x => x.TransactionAt)
+                        .Message(MessageType.LessThanEqual)
+                        .Build()
+                );
 
             RuleForEach(x => x.ProductSupplyings)
                 .ChildRules(item =>

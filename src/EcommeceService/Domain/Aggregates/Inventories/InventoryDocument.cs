@@ -10,8 +10,6 @@ namespace Domain.Aggregates.Inventories
     public class InventoryDocument : AggregateRoot
     {
         public decimal Amount { get; set; }
-        public PaymentMethod? PaymentMethod { get; set; }
-        public decimal PaidAmount { get; set; }
         public long? BranchId { get; set; }
         public DateTimeOffset? TransactionAt { get; set; }
         public string Code { get; set; } = null!;
@@ -30,7 +28,6 @@ namespace Domain.Aggregates.Inventories
                 Status = status;
             if (status == InventoryStatus.Completed)
             {
-                TransactionAt = DateTimeOffset.UtcNow;
                 if (Type == InventoryType.Import)
                 {
                     Emit(new InventoryDocumentCompletedEvent { InventoryDocument = this });

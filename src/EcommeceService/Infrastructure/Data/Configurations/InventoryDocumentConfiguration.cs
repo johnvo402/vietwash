@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Domain.Aggregates.Inventories;
+﻿using Domain.Aggregates.Inventories;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data.Configurations
@@ -17,7 +12,6 @@ namespace Infrastructure.Data.Configurations
             builder.HasKey(x => x.Id);
             builder.HasIndex(x => x.Id);
             builder.Property(x => x.Amount).HasColumnType("numeric");
-            builder.Property(x => x.PaidAmount).HasColumnType("numeric");
             builder.Property(x => x.Code).HasColumnType("citext");
         }
     }

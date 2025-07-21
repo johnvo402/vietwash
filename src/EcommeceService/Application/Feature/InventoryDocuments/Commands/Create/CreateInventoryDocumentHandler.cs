@@ -18,6 +18,7 @@ namespace Application.Feature.InventoryDocuments.Commands.Create
         )
         {
             var inventoryDocument = request.ToEntity();
+            inventoryDocument.TransactionAt = request.TransactionAt;
             var uploadedImages = new List<string>();
 
             try
