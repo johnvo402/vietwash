@@ -1,15 +1,15 @@
 ﻿using System.Data.Common;
 using Application.Common.Errors;
+using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Equipments;
-using Domain.Aggregates.Equipments.Specifications;
 using Mediator;
 
 namespace Application.Feature.Equipments.Command.Update
 {
-    public class UpdateEquipmentHandler(IUnitOfWork unitOfWork)
+    public class UpdateEquipmentHandler(IUnitOfWork unitOfWork, IMediaUpdateService media)
         : IRequestHandler<UpdateEquipmentCommand, Result>
     {
         public async ValueTask<Result> Handle(
@@ -33,7 +33,8 @@ namespace Application.Feature.Equipments.Command.Update
                     )
                 );
             }
-
+            var oldImage = existingEquipment.Image;
+            var newImage = command.Equipment.Image;
             existingEquipment.FromUpdateModel(command.Equipment);
 
             try
@@ -46,11 +47,12 @@ namespace Application.Feature.Equipments.Command.Update
 
                 await unitOfWork.SaveAsync(cancellationToken);
                 await unitOfWork.CommitAsync(cancellationToken);
-
+                await media.DeleteMediaAsync(oldImage);
                 return Result.Success();
             }
             catch
             {
+                await media.DeleteMediaAsync(newImage);
                 await unitOfWork.RollbackAsync(cancellationToken);
                 throw;
             }

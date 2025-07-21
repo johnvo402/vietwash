@@ -16,6 +16,7 @@ namespace Application.Feature.Common.Projections.Equipments
 
     public class EquipmentUpdateModel
     {
+        public string? Image { get; set; }
         public string Name { get; set; } = default!;
         public string Description { get; set; } = default!;
         public EquipmentStatus Status { get; set; } = EquipmentStatus.Active;
