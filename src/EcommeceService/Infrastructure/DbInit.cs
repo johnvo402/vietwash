@@ -809,7 +809,6 @@ public class DbInitializer
         for (int i = 1; i <= 20; i++)
         {
             decimal price = 1500000 + i * 100000;
-            int capacity = 7 + (i % 3);
 
             totalEquipmentAmount += price;
 
@@ -819,7 +818,6 @@ public class DbInitializer
                     Name = $"Máy {(i % 2 == 0 ? "Sấy" : "Giặt")} {i}",
                     Code = Generator.GenerateCode("EQ", 6),
                     Price = price,
-                    Capacity = capacity,
                     Quantity = 1,
                     SupplierId = supplier.Id,
                 }

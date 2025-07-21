@@ -180,17 +180,6 @@ namespace Application.Feature.Common.Validators.Inventories
                                 .Build()
                         );
 
-                    item.RuleFor(x => x.Capacity)
-                        .GreaterThan(0)
-                        .WithState(x =>
-                            Messager
-                                .Create<EquipmentSupplyingModel>(nameof(EquipmentSupplyingModel))
-                                .Property(x => x.Capacity)
-                                .Message(MessageType.GreaterThan)
-                                .Negative()
-                                .Build()
-                        );
-
                     item.RuleFor(x => x.SupplierId)
                         .NotEmpty()
                         .WithState(x =>

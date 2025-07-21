@@ -46,7 +46,6 @@ public sealed class InventoryDocumentCompletedHandler
                     name: supplying.Name,
                     code: code,
                     price: supplying.Price,
-                    capacity: supplying.Capacity,
                     status: EquipmentStatus.Active,
                     description: document.Code,
                     lastMaintenanceOrRepairDate: DateTimeOffset.UtcNow,

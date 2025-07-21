@@ -10,7 +10,6 @@ public class EquipmentSupplyingConfiguration : IEntityTypeConfiguration<Equipmen
     {
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Price).HasColumnType("numeric");
-        builder.Property(x => x.Capacity).HasColumnType("numeric");
 
         builder
             .HasOne(x => x.Supplier)

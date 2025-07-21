@@ -21,7 +21,6 @@ namespace Application.Feature.Equipments.Queries.List
                 Description = equipment.Description,
                 Code = equipment.Code,
                 Price = equipment.Price,
-                Capacity = equipment.Capacity,
                 Status = equipment.Status,
                 Image = equipment.Image,
             };

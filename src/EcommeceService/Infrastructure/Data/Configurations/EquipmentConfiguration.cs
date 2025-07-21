@@ -12,7 +12,6 @@ namespace Infrastructure.Data.Configurations
             builder.Property(x => x.Code).HasColumnType("citext");
             builder.HasIndex(x => x.Code);
             builder.Property(x => x.Price).HasColumnType("numeric");
-            builder.Property(x => x.Capacity).HasColumnType("numeric");
         }
     }
 }
