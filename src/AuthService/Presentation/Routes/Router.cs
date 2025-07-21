@@ -1,4 +1,5 @@
 ﻿using Contracts.Routers;
+using Domain.Aggregates.Accounts;
 
 namespace Presentation.Routes
 {
@@ -36,10 +37,14 @@ namespace Presentation.Routes
             public const string Tags = $"{nameof(Accounts)} endpoint";
         }
 
-        public static class Customer
+        public static class CustomerRoute
         {
-            public const string GetList = $"{Auth}/{RouterBase.prefix}{nameof(Customer)}";
-            public const string Tags = $"{nameof(Customer)} endpoint";
+			public const string Customers = $"{Auth}/{RouterBase.prefix}{nameof(Customers)}";
+			public const string GetUpdateDelete =
+				$"{Auth}/{RouterBase.prefix}{nameof(Customers)}/" + "{" + RouterBase.Id + "}";
+			public const string GetRouteName = $"{Customers}DetailEndpoint";
+			public const string GetList = $"{Auth}/{RouterBase.prefix}{nameof(Customers)}";
+            public const string Tags = $"{nameof(Customers)} endpoint";
         }
 
         public static class MediaRoute
