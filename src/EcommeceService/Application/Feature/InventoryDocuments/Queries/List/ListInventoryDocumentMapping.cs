@@ -18,7 +18,6 @@ namespace Application.Feature.InventoryDocuments.Queries.List
                 UpdatedBy = document.UpdatedBy,
 
                 Amount = document.Amount,
-                PaidAmount = document.PaidAmount,
                 BranchId = document.BranchId,
                 TransactionAt = document.TransactionAt,
                 Code = document.Code,

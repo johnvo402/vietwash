@@ -53,12 +53,12 @@ public class UpdateAccountHandler(
 
             await unitOfWork.CommitAsync(cancellationToken);
 
-            await mediaUpdateService.DeleteAvatarAsync(oldAvatar);
+            await mediaUpdateService.DeleteMediaAsync(oldAvatar);
             return Result<UpdateAccountResponse>.Success(new() { Message = "Update success" });
         }
         catch (Exception)
         {
-            await mediaUpdateService.DeleteAvatarAsync(user.AvtUrl);
+            await mediaUpdateService.DeleteMediaAsync(user.AvtUrl);
             await unitOfWork.RollbackAsync(cancellationToken);
             throw;
         }

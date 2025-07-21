@@ -58,7 +58,7 @@ namespace Application.Feature.BranchProducts.Command.Update
 
                 if (!string.IsNullOrEmpty(oldImage))
                 {
-                    await mediaUpdateService.DeleteAvatarAsync(oldImage);
+                    await mediaUpdateService.DeleteMediaAsync(oldImage);
                 }
 
                 return Result.Success();
@@ -67,7 +67,7 @@ namespace Application.Feature.BranchProducts.Command.Update
             {
                 if (!string.IsNullOrEmpty(newImage))
                 {
-                    await mediaUpdateService.DeleteAvatarAsync(newImage);
+                    await mediaUpdateService.DeleteMediaAsync(newImage);
                 }
                 await unitOfWork.RollbackAsync(cancellationToken);
                 throw;

@@ -16,7 +16,6 @@ namespace Application.Feature.Common.Projections.Equipments
         public string? Description { get; set; }
         public string Code { get; set; } = default!;
         public decimal Price { get; set; }
-        public decimal Capacity { get; set; }
         public EquipmentStatus Status { get; set; }
 
         public virtual void MappingFrom(Equipment equipment)
@@ -33,8 +32,8 @@ namespace Application.Feature.Common.Projections.Equipments
             Description = equipment.Description;
             Code = equipment.Code;
             Price = equipment.Price;
-            Capacity = equipment.Capacity;
             Status = equipment.Status;
+            Image = equipment.Image;
         }
     }
 }

@@ -43,7 +43,7 @@ public class CreateUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService media
         }
         catch (Exception ex)
         {
-            await mediaUpdateService.DeleteAvatarAsync(userAvatar);
+            await mediaUpdateService.DeleteMediaAsync(userAvatar);
             await unitOfWork.RollbackAsync(cancellationToken);
             return new PubSubResponse<CreateAccountCommand>
             {

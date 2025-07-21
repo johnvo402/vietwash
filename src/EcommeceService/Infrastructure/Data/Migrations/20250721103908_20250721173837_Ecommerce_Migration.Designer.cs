@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    partial class TheDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250721103908_20250721173837_Ecommerce_Migration")]
+    partial class _20250721173837_Ecommerce_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,6 +35,10 @@ namespace Infrastructure.Data.Migrations
                     b.Property<long>("BranchId")
                         .HasColumnType("bigint")
                         .HasColumnName("branch_id");
+
+                    b.Property<decimal>("Capacity")
+                        .HasColumnType("numeric")
+                        .HasColumnName("capacity");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -325,6 +332,10 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
+                    b.Property<decimal>("Capacity")
+                        .HasColumnType("numeric")
+                        .HasColumnName("capacity");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasColumnType("text")
@@ -406,6 +417,14 @@ namespace Infrastructure.Data.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("text")
                         .HasColumnName("note");
+
+                    b.Property<decimal>("PaidAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("paid_amount");
+
+                    b.Property<byte?>("PaymentMethod")
+                        .HasColumnType("smallint")
+                        .HasColumnName("payment_method");
 
                     b.Property<string>("PublicId")
                         .IsRequired()

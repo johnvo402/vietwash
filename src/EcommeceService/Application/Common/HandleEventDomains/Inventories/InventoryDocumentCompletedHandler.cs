@@ -46,12 +46,12 @@ public sealed class InventoryDocumentCompletedHandler
                     name: supplying.Name,
                     code: code,
                     price: supplying.Price,
-                    capacity: supplying.Capacity,
                     status: EquipmentStatus.Active,
                     description: document.Code,
                     lastMaintenanceOrRepairDate: DateTimeOffset.UtcNow,
                     nextMaintenanceDate: DateTimeOffset.UtcNow.AddMonths(6)
                 );
+                equipment.Image = supplying.Image;
 
                 newEquipments.Add(equipment);
             }

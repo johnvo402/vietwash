@@ -12,10 +12,9 @@ namespace Application.Feature.Equipments.Command.Create
                 name: model.Name,
                 code: model.Code,
                 price: model.Price,
-                capacity: model.Capacity,
                 status: model.Status,
                 description: model.Description,
-				lastMaintenanceOrRepairDate: model.LastMaintenanceOrRepairDate,
+                lastMaintenanceOrRepairDate: model.LastMaintenanceOrRepairDate,
                 nextMaintenanceDate: model.NextMaintenanceDate
             );
         }

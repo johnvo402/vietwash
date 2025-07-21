@@ -41,7 +41,6 @@ namespace Application.Feature.Common.Projections.Inventories
         [File]
         public string? Image { get; set; }
         public decimal Price { get; set; } = default!;
-        public decimal Capacity { get; set; } = default!;
         public int Quantity { get; set; } = default!;
         public long SupplierId { get; set; } = default!;
         public string SupplierName { get; set; } = default!;
@@ -55,7 +54,6 @@ namespace Application.Feature.Common.Projections.Inventories
             Quantity = supplying.Quantity;
             Code = supplying.Code;
             Price = supplying.Price;
-            Capacity = supplying.Capacity;
             SupplierName = supplying.Supplier.Name;
         }
     }

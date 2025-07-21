@@ -9,7 +9,6 @@ public class EquipmentSupplying : DefaultEntity<long>
     public string Code { get; set; } = default!;
     public string? Image { get; set; }
     public decimal Price { get; set; } = default!;
-    public decimal Capacity { get; set; } = default!;
     public int Quantity { get; set; } = default!;
     public long SupplierId { get; set; } = default!;
     public long InventoryDocumentId { get; set; } = default!;

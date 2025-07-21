@@ -45,12 +45,12 @@ public class UpdateUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService media
             await unitOfWork.Repository<User>().UpdateAsync(user);
             await unitOfWork.CommitAsync(cancellationToken);
 
-            await mediaUpdateService.DeleteAvatarAsync(oldAvatar);
+            await mediaUpdateService.DeleteMediaAsync(oldAvatar);
             return Result<UpdateUserResponse>.Success(new() { Message = "Success" });
         }
         catch (Exception)
         {
-            await mediaUpdateService.DeleteAvatarAsync(user.AvtUrl);
+            await mediaUpdateService.DeleteMediaAsync(user.AvtUrl);
             await unitOfWork.RollbackAsync(cancellationToken);
             throw;
         }

@@ -96,21 +96,74 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
         ProcessDataPropertiesWithFileAttribute(response);
 
     // Processes the properties of a data object within a pagination response
-    private void ProcessDataPropertiesWithFileAttribute(object data)
+    private void ProcessDataPropertiesWithFileAttribute(
+        object data,
+        HashSet<object> processedObjects = null
+    )
     {
+        if (data == null)
+            return;
+
+        // Khởi tạo HashSet để tránh vòng lặp vô hạn
+        processedObjects ??= new HashSet<object>(ReferenceEqualityComparer.Instance);
+        if (!processedObjects.Add(data))
+            return;
+
+        // Xử lý các thuộc tính trực tiếp có attribute [File]
         IEnumerable<PropertyInfo> propertiesWithFileAttribute = GetFileAttributeProperties(
             data.GetType()
         );
-
         foreach (PropertyInfo prop in propertiesWithFileAttribute)
         {
-            object? imageKey = prop.GetValue(data);
-            if (imageKey == null)
-            {
+            object? propValue = prop.GetValue(data);
+            if (propValue == null)
                 continue;
-            }
 
-            UpdatePropertyIfNotPublicUrl(data, prop, imageKey);
+            // Nếu thuộc tính là chuỗi và có attribute [File], cập nhật đường dẫn
+            if (prop.PropertyType == typeof(string))
+            {
+                UpdatePropertyIfNotPublicUrl(data, prop, propValue);
+            }
+        }
+
+        // Xử lý các thuộc tính là IEnumerable (bao gồm ICollection, List, v.v.)
+        IEnumerable<PropertyInfo> enumerableProperties = data.GetType()
+            .GetProperties()
+            .Where(prop =>
+                typeof(IEnumerable).IsAssignableFrom(prop.PropertyType)
+                && prop.PropertyType != typeof(string)
+            );
+
+        foreach (PropertyInfo prop in enumerableProperties)
+        {
+            object? propValue = prop.GetValue(data);
+            if (propValue is IEnumerable enumerable && propValue != null)
+            {
+                foreach (object item in enumerable)
+                {
+                    // Đệ quy vào từng phần tử của danh sách (bao gồm cả ICollection)
+                    ProcessDataPropertiesWithFileAttribute(item, processedObjects);
+                }
+            }
+        }
+
+        // Xử lý các thuộc tính là đối tượng phức hợp (không phải IEnumerable, không phải string)
+        IEnumerable<PropertyInfo> complexProperties = data.GetType()
+            .GetProperties()
+            .Where(prop =>
+                !prop.PropertyType.IsValueType
+                && prop.PropertyType != typeof(string)
+                && !typeof(IEnumerable).IsAssignableFrom(prop.PropertyType)
+            );
+
+        foreach (PropertyInfo prop in complexProperties)
+        {
+            object? propValue = prop.GetValue(data);
+            if (propValue != null)
+            {
+                // Đệ quy vào đối tượng phức hợp
+                ProcessDataPropertiesWithFileAttribute(propValue, processedObjects);
+            }
         }
     }
 

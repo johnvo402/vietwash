@@ -47,6 +47,15 @@ namespace Application.Feature.Common.Validators.Inventories
                         .Message(MessageType.MaximumLength)
                         .Build()
                 );
+            RuleFor(x => x.TransactionAt)
+                .LessThanOrEqualTo(DateTimeOffset.UtcNow)
+                .WithState(x =>
+                    Messager
+                        .Create<InventoryDocumentModel>(nameof(InventoryDocument))
+                        .Property(x => x.TransactionAt)
+                        .Message(MessageType.LessThanEqual)
+                        .Build()
+                );
 
             RuleForEach(x => x.ProductSupplyings)
                 .ChildRules(item =>
@@ -175,17 +184,6 @@ namespace Application.Feature.Common.Validators.Inventories
                             Messager
                                 .Create<EquipmentSupplyingModel>(nameof(EquipmentSupplyingModel))
                                 .Property(x => x.Price)
-                                .Message(MessageType.GreaterThan)
-                                .Negative()
-                                .Build()
-                        );
-
-                    item.RuleFor(x => x.Capacity)
-                        .GreaterThan(0)
-                        .WithState(x =>
-                            Messager
-                                .Create<EquipmentSupplyingModel>(nameof(EquipmentSupplyingModel))
-                                .Property(x => x.Capacity)
                                 .Message(MessageType.GreaterThan)
                                 .Negative()
                                 .Build()

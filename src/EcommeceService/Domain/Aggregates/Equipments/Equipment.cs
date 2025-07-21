@@ -10,12 +10,10 @@ namespace Domain.Aggregates.Equipments
         public long BranchId { get; set; } = default!;
         public string Name { get; set; } = default!;
         public string? Description { get; set; }
-
+        public string? Image { get; set; }
         public string Code { get; set; } = default!;
 
         public decimal Price { get; set; } = default!;
-
-        public decimal Capacity { get; set; } = default!;
 
         public DateTimeOffset? LastMaintenanceOrRepairDate { get; set; }
 
@@ -30,7 +28,6 @@ namespace Domain.Aggregates.Equipments
             string name,
             string code,
             decimal price,
-            decimal capacity,
             EquipmentStatus status,
             string? description = null,
             DateTimeOffset? lastMaintenanceOrRepairDate = null,
@@ -41,10 +38,9 @@ namespace Domain.Aggregates.Equipments
             Name = Guard.Against.NullOrWhiteSpace(name, nameof(name));
             Code = Guard.Against.NullOrWhiteSpace(code, nameof(code));
             Price = price;
-            Capacity = capacity;
             Status = Guard.Against.EnumOutOfRange(status, nameof(status));
             Description = description?.Trim();
-			LastMaintenanceOrRepairDate = lastMaintenanceOrRepairDate;
+            LastMaintenanceOrRepairDate = lastMaintenanceOrRepairDate;
             NextMaintenanceDate = nextMaintenanceDate;
         }
 
@@ -54,7 +50,6 @@ namespace Domain.Aggregates.Equipments
             string? description = null,
             string? code = null,
             decimal? price = null,
-            decimal? capacity = null,
             EquipmentStatus? status = null,
             DateTimeOffset? lastMaintenanceOrRepairDate = null,
             DateTimeOffset? nextMaintenanceDate = null
@@ -70,12 +65,10 @@ namespace Domain.Aggregates.Equipments
                 Description = description.Trim();
             if (price.HasValue)
                 Price = price.Value;
-            if (capacity.HasValue)
-                Capacity = capacity.Value;
             if (status.HasValue)
                 Status = status.Value;
             if (lastMaintenanceOrRepairDate.HasValue)
-				LastMaintenanceOrRepairDate = lastMaintenanceOrRepairDate;
+                LastMaintenanceOrRepairDate = lastMaintenanceOrRepairDate;
             if (nextMaintenanceDate.HasValue)
                 NextMaintenanceDate = nextMaintenanceDate;
         }
