@@ -7,8 +7,10 @@ namespace Domain.Aggregates.Equipments.Specifications
     {
         public GetEquipmentWithIncludeByIdSpecification(long id)
         {
-            Query.Where(x => x.Id == id)
-                .Include(x => x.EquipmentActivities).ThenInclude(a => a.ActivityDetails);
-		}
+            Query
+                .Where(x => x.Id == id)
+                .Include(x => x.EquipmentActivities)
+                .ThenInclude(a => a.ActivityDetails);
+        }
     }
 }

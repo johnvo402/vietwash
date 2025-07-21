@@ -13,4 +13,11 @@ namespace Application.Feature.Common.Projections.Equipments
         public DateTimeOffset? LastMaintenanceOrRepairDate { get; set; }
         public DateTimeOffset? NextMaintenanceDate { get; set; }
     }
+
+    public class EquipmentUpdateModel
+    {
+        public string Name { get; set; } = default!;
+        public string Description { get; set; } = default!;
+        public EquipmentStatus Status { get; set; } = EquipmentStatus.Active;
+    }
 }

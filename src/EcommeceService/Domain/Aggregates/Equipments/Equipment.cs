@@ -45,32 +45,19 @@ namespace Domain.Aggregates.Equipments
         }
 
         public void Update(
-            long? branchId = null,
             string? name = null,
             string? description = null,
-            string? code = null,
-            decimal? price = null,
-            EquipmentStatus? status = null,
-            DateTimeOffset? lastMaintenanceOrRepairDate = null,
-            DateTimeOffset? nextMaintenanceDate = null
+            EquipmentStatus? status = null
         )
         {
-            if (branchId.HasValue && branchId.Value > 0)
-                BranchId = branchId.Value;
             if (!string.IsNullOrWhiteSpace(name))
                 Name = name.Trim();
-            if (!string.IsNullOrWhiteSpace(code))
-                Code = code.Trim();
+
             if (description != null)
                 Description = description.Trim();
-            if (price.HasValue)
-                Price = price.Value;
+
             if (status.HasValue)
                 Status = status.Value;
-            if (lastMaintenanceOrRepairDate.HasValue)
-                LastMaintenanceOrRepairDate = lastMaintenanceOrRepairDate;
-            if (nextMaintenanceDate.HasValue)
-                NextMaintenanceDate = nextMaintenanceDate;
         }
 
         protected override bool TryApplyDomainEvent(INotification domainEvent)

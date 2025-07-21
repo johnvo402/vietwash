@@ -78,4 +78,43 @@ namespace Application.Feature.Common.Validators.Equipments
                 .AnyAsync(p => p.Code == code, cancellation);
         }
     }
+
+    public class EquipmentUpdateValidator : AbstractValidator<EquipmentUpdateModel>
+    {
+        public EquipmentUpdateValidator()
+        {
+            ApplyRules();
+        }
+
+        private void ApplyRules()
+        {
+            RuleFor(x => x.Name)
+                .NotEmpty()
+                .WithState(x =>
+                    Messager
+                        .Create<Equipment>()
+                        .Property(x => x.Name)
+                        .Message(MessageType.Null)
+                        .Negative()
+                        .Build()
+                )
+                .MaximumLength(256)
+                .WithState(x =>
+                    Messager
+                        .Create<EquipmentModel>(nameof(Equipment))
+                        .Property(x => x.Name)
+                        .Message(MessageType.MaximumLength)
+                        .Build()
+                );
+            RuleFor(x => x.Description)
+                .MaximumLength(500)
+                .WithState(x =>
+                    Messager
+                        .Create<EquipmentModel>(nameof(Equipment))
+                        .Property(x => x.Description)
+                        .Message(MessageType.MaximumLength)
+                        .Build()
+                );
+        }
+    }
 }

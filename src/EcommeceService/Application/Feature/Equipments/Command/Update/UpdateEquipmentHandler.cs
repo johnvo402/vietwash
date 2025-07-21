@@ -18,11 +18,8 @@ namespace Application.Feature.Equipments.Command.Update
         )
         {
             Equipment? existingEquipment = await unitOfWork
-                .DynamicReadOnlyRepository<Equipment>()
-                .FindByConditionAsync(
-                    new GetEquipmentWithIncludeByIdSpecification(command.EquipmentId),
-                    cancellationToken
-                );
+                .Repository<Equipment>()
+                .FindByIdAsync(command.EquipmentId, cancellationToken);
             if (existingEquipment == null)
             {
                 return Result.Failure(

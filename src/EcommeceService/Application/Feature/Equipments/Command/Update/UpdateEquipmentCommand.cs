@@ -12,6 +12,6 @@ namespace Application.Feature.Equipments.Command.Update
         public long EquipmentId { get; set; } = default!;
 
         [FromBody]
-        public EquipmentModel Equipment { get; set; } = default!;
+        public EquipmentUpdateModel Equipment { get; set; } = default!;
     }
 }
