@@ -14,6 +14,16 @@ namespace Application.Common
             NegativeMessage: "file-size-too-large"
         );
 
+        public static readonly CustomMessage TotalFileSizeTooLarge = new(
+            Message: "total-file-size-error",
+            CustomMessageTranslations: new Dictionary<string, string>
+            {
+                { LanguageType.En.ToString(), "File size must be less than or equal to 200MB." },
+                { LanguageType.Vi.ToString(), "Kích thước tệp phải nhỏ hơn hoặc bằng 200MB." },
+            },
+            NegativeMessage: "total-file-size-too-large"
+        );
+
         public static readonly CustomMessage FileTypeInValid = new(
             Message: "file-type-error",
             CustomMessageTranslations: new Dictionary<string, string>

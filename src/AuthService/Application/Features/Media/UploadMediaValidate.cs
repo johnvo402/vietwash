@@ -19,6 +19,7 @@ namespace Application.Features.Media
         };
 
         private const long MaxFileSize = 50 * 1024 * 1024; // 50MB
+        private const long MaxTotalSize = 200 * 1024 * 1024; // 200MB
 
         public UploadMediaValidate()
         {
@@ -57,6 +58,16 @@ namespace Application.Features.Media
                                 .Build()
                         );
                 });
+            RuleFor(x => x.Files)
+                .Must(files => files.Sum(f => f.Length) <= MaxTotalSize)
+                .WithState(x =>
+                    Messager
+                        .Create<UploadMediaCommand>()
+                        .Property(d => d.Files)
+                        .Message(CustomMessages.TotalFileSizeTooLarge)
+                        .Negative()
+                        .Build()
+                );
         }
     }
 }
