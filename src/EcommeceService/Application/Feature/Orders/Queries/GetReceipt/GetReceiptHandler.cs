@@ -92,7 +92,7 @@ public class GetReceiptHandler(
             throw;
         }
 
-        var fileUrl = await media.UploadAvatarAsync(formFile, mediaKey);
+        var fileUrl = await media.UploadMediaAsync(formFile, mediaKey);
 
         if (string.IsNullOrEmpty(fileUrl))
         {

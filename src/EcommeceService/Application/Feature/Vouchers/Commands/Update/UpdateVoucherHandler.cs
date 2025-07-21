@@ -55,7 +55,7 @@ namespace Application.Feature.Vouchers.Commands.Update
 
                 if (!string.IsNullOrEmpty(oldVoucherImage))
                 {
-                    await mediaUpdateService.DeleteAvatarAsync(oldVoucherImage);
+                    await mediaUpdateService.DeleteMediaAsync(oldVoucherImage);
                 }
 
                 return Result.Success();
@@ -64,7 +64,7 @@ namespace Application.Feature.Vouchers.Commands.Update
             {
                 if (!string.IsNullOrEmpty(newVoucherImage))
                 {
-                    await mediaUpdateService.DeleteAvatarAsync(newVoucherImage);
+                    await mediaUpdateService.DeleteMediaAsync(newVoucherImage);
                 }
                 await unitOfWork.RollbackAsync(cancellationToken);
                 throw;

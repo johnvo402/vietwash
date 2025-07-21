@@ -56,7 +56,7 @@ public class CreateAccountHandler(IUnitOfWork unitOfWork, IMediaUpdateService me
         }
         catch (Exception)
         {
-            await mediaUpdateService.DeleteAvatarAsync(userAvatar);
+            await mediaUpdateService.DeleteMediaAsync(userAvatar);
             await unitOfWork.RollbackAsync(cancellationToken);
             throw;
         }

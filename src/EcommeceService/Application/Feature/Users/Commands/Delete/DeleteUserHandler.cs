@@ -30,7 +30,7 @@ public class DeleteUserHandler(
         await unitOfWork.Repository<User>().DeleteAsync(user);
         await unitOfWork.SaveAsync(cancellationToken);
 
-        await MediaUpdateService.DeleteAvatarAsync(avatar);
+        await MediaUpdateService.DeleteMediaAsync(avatar);
         return Result.Success();
     }
 }

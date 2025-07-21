@@ -41,7 +41,7 @@ namespace Application.Feature.Services.Command.Create
             {
                 if (!string.IsNullOrEmpty(serviceImage))
                 {
-                    await mediaUpdateService.DeleteAvatarAsync(serviceImage);
+                    await mediaUpdateService.DeleteMediaAsync(serviceImage);
                 }
                 await unitOfWork.RollbackAsync(cancellationToken);
                 throw;

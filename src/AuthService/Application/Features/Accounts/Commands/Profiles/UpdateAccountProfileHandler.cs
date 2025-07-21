@@ -57,11 +57,11 @@ public class UpdateAccountProfileHandler(
             await unitOfWork.SaveAsync(cancellationToken);
             await unitOfWork.CommitAsync(cancellationToken);
 
-            await avatarUpdate.DeleteAvatarAsync(oldAvatar);
+            await avatarUpdate.DeleteMediaAsync(oldAvatar);
         }
         catch (Exception)
         {
-            await avatarUpdate.DeleteAvatarAsync(user.AvtUrl);
+            await avatarUpdate.DeleteMediaAsync(user.AvtUrl);
             await unitOfWork.RollbackAsync(cancellationToken);
 
             throw;

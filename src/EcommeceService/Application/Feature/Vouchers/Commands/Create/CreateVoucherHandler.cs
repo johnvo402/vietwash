@@ -87,7 +87,7 @@ namespace Application.Feature.Vouchers.Commands.Create
             {
                 if (!string.IsNullOrEmpty(voucherImage))
                 {
-                    await mediaUpdateService.DeleteAvatarAsync(voucherImage);
+                    await mediaUpdateService.DeleteMediaAsync(voucherImage);
                 }
                 await unitOfWork.RollbackAsync(cancellationToken);
                 throw;
