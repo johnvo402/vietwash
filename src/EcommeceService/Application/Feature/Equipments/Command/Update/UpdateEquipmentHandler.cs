@@ -33,8 +33,12 @@ namespace Application.Feature.Equipments.Command.Update
                     )
                 );
             }
-            var oldImage = existingEquipment.Image;
+            string? oldImage = null;
             var newImage = command.Equipment.Image;
+            if (!string.IsNullOrEmpty(newImage))
+            {
+                oldImage = existingEquipment.Image;
+            }
             existingEquipment.FromUpdateModel(command.Equipment);
 
             try

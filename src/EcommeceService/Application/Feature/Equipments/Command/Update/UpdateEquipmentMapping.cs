@@ -8,7 +8,8 @@ namespace Application.Feature.Equipments.Command.Update
         public static void FromUpdateModel(this Equipment entity, EquipmentUpdateModel model)
         {
             entity.Update(name: model.Name, description: model.Description, status: model.Status);
-            entity.Image = model.Image;
+            if (model.Image != null)
+                entity.Image = model.Image;
         }
     }
 }
