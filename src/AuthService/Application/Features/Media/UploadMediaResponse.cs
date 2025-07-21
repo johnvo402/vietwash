@@ -2,6 +2,6 @@
 {
     public class UploadMediaResponse
     {
-        public List<string?>? Key { get; set; }
+        public string? Key { get; set; }
     }
 }

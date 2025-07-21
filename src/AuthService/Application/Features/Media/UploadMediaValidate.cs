@@ -22,12 +22,12 @@ namespace Application.Features.Media
 
         public UploadMediaValidate()
         {
-            RuleForEach(x => x.Files)
+            RuleFor(x => x.File)
                 .NotEmpty()
                 .WithState(x =>
                     Messager
                         .Create<UploadMediaCommand>()
-                        .Property(x => x.Files!)
+                        .Property(x => x.File!)
                         .Message(MessageType.Empty)
                         .Negative()
                         .Build()
@@ -39,7 +39,7 @@ namespace Application.Features.Media
                         .WithState(x =>
                             Messager
                                 .Create<UploadMediaCommand>()
-                                .Property(d => d.Files)
+                                .Property(d => d.File)
                                 .Message(CustomMessages.FileSizeTooLarge)
                                 .Negative()
                                 .Build()
@@ -51,7 +51,7 @@ namespace Application.Features.Media
                         .WithState(x =>
                             Messager
                                 .Create<UploadMediaCommand>()
-                                .Property(d => d.Files)
+                                .Property(d => d.File)
                                 .Message(CustomMessages.FileTypeInValid)
                                 .Negative()
                                 .Build()

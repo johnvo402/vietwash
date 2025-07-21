@@ -7,7 +7,7 @@ namespace Application.Features.Media
 {
     public class UploadMediaCommand : IRequest<Result<UploadMediaResponse>>
     {
-        public IList<IFormFile> Files { get; set; } = default!;
+        public IFormFile File { get; set; } = default!;
         public MediaType MediaType { get; set; }
     }
 }
