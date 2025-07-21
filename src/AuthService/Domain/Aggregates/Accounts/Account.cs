@@ -21,8 +21,8 @@ public class Account : AggregateRoot
     public string Role { get; set; }
     public CustomerGroup? CustomerGroup { get; set; }
     public bool Disabled { get; set; }
-    public AccountStatus Status { get; set; }
-    public ICollection<AccountToken>? AccountTokens { get; set; } = [];
+    public AccountStatus Status { get; set; } = AccountStatus.Active;
+	public ICollection<AccountToken>? AccountTokens { get; set; } = [];
 
     public ICollection<AccountResetPassword>? AccountResetPasswords { get; set; } = [];
     public ICollection<AccountContact>? AccountContacts { get; set; } = [];
