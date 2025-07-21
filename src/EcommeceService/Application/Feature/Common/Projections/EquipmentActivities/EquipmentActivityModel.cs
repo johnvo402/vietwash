@@ -2,12 +2,11 @@
 
 namespace Application.Feature.Common.Projections.EquipmentActivities
 {
-	public class EquipmentActivityModel
-	{
-		public long BranchId { get; set; }
-		public TypeActivity Type { get; set; }
-		public string? Description { get; set; }
-		public decimal LaborCost { get; set; }
-		public List<EquipmentActivityDetailModel> Details { get; set; } = [];
-	}
+    public class EquipmentActivityModel
+    {
+        public TypeActivity Type { get; set; }
+        public string? Description { get; set; }
+        public decimal LaborCost { get; set; }
+        public List<EquipmentActivityDetailModel> Details { get; set; } = [];
+    }
 }
