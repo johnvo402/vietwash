@@ -4,6 +4,7 @@ using Mediator;
 using Contracts.ApiWrapper;
 using Contracts.Utils;
 using Infrastructure.Constants;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Customers.Command.Create
 {
@@ -15,8 +16,15 @@ namespace Application.Features.Customers.Command.Create
 			CancellationToken cancellationToken
 		)
 		{
+			var branchIds = await unitOfWork
+				.Repository<BranchAccount>()
+				.QueryAsync()
+				.Select(x => x.BranchId)
+				.Distinct()
+				.ToListAsync(cancellationToken);
+
 			string code = Generator.GenerateAccountCode(ROLE.CUSTOMER);
-			Account mappingAccount = command.ToAccount(code);
+			Account mappingAccount = command.ToAccount(code, branchIds);
 
 			try
 			{

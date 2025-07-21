@@ -1,5 +1,4 @@
-﻿
-using Application.Common.Errors;
+﻿using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Accounts.Commands.Update;
@@ -54,12 +53,12 @@ namespace Application.Features.Customers.Command.Update
 
 				await unitOfWork.CommitAsync(cancellationToken);
 
-				await mediaUpdateService.DeleteAvatarAsync(oldAvatar);
+				await mediaUpdateService.DeleteMediaAsync(oldAvatar);
 				return Result.Success();
 			}
 			catch (Exception)
 			{
-				await mediaUpdateService.DeleteAvatarAsync(customer.AvtUrl);
+				await mediaUpdateService.DeleteMediaAsync(customer.AvtUrl);
 				await unitOfWork.RollbackAsync(cancellationToken);
 				throw;
 			}
