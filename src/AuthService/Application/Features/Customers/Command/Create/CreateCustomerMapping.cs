@@ -6,7 +6,7 @@ namespace Application.Features.Customers.Command.Create
 {
 	public static class CreateCustomerMapping
 	{
-		public static Account ToAccount(this CreateCustomerCommand command, string code, IEnumerable<long> branchAccounts)
+		public static Account ToAccount(this CreateCustomerCommand command, string code, IEnumerable<BranchAccountModel> branchAccounts)
 		{
 			return new Account(
 				displayName: string.IsNullOrWhiteSpace(command.DisplayName) ? command.PhoneNumber! : command.DisplayName,
@@ -20,7 +20,8 @@ namespace Application.Features.Customers.Command.Create
 				Gender = command.Gender,
 				BranchAccounts = branchAccounts.Select(x => new BranchAccount
 				{
-					BranchId = x,
+					BranchId = x.BranchId,
+					BranchName = x.BranchName
 				}).ToList()
 			};
 		}

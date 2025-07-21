@@ -5,6 +5,7 @@ using Contracts.ApiWrapper;
 using Contracts.Utils;
 using Infrastructure.Constants;
 using Microsoft.EntityFrameworkCore;
+using Application.Features.Common.Projections.Accounts;
 
 namespace Application.Features.Customers.Command.Create
 {
@@ -16,15 +17,22 @@ namespace Application.Features.Customers.Command.Create
 			CancellationToken cancellationToken
 		)
 		{
-			var branchIds = await unitOfWork
+			var branches = await unitOfWork
 				.Repository<BranchAccount>()
 				.QueryAsync()
-				.Select(x => x.BranchId)
-				.Distinct()
+				.GroupBy(x => x.BranchId)
+				.Select(g => new BranchAccountModel
+				{
+					BranchId = g.Key,
+					BranchName = g
+						.Where(x => x.BranchName != null)
+						.Select(x => x.BranchName)
+						.FirstOrDefault()
+				})
 				.ToListAsync(cancellationToken);
 
 			string code = Generator.GenerateAccountCode(ROLE.CUSTOMER);
-			Account mappingAccount = command.ToAccount(code, branchIds);
+			Account mappingAccount = command.ToAccount(code, branches);
 
 			try
 			{
