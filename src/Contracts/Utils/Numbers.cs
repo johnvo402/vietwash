@@ -22,7 +22,7 @@ public static class NumberToTextConverter
 
     public static string FormatCurrency(decimal number, string? currency = "đ")
     {
-        return string.Format(new CultureInfo("vi-VN"), "{0:N2}{1}", number, currency);
+        return string.Format(new CultureInfo("vi-VN"), "{0:N0}{1}", number, currency);
     }
 
     public static string ToVietnameseCurrencyText(decimal number)
