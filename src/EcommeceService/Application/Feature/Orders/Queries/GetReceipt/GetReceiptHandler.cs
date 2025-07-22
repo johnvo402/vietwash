@@ -1,8 +1,8 @@
 using Application.Common.Errors;
+using Application.Common.Interfaces.Services.Aws;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Common.Projections.Receipts;
-using Application.Feature.Orders.Queries.Detail;
 using Contracts.ApiWrapper;
 using Contracts.Application.Common.Interfaces.Services.Pdf;
 using Contracts.Common.Messages;
@@ -17,9 +17,13 @@ namespace Application.Feature.Orders.Queries.GetReceipt;
 public class GetReceiptHandler(
     IPdfService pdfService,
     IMediaUpdateService media,
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork,
+    IAmazonS3Service awsAmazonService
 ) : IRequestHandler<GetReceiptQuery, Result<GetReceiptResponse>>
 {
+    private const string LOGO_URL = "Images/favicon.svg";
+    private const string STAMP_URL = "Images/condau.svg";
+
     public async ValueTask<Result<GetReceiptResponse>> Handle(
         GetReceiptQuery request,
         CancellationToken cancellationToken
@@ -42,6 +46,7 @@ public class GetReceiptHandler(
                 )
             );
         }
+
         var receipt = orderDetailResult.Receipt;
         if (!string.IsNullOrEmpty(receipt))
         {
@@ -49,7 +54,10 @@ public class GetReceiptHandler(
                 new GetReceiptResponse { ReceiptUrl = receipt }
             );
         }
+        var logo = awsAmazonService.GetFullpath(LOGO_URL);
+        var stamp = awsAmazonService.GetFullpath(STAMP_URL);
         ReceiptModel? receiptModel = orderDetailResult.MapToReceiptModel();
+        receiptModel.OrgInfo = new OrganizationInfo { Logo = logo, Stamp = stamp };
         // Step 2: Generate PDF
         var pdfBytes = await pdfService.GeneratePdfAsync(
             new PdfGlobalParams { Template = new("Biennhan", receiptModel) }

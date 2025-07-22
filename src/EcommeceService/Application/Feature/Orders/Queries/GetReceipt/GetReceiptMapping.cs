@@ -1,4 +1,5 @@
 using Application.Feature.Common.Projections.Receipts;
+using Application.Features.Common.Projections.Users;
 using Contracts.Utils;
 using Domain.Aggregates.Orders;
 
@@ -15,10 +16,15 @@ namespace Application.Feature.Orders.Queries.GetReceipt
 
             var receiptModel = new ReceiptModel
             {
-                Customer = new CustomerInfoReceipt
+                Customer = new UserDTO
                 {
                     DisplayName = order.Customer?.DisplayName ?? string.Empty,
                     PhoneNumber = order.Customer?.DisplayName ?? string.Empty,
+                },
+                Staff = new UserDTO
+                {
+                    DisplayName = order.Staff?.DisplayName ?? string.Empty,
+                    PhoneNumber = order.Staff?.DisplayName ?? string.Empty,
                 },
                 OrderDate = order.OrderDate,
                 OrderItems =
