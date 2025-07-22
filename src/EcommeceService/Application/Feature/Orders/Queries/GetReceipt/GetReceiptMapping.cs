@@ -29,6 +29,9 @@ namespace Application.Feature.Orders.Queries.GetReceipt
                             UnitRelationName = item.UnitRelationName ?? string.Empty,
                             Quantity = item.Quantity,
                             UnitPrice = NumberToTextConverter.FormatCurrency(item.UnitPrice),
+                            TotalPriceItem = NumberToTextConverter.FormatCurrency(
+                                item.Quantity * item.UnitPrice
+                            ),
                         })
                         .ToList() ?? new List<OrderItemReceipt>(),
                 Total = NumberToTextConverter.FormatCurrency(order.Total),
