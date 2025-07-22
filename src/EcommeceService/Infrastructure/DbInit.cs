@@ -17,7 +17,6 @@ using Domain.Aggregates.Suppliers;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Domain.Aggregates.Vouchers;
-using Domain.Aggregates.Vouchers.Specifications;
 using Infrastructure.Constants;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -88,6 +87,14 @@ public class DbInitializer
             else
             {
                 logger.Information("Dữ liệu dịch vụ đã tồn tại, bỏ qua khởi tạo.");
+            }
+            if (!await unitOfWork.Repository<Voucher>().AnyAsync())
+            {
+                logger.Information("Bắt đầu khởi tạo dữ liệu voucher...");
+
+                await InitVouchersAsync(unitOfWork, encryption, qrGenerator, cancellationToken);
+
+                logger.Information("Hoàn tất khởi tạo dữ liệu voucher...");
             }
             // Initialize Orders
             if (!await unitOfWork.Repository<Order>().AnyAsync())
@@ -171,6 +178,8 @@ public class DbInitializer
                 SelectOnlyId(),
                 cancellationToken
             );
+
+        var voucherResult = await unitOfWork.Repository<Voucher>().ListAsync(cancellationToken);
         if (!staffResult.Any())
         {
             logger.Warning("Không tìm thấy nhân viên trong cơ sở dữ liệu.");
@@ -184,12 +193,12 @@ public class DbInitializer
         {
             long? customerId = customerResult[random.Next(customerResult.Count())].Id;
             long staffId = staffResult[random.Next(staffResult.Count())].Id;
-            long voucherId = staffResult[random.Next(staffResult.Count())].Id;
+            var voucherList = voucherResult.ToList();
+            var voucher = voucherList[random.Next(voucherList.Count())];
 
             int itemCount = random.Next(1, 4); // Số lượng mục trong đơn hàng
             var orderItems = new List<OrderItem>();
             decimal totalPrice = 0;
-            string voucherCode = Generator.GenerateRandomString(9);
             var services = await unitOfWork
                 .DynamicReadOnlyRepository<Service>()
                 .ListAsync(
@@ -294,8 +303,8 @@ public class DbInitializer
             var order = new Order(
                 branchId: 1,
                 staffId: staffId,
-                voucherId: voucherId,
-                voucherCode: voucherCode,
+                voucherId: voucher.Id,
+                voucherCode: voucher.Code,
                 code: code,
                 amount: totalPrice,
                 total: totalPrice,
@@ -883,5 +892,78 @@ public class DbInitializer
             await unitOfWork.Repository<InventoryInvoice>().AddAsync(invoice, cancellationToken);
             await unitOfWork.SaveAsync(cancellationToken);
         }
+    }
+
+    private static async Task InitVouchersAsync(
+        IUnitOfWork unitOfWork,
+        IEncryptionService encryption,
+        IQrGenerator barcode,
+        CancellationToken cancellationToken
+    )
+    {
+        var vouchers = new List<Voucher>
+        {
+            new Voucher(
+                code: "GIATUI10",
+                title: "Giảm Giá Chào Mừng",
+                imgUrl: null,
+                barcode: GenBarcode("GIATUI10", encryption, barcode),
+                discountFixed: false,
+                discountValue: 10.0m,
+                startAt: DateTimeOffset.UtcNow,
+                endAt: DateTimeOffset.UtcNow.AddMonths(1),
+                status: ActivationStatus.Active,
+                description: "Giảm 10% cho khách hàng mới sử dụng dịch vụ giặt ủi"
+            ),
+            new Voucher(
+                code: "HAPPYBIRTHDAY",
+                title: "Giảm Giá Sinh Nhật",
+                imgUrl: null,
+                barcode: GenBarcode("HAPPYBIRTHDAY", encryption, barcode),
+                discountFixed: false,
+                discountValue: 10.0m,
+                startAt: DateTimeOffset.UtcNow,
+                endAt: DateTimeOffset.UtcNow.AddMonths(1),
+                status: ActivationStatus.Active,
+                description: "Giảm 10% cho khách hàng mới sử dụng dịch vụ giặt ủi"
+            ),
+            new Voucher(
+                code: "SUMMER15",
+                title: "Ưu Đãi Mùa Hè",
+                imgUrl: null,
+                barcode: GenBarcode("SUMMER15", encryption, barcode),
+                discountFixed: false,
+                discountValue: 15.0m,
+                startAt: DateTimeOffset.UtcNow,
+                endAt: DateTimeOffset.UtcNow.AddMonths(2),
+                status: ActivationStatus.Active,
+                description: "Giảm 15% cho tất cả dịch vụ giặt ủi trong mùa hè"
+            ),
+            new Voucher(
+                code: "FIXED20K",
+                title: "Giảm Giá Cố Định",
+                imgUrl: null,
+                barcode: GenBarcode("FIXED20K", encryption, barcode),
+                discountFixed: true,
+                discountValue: 20000.0m,
+                startAt: DateTimeOffset.UtcNow,
+                endAt: DateTimeOffset.UtcNow.AddMonths(3),
+                status: ActivationStatus.Active,
+                description: "Giảm 20.000 VNĐ cho hóa đơn giặt ủi tiếp theo"
+            ),
+        };
+
+        await unitOfWork.Repository<Voucher>().AddRangeAsync(vouchers, cancellationToken);
+        await unitOfWork.SaveAsync(cancellationToken);
+    }
+
+    private static string GenBarcode(
+        string code,
+        IEncryptionService encryption,
+        IQrGenerator barcode
+    )
+    {
+        var codeEncrypt = encryption.Encrypt(code);
+        return barcode.GenerateQrBase64(codeEncrypt);
     }
 }

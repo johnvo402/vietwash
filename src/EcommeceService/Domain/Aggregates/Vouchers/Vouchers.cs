@@ -23,8 +23,8 @@ namespace Domain.Aggregates.Vouchers
         public DateTimeOffset? StartAt { get; set; }
         public DateTimeOffset? EndAt { get; set; }
         public ActivationStatus Status { get; set; }
-        public ICollection<VoucherCustomer> VoucherCustomers { get; set; } = new List<VoucherCustomer>();
-
+        public ICollection<VoucherCustomer> VoucherCustomers { get; set; } =
+            new List<VoucherCustomer>();
 
         public Voucher() { }
 

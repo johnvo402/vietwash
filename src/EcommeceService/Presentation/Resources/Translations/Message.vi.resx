@@ -542,4 +542,9 @@
         <value>loại hành động phải hồi</value>
         <comment />
     </data>
+  <data name="Voucher"
+    xml:space="preserve">
+        <value>Voucher</value>
+        <comment />
+    </data>
 </root>
