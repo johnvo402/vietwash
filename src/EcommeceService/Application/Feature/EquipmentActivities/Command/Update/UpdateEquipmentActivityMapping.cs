@@ -1,6 +1,5 @@
 ﻿using Application.Feature.Common.Mapping.EquipmentActivities;
 using Application.Feature.Common.Projections.EquipmentActivities;
-using Contracts.Extensions;
 using Domain.Aggregates.Equipments;
 
 namespace Application.Feature.EquipmentActivities.Command.Update
@@ -17,13 +16,6 @@ namespace Application.Feature.EquipmentActivities.Command.Update
 				totalCost: amount + model.LaborCost,
 				description: model.Description
 			);
-			entity.ActivityDetails = model.Details.ToListMapping(x => new EquipmentActivityDetail
-			{
-				PartName = x.PartName,
-				Quantity = x.Quantity,
-				UnitPrice = x.UnitPrice,
-				Amount = x.Quantity * x.UnitPrice
-			});
 			entity.ActivityDetails = model.Details.ToListActivityDetails() ?? [];
 		}
 	}
