@@ -1,4 +1,5 @@
-﻿using Domain.Aggregates.Equipments.Enums;
+﻿using Application.Feature.Common.Projections.Units;
+using Domain.Aggregates.Equipments.Enums;
 
 namespace Application.Feature.Common.Projections.EquipmentActivities
 {
@@ -8,5 +9,5 @@ namespace Application.Feature.Common.Projections.EquipmentActivities
         public string? Description { get; set; }
         public decimal LaborCost { get; set; }
         public List<EquipmentActivityDetailModel> Details { get; set; } = [];
-    }
+	}
 }
