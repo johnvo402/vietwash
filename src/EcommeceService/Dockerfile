@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0.12 AS base
 WORKDIR /app
 EXPOSE 8080
 
-# Cài các thư viện cần thiết để chạy Chrome headless
+
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
@@ -23,17 +23,22 @@ RUN apt-get update && apt-get install -y \
     libatk1.0-0 \
     libpangocairo-1.0-0 \
     libpango-1.0-0 \
-    fonts-liberation \
     libappindicator3-1 \
     libxext6 \
     --no-install-recommends && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy the published application from the workflow
+# Copy the published application
 FROM base AS final
 WORKDIR /app
 COPY src/EcommeceService/app/publish .
 COPY src/EcommeceService/Presentation/wwwroot wwwroot
+
+# 🔽 Copy font Times New Roman từ thư mục bạn chỉ định
+COPY src/EcommeceService/Presentation/Data/Font /usr/share/fonts/truetype/custom/
+
+# Làm mới cache font
+RUN fc-cache -f -v
 
 ENTRYPOINT ["dotnet", "Presentation.dll"]

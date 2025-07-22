@@ -48,9 +48,10 @@ public class GetReceiptHandler(
                 new GetReceiptResponse { ReceiptUrl = receipt }
             );
         }
+        var receiptModel = orderDetailResult.MapToReceiptModel();
         // Step 2: Generate PDF
         var pdfBytes = await pdfService.GeneratePdfAsync(
-            new PdfGlobalParams { Template = new("Biennhan", orderDetailResult) }
+            new PdfGlobalParams { Template = new("Biennhan", receiptModel) }
         );
 
         if (pdfBytes is null || pdfBytes.Length == 0)

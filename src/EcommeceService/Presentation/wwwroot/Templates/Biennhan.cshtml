@@ -25,7 +25,6 @@
         .receipt {
             width: 210mm;
             height: 297mm;
-            /* A4 height */
             border: 1px solid #000;
             padding: 10mm;
             box-sizing: border-box;
@@ -45,6 +44,12 @@
 
         .header p {
             font-size: 12px;
+            margin: 2mm 0;
+        }
+
+        .header .receipt-title {
+            font-size: 16px;
+            font-weight: bold;
             margin: 2mm 0;
         }
 
@@ -88,7 +93,6 @@
             font-weight: bold;
             text-align: right;
             padding: 5mm;
-            border-top: 2px solid #000;
         }
 
         .signatures {
@@ -108,22 +112,23 @@
             height: 25mm;
         }
 
-        /* Different colors for each copy */
+        .amount-in-words {
+            font-size: 12px;
+            margin-top: 5mm;
+            text-align: left;
+        }
+
         .copy:nth-child(1) .receipt {
             background-color: #e6f3ff;
         }
 
-        /* Light blue */
         .copy:nth-child(2) .receipt {
             background-color: #ffe6e6;
         }
 
-        /* Light pink */
         .copy:nth-child(3) .receipt {
             background-color: #e6ffe6;
         }
-
-        /* Light green */
     </style>
 </head>
 
@@ -138,6 +143,7 @@
                 <h1>CỬA HÀNG GIẶT ỦI VIETWASH</h1>
                 <p>Địa chỉ: Nguyễn Văn Cừ, An Khánh, Ninh Kiều, Cần Thơ</p>
                 <p>Điện thoại: 038 339 5692</p>
+                <p class="receipt-title">Biên Lai</p>
             </div>
             <div class="info">
                 <p>Khách hàng: @Model.Customer.DisplayName</p>
@@ -167,7 +173,7 @@
                             <td>@(item.Quantity* item.UnitPrice)</td>
                         </tr>
                     }
-                    while (index < 5)
+                    while (index < 4)
                     {
                         index++;
                         <tr>
@@ -179,10 +185,14 @@
                             <td></td>
                         </tr>
                     }
+                    <tr class="total-row">
+                        <td colspan="5">Thành Tiền</td>
+                        <td>@Model.Total</td>
+                    </tr>
                 }
             </table>
-            <div class="total-row">
-                <p>TỔNG CỘNG: @Model.Total</p>
+            <div class="amount-in-words">
+                <p>Thành Tiền Bằng Chữ: @Model.TotalInWords</p>
             </div>
             <div class="signatures">
                 <p>Chữ ký khách hàng</p>
@@ -203,6 +213,7 @@
                 <h1>CỬA HÀNG GIẶT ỦI VIETWASH</h1>
                 <p>Địa chỉ: Nguyễn Văn Cừ, An Khánh, Ninh Kiều, Cần Thơ</p>
                 <p>Điện thoại: 038 339 5692</p>
+                <p class="receipt-title">Biên Lai</p>
             </div>
             <div class="info">
                 <p>Khách hàng: @Model.Customer.DisplayName</p>
@@ -232,7 +243,7 @@
                             <td>@(item.Quantity* item.UnitPrice)</td>
                         </tr>
                     }
-                    while (index1 < 5)
+                    while (index1 < 4)
                     {
                         index1++;
                         <tr>
@@ -244,10 +255,14 @@
                             <td></td>
                         </tr>
                     }
+                    <tr class="total-row">
+                        <td colspan="5">Thành Tiền</td>
+                        <td>@Model.Total</td>
+                    </tr>
                 }
             </table>
-            <div class="total-row">
-                <p>TỔNG CỘNG: @Model.Total</p>
+            <div class="amount-in-words">
+                <p>Thành Tiền Bằng Chữ: @Model.TotalInWords</p>
             </div>
             <div class="signatures">
                 <p>Chữ ký khách hàng</p>
@@ -268,6 +283,7 @@
                 <h1>CỬA HÀNG GIẶT ỦI VIETWASH</h1>
                 <p>Địa chỉ: Nguyễn Văn Cừ, An Khánh, Ninh Kiều, Cần Thơ</p>
                 <p>Điện thoại: 038 339 5692</p>
+                <p class="receipt-title">Biên Lai</p>
             </div>
             <div class="info">
                 <p>Khách hàng: @Model.Customer.DisplayName</p>
@@ -297,7 +313,7 @@
                             <td>@(item.Quantity* item.UnitPrice)</td>
                         </tr>
                     }
-                    while (index2 < 5)
+                    while (index2 < 4)
                     {
                         index2++;
                         <tr>
@@ -309,10 +325,14 @@
                             <td></td>
                         </tr>
                     }
+                    <tr class="total-row">
+                        <td colspan="5">Thành Tiền</td>
+                        <td>@Model.Total</td>
+                    </tr>
                 }
             </table>
-            <div class="total-row">
-                <p>TỔNG CỘNG: @Model.Total</p>
+            <div class="amount-in-words">
+                <p>Thành Tiền Bằng Chữ: @Model.TotalInWords</p>
             </div>
             <div class="signatures">
                 <p>Chữ ký khách hàng</p>
