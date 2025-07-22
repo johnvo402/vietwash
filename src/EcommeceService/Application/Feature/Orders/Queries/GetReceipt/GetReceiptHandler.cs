@@ -1,6 +1,7 @@
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Feature.Common.Projections.Receipts;
 using Application.Feature.Orders.Queries.Detail;
 using Contracts.ApiWrapper;
 using Contracts.Application.Common.Interfaces.Services.Pdf;
@@ -48,7 +49,7 @@ public class GetReceiptHandler(
                 new GetReceiptResponse { ReceiptUrl = receipt }
             );
         }
-        var receiptModel = orderDetailResult.MapToReceiptModel();
+        ReceiptModel? receiptModel = orderDetailResult.MapToReceiptModel();
         // Step 2: Generate PDF
         var pdfBytes = await pdfService.GeneratePdfAsync(
             new PdfGlobalParams { Template = new("Biennhan", receiptModel) }
