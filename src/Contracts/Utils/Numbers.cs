@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace Contracts.Utils;
@@ -21,7 +22,7 @@ public static class NumberToTextConverter
 
     public static string FormatCurrency(decimal number, string? currency = "đ")
     {
-        return string.Format("{0:N2}{1}", number, currency);
+        return string.Format(new CultureInfo("vi-VN"), "{0:N2}{1}", number, currency);
     }
 
     public static string ToVietnameseCurrencyText(decimal number)
