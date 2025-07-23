@@ -20,13 +20,13 @@ namespace Application.Features.Customers.Command.Create
             var branches = await unitOfWork
                 .Repository<BranchAccount>()
                 .QueryAsync()
-                .Select(x => new BranchAccountModel
+                .GroupBy(x => x.BranchId)
+                .Select(g => new BranchAccountModel
                 {
-                    BranchId = x.BranchId,
-                    BranchName = x.BranchName ?? string.Empty,
+                    BranchId = g.Key,
+                    BranchName = g.Select(x => x.BranchName).FirstOrDefault() ?? string.Empty,
                 })
-                .DistinctBy(x => x.BranchId)
-                .ToListAsync(cancellationToken);
+                .ToListAsync();
 
             string code = Generator.GenerateAccountCode(ROLE.CUSTOMER);
             Account mappingAccount = command.ToAccount(code, branches);
