@@ -9,5 +9,8 @@ namespace Application.Feature.Vouchers.Queries.CheckCode
     {
         [FromRoute(Name = RouterBase.Id)]
         public required string VoucherCode { get; set; }
+
+        [FromRoute(Name = "CustomerId")]
+        public required long CustomerId { get; set; }
     }
 }

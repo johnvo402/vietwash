@@ -211,10 +211,12 @@ namespace Presentation.Routes
                 + RouterBase.Id
                 + "}";
             public const string CheckCode =
-                $"{Ecommerce}/{RouterBase.prefix}{nameof(VoucherUsage)}/{nameof(CheckCode)}/"
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(VoucherUsage)}/"
                 + "{"
                 + RouterBase.Id
-                + "}";
+                + "}"
+                + $"/{nameof(CheckCode)}/"
+                + "{CustomerId}";
             public const string GetUpdateDelete =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Vouchers)}/" + "{" + RouterBase.Id + "}";
             public const string GetDetail =

@@ -1,6 +1,8 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Common.Messages;
+using Domain.Aggregates.Enums;
+using Domain.Aggregates.Users;
 using Domain.Aggregates.Vouchers;
 using FluentValidation;
 
@@ -20,6 +22,11 @@ namespace Application.Feature.Vouchers.Queries.CheckCode
 
         private void ApplyRule()
         {
+            RuleFor(x => x.CustomerId)
+                .MustAsync(CheckUserExists)
+                .WithState(x =>
+                    Messager.Create<User>().Message(MessageType.Existence).Negative().Build()
+                );
             RuleFor(x => x.VoucherCode)
                 .MustAsync(CheckVoucherCode)
                 .WithState(x =>
@@ -61,6 +68,14 @@ namespace Application.Feature.Vouchers.Queries.CheckCode
                         ),
                     cancellation
                 );
+        }
+
+        private async Task<bool> CheckUserExists(long userId, CancellationToken cancellation)
+        {
+            var now = DateTimeOffset.UtcNow;
+            return await _unitOfWork
+                .Repository<User>()
+                .AnyAsync(x => x.Id == userId && x.Status == ActivationStatus.Active, cancellation);
         }
     }
 }
