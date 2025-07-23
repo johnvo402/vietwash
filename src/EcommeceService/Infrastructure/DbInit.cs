@@ -14,6 +14,7 @@ using Domain.Aggregates.Services;
 using Domain.Aggregates.Services.Enums;
 using Domain.Aggregates.Services.Specifications;
 using Domain.Aggregates.Suppliers;
+using Domain.Aggregates.Tariffs;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Domain.Aggregates.Vouchers;
@@ -132,7 +133,14 @@ public class DbInitializer
 
                 logger.Information("Hoàn tất khởi tạo phiếu nhập kho.");
             }
+            if (!await unitOfWork.Repository<Tariff>().AnyAsync())
+            {
+                logger.Information("Bắt đầu khởi tạo phiếu nhập kho...");
 
+                await InitializeTariffsAsync(unitOfWork, logger, cancellationToken);
+
+                logger.Information("Hoàn tất khởi tạo phiếu nhập kho.");
+            }
             await unitOfWork.CommitAsync();
         }
         catch (Exception ex)
@@ -971,5 +979,160 @@ public class DbInitializer
 
         await unitOfWork.Repository<Voucher>().AddRangeAsync(vouchers, cancellationToken);
         await unitOfWork.SaveAsync(cancellationToken);
+    }
+
+    public static async Task InitializeTariffsAsync(
+        IUnitOfWork unitOfWork,
+        ILogger logger,
+        CancellationToken cancellationToken
+    )
+    {
+        // Lấy danh sách service và unit_relations hợp lệ
+        var services = await unitOfWork
+            .DynamicReadOnlyRepository<Service>()
+            .ListAsync(
+                new ListServiceSpecification(),
+                new QueryParamRequest { },
+                s => new
+                {
+                    s.Id,
+                    s.Name,
+                    UnitRelations = s
+                        .UnitRelations.Where(x =>
+                            x.Status.Equals(ActivationStatus.Active) && x.Price > 0
+                        )
+                        .Select(x => new
+                        {
+                            x.Id,
+                            x.Name,
+                            x.Price,
+                            x.ProcessingTime,
+                            x.Status,
+                        })
+                        .ToList(),
+                },
+                cancellationToken
+            );
+
+        if (!services.Any())
+        {
+            logger.Warning("Không tìm thấy service nào trong cơ sở dữ liệu.");
+            return;
+        }
+
+        // Lọc các service có unit_relations hợp lệ
+        var validServices = services.Where(s => s.UnitRelations.Any()).ToList();
+        if (!validServices.Any())
+        {
+            logger.Warning(
+                "Không tìm thấy service nào có unit_relations hợp lệ (status = Active và price > 0)."
+            );
+            return;
+        }
+
+        logger.Debug(
+            $"Tìm thấy {validServices.Count} service với {validServices.Sum(s => s.UnitRelations.Count)} unit_relations hợp lệ."
+        );
+
+        var random = new Random();
+        var branchIds = new long[] { 1, 2, 3 }; // Thay bằng truy vấn động nếu cần
+        var tariffNames = new[]
+        {
+            "basic_plan",
+            "premium_plan",
+            "enterprise_plan",
+            "starter_plan",
+            "advanced_plan",
+        };
+        var statusValues = Enum.GetValues(typeof(ActivationStatus))
+            .Cast<ActivationStatus>()
+            .ToArray();
+        int tariffsCreated = 0;
+        int serviceTariffsCreated = 0;
+
+        for (int i = 1; i <= 20; i++)
+        {
+            // Tạo Tariff mới
+            var tariff = new Tariff(
+                name: $"{tariffNames[random.Next(tariffNames.Length)]}_#{i}",
+                branchId: branchIds[random.Next(branchIds.Length)],
+                status: statusValues[random.Next(statusValues.Length)],
+                disable: random.Next(0, 2) == 0,
+                startAt: DateTimeOffset.UtcNow.AddDays(-random.Next(0, 30)),
+                endAt: random.Next(0, 2) == 0
+                    ? DateTimeOffset.UtcNow.AddDays(random.Next(30, 90))
+                    : null
+            );
+
+            // Theo dõi các cặp service_id và unit_relation_id đã sử dụng
+            var usedServiceUnitPairs = new HashSet<(long serviceId, long unitRelationId)>();
+
+            // Tạo 1-3 ServiceTariff cho Tariff này
+            int serviceTariffCount = random.Next(1, Math.Min(4, validServices.Count + 1)); // Đảm bảo không vượt quá số service hợp lệ
+            for (int j = 0; j < serviceTariffCount; j++)
+            {
+                // Chọn service ngẫu nhiên và đảm bảo không trùng
+                var availableServices = validServices
+                    .Where(s =>
+                        s.UnitRelations.Any(ur => !usedServiceUnitPairs.Contains((s.Id, ur.Id)))
+                    )
+                    .ToList();
+
+                if (!availableServices.Any())
+                {
+                    logger.Warning(
+                        $"Hết service hoặc unit_relation hợp lệ để tạo service_tariff cho tariff {tariff.Name}."
+                    );
+                    break;
+                }
+
+                var service = availableServices.OrderBy(x => random.Next()).First();
+                var unitRelation = service
+                    .UnitRelations.Where(ur => !usedServiceUnitPairs.Contains((service.Id, ur.Id)))
+                    .OrderBy(x => random.Next())
+                    .First();
+
+                var serviceTariff = new ServiceTariff
+                {
+                    TariffId = tariff.Id,
+                    ServiceId = service.Id,
+                    UnitRelationId = unitRelation.Id,
+                    Price = unitRelation.Price * (1 + (decimal)random.NextDouble() * 0.2m),
+                    Tariff = tariff,
+                    Service = null!, // EF Core navigation
+                    UnitRelation = null!, // EF Core navigation
+                };
+
+                tariff.ServiceTariffs.Add(serviceTariff);
+                usedServiceUnitPairs.Add((service.Id, unitRelation.Id));
+                serviceTariffsCreated++;
+            }
+
+            // Lưu Tariff (cho phép lưu ngay cả khi không có service_tariff, tùy thuộc vào quy tắc nghiệp vụ)
+            await unitOfWork.Repository<Tariff>().AddAsync(tariff, cancellationToken);
+            tariffsCreated++;
+        }
+
+        try
+        {
+            await unitOfWork.SaveAsync(cancellationToken);
+            logger.Information(
+                $"Đã khởi tạo {tariffsCreated} tariff và {serviceTariffsCreated} service_tariff."
+            );
+        }
+        catch (DbUpdateException ex)
+            when (ex.InnerException is Npgsql.PostgresException pgEx && pgEx.SqlState == "23505")
+        {
+            logger.Error(
+                ex,
+                $"Lỗi lưu dữ liệu do vi phạm ràng buộc khóa duy nhất: {pgEx.MessageText}"
+            );
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.Error(ex, "Lỗi không xác định khi lưu tariff và service_tariff.");
+            throw;
+        }
     }
 }
