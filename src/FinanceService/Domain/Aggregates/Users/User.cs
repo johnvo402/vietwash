@@ -62,10 +62,10 @@ public class User : BaseEntity
         }
     }
 
-    public User(string displayName, string email, string phoneNumber, string role, string code)
+    public User(string displayName, string? email, string phoneNumber, string role, string code)
     {
         DisplayName = Guard.Against.Null(displayName, nameof(DisplayName));
-        Email = Guard.Against.Null(email, nameof(Email));
+        Email = email;
         PhoneNumber = Guard.Against.Null(phoneNumber, nameof(PhoneNumber));
         Role = Guard.Against.NullOrEmpty(role, nameof(Role));
         Code = Guard.Against.NullOrEmpty(code, nameof(Code));
