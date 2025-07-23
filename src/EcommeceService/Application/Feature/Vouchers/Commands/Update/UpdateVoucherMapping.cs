@@ -5,13 +5,13 @@ namespace Application.Feature.Vouchers.Commands.Update
 {
     public static class UpdateVoucherMapping
     {
-        public static void FromUpdateModel(this Voucher entity, VoucherModel model)
+        public static void FromUpdateModel(this Voucher entity, VoucherModel model, string barcode)
         {
             entity.Update(
                 code: model.Code,
                 title: model.Title,
                 imgUrl: model.ImgUrl,
-                barcode: model.Barcode,
+                barcode: barcode,
                 discountFixed: model.DiscountFixed,
                 discountValue: model.DiscountValue,
                 // totalQuantity: model.TotalQuantity,

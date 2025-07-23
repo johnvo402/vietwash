@@ -7,7 +7,7 @@ namespace Application.Feature.Vouchers.Commands.Create
 {
     public static class CreateVoucherMapping
     {
-        public static Voucher ToEntity(this VoucherModel model)
+        public static Voucher ToEntity(this VoucherModel model, string barcode)
         {
             if (string.IsNullOrWhiteSpace(model.Code))
             {
@@ -18,7 +18,7 @@ namespace Application.Feature.Vouchers.Commands.Create
                 code: model.Code,
                 title: model.Title,
                 imgUrl: model.ImgUrl,
-                barcode: model.Barcode,
+                barcode: barcode,
                 discountFixed: model.DiscountFixed,
                 discountValue: model.DiscountValue,
                 startAt: model.StartAt,

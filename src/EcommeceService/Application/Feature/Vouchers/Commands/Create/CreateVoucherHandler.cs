@@ -1,4 +1,5 @@
 ﻿using System.Data.Common;
+using Application.Common.Interfaces;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
@@ -7,15 +8,13 @@ using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Domain.Aggregates.Vouchers;
 using Mediator;
-using Microsoft.EntityFrameworkCore.Metadata.Conventions;
-using Microsoft.OpenApi.Extensions;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Application.Feature.Vouchers.Commands.Create
 {
     public class CreateVoucherHandler(
         IUnitOfWork unitOfWork,
-        IMediaUpdateService mediaUpdateService
+        IMediaUpdateService mediaUpdateService,
+        IQrGenerator qrGenerator
     ) : IRequestHandler<CreateVoucherCommand, Result>
     {
         public async ValueTask<Result> Handle(
@@ -23,7 +22,8 @@ namespace Application.Feature.Vouchers.Commands.Create
             CancellationToken cancellationToken
         )
         {
-            Voucher mappingVoucher = request.ToEntity();
+            var barcode = qrGenerator.GenerateQrBase64(request.Code!);
+            Voucher mappingVoucher = request.ToEntity(barcode);
 
             string? voucherImage = null;
             try
@@ -45,7 +45,6 @@ namespace Application.Feature.Vouchers.Commands.Create
                     mappingVoucher.TotalQuantity = userList.Count;
                     foreach (var user in userList)
                     {
-
                         mappingVoucher.VoucherCustomers.Add(
                             new VoucherCustomer
                             {
@@ -62,7 +61,6 @@ namespace Application.Feature.Vouchers.Commands.Create
                     mappingVoucher.TotalQuantity = customerIds.Count;
                     foreach (var customerId in customerIds)
                     {
-
                         mappingVoucher.VoucherCustomers.Add(
                             new VoucherCustomer
                             {

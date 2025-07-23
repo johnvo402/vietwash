@@ -1,22 +1,26 @@
-﻿using Application.Common.Errors;
-using Application.Common.Interfaces.Services.Identity;
-using Application.Common.Interfaces.UnitOfWorks;
-using Contracts.Common.Messages;
-using Domain.Aggregates.Vouchers.Specifications;
-using Domain.Aggregates.Vouchers;
-using Mediator;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Application.Common.Errors;
+using Application.Common.Interfaces;
+using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
+using Contracts.Common.Messages;
+using Domain.Aggregates.Vouchers;
+using Domain.Aggregates.Vouchers.Specifications;
+using Mediator;
 
 namespace Application.Feature.Vouchers.Commands.Update
 {
-    public class UpdateVoucherHandler(IUnitOfWork unitOfWork, IMediaUpdateService mediaUpdateService)
-    : IRequestHandler<UpdateVoucherCommand, Result>
+    public class UpdateVoucherHandler(
+        IUnitOfWork unitOfWork,
+        IMediaUpdateService mediaUpdateService,
+        IQrGenerator qrGenerator
+    ) : IRequestHandler<UpdateVoucherCommand, Result>
     {
         public async ValueTask<Result> Handle(
             UpdateVoucherCommand command,
@@ -34,19 +38,25 @@ namespace Application.Feature.Vouchers.Commands.Update
                 return Result.Failure(
                     new NotFoundError(
                         "Voucher not found",
-                        Messager.Create<Voucher>().Message(MessageType.Found).Negative().BuildMessage()
+                        Messager
+                            .Create<Voucher>()
+                            .Message(MessageType.Found)
+                            .Negative()
+                            .BuildMessage()
                     )
                 );
             }
-
+            var barcode = qrGenerator.GenerateQrBase64(command.Voucher.Code!);
             string? oldVoucherImage = existingVoucher.ImgUrl;
 
-            existingVoucher.FromUpdateModel(command.Voucher);
+            existingVoucher.FromUpdateModel(command.Voucher, barcode);
 
             string? newVoucherImage = command.Voucher.ImgUrl;
             try
             {
-                DbTransaction transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
+                DbTransaction transaction = await unitOfWork.BeginTransactionAsync(
+                    cancellationToken
+                );
 
                 await unitOfWork.Repository<Voucher>().UpdateAsync(existingVoucher);
 
