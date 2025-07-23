@@ -12,19 +12,23 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Presentation.Endpoints.Customer
 {
-	public class GetCustomerDetailEndpoint(ISender sender)
-	: EndpointBaseAsync.WithRequest<long>.WithActionResult<ApiResponse<GetCustomerDetailResponse>>
-	{
-		[HttpGet(Router.CustomerRoute.GetUpdateDelete, Name = Router.CustomerRoute.GetRouteName)]
-		[SwaggerOperation(Tags = [Router.CustomerRoute.Tags], Summary = "Detail Customer")]
-		[AuthorizeBy]
-		public override async Task<ActionResult<ApiResponse<GetCustomerDetailResponse>>> HandleAsync(
-			[FromRoute(Name = RouterBase.Id)] long id,
-			CancellationToken cancellationToken = default
-		)
-		{
-			var result = await sender.Send(new GetCustomerDetailQuery(id), cancellationToken);
-			return result.ToActionResult();
-		}
-	}
+    public class GetCustomerDetailEndpoint(ISender sender)
+        : EndpointBaseAsync.WithRequest<long>.WithActionResult<
+            ApiResponse<GetCustomerDetailResponse>
+        >
+    {
+        [HttpGet(Router.CustomerRoute.GetUpdateDelete, Name = Router.CustomerRoute.GetRouteName)]
+        [SwaggerOperation(Tags = [Router.CustomerRoute.Tags], Summary = "Detail Customer")]
+        [AuthorizeBy]
+        public override async Task<
+            ActionResult<ApiResponse<GetCustomerDetailResponse>>
+        > HandleAsync(
+            [FromRoute(Name = RouterBase.Id)] long id,
+            CancellationToken cancellationToken = default
+        )
+        {
+            var result = await sender.Send(new GetCustomerDetailQuery(id), cancellationToken);
+            return result.ToActionResult();
+        }
+    }
 }

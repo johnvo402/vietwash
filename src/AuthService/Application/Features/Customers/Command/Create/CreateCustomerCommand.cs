@@ -4,5 +4,5 @@ using Mediator;
 
 namespace Application.Features.Customers.Command.Create
 {
-	public class CreateCustomerCommand : CustomerModel, IRequest<Result>;
+    public class CreateCustomerCommand : CustomerModel, IRequest<Result<CreateCustomerResponse>>;
 }
