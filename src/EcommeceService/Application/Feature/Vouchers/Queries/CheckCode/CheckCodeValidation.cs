@@ -11,12 +11,10 @@ namespace Application.Feature.Vouchers.Queries.CheckCode
     public class CheckCodeValidation : AbstractValidator<CheckCodeQuery>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ICurrentAccount _currentAccount;
 
-        public CheckCodeValidation(IUnitOfWork unitOfWork, ICurrentAccount currentAccount)
+        public CheckCodeValidation(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _currentAccount = currentAccount;
             ApplyRule();
         }
 
@@ -28,32 +26,44 @@ namespace Application.Feature.Vouchers.Queries.CheckCode
                     Messager.Create<User>().Message(MessageType.Existence).Negative().Build()
                 );
             RuleFor(x => x.VoucherCode)
-                .MustAsync(CheckVoucherCode)
+                .MustAsync(
+                    (command, value, cts) =>
+                        CheckVoucherCode(value, command.CustomerId, cancellation: cts)
+                )
                 .WithState(x =>
                     Messager.Create<Voucher>().Message(MessageType.Valid).Negative().Build()
                 );
             RuleFor(x => x.VoucherCode)
-                .MustAsync(CheckVoucherDate)
+                .MustAsync(
+                    (command, value, cts) =>
+                        CheckVoucherDate(value, command.CustomerId, cancellation: cts)
+                )
                 .WithState(x =>
                     Messager.Create<Voucher>().Message(MessageType.Expired).Negative().Build()
                 );
         }
 
-        private async Task<bool> CheckVoucherCode(string code, CancellationToken cancellation)
+        private async Task<bool> CheckVoucherCode(
+            string code,
+            long customerId,
+            CancellationToken cancellation
+        )
         {
             return await _unitOfWork
                 .Repository<Voucher>()
                 .AnyAsync(
                     x =>
                         x.Code == code
-                        && x.VoucherCustomers.Any(x =>
-                            !x.IsUsed && x.CustomerId == _currentAccount.Id!
-                        ),
+                        && x.VoucherCustomers.Any(x => !x.IsUsed && x.CustomerId == customerId),
                     cancellation
                 );
         }
 
-        private async Task<bool> CheckVoucherDate(string code, CancellationToken cancellation)
+        private async Task<bool> CheckVoucherDate(
+            string code,
+            long customerId,
+            CancellationToken cancellation
+        )
         {
             var now = DateTimeOffset.UtcNow;
             return await _unitOfWork
@@ -63,9 +73,7 @@ namespace Application.Feature.Vouchers.Queries.CheckCode
                         x.Code == code
                         && x.StartAt <= now
                         && x.EndAt >= now
-                        && x.VoucherCustomers.Any(x =>
-                            !x.IsUsed && x.CustomerId == _currentAccount.Id!
-                        ),
+                        && x.VoucherCustomers.Any(x => !x.IsUsed && x.CustomerId == customerId),
                     cancellation
                 );
         }
