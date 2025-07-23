@@ -1038,11 +1038,11 @@ public class DbInitializer
         var branchIds = new long[] { 1, 2, 3 }; // Thay bằng truy vấn động nếu cần
         var tariffNames = new[]
         {
-            "basic_plan",
-            "premium_plan",
-            "enterprise_plan",
-            "starter_plan",
-            "advanced_plan",
+            "Basic plan",
+            "Premium plan",
+            "Enterprise plan",
+            "Starter plan",
+            "Advanced plan",
         };
         var statusValues = Enum.GetValues(typeof(ActivationStatus))
             .Cast<ActivationStatus>()
@@ -1054,10 +1054,9 @@ public class DbInitializer
         {
             // Tạo Tariff mới
             var tariff = new Tariff(
-                name: $"{tariffNames[random.Next(tariffNames.Length)]}_#{i}",
+                name: tariffNames[random.Next(tariffNames.Length)],
                 branchId: branchIds[random.Next(branchIds.Length)],
                 status: statusValues[random.Next(statusValues.Length)],
-                disable: random.Next(0, 2) == 0,
                 startAt: DateTimeOffset.UtcNow.AddDays(-random.Next(0, 30)),
                 endAt: random.Next(0, 2) == 0
                     ? DateTimeOffset.UtcNow.AddDays(random.Next(30, 90))

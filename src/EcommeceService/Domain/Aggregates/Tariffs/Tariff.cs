@@ -22,7 +22,6 @@ namespace Domain.Aggregates.Tariffs
             string name,
             long branchId,
             ActivationStatus status,
-            bool disable = false,
             DateTimeOffset? startAt = null,
             DateTimeOffset? endAt = null
         )
@@ -30,7 +29,7 @@ namespace Domain.Aggregates.Tariffs
             Name = Guard.Against.NullOrWhiteSpace(name, nameof(name)).Trim();
             BranchId = Guard.Against.NegativeOrZero(branchId, nameof(branchId));
             Status = Guard.Against.EnumOutOfRange(status, nameof(status));
-            Disable = disable;
+            Disable = false;
             StartAt = startAt;
             EndAt = endAt;
         }
