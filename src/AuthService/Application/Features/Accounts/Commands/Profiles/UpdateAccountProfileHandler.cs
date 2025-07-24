@@ -5,7 +5,6 @@ using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Contracts.Common.Messages;
-using Contracts.Dtos.Models;
 using Domain.Aggregates.Accounts;
 using Domain.Aggregates.Accounts.Specifications;
 using Infrastructure.Constants;
@@ -40,8 +39,13 @@ public class UpdateAccountProfileHandler(
             );
         }
 
-        string? oldAvatar = user.AvtUrl;
-
+        string? oldAvatar = null;
+        string? newAvatar = null;
+        if (user.AvtUrl != command.AvtUrl)
+        {
+            oldAvatar = user.AvtUrl;
+            newAvatar = command.AvtUrl;
+        }
         user.FromUpdateModel(command);
 
         user.AvtUrl = command.AvtUrl;
@@ -61,7 +65,7 @@ public class UpdateAccountProfileHandler(
         }
         catch (Exception)
         {
-            await avatarUpdate.DeleteMediaAsync(user.AvtUrl);
+            await avatarUpdate.DeleteMediaAsync(newAvatar);
             await unitOfWork.RollbackAsync(cancellationToken);
 
             throw;

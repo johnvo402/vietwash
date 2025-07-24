@@ -25,6 +25,7 @@ public static class DependencyInjection
             .AddSingleton(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>))
             .AddSingleton(typeof(IPipelineBehavior<,>), typeof(PerformaceBehavior<,>))
             .AddSingleton(typeof(IPipelineBehavior<,>), typeof(ProcessImagePathBehavior<,>))
+            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(ProcessImageKeyBehavior<,>))
             .AddValidatorsFromAssembly(currentAssembly)
             .AddSingleton<IAuthorizationPolicyProvider, AuthorizePolicyProvider>()
             .AddSingleton<IAuthorizationHandler, AuthorizeHandler>()
