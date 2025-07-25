@@ -34,10 +34,12 @@
             margin: 5px 0;
             font-size: 20px;
         }
+
         .header h2 {
             margin: 5px 0;
             font-size: 18px;
         }
+
         .header p {
             margin: 2px 0;
             font-size: 12px;
@@ -113,6 +115,10 @@
             font-weight: bold;
         }
 
+        .normal {
+            font-weight: normal;
+        }
+
         .qr-box {
             text-align: right;
         }
@@ -128,7 +134,7 @@
     <div class="invoice">
         <div class="header">
             <img src="@Model.OrgInfo?.Logo" alt="Logo" />
-            <h1>HÓA ĐƠN GIÁ TRỊ GIA TĂNG (GTGT)</h1>
+            <h1>HÓA ĐƠN GIÁ TRỊ GIA TĂNG</h1>
             <h2>VAT INVOICE</h2>
             <p><strong>Mẫu số (Form No.):</strong> 01GTKT0/001 | <strong>Ký hiệu (Serial):</strong> @Model.InvoiceSymbol
             </p>
@@ -211,8 +217,8 @@
                     <td colspan="5" class="text-right">Tổng cộng thanh toán (Total Payment):</td>
                     <td class="text-right">@Model.TotalWithTax</td>
                 </tr>
-                 <tr class="bold">
-                    <td colspan="6" class="text-left">Số tiền viết bằng chữ (Amount in words): @Model.TotalInWords</td>
+                <tr class="bold">
+                    <td colspan="6" class="text-left">Số tiền viết bằng chữ (Amount in words): <p class="normal">@Model.TotalInWords</p></td>
                 </tr>
             </tbody>
         </table>
