@@ -20,7 +20,10 @@ namespace Infrastructure.Data.Configurations
                 .HasOne(x => x.Tariff)
                 .WithMany(x => x.ServiceTariffs)
                 .HasForeignKey(x => x.TariffId);
-            builder.HasOne(x => x.Service).WithMany().HasForeignKey(x => x.ServiceId);
+            builder
+                .HasOne(x => x.Service)
+                .WithMany(x => x.ServiceTariffs)
+                .HasForeignKey(x => x.ServiceId);
             builder.HasOne(x => x.UnitRelation).WithMany().HasForeignKey(x => x.UnitRelationId);
         }
     }
