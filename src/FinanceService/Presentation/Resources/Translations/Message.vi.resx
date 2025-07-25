@@ -297,4 +297,8 @@
     <value>Tải trọng</value>
     <comment> </comment>
   </data>
+   <data name="EInvoice" xml:space="preserve">
+    <value>Hóa đơn điện tử</value>
+    <comment> </comment>
+  </data>
 </root>
