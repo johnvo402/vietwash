@@ -8,6 +8,7 @@ namespace Application.Feature.Common.Projections.Tariffs
     public class TariffProjection : BaseEntity
     {
         public string Name { get; set; }
+        public long BranchId { get; set; }
         public DateTimeOffset? StartAt { get; set; }
         public DateTimeOffset? EndAt { get; set; }
         public ActivationStatus Status { get; set; }
@@ -20,6 +21,7 @@ namespace Application.Feature.Common.Projections.Tariffs
             StartAt = tariff.StartAt;
             EndAt = tariff.EndAt;
             Status = tariff.Status;
+            BranchId = tariff.BranchId;
             ServiceTariffs = tariff
                 .ServiceTariffs.Select(x => x.ToServiceTariffProjectionResponse())
                 .ToList();
