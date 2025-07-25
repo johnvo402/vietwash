@@ -1,4 +1,6 @@
 ﻿using Application.Common.Security;
+using Application.Feature.Common.Projections.Units;
+using Application.Feature.Services.Queries.List;
 using Domain.Aggregates.Enums;
 using Domain.Aggregates.Services;
 using Domain.Aggregates.Services.Enums;
@@ -15,6 +17,8 @@ namespace Application.Feature.Common.Projections.Services
         [File]
         public string? Image { get; set; }
         public ActivationStatus? Status { get; set; }
+        public CategoryService? Category { get; set; }
+        public ICollection<UnitRelationProjection> UnitRelations { get; set; } = [];
 
         public virtual void MappingFrom(Service service)
         {

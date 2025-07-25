@@ -11,6 +11,8 @@ namespace Presentation.Routes
         {
             public const string Tags = $"{nameof(ServiceRoute)} endpoint";
             public const string Services = $"{Ecommerce}/{RouterBase.prefix}{nameof(Services)}";
+            public const string ServicesByTariff =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Services)}/{nameof(ServicesByTariff)}";
             public const string GetUpdateDelete =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Services)}/" + "{" + RouterBase.Id + "}";
             public const string GetDetail =

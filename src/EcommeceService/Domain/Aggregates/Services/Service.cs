@@ -23,6 +23,8 @@ namespace Domain.Aggregates.Services
         public ICollection<OrderItem> OrderItems { get; set; } = [];
         public ICollection<UnitRelation> UnitRelations { get; set; } = [];
         public ICollection<GroupService> GroupServices { get; set; } = [];
+        public ICollection<ServiceTariff> ServiceTariffs { get; set; } = [];
+
         public ICollection<ServicePriceTariffHistory> ServicePriceTariffHistories { get; set; } =
             [];
 

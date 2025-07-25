@@ -12,7 +12,10 @@ public class ServiceConfiguration : IEntityTypeConfiguration<Service>
         builder.HasIndex(x => x.Id);
         builder.Property(x => x.Name).HasColumnType("citext");
         builder.HasIndex(x => x.CategoryId);
-        builder.HasOne(x => x.Category).WithMany( c=> c.Services).HasForeignKey(x => x.CategoryId);
-
+        builder.HasOne(x => x.Category).WithMany(c => c.Services).HasForeignKey(x => x.CategoryId);
+        builder
+            .HasMany(x => x.ServiceTariffs)
+            .WithOne(c => c.Service)
+            .HasForeignKey(x => x.ServiceId);
     }
 }

@@ -16,6 +16,7 @@ namespace Infrastructure.Data.Configurations
         {
             builder.HasKey(x => x.Id);
             builder.HasIndex(x => x.Id);
+            builder.HasIndex(x => x.Code);
             builder.Property(x => x.Code).HasColumnType("citext");
             builder.Property(x => x.Amount).HasColumnType("numeric");
             builder.Property(x => x.Total).HasColumnType("numeric");

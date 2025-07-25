@@ -33,5 +33,17 @@ namespace Presentation.Routes
             public const string GetCustomerPoint =
                 $"{Finance}/{RouterBase.prefix}{nameof(Transaction)}/{nameof(GetCustomerPoint)}";
         }
+
+        public static class EInvoiceRoute
+        {
+            public const string Tags = $"{nameof(EInvoiceRoute)} endpoint";
+            public const string EInvoice = $"{Finance}/{RouterBase.prefix}{nameof(EInvoice)}";
+
+            public const string GetByOrderId =
+                $"{Finance}/{RouterBase.prefix}{nameof(EInvoice)}/{nameof(GetByOrderId)}/"
+                + "{OrderId}";
+            public const string GetByCode =
+                $"{Finance}/{RouterBase.prefix}{nameof(EInvoice)}/{nameof(GetByCode)}/" + "{Code}";
+        }
     }
 }
