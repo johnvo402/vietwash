@@ -1,5 +1,5 @@
 ﻿using System.Data.Common;
-using Application.Common.Interfaces;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;

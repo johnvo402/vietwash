@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using Application.Common.Interfaces;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Application.Common.Interfaces.Services.Encryptions;
 using Contracts.Dtos.Requests;
@@ -313,7 +313,6 @@ public class DbInitializer
                 amount: totalPrice,
                 total: totalPrice,
                 status: status,
-                orderDate: DateTimeOffset.UtcNow.AddDays(-random.NextDouble() * 10),
                 customerId: customerId,
                 discountFixed: true,
                 discountValue: 0,
@@ -873,29 +872,6 @@ public class DbInitializer
         // 👉 Update status và phát event
         document.UpdateStatus(InventoryStatus.Completed);
         await unitOfWork.SaveAsync(cancellationToken);
-
-        if (paidAmount > 0)
-        {
-            var invoice = new InventoryInvoice
-            {
-                Amount = paidAmount,
-                Status = ActivationStatus.Active,
-                SupplierId = supplier.Id,
-                TransactionAt = DateTimeOffset.UtcNow,
-            };
-
-            var relation = new InventoryRelation
-            {
-                Amount = paidAmount,
-                InventoryDocument = document,
-                InventoryInvoice = invoice,
-            };
-
-            invoice.InventoryRelationships.Add(relation);
-
-            await unitOfWork.Repository<InventoryInvoice>().AddAsync(invoice, cancellationToken);
-            await unitOfWork.SaveAsync(cancellationToken);
-        }
     }
 
     private static async Task InitVouchersAsync(

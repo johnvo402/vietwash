@@ -93,7 +93,6 @@ public static class DependencyInjection
         services
             .AddAmazonS3(configuration)
             .AddSingleton<ICurrentAccount, CurrentUserService>()
-            .AddSingleton<IQrGenerator, QrCodeGenerator>()
             .AddSingleton(typeof(IMediaUpdateService), typeof(MediaUpdateService))
             .Scan(scan =>
                 scan.FromCallingAssembly()

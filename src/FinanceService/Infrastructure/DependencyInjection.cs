@@ -2,6 +2,7 @@ using Application.Common.Interfaces.Registers;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.Infrastructure.Common;
 using Contracts.Infrastructure.PubSub;
 using Contracts.Infrastructure.Services.Cache.MemoryCache;
 using Infrastructure.Common;
@@ -42,6 +43,8 @@ public static class DependencyInjection
         services.Configure<DatabaseSettings>(options =>
             configuration.GetSection(nameof(DatabaseSettings)).Bind(options)
         );
+        services.Configure<OrgSetting>(configuration.GetSection(nameof(OrgSetting)));
+        services.AddSingleton(sp => sp.GetRequiredService<IOptions<OrgSetting>>().Value);
         services.TryAddSingleton<IValidateOptions<DatabaseSettings>, ValidateDatabaseSetting>();
 
         services.AddSingleton(sp =>

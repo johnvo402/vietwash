@@ -36,7 +36,7 @@ COPY src/EcommeceService/app/publish .
 COPY src/EcommeceService/Presentation/wwwroot wwwroot
 
 # 🔽 Copy font Times New Roman từ thư mục bạn chỉ định
-COPY src/EcommeceService/Presentation/Data/Font /usr/share/fonts/truetype/custom/
+COPY src/Statics/Data/Font /usr/share/fonts/truetype/custom/
 
 # Làm mới cache font
 RUN fc-cache -f -v

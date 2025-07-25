@@ -1,10 +1,4 @@
-﻿using Domain.Aggregates.Products;
-using Mediator;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Mediator;
 
 namespace Domain.Aggregates.Vouchers.Events
 {
@@ -17,4 +11,3 @@ namespace Domain.Aggregates.Vouchers.Events
         public decimal DiscountApply { get; init; }
     }
 }
-

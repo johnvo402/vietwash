@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Services.DistributedCache;
+using Application.Events.CreateEInvoiceEvents;
 using Application.Features.BranchUsers;
 using Application.Features.Funds.Events;
 using Application.Features.Users.Commands.Create;
@@ -80,6 +81,33 @@ public class PubSubBackgroundService : BackgroundService
                 );
             },
             "CreateAccountEvent"
+        );
+
+        _pubSubService.Subscribe<EInvoiceOrderMessage>(
+            async message =>
+            {
+                _logger.Information(
+                    "PubSubBackgroundService started, subscribing to EInvoiceEvent."
+                );
+
+                using var scope = _serviceProvider.CreateScope();
+                var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+                var pubSubLogService =
+                    scope.ServiceProvider.GetRequiredService<IPubSubLogService>();
+                var deadLetterPubSub = scope.ServiceProvider.GetRequiredService<IPubSubService>();
+
+                var request = new CreateEInvoiceEvent { Payload = message };
+
+                await ProcessMessageAsync<CreateEInvoiceEvent, PubSubResponse<CreateEInvoiceEvent>>(
+                    request,
+                    sender,
+                    pubSubLogService,
+                    deadLetterPubSub,
+                    "EInvoiceEvent",
+                    stoppingToken
+                );
+            },
+            "EInvoiceEvent"
         );
 
         _pubSubService.Subscribe<CreateFundEventPayload>(

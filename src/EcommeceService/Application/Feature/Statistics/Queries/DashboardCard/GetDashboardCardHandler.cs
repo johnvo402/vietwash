@@ -1,4 +1,5 @@
-﻿using Application.Common.Interfaces.Services;
+﻿using System.Linq.Expressions;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Statistics.Queries.RevenueStatistic;
 using Application.Feature.Statistics.Queries.SaleResult;
@@ -6,8 +7,8 @@ using Contracts.ApiWrapper;
 using Contracts.Dtos.Requests;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
-using Domain.Aggregates.Orders.Specifications;
 using Mediator;
+using Microsoft.EntityFrameworkCore;
 
 public class GetDashboardCardHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
     : IRequestHandler<GetDashboardCardQuery, Result<GetDashboardCardResponse>>
@@ -18,55 +19,61 @@ public class GetDashboardCardHandler(IUnitOfWork unitOfWork, ICurrentAccount cur
     )
     {
         var listBranchUser = currentUser.Session!.Branches!.ToList();
-        var queryParamRequest = new QueryParamRequest();
 
-        var orderList = await unitOfWork
-            .DynamicReadOnlyRepository<Order>()
-            .ListAsync(
-                new ListOrderSpecification(
-                    string.Empty,
-                    string.Empty,
-                    request.BranchId,
-                    listBranchUser
-                ),
-                queryParamRequest,
-                cancellationToken
-            );
+        // Base query for orders
+        Expression<Func<Order, bool>> baseCriteria = o =>
+            listBranchUser.Contains(o.BranchId.ToString())
+            || o.BranchId == request.BranchId && o.OrderDate != null;
 
-        if (orderList == null || !orderList.Any())
+        var today = DateTimeOffset.UtcNow.Date;
+        var yesterday = today.AddDays(-1);
+        var lastMonth = today.AddMonths(-1);
+
+        // Query for completed orders today
+        Expression<Func<Order, bool>> todayCriteria = o =>
+            baseCriteria.Compile()(o)
+            && o.Status == OrderStatus.Completed
+            && o.OrderDate!.Value.Date == today;
+
+        var completedTodayOrdersQuery = unitOfWork.Repository<Order>().QueryAsync(todayCriteria);
+
+        var completedTodayOrders = await completedTodayOrdersQuery.ToListAsync(cancellationToken);
+
+        if (!completedTodayOrders.Any())
         {
             return Result<GetDashboardCardResponse>.Success();
         }
 
-        var today = DateTime.UtcNow.Date;
-        var yesterday = today.AddDays(-1);
-        var lastMonth = today.AddMonths(-1);
-
-        // Lọc những đơn hàng Completed hôm nay
-        var completedTodayOrders = orderList
-            .Where(o => o.Status == OrderStatus.Completed && o.OrderDate.Date == today)
-            .ToList();
-
         int numberOrder = completedTodayOrders.Count;
-
         decimal revenue = completedTodayOrders.Sum(o => o.Amount);
-
-        // Nếu netRevenue có công thức khác thì sửa ở đây, còn không thì giữ bằng revenue
         decimal netRevenue = revenue;
 
-        // Tổng doanh thu hôm qua
-        decimal revenueYesterday = orderList
-            .Where(o => o.Status == OrderStatus.Completed && o.OrderDate.Date == yesterday)
-            .Sum(o => o.Amount);
+        // Query for yesterday's revenue
+        Expression<Func<Order, bool>> yesterdayCriteria = o =>
+            baseCriteria.Compile()(o)
+            && o.Status == OrderStatus.Completed
+            && o.OrderDate!.Value.Date == yesterday;
 
-        // Tổng doanh thu tháng trước
-        decimal revenueLastMonth = orderList
-            .Where(o =>
-                o.Status == OrderStatus.Completed
-                && o.OrderDate.Month == lastMonth.Month
-                && o.OrderDate.Year == lastMonth.Year
-            )
-            .Sum(o => o.Amount);
+        var yesterdayOrdersQuery = unitOfWork.Repository<Order>().QueryAsync(yesterdayCriteria);
+
+        decimal revenueYesterday = await yesterdayOrdersQuery.SumAsync(
+            o => o.Amount,
+            cancellationToken
+        );
+
+        // Query for last month's revenue
+        Expression<Func<Order, bool>> lastMonthCriteria = o =>
+            baseCriteria.Compile()(o)
+            && o.Status == OrderStatus.Completed
+            && o.OrderDate!.Value.Month == lastMonth.Month
+            && o.OrderDate!.Value.Year == lastMonth.Year;
+
+        var lastMonthOrdersQuery = unitOfWork.Repository<Order>().QueryAsync(lastMonthCriteria);
+
+        decimal revenueLastMonth = await lastMonthOrdersQuery.SumAsync(
+            o => o.Amount,
+            cancellationToken
+        );
 
         return Result<GetDashboardCardResponse>.Success(
             new GetDashboardCardResponse

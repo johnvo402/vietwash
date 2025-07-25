@@ -1,11 +1,5 @@
-using System.Threading;
-using System.Xml.Linq;
 using Ardalis.GuardClauses;
-using Domain.Aggregates.Enums;
 using Domain.Aggregates.Orders.Enums;
-using Domain.Aggregates.Products;
-using Domain.Aggregates.Products.Events;
-using Domain.Aggregates.Services;
 using Domain.Aggregates.Orders.Events;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Vouchers;
@@ -13,7 +7,6 @@ using Domain.Aggregates.Vouchers.Events;
 using Domain.Events;
 using Mediator;
 using Shared.Kernel.Common;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Domain.Aggregates.Orders
 {
@@ -32,12 +25,10 @@ namespace Domain.Aggregates.Orders
         public decimal DiscountValue { get; set; } = default!;
         public string Note { get; set; } = default!;
         public OrderStatus Status { get; set; } = default!;
-        public DateTimeOffset OrderDate { get; set; } = default!;
+        public DateTimeOffset? OrderDate { get; set; }
         public DateTimeOffset DeliveryTime { get; set; } = default!;
         public User? Staff { get; set; }
         public User? Customer { get; set; }
-        public string? Receipt { get; set; }
-
         public virtual VoucherUsage? VoucherUsage { get; set; }
 
         public string? CodeConfirm { get; set; }
@@ -55,6 +46,8 @@ namespace Domain.Aggregates.Orders
                     return true;
                 case UpdateStatusOrderEvent:
                     return true;
+                case EInvoiceEvent:
+                    return true;
                 default:
                     return false;
             }
@@ -69,7 +62,6 @@ namespace Domain.Aggregates.Orders
             decimal amount,
             decimal total,
             OrderStatus status,
-            DateTimeOffset orderDate,
             long? voucherId = null,
             string? voucherCode = null,
             long? customerId = null,
@@ -90,66 +82,17 @@ namespace Domain.Aggregates.Orders
             Amount = amount;
             Total = total;
             Status = status;
-            OrderDate = orderDate;
 
             CustomerId = customerId;
             DiscountFixed = discountFixed;
             DiscountValue = discountValue;
             Note = note ?? string.Empty;
-            DeliveryTime = deliveryTime ?? orderDate.AddDays(1);
-        }
-
-        public void Update(
-            long? customerId = null,
-            long? branchId = null,
-            long? staffId = null,
-            string? code = null,
-            decimal? amount = null,
-            decimal? total = null,
-            bool? discountFixed = null,
-            decimal? discountValue = null,
-            string? note = null,
-            OrderStatus? status = null,
-            DateTimeOffset? orderDate = null,
-            DateTimeOffset? deliveryTime = null
-        )
-        {
-            if (code is not null)
-                Guard.Against.NullOrWhiteSpace(code, nameof(code));
-
-            if (status.HasValue)
-                Guard.Against.Null(status, nameof(status));
-
-            if (customerId.HasValue)
-                CustomerId = customerId.Value;
-            if (branchId.HasValue)
-                BranchId = branchId.Value;
-            if (staffId.HasValue)
-                StaffId = staffId.Value;
-            if (code is not null)
-                Code = code;
-            if (amount.HasValue)
-                Amount = amount.Value;
-            if (total.HasValue)
-                Total = total.Value;
-            if (discountFixed.HasValue)
-                DiscountFixed = discountFixed.Value;
-            if (discountValue.HasValue)
-                DiscountValue = discountValue.Value;
-            if (note is not null)
-                Note = note;
-            if (status.HasValue)
-                Status = status.Value;
-            if (orderDate.HasValue)
-                OrderDate = orderDate.Value;
-            if (deliveryTime.HasValue)
-                DeliveryTime = deliveryTime.Value;
-            Receipt = null;
+            DeliveryTime = deliveryTime ?? DateTimeOffset.UtcNow.AddDays(1);
         }
 
         public void EmitVoucherUsageEvent(decimal discountApply, long voucherId)
         {
-            if (voucherId != null && CustomerId.HasValue)
+            if (CustomerId.HasValue)
             {
                 Emit(
                     new VoucherUsageEvent
@@ -174,7 +117,8 @@ namespace Domain.Aggregates.Orders
                     break;
                 case OrderStatus.Completed:
                     Status = OrderStatus.Completed;
-
+                    OrderDate = DateTimeOffset.UtcNow;
+                    Emit(new EInvoiceEvent() { Order = this });
                     Emit(
                         new CreateFundEvent()
                         {

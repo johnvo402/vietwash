@@ -13,7 +13,7 @@ namespace Application.Feature.Common.Projections.Orders
         public bool DiscountFixed { get; set; }
         public decimal DiscountValue { get; set; }
         public long? CustomerId { get; set; }
-        public DateTimeOffset OrderDate { get; set; }
+        public DateTimeOffset? OrderDate { get; set; }
         public DateTimeOffset DeliveryTime { get; set; }
         public OrderStatus Status { get; set; }
         public long BranchId { get; set; }

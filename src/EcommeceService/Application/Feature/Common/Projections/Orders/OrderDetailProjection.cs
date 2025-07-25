@@ -9,7 +9,6 @@ namespace Application.Feature.Common.Projections.Orders
     public class OrderDetailProjection : OrderProjection
     {
         public string? Note { get; set; }
-        public string? Receipt { get; set; }
         public long? StaffId { get; set; }
         public PaymentMethod? PaymentMethod { get; set; }
         public string? QrCode { get; set; }
@@ -35,7 +34,6 @@ namespace Application.Feature.Common.Projections.Orders
             DeliveryTime = order.DeliveryTime;
             Status = order.Status;
             BranchId = order.BranchId;
-            Receipt = order.Receipt;
             QrCode = order.CodeConfirm;
             PaymentMethod = order.PaymentMethod;
             OrderItems = order

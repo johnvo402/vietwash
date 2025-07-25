@@ -1,11 +1,11 @@
 ﻿using Application.Features.Common.Projections.Users;
+using Contracts.Application.Common;
 using Domain.Aggregates.Feedbacks.Enums;
 
 namespace Application.Feature.Common.Projections.Feedbacks
 {
-    public class FeedbackProjection
+    public class FeedbackProjection : BaseResponse
     {
-        public long Id { get; set; }
         public long BranchId { get; set; }
         public long ServiceId { get; set; }
         public long? CustomerId { get; set; }

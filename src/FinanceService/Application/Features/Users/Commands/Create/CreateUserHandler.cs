@@ -7,7 +7,7 @@ using Mediator;
 
 namespace Application.Features.Users.Commands.Create;
 
-public class CreateUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService mediaUpdateService)
+public class CreateUserHandler(IUnitOfWork unitOfWork)
     : IRequestHandler<CreateUserCommand, PubSubResponse<CreateUserCommand>>
 {
     public async ValueTask<PubSubResponse<CreateUserCommand>> Handle(
@@ -43,7 +43,6 @@ public class CreateUserHandler(IUnitOfWork unitOfWork, IMediaUpdateService media
         }
         catch (Exception ex)
         {
-            await mediaUpdateService.DeleteMediaAsync(userAvatar);
             await unitOfWork.RollbackAsync(cancellationToken);
             return new PubSubResponse<CreateUserCommand>
             {

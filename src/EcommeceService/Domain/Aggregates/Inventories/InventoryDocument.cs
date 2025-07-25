@@ -18,7 +18,6 @@ namespace Domain.Aggregates.Inventories
         public string? Note { get; set; }
         public string? CancelReason { get; set; }
 
-        public ICollection<InventoryRelation> InventoryRelationships { get; set; } = [];
         public ICollection<EquipmentSupplying> EquipmentSupplyings { get; set; } = [];
         public ICollection<ProductSupplying> ProductSupplyings { get; set; } = [];
 

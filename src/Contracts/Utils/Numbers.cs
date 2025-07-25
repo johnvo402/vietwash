@@ -20,7 +20,7 @@ public static class NumberToTextConverter
     };
     private static readonly string[] DonVi = { "", "nghìn", "triệu", "tỷ" };
 
-    public static string FormatCurrency(decimal number, string? currency = "đ")
+    public static string FormatCurrency(this decimal number, string? currency = "")
     {
         return string.Format(new CultureInfo("vi-VN"), "{0:N0}{1}", number, currency);
     }
@@ -28,13 +28,13 @@ public static class NumberToTextConverter
     public static string ToVietnameseCurrencyText(decimal number)
     {
         if (number == 0)
-            return "Không đồng chẵn";
+            return "Không đồng";
 
         bool isNegative = number < 0;
         number = Math.Abs(number);
 
         long soNguyen = (long)Math.Floor(number); // Phần nguyên
-        string result = ToText(soNguyen) + " đồng chẵn";
+        string result = ToText(soNguyen) + " đồng";
 
         return (isNegative ? "Âm " : "") + CapitalizeFirst(result.Trim());
     }

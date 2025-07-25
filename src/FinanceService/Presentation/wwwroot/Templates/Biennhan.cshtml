@@ -1,0 +1,234 @@
+@model Application.Common.Models.EInvoices.ReceiptModel
+
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Hóa đơn điện tử</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .invoice {
+            max-width: 800px;
+            margin: auto;
+            border: 1px solid #000;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+        }
+
+        .header img {
+            width: 120px;
+            margin-bottom: 10px;
+        }
+
+        .header h1 {
+            margin: 5px 0;
+            font-size: 20px;
+        }
+        .header h2 {
+            margin: 5px 0;
+            font-size: 18px;
+        }
+        .header p {
+            margin: 2px 0;
+            font-size: 12px;
+        }
+
+        .info {
+            margin-top: 15px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .info-left,
+        .info-right {
+            width: 48%;
+        }
+
+        .info p {
+            margin: 3px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #000;
+        }
+
+        th,
+        td {
+            padding: 6px;
+            text-align: center;
+        }
+
+        .footer {
+            margin-top: 15px;
+            font-size: 12px;
+        }
+
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            font-size: 12px;
+        }
+
+        .signatures>div {
+            text-align: center;
+            width: 32%;
+        }
+
+        .stamp {
+            width: 100px;
+            height: auto;
+            margin-top: 5px;
+        }
+
+        .text-left {
+            text-align: left !important;
+        }
+
+        .text-right {
+            text-align: right !important;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .qr-box {
+            text-align: right;
+        }
+
+        .qr-box img {
+            width: 100px;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="invoice">
+        <div class="header">
+            <img src="@Model.OrgInfo?.Logo" alt="Logo" />
+            <h1>HÓA ĐƠN GIÁ TRỊ GIA TĂNG (GTGT)</h1>
+            <h2>VAT INVOICE</h2>
+            <p><strong>Mẫu số (Form No.):</strong> 01GTKT0/001 | <strong>Ký hiệu (Serial):</strong> @Model.InvoiceSymbol
+            </p>
+            <p><strong>Số hóa đơn (Invoice No.):</strong> @Model.InvoiceNumber</p>
+            <p><strong>Ngày phát hành (Issued Date):</strong> @Model.OrderDate.ToString("dd/MM/yyyy")</p>
+            <p><strong>Mã tra cứu (Lookup Code):</strong> <span class="bold">@Model.LookupCode</span></p>
+        </div>
+
+        <div class="info">
+            <div class="info-left">
+                <p><strong>Đơn vị bán hàng (Seller):</strong> @Model.OrgInfo?.Name</p>
+                <p><strong>Mã số thuế (Tax Code):</strong> @Model.OrgInfo?.TaxCode</p>
+                <p><strong>Địa chỉ (Address):</strong> @Model.OrgInfo?.Address</p>
+                <p><strong>Điện thoại (Phone):</strong> @Model.OrgInfo?.Phone</p>
+                <br />
+                <p><strong>Người mua hàng (Buyer):</strong> @Model.CustomerName</p>
+                <p><strong>Mã số thuế (Tax Code):</strong> @Model.CustomerTaxCode</p>
+                <p><strong>Điện thoại (Phone):</strong> @Model.CustomerPhone</p>
+            </div>
+            <div class="qr-box">
+                <img src="@Model.QrCodeUrl" alt="QR Code" />
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>STT<br />(No.)</th>
+                    <th>Tên hàng hóa, dịch vụ<br />(Goods/Service)</th>
+                    <th>ĐVT<br />(Unit)</th>
+                    <th>Số lượng<br />(Quantity)</th>
+                    <th>Đơn giá<br />(Unit Price)</th>
+                    <th>Thành tiền<br />(Amount)</th>
+                </tr>
+                <tr>
+                    <th>(1)</th>
+                    <th>(2)</th>
+                    <th>(3)</th>
+                    <th>(4)</th>
+                    <th>(5)</th>
+                    <th>(6) = (4) x (5)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int index = 1;
+                    foreach (var item in Model.OrderItems)
+                    {
+                        <tr>
+                            <td>@index</td>
+                            <td class="text-left">@item.ServiceName</td>
+                            <td>@item.UnitRelationName</td>
+                            <td>@item.Quantity</td>
+                            <td class="text-right">@item.UnitPrice</td>
+                            <td class="text-right">@item.TotalPriceItem</td>
+                        </tr>
+                        ;
+                        index++;
+                    }
+                }
+
+                <tr class="bold">
+                    <td colspan="5" class="text-right">Cộng tiền hàng (Subtotal):</td>
+                    <td class="text-right">@Model.Total</td>
+                </tr>
+                <tr class="bold">
+                    <td colspan="5" style="padding-right: 10px;">
+                        <div style="display: flex; justify-content: space-between; width: 100%;">
+                            <span class="text-left">Thuế suất GTGT (VAT Rate): @Model.VatPercent.ToString("N0")%</span>
+                            <span class="text-right">Tiền thuế GTGT (VAT Amount):</span>
+                        </div>
+                    </td>
+                    <td class="text-right">@Model.TaxTotal</td>
+                </tr>
+                <tr class="bold">
+                    <td colspan="5" class="text-right">Giảm giá (Discount):</td>
+                    <td class="text-right">@Model.Discount</td>
+                </tr>
+                <tr class="bold">
+                    <td colspan="5" class="text-right">Tổng cộng thanh toán (Total Payment):</td>
+                    <td class="text-right">@Model.TotalWithTax</td>
+                </tr>
+                 <tr class="bold">
+                    <td colspan="6" class="text-left">Số tiền viết bằng chữ (Amount in words): @Model.TotalInWords</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="signatures">
+            <div>
+                <p>Người mua hàng (Buyer)</p>
+                <p>(Ký, ghi rõ họ tên / Sign & full name)</p>
+            </div>
+            <div>
+                <p>Người bán hàng (Seller)</p>
+                <p>(Đã đóng dấu / Stamped)</p>
+                <img src="@Model.OrgInfo?.Stamp" alt="Con dấu" class="stamp" />
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

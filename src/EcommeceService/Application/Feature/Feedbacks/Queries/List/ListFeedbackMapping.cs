@@ -26,6 +26,8 @@ namespace Application.Feature.Feedbacks.Queries.List
                     .Select(r => r.Type)
                     .FirstOrDefault(),
                 CreatedUser = feedback.User != null ? feedback.User.UserDTOResponse() : null,
+                CreatedAt = feedback.CreatedAt,
+                UpdatedAt = feedback.UpdatedAt,
                 Replies = feedback
                     .Replies.Select(reply => new ReplyProjection
                     {

@@ -20,7 +20,6 @@ namespace Application.Feature.Vouchers.Queries.VoucherUsageDetail
             UpdatedAt = voucherUsage.UpdatedAt;
             UpdatedBy = voucherUsage.UpdatedBy;
 
-
             if (voucherUsage.Order is not null)
             {
                 var order = voucherUsage.Order;
@@ -31,7 +30,7 @@ namespace Application.Feature.Vouchers.Queries.VoucherUsageDetail
                     Total = order.Total,
                     Status = order.Status,
                     OrderDate = order.OrderDate,
-                    CustomerName = order.Customer?.DisplayName
+                    CustomerName = order.Customer?.DisplayName,
                 };
             }
         }
@@ -43,7 +42,7 @@ namespace Application.Feature.Vouchers.Queries.VoucherUsageDetail
         public string Code { get; set; } = default!;
         public decimal Total { get; set; }
         public Domain.Aggregates.Orders.Enums.OrderStatus Status { get; set; }
-        public DateTimeOffset OrderDate { get; set; }
+        public DateTimeOffset? OrderDate { get; set; }
         public string? CustomerName { get; set; }
     }
 }

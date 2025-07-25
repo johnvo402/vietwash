@@ -30,6 +30,8 @@ public class ProcessImageKeyBehavior<TMessage, TResponse>(
 
         foreach (PropertyInfo prop in fileProps)
         {
+            if (prop.GetIndexParameters().Length > 0)
+                continue;
             object? value = prop.GetValue(data);
             if (value is not string str || string.IsNullOrWhiteSpace(str))
                 continue;
@@ -41,8 +43,8 @@ public class ProcessImageKeyBehavior<TMessage, TResponse>(
                 logger.Information("✅ Converted {FullUrl} => {Key}", str, key);
             }
         }
-
-        foreach (PropertyInfo prop in data.GetType().GetProperties())
+        var props = data.GetType().GetProperties().Where(p => p.GetIndexParameters().Length == 0);
+        foreach (PropertyInfo prop in props)
         {
             if (prop.PropertyType == typeof(string))
                 continue;

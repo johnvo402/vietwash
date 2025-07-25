@@ -22,7 +22,6 @@ namespace Application.Feature.Orders.Command.Create
                 amount: amount,
                 total: CalculationTotal(amount, command.DiscountFixed, command.DiscountValue),
                 status: OrderStatus.Pending,
-                orderDate: DateTimeOffset.UtcNow,
                 customerId: command.CustomerId,
                 discountFixed: command.DiscountFixed,
                 discountValue: command.DiscountValue,
