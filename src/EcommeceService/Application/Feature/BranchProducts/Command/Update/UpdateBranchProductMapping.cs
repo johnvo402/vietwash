@@ -13,7 +13,6 @@ namespace Application.Feature.BranchProducts.Command.Update
                 name: model.Name,
                 description: model.Description,
                 sku: model.Sku,
-                barcode: model.Barcode,
                 image: model.Image,
                 status: model.Status,
                 capitalPrice: model.CapitalPrice,

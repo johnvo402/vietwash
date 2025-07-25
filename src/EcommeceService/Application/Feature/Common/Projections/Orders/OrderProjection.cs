@@ -1,4 +1,5 @@
 using Application.Feature.Services.Queries.Detail;
+using Application.Features.Common.Projections.Users;
 using Contracts.Application.Common;
 using Domain.Aggregates.Orders.Enums;
 
@@ -12,7 +13,7 @@ namespace Application.Feature.Common.Projections.Orders
         public bool DiscountFixed { get; set; }
         public decimal DiscountValue { get; set; }
         public long? CustomerId { get; set; }
-        public DateTimeOffset OrderDate { get; set; }
+        public DateTimeOffset? OrderDate { get; set; }
         public DateTimeOffset DeliveryTime { get; set; }
         public OrderStatus Status { get; set; }
         public long BranchId { get; set; }

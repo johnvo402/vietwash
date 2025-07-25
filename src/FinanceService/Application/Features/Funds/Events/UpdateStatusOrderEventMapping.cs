@@ -16,12 +16,32 @@ namespace Application.Features.Funds.Events
                 status: FundStatus.Confirmed,
                 amount: command.Amount,
                 fundBehaviorId: command.BehaviorId,
-                transactionDate: null, // Provide a DateTimeOffset? value as required
+                transactionDate: DateTimeOffset.UtcNow, // Provide a DateTimeOffset? value as required
                 paymentMethod: command.PaymentMethod,
                 branchId: command.BranchId,
                 note: null, // Assuming no note is provided in UpdateStatusOrderEvent
                 referenceId: command.ReferenceId, // TODO: Replace 0 with the actual referenceId as required
                 objectId: command.ObjectId, // Provide a value or null for objectId as required
+                metadata: command.Metadata // Provide a value or null for metadata as required
+            );
+        }
+
+        public static Transaction ToTransaction(this CreateFundEventPayload command)
+        {
+            if (command.ObjectId is null)
+                throw new ArgumentNullException(nameof(command.ObjectId));
+
+            var metadata = (command.Metadata ?? new Dictionary<string, object>()).ToDictionary(
+                kvp => kvp.Key,
+                kvp => (object?)kvp.Value
+            );
+
+            metadata["id"] = command.ReferenceId;
+            return new Transaction(
+                type: TransactionType.Point,
+                amount: Math.Ceiling(command.Amount / 1000),
+                transactionAt: DateTimeOffset.UtcNow, // Provide a DateTimeOffset? value as required
+                customerId: (long)command.ObjectId!, // Provide a value or null for objectId as required
                 metadata: command.Metadata // Provide a value or null for metadata as required
             );
         }

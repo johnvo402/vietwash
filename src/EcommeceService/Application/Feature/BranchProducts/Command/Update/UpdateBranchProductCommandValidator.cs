@@ -40,25 +40,6 @@ namespace Application.Feature.BranchProducts.Command.Update
                         .Negative()
                         .Build()
                 );
-            RuleFor(x => x.BranchProduct.Barcode)
-                .NotEmpty()
-                .WithState(x =>
-                    Messager
-                        .Create<BranchProduct>()
-                        .Property(x => x.Barcode)
-                        .Message(MessageType.Null)
-                        .Negative()
-                        .Build()
-                )
-                .MustAsync(IsBarcodeExistsAsync)
-                .WithState(_ =>
-                    Messager
-                        .Create<BranchProduct>()
-                        .Property(x => x.Barcode)
-                        .Message(MessageType.Found)
-                        .Negative()
-                        .Build()
-                );
         }
 
         private async Task<bool> IsSkuExistsAsync(
@@ -70,20 +51,6 @@ namespace Application.Feature.BranchProducts.Command.Update
             return !await unitOfWork
                 .Repository<BranchProduct>()
                 .AnyAsync(bp => bp.Sku == sku && bp.Id != command.BranchProductId, cancellation);
-        }
-
-        private async Task<bool> IsBarcodeExistsAsync(
-            UpdateBranchProductCommand command,
-            string barcode,
-            CancellationToken cancellation
-        )
-        {
-            return !await unitOfWork
-                .Repository<BranchProduct>()
-                .AnyAsync(
-                    bp => bp.Barcode == barcode && bp.Id != command.BranchProductId,
-                    cancellation
-                );
         }
     }
 }

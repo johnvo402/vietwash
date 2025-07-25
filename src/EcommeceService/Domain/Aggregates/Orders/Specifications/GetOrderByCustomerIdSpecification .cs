@@ -14,7 +14,6 @@ namespace Domain.Aggregates.Orders.Specifications
                 .ThenInclude(x => x.Service)
                 .Include(x => x.OrderItems)
                 .ThenInclude(x => x.UnitRelation)
-                .Include(x => x.OrderPayments)
                 .AsSplitQuery();
         }
     }

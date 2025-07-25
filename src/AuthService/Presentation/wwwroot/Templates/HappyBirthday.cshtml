@@ -1,0 +1,94 @@
+@model string
+
+@{
+    Layout = null;
+    var recipientName = Model;
+    var today = DateTime.Now.ToString("dd/MM/yyyy");
+    var logoUrl = "https://vietwash.vercel.app/favicon.ico";
+}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Chúc mừng sinh nhật!</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            padding: 30px;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 600px;
+            margin: auto;
+            text-align: center;
+        }
+
+        .logo img {
+            height: 60px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #ff6f61;
+            font-size: 26px;
+        }
+
+        p {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .voucher {
+            background-color: #ffe5e0;
+            border: 1px dashed #ff6f61;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #d94c3d;
+            border-radius: 8px;
+        }
+
+        .footer {
+            margin-top: 25px;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="logo">
+            <img src="@logoUrl" alt="VietWash Logo" />
+        </div>
+
+        <h1>🎉 Chúc mừng sinh nhật @recipientName! 🎂</h1>
+
+        <p>Hôm nay (@today), toàn thể đội ngũ <strong>VietWash</strong> xin gửi tới bạn lời chúc sinh nhật tràn đầy niềm
+            vui và hạnh phúc!</p>
+
+        <p>🎁 Nhân dịp đặc biệt này, bạn nhận được một <strong>voucher ưu đãi sinh nhật</strong> từ VietWash.</p>
+
+        <div class="voucher">
+            🎫 Voucher đã được thêm vào tài khoản của bạn!
+        </div>
+
+        <p>👉 Hãy mở ứng dụng <strong>VietWash</strong>, vào mục <strong>Voucher</strong> để xem và sử dụng ưu đãi nhé!
+        </p>
+
+        <div class="footer">
+            — Thân ái từ đội ngũ <strong>VietWash</strong> —
+        </div>
+    </div>
+</body>
+
+</html>

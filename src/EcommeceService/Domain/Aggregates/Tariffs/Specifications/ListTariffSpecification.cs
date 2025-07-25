@@ -7,10 +7,7 @@ namespace Domain.Aggregates.Tariffs.Specifications
     {
         public ListTariffSpecification()
         {
-            Query
-                .Where(x => !x.Disable)
-                .AsNoTracking()
-                .AsSplitQuery();
+            Query.Where(x => !x.Disable).AsNoTracking().AsSplitQuery();
             string key = GetUniqueCachedKey();
             Query.EnableCache(key);
         }

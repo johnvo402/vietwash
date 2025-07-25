@@ -33,7 +33,7 @@ namespace Application.Feature.Orders.Queries.List
             }
             var response = await unitOfWork
                 .DynamicReadOnlyRepository<Order>(false)
-                .CursorPagedListAsync(
+                .PagedListAsync(
                     new ListOrderSpecification(
                         query.From,
                         query.To,

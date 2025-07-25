@@ -6,12 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Feature.Equipments.Command.Update
 {
-	public class UpdateEquipmentCommand : IRequest<Result>
-	{
-		[FromRoute(Name = RouterBase.Id)]
-		public long EquipmentId { get; set; } = default!;
+    public class UpdateEquipmentCommand : IRequest<Result>
+    {
+        [FromRoute(Name = RouterBase.Id)]
+        public long EquipmentId { get; set; } = default!;
 
-		[FromBody]
-		public EquipmentModel Equipment { get; set; } = default!;
-	}
+        [FromBody]
+        public EquipmentUpdateModel Equipment { get; set; } = default!;
+    }
 }

@@ -9,6 +9,7 @@ namespace Domain.Aggregates.Equipments.Enums
     public enum EquipmentStatus : byte
     {
         Active = 1,
-        Maintain = 2,
-    }
+		UnderMaintenance = 2,
+		UnderRepair = 3,
+	}
 }

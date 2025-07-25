@@ -24,10 +24,22 @@ services:
     ports:
       - "8080"
     restart: always
+  gateway-2:
+    container_name: gateway-2
+    image: gateway-2
+    ports:
+      - "8080"
+    restart: always
 
   finance:
     container_name: finance
     image: finance
+    ports:
+      - "8080"
+    restart: always
+  notification:
+    container_name: notification
+    image: notification
     ports:
       - "8080"
     restart: always

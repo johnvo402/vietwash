@@ -10,7 +10,6 @@ public class EquipmentSupplyingConfiguration : IEntityTypeConfiguration<Equipmen
     {
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Price).HasColumnType("numeric");
-        builder.Property(x => x.Capacity).HasColumnType("numeric");
 
         builder
             .HasOne(x => x.Supplier)
@@ -21,10 +20,5 @@ public class EquipmentSupplyingConfiguration : IEntityTypeConfiguration<Equipmen
             .HasOne(x => x.InventoryDocument)
             .WithMany(x => x.EquipmentSupplyings)
             .HasForeignKey(x => x.InventoryDocumentId);
-
-        builder
-            .HasOne(x => x.UnitRelation)
-            .WithMany(x => x.EquipmentSupplyings)
-            .HasForeignKey(x => x.UnitRelationId);
     }
 }

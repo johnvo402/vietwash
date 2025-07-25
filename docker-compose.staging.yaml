@@ -17,6 +17,7 @@ services:
       - ./logs:/var/log/nginx
     depends_on:
       - gateway
+      - gateway-2
 
   auth:
     # <<: *common_config
@@ -48,10 +49,18 @@ services:
     build:
       context: .
       dockerfile: ./src/ProjectService/Dockerfile
-      
+
   gateway:
     # <<: *common_config
     image: gateway
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+    build:
+      context: .
+      dockerfile: ./src/ApiGateway/Dockerfile
+  gateway-2:
+    # <<: *common_config
+    image: gateway-2
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
     build:
@@ -68,4 +77,13 @@ services:
     build:
       context: .
       dockerfile: ./src/FinanceService/Dockerfile
-  
+  notification:
+    # <<: *common_config
+    image: notification
+    volumes:
+      - ./logs:/logs
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+    build:
+      context: .
+      dockerfile: ./src/NotificationService/Dockerfile

@@ -10,20 +10,8 @@ namespace Application.Feature.InventoryDocuments.Commands.Create
     {
         public static InventoryDocument ToEntity(this InventoryDocumentModel model)
         {
-            long? fromWarehouseId = null;
-            long? toWarehouseId = null;
             string prefixCode = "NH";
             string code = Generator.GenerateCode(prefixCode, 6);
-
-            switch (model.Type)
-            {
-                case InventoryType.Import:
-                    toWarehouseId = model.WarehouseId;
-                    break;
-                case InventoryType.Export:
-                    fromWarehouseId = model.WarehouseId;
-                    break;
-            }
 
             var productSupplyings = model.ProductSupplyings.ToListProductSupplying() ?? [];
             var equipmentSupplyings = model.EquipmentSupplyings.ToListEquipmentSupplying() ?? [];
@@ -35,8 +23,6 @@ namespace Application.Feature.InventoryDocuments.Commands.Create
             var inventoryDocument = new InventoryDocument(
                 code: code,
                 type: model.Type,
-                fromWarehouseId: fromWarehouseId,
-                toWarehouseId: toWarehouseId,
                 branchId: model.BranchId,
                 note: model.Note,
                 amount: amount

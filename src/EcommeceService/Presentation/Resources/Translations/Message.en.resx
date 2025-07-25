@@ -529,4 +529,19 @@
         <value>Product</value>
         <comment />
     </data>
+  <data name="Feedback"
+    xml:space="preserve">
+        <value>Feedback</value>
+        <comment />
+    </data>
+  <data name="ReactionType"
+    xml:space="preserve">
+        <value>Reaction Type</value>
+        <comment />
+    </data>
+  <data name="Voucher"
+    xml:space="preserve">
+        <value>Voucher</value>
+        <comment />
+    </data>
 </root>

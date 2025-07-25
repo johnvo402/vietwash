@@ -1,8 +1,7 @@
-﻿
-namespace Application.Features.Media
+﻿namespace Application.Features.Media
 {
     public class UploadMediaResponse
     {
-        public string? Key { get; set; }
+        public List<string?>? Key { get; set; }
     }
 }

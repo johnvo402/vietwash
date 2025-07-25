@@ -5,6 +5,7 @@ using Application.Common.Interfaces.Services.DistributedCache;
 using Contracts.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Kernel.Extensions;
 
 namespace Infrastructure.Services;
 

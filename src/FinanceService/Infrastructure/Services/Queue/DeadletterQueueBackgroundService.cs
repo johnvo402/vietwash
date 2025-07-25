@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Services.DistributedCache;
+using Application.Events.CreateEInvoiceEvents;
 using Application.Features.BranchUsers;
 using Application.Features.Funds.Events;
 using Application.Features.Users.Commands.Create;
@@ -178,6 +179,66 @@ public class DeadletterPubSubBackgroundService : BackgroundService
                 }
             },
             "CreateFundEvent"
+        );
+
+        pubSubService.Subscribe<EInvoiceOrderMessage>(
+            async message =>
+            {
+                // Limit concurrent tasks
+                if (_runningTasks.Count >= _settings.DeadLetterMaxRetryAttempts)
+                {
+                    _logger.Warning(
+                        "Max concurrent tasks reached ({MaxTasks}). Waiting for tasks to complete.",
+                        _settings.DeadLetterMaxRetryAttempts
+                    );
+                    await Task.WhenAny(_runningTasks);
+                    _runningTasks.RemoveAll(t => t.IsCompleted || t.IsFaulted || t.IsCanceled);
+                }
+
+                var task = Task.Run(
+                    async () =>
+                    {
+                        using var scope = _serviceProvider.CreateScope();
+                        var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+                        var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
+                        var pubSubLogService =
+                            scope.ServiceProvider.GetRequiredService<IPubSubLogService>();
+                        var request = new CreateEInvoiceEvent { Payload = message };
+                        await ProcessMessageAsync<
+                            CreateEInvoiceEvent,
+                            PubSubResponse<CreateEInvoiceEvent>
+                        >(request, sender, pubSubLogService, logger, stoppingToken);
+                    },
+                    stoppingToken
+                );
+
+                lock (_runningTasks)
+                {
+                    _runningTasks.Add(task);
+                }
+
+                // Clean up completed tasks
+                try
+                {
+                    await Task.WhenAny(_runningTasks);
+                    lock (_runningTasks)
+                    {
+                        foreach (var failedTask in _runningTasks.FindAll(t => t.IsFaulted))
+                        {
+                            _logger.Error(
+                                failedTask.Exception,
+                                "Task processing dead-letter message failed."
+                            );
+                        }
+                        _runningTasks.RemoveAll(t => t.IsCompleted || t.IsFaulted || t.IsCanceled);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Error cleaning up tasks.");
+                }
+            },
+            "EInvoiceEvent"
         );
         pubSubService.Subscribe<BranchCreateEvent>(
             async message =>

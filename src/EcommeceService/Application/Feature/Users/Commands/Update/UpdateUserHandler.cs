@@ -51,7 +51,7 @@ public class UpdateUserHandler(
                 && !string.IsNullOrWhiteSpace(user.AvtUrl)
             )
             {
-                await mediaUpdateService.DeleteAvatarAsync(oldAvatar);
+                await mediaUpdateService.DeleteMediaAsync(oldAvatar);
             }
 
             return Result<UpdateUserResponse>.Success(user.ToUpdateUserResponse());
@@ -63,7 +63,7 @@ public class UpdateUserHandler(
             // Nếu user.AvtUrl là mới upload, xoá ảnh rác
             if (!string.IsNullOrWhiteSpace(user.AvtUrl))
             {
-                await mediaUpdateService.DeleteAvatarAsync(user.AvtUrl);
+                await mediaUpdateService.DeleteMediaAsync(user.AvtUrl);
             }
 
             throw;

@@ -3,7 +3,7 @@ using Domain.Aggregates.Tariffs;
 
 namespace Application.Feature.Tariffs.Queries.List
 {
-	public static class ListTariffMapping
+    public static class ListTariffMapping
     {
         public static Expression<Func<Tariff, ListTariffResponse>> Selector() =>
             tariff => new ListTariffResponse
@@ -16,7 +16,9 @@ namespace Application.Feature.Tariffs.Queries.List
                 UpdatedBy = tariff.UpdatedBy,
 
                 Name = tariff.Name,
-                Disable = tariff.Disable,
+                EndAt = tariff.EndAt,
+                StartAt = tariff.StartAt,
+                Status = tariff.Status,
             };
     }
 }

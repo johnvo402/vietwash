@@ -179,4 +179,6 @@ public class AwsAmazonService(IAmazonS3 amazonS3, IOptions<S3AwsSettings> awsSet
     }
 
     public string? GetPublicUrl() => s3AwsSettings.PublicUrl;
+
+    public string? GetBucketName() => s3AwsSettings.BucketName;
 }

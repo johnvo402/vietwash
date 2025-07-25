@@ -9,11 +9,17 @@ public class VoucherCustomerConfiguration : IEntityTypeConfiguration<VoucherCust
     public void Configure(EntityTypeBuilder<VoucherCustomer> builder)
     {
         builder.HasKey(x => x.Id);
-        builder
-            .HasOne(x => x.Voucher)
-            .WithMany(x => x.VoucherCustomers)
-            .HasForeignKey(x => x.VoucherId);
 
-        builder.HasOne(x => x.Customer).WithMany().HasForeignKey(x => x.CustomerId);
+        // builder
+            // .HasOne(x => x.Voucher)
+            // .WithMany(x => x.VoucherCustomers)
+            // .HasForeignKey(x => x.VoucherId)
+            // .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasOne(x => x.Customer)
+            .WithMany()
+            .HasForeignKey(x => x.CustomerId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

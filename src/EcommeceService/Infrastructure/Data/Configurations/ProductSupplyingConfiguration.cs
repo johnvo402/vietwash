@@ -18,6 +18,10 @@ namespace Infrastructure.Data.Configurations
                 .HasOne(x => x.Supplier)
                 .WithMany(x => x.ProductSupplyings)
                 .HasForeignKey(x => x.SupplierId);
+            builder
+                .HasOne(x => x.Product)
+                .WithMany(x => x.ProductSupplyings)
+                .HasForeignKey(x => x.ProductId);
         }
     }
 }

@@ -26,7 +26,6 @@ namespace Domain.Aggregates.Orders.Specifications
                 .ThenInclude(oi => oi.Service)
                 .Include(x => x.OrderItems)
                 .ThenInclude(oi => oi.UnitRelation)
-                .Include(x => x.OrderPayments)
                 .AsNoTracking()
                 .AsSplitQuery();
         }

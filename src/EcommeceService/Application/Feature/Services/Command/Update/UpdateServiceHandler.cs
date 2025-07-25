@@ -53,7 +53,7 @@ public class UpdateServiceHandler(IUnitOfWork unitOfWork, IMediaUpdateService me
 
             if (!string.IsNullOrEmpty(oldServiceImage))
             {
-                await mediaUpdateService.DeleteAvatarAsync(oldServiceImage);
+                await mediaUpdateService.DeleteMediaAsync(oldServiceImage);
             }
 
             return Result.Success();
@@ -62,7 +62,7 @@ public class UpdateServiceHandler(IUnitOfWork unitOfWork, IMediaUpdateService me
         {
             if (!string.IsNullOrEmpty(newServiceImage))
             {
-                await mediaUpdateService.DeleteAvatarAsync(newServiceImage);
+                await mediaUpdateService.DeleteMediaAsync(newServiceImage);
             }
             await unitOfWork.RollbackAsync(cancellationToken);
             throw;

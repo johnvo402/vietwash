@@ -20,9 +20,8 @@ namespace Application.Feature.BranchProducts.Queries.List
                 Description = products.Description,
                 BranchId = products.BranchId,
                 Sku = products.Sku,
-                Barcode = products.Barcode,
                 CapitalPrice = products.CapitalPrice,
-
+                StockQuantity = products.ProductSupplyings.Sum(i => i.Quantity),
                 Category = products.Category.ToCategoryService(),
                 UnitRelations = products
                     .UnitRelations.Select(x => x.ToUnitRelationProjectionResponse())

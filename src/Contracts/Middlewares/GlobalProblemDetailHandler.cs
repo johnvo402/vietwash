@@ -1,3 +1,5 @@
+using Application.Common.Errors;
+using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
@@ -28,6 +30,25 @@ namespace Contracts.Middlewares
                 exception.Message,
                 exception.StackTrace?.TrimStart()
             );
+            if (exception is ValidationException validationEx)
+            {
+                var validationError = new ValidationError(validationEx.Errors.ToList());
+
+                var problemDetails = new ProblemDetails
+                {
+                    Title = validationError.Title,
+                    Type = validationError.Type,
+                    Status = validationError.Status,
+                    Detail = validationError.Detail,
+                };
+                problemDetails.Extensions["invalidParams"] = validationError.InvalidParams;
+
+                httpContext.Response.StatusCode = validationError.Status;
+                httpContext.Response.ContentType = "application/problem+json";
+
+                await httpContext.Response.WriteAsJsonAsync(problemDetails);
+                return true;
+            }
 
             int code = StatusCodes.Status500InternalServerError;
             httpContext.Response.StatusCode = code;

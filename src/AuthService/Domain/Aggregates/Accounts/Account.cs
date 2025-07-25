@@ -21,7 +21,7 @@ public class Account : AggregateRoot
     public string Role { get; set; }
     public CustomerGroup? CustomerGroup { get; set; }
     public bool Disabled { get; set; }
-    public AccountStatus Status { get; set; }
+    public AccountStatus Status { get; set; } = AccountStatus.Active;
     public ICollection<AccountToken>? AccountTokens { get; set; } = [];
 
     public ICollection<AccountResetPassword>? AccountResetPasswords { get; set; } = [];
@@ -47,6 +47,7 @@ public class Account : AggregateRoot
         Role = Guard.Against.NullOrEmpty(role, nameof(Role));
         Code = Guard.Against.NullOrEmpty(code, nameof(Code));
         PhoneCode = phoneCode;
+        Status = AccountStatus.Active;
     }
 
     public void Update(

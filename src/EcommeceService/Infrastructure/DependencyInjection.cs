@@ -1,9 +1,11 @@
+using Application.Common.Interfaces;
 using Application.Common.Interfaces.Registers;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Infrastructure.PubSub;
 using Contracts.Infrastructure.Services.Cache.MemoryCache;
+using Contracts.Infrastructure.Services.Encryptions;
 using Infrastructure.Common;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
@@ -14,6 +16,8 @@ using Infrastructure.Services.DistributedCache;
 using Infrastructure.Services.Hangfires;
 using Infrastructure.Services.Identity;
 using Infrastructure.Services.Mail;
+using Infrastructure.Services.PayOs;
+using Infrastructure.Services.QrCodes;
 using Infrastructure.Services.Token;
 using Infrastructure.UnitOfWorks;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -104,9 +108,11 @@ public static class DependencyInjection
             )
             .AddSingleton<IActionContextAccessor, ActionContextAccessor>()
             .AddJwtAuth(configuration)
+            .AddEncryption(configuration)
             .AddMemoryCache()
             .AddRedis(configuration)
-            .PubSubLogClient()
+            .AddPayOs(configuration)
+            .PubSubLogClient(environmentName)
             .AddHostedService<PubSubBackgroundService>()
             .AddHostedService<DeadletterPubSubBackgroundService>()
             .AddHostedService<DbInitializerBackgroundService>()

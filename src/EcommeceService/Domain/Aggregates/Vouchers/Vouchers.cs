@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Domain.Aggregates.Equipments.Enums;
-using Shared.Kernel.Common;
-using Mediator;
+using Ardalis.GuardClauses;
 using Domain.Aggregates.Enums;
+using Domain.Aggregates.Users.Enums;
+using Mediator;
+using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Vouchers
 {
@@ -14,21 +13,105 @@ namespace Domain.Aggregates.Vouchers
     {
         public string Code { get; set; } = default!;
         public string Title { get; set; } = default!;
-        public string ImgUrl { get; set; } = default!;
+        public string? ImgUrl { get; set; }
         public string Barcode { get; set; } = default!;
-        public bool DiscountFixed { get; set; } = default!;
-        public decimal DiscountValue { get; set; } = default!;
-        public string? Description { get; set; } = default!;
-        public DateTimeOffset StartAt { get; set; } = default!;
-        public DateTimeOffset EndAt { get; set; } = default!;
-        public ActivationStatus Status { get; set; } = default!;
-
+        public bool DiscountFixed { get; set; }
+        public decimal DiscountValue { get; set; }
+        public int TotalQuantity { get; set; }
+        public int UsedQuantity { get; set; }
+        public string? Description { get; set; }
+        public DateTimeOffset? StartAt { get; set; }
+        public DateTimeOffset? EndAt { get; set; }
+        public ActivationStatus Status { get; set; }
         public ICollection<VoucherCustomer> VoucherCustomers { get; set; } =
             new List<VoucherCustomer>();
 
+        public Voucher() { }
+
+        public Voucher(
+            string code,
+            string title,
+            string? imgUrl,
+            string barcode,
+            bool discountFixed,
+            decimal discountValue,
+            // int totalQuantity,
+            // int usedQuantity,
+            DateTimeOffset? startAt,
+            DateTimeOffset? endAt,
+            ActivationStatus status,
+            string? description = null
+        )
+        {
+            Code = Guard.Against.NullOrWhiteSpace(code);
+            Title = Guard.Against.NullOrWhiteSpace(title);
+            ImgUrl = imgUrl;
+            Barcode = Guard.Against.NullOrWhiteSpace(barcode);
+            DiscountFixed = discountFixed;
+            DiscountValue = Guard.Against.NegativeOrZero(discountValue);
+            // TotalQuantity = Guard.Against.NegativeOrZero(totalQuantity);
+            // UsedQuantity = Guard.Against.Negative(usedQuantity);
+            StartAt = startAt;
+            EndAt = endAt;
+            Status = Guard.Against.EnumOutOfRange(status);
+            Description = description?.Trim();
+        }
+
+        public void Update(
+            string? code = null,
+            string? title = null,
+            string? imgUrl = null,
+            string? barcode = null,
+            bool? discountFixed = null,
+            decimal? discountValue = null,
+            // int? totalQuantity = null,
+            // int? usedQuantity = null,
+            DateTimeOffset? startAt = null,
+            DateTimeOffset? endAt = null,
+            ActivationStatus? status = null,
+            string? description = null
+        )
+        {
+            if (!string.IsNullOrWhiteSpace(code))
+                Code = code.Trim();
+
+            if (!string.IsNullOrWhiteSpace(title))
+                Title = title.Trim();
+
+            if (!string.IsNullOrWhiteSpace(imgUrl))
+                ImgUrl = imgUrl.Trim();
+
+            if (!string.IsNullOrWhiteSpace(barcode))
+                Barcode = barcode.Trim();
+
+            if (discountFixed.HasValue)
+                DiscountFixed = discountFixed.Value;
+
+            if (discountValue.HasValue)
+                DiscountValue = Guard.Against.NegativeOrZero(discountValue.Value);
+
+            // if (totalQuantity.HasValue)
+            //     TotalQuantity = Guard.Against.NegativeOrZero(totalQuantity.Value);
+
+            // if (usedQuantity.HasValue)
+            //     UsedQuantity = Guard.Against.NegativeOrZero(usedQuantity.Value);
+
+            if (startAt.HasValue)
+                StartAt = startAt;
+
+            if (endAt.HasValue)
+                EndAt = endAt;
+
+            if (status.HasValue)
+                Status = Guard.Against.EnumOutOfRange(status.Value);
+
+            if (description != null)
+                Description = description.Trim();
+        }
+
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
-            throw new NotImplementedException();
+            return false;
         }
     }
 }

@@ -69,7 +69,12 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-                .WithOrigins("http://localhost:3000", "https://vietwash.vercel.app")
+                .WithOrigins(
+                    "http://localhost:3000",
+                    "https://vietwash.vercel.app",
+                    "https://api-app.payos.vn",
+                    "http://localhost:5500"
+                )
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials();
@@ -80,6 +85,11 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseCors("AllowFrontend");
+
+app.UseWebSockets(new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromMinutes(2)
+});
 app.UseRateLimiter();
 app.MapGet("/", () => "Run oke!");
 

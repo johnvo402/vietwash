@@ -53,19 +53,18 @@ namespace Application.Feature.Orders.Command.UpdateStatus
                                     .BuildMessage()
                             )
                         );
-                    if (request.Status.Value == OrderStatus.Completed)
-                    {
-                        order.OrderPayments.Add(
-                            new OrderPayment
-                            {
-                                Amount = order.Total,
-                                PaymentMethod = (PaymentMethod)request.PaymentMethod!,
-                                PaymentDate = DateTimeOffset.UtcNow,
-                            }
-                        );
-                    }
 
                     order.UpdateStatus(request.Status.Value);
+
+                    if (
+                        request.Status == OrderStatus.Completed
+                        && order.Status != OrderStatus.Completed
+                    )
+                    {
+                        order.EmitVoucherUsageEvent(order.DiscountValue, order.VoucherId.Value);
+                    }
+
+                    order.PaymentMethod = request.PaymentMethod;
                 }
                 using var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
 

@@ -25,7 +25,7 @@ namespace Application.Feature.Suppliers.Query.List
 
             var response = await unitOfWork
                 .DynamicReadOnlyRepository<Supplier>()
-                .CursorPagedListAsync(
+                .PagedListAsync(
                     new ListSupplierSpecification(),
                     query,
                     ListSupplierMapping.Selector(),

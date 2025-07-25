@@ -8,7 +8,8 @@ public interface IMediaUpdateService : ISingleton
 {
     string? GetKey(IFormFile? avatar, MediaType mediaType);
 
-    Task<string?> UploadAvatarAsync(IFormFile? avatar, string? key);
+    Task<string?> UploadMediaAsync(IFormFile? avatar, string? key);
+    Task<string?> UploadMultiPartMediaAsync(IFormFile? avatar, string? key);
 
-    Task DeleteAvatarAsync(string? key);
+    Task DeleteMediaAsync(string? key);
 }

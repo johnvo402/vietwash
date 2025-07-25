@@ -19,4 +19,5 @@ public interface IAmazonS3Service : ISingleton
     string UniqueFileName(string fileName);
 
     string? GetPublicUrl();
+    string? GetBucketName();
 }

@@ -12,7 +12,6 @@ services:
       - db_data:/var/lib/postgresql/data
       # - ./scripts/bootstrap:/bootstrap:ro
       - ./scripts/docker-entrypoint-initdb.d/000_createdb.sql:/docker-entrypoint-initdb.d/000_createdb.sql
-      - ./scripts/docker-entrypoint-initdb.d/001_createextention.sql:/docker-entrypoint-initdb.d/001_createextention.sql
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     shm_size: ${POSTGRES_SHM_SIZE}
@@ -30,6 +29,9 @@ services:
   gateway:
     depends_on:
       - "database"
+  gateway-2:
+    depends_on:
+      - "database"
 
   auth:
     depends_on:
@@ -41,6 +43,9 @@ services:
     depends_on:
       - "database"
   finance:
+    depends_on:
+      - "database"
+  notification:
     depends_on:
       - "database"
       

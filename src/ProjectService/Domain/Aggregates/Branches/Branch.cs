@@ -1,7 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using Domain.Aggregates.Branches.Events;
 using Domain.Aggregates.Enums;
-using Domain.Aggregates.Warehouses;
 using Mediator;
 using Shared.Kernel.Common;
 
@@ -27,7 +26,6 @@ namespace Domain.Aggregates.Branches
         public string? Street { get; set; }
         public string? Slug { get; set; }
         public ICollection<BranchUser> BranchUsers { get; set; } = [];
-        public ICollection<Warehouse> Warehouses { get; set; } = [];
 
         public Branch(
             string name,

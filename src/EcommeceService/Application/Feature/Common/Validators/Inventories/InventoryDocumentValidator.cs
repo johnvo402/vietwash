@@ -27,17 +27,6 @@ namespace Application.Feature.Common.Validators.Inventories
 
         private void ApplyRules()
         {
-            RuleFor(x => x.WarehouseId)
-                .NotNull()
-                .WithState(x =>
-                    Messager
-                        .Create<InventoryDocumentModel>(nameof(InventoryDocument))
-                        .Property(x => x.WarehouseId)
-                        .Message(MessageType.Null)
-                        .Negative()
-                        .Build()
-                );
-
             RuleFor(x => x.BranchId)
                 .NotNull()
                 .WithState(x =>
@@ -56,6 +45,15 @@ namespace Application.Feature.Common.Validators.Inventories
                         .Create<InventoryDocumentModel>(nameof(InventoryDocument))
                         .Property(x => x.Note)
                         .Message(MessageType.MaximumLength)
+                        .Build()
+                );
+            RuleFor(x => x.TransactionAt)
+                .LessThanOrEqualTo(DateTimeOffset.UtcNow)
+                .WithState(x =>
+                    Messager
+                        .Create<InventoryDocumentModel>(nameof(InventoryDocument))
+                        .Property(x => x.TransactionAt)
+                        .Message(MessageType.LessThanEqual)
                         .Build()
                 );
 
@@ -158,7 +156,6 @@ namespace Application.Feature.Common.Validators.Inventories
                                 .Negative()
                                 .Build()
                         );
-
                     item.RuleFor(x => x.Code)
                         .NotEmpty()
                         .WithState(x =>
@@ -188,37 +185,6 @@ namespace Application.Feature.Common.Validators.Inventories
                                 .Create<EquipmentSupplyingModel>(nameof(EquipmentSupplyingModel))
                                 .Property(x => x.Price)
                                 .Message(MessageType.GreaterThan)
-                                .Negative()
-                                .Build()
-                        );
-
-                    item.RuleFor(x => x.Capacity)
-                        .GreaterThan(0)
-                        .WithState(x =>
-                            Messager
-                                .Create<EquipmentSupplyingModel>(nameof(EquipmentSupplyingModel))
-                                .Property(x => x.Capacity)
-                                .Message(MessageType.GreaterThan)
-                                .Negative()
-                                .Build()
-                        );
-
-                    item.RuleFor(x => x.UnitRelationId)
-                        .NotEmpty()
-                        .WithState(x =>
-                            Messager
-                                .Create<EquipmentSupplyingModel>(nameof(EquipmentSupplyingModel))
-                                .Property(x => x.UnitRelationId)
-                                .Message(MessageType.Null)
-                                .Negative()
-                                .Build()
-                        )
-                        .MustAsync(CheckUnitRelationExistenceAsync)
-                        .WithState(x =>
-                            Messager
-                                .Create<EquipmentSupplyingModel>(nameof(EquipmentSupplyingModel))
-                                .Property(x => x.UnitRelationId)
-                                .Message(MessageType.Existence)
                                 .Negative()
                                 .Build()
                         );

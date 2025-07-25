@@ -1,6 +1,9 @@
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Orders.Enums;
+using Domain.Aggregates.Orders.Events;
 using Domain.Aggregates.Users;
+using Domain.Aggregates.Vouchers;
+using Domain.Aggregates.Vouchers.Events;
 using Domain.Events;
 using Mediator;
 using Shared.Kernel.Common;
@@ -12,26 +15,38 @@ namespace Domain.Aggregates.Orders
         public long? CustomerId { get; set; }
         public long BranchId { get; set; } = default!;
         public long StaffId { get; set; } = default!;
+        public long? VoucherId { get; set; }
+        public string? VoucherCode { get; set; }
         public string Code { get; set; } = default!;
         public decimal Amount { get; set; } = default!;
         public decimal Total { get; set; } = default!;
         public bool DiscountFixed { get; set; } = default!;
+        public PaymentMethod? PaymentMethod { get; set; }
         public decimal DiscountValue { get; set; } = default!;
         public string Note { get; set; } = default!;
         public OrderStatus Status { get; set; } = default!;
-        public DateTimeOffset OrderDate { get; set; } = default!;
+        public DateTimeOffset? OrderDate { get; set; }
         public DateTimeOffset DeliveryTime { get; set; } = default!;
         public User? Staff { get; set; }
         public User? Customer { get; set; }
-        public string? Receipt { get; set; }
+        public virtual VoucherUsage? VoucherUsage { get; set; }
+
+        public string? CodeConfirm { get; set; }
+
         public ICollection<OrderItem> OrderItems { get; set; } = [];
-        public ICollection<OrderPayment> OrderPayments { get; set; } = [];
 
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
             switch (domainEvent)
             {
                 case CreateFundEvent:
+                    return true;
+
+                case VoucherUsageEvent:
+                    return true;
+                case UpdateStatusOrderEvent:
+                    return true;
+                case EInvoiceEvent:
                     return true;
                 default:
                     return false;
@@ -47,7 +62,8 @@ namespace Domain.Aggregates.Orders
             decimal amount,
             decimal total,
             OrderStatus status,
-            DateTimeOffset orderDate,
+            long? voucherId = null,
+            string? voucherCode = null,
             long? customerId = null,
             bool discountFixed = false,
             decimal discountValue = 0,
@@ -60,80 +76,56 @@ namespace Domain.Aggregates.Orders
 
             BranchId = branchId;
             StaffId = staffId;
+            VoucherId = voucherId;
+            VoucherCode = voucherCode;
             Code = code;
             Amount = amount;
             Total = total;
             Status = status;
-            OrderDate = orderDate;
 
             CustomerId = customerId;
             DiscountFixed = discountFixed;
             DiscountValue = discountValue;
             Note = note ?? string.Empty;
-            DeliveryTime = deliveryTime ?? orderDate.AddDays(1);
+            DeliveryTime = deliveryTime ?? DateTimeOffset.UtcNow.AddDays(1);
         }
 
-        public void Update(
-            long? customerId = null,
-            long? branchId = null,
-            long? staffId = null,
-            string? code = null,
-            decimal? amount = null,
-            decimal? total = null,
-            bool? discountFixed = null,
-            decimal? discountValue = null,
-            string? note = null,
-            OrderStatus? status = null,
-            DateTimeOffset? orderDate = null,
-            DateTimeOffset? deliveryTime = null
-        )
+        public void EmitVoucherUsageEvent(decimal discountApply, long voucherId)
         {
-            if (code is not null)
-                Guard.Against.NullOrWhiteSpace(code, nameof(code));
-
-            if (status.HasValue)
-                Guard.Against.Null(status, nameof(status));
-
-            if (customerId.HasValue)
-                CustomerId = customerId.Value;
-            if (branchId.HasValue)
-                BranchId = branchId.Value;
-            if (staffId.HasValue)
-                StaffId = staffId.Value;
-            if (code is not null)
-                Code = code;
-            if (amount.HasValue)
-                Amount = amount.Value;
-            if (total.HasValue)
-                Total = total.Value;
-            if (discountFixed.HasValue)
-                DiscountFixed = discountFixed.Value;
-            if (discountValue.HasValue)
-                DiscountValue = discountValue.Value;
-            if (note is not null)
-                Note = note;
-            if (status.HasValue)
-                Status = status.Value;
-            if (orderDate.HasValue)
-                OrderDate = orderDate.Value;
-            if (deliveryTime.HasValue)
-                DeliveryTime = deliveryTime.Value;
-            Receipt = null;
+            if (CustomerId.HasValue)
+            {
+                Emit(
+                    new VoucherUsageEvent
+                    {
+                        VoucherId = voucherId,
+                        CustomerId = CustomerId.Value,
+                        BranchId = BranchId,
+                        OrderId = Id,
+                        DiscountApply = discountApply,
+                    }
+                );
+            }
         }
 
         public void UpdateStatus(OrderStatus status)
         {
             switch (status)
             {
+                case OrderStatus.Processed:
+                    Status = OrderStatus.Processed;
+                    Emit(new UpdateStatusOrderEvent() { Order = this });
+                    break;
                 case OrderStatus.Completed:
                     Status = OrderStatus.Completed;
+                    OrderDate = DateTimeOffset.UtcNow;
+                    Emit(new EInvoiceEvent() { Order = this });
                     Emit(
                         new CreateFundEvent()
                         {
                             TypeId = "income",
                             ReferenceId = Id,
-                            Amount = OrderPayments.Sum(x => x.Amount),
-                            PaymentMethod = OrderPayments.FirstOrDefault()!.PaymentMethod,
+                            Amount = Total,
+                            PaymentMethod = PaymentMethod ?? Enums.PaymentMethod.Cash,
                             BranchId = BranchId,
                             ObjectId = CustomerId,
                             BehaviorId = 1,
@@ -144,26 +136,31 @@ namespace Domain.Aggregates.Orders
                             },
                         }
                     );
+
                     break;
                 case OrderStatus.Cancelled:
-                    Status = OrderStatus.Cancelled;
-                    Emit(
-                        new CreateFundEvent()
-                        {
-                            TypeId = "Spend",
-                            ReferenceId = Id,
-                            Amount = OrderPayments.Sum(x => x.Amount),
-                            PaymentMethod = OrderPayments.FirstOrDefault()!.PaymentMethod,
-                            BranchId = BranchId,
-                            ObjectId = CustomerId,
-                            BehaviorId = 2,
-                            Metadata = new Dictionary<string, object>
+
+                    if (Status == OrderStatus.Completed)
+                    {
+                        Emit(
+                            new CreateFundEvent()
                             {
-                                ["code"] = Code,
-                                ["publicId"] = PublicId.ToString(),
-                            },
-                        }
-                    );
+                                TypeId = "Spend",
+                                ReferenceId = Id,
+                                Amount = Total,
+                                PaymentMethod = PaymentMethod ?? Enums.PaymentMethod.Cash,
+                                BranchId = BranchId,
+                                ObjectId = CustomerId,
+                                BehaviorId = 2,
+                                Metadata = new Dictionary<string, object>
+                                {
+                                    ["code"] = Code,
+                                    ["publicId"] = PublicId.ToString(),
+                                },
+                            }
+                        );
+                    }
+                    Status = OrderStatus.Cancelled;
                     break;
                 default:
                     Status = status;

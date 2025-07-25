@@ -17,7 +17,7 @@ namespace Presentation.Endpoints.Inventories
     {
         [HttpPost(Router.InventoryRoute.Inventories)]
         [SwaggerOperation(
-            Tags = [Router.OrderRoute.Tags],
+            Tags = [Router.InventoryRoute.Tags],
             Summary = "Inventory Document a new order"
         )]
         [AuthorizeBy]

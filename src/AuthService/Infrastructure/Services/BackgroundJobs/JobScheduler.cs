@@ -10,7 +10,10 @@ namespace Infrastructure.Services.BackgroundJobs
         private readonly IRecurringJobManager _recurringJobManager;
         private readonly IServiceProvider _serviceProvider;
 
-        public JobScheduler(IRecurringJobManager recurringJobManager, IServiceProvider serviceProvider)
+        public JobScheduler(
+            IRecurringJobManager recurringJobManager,
+            IServiceProvider serviceProvider
+        )
         {
             _recurringJobManager = recurringJobManager;
             _serviceProvider = serviceProvider;
@@ -20,7 +23,7 @@ namespace Infrastructure.Services.BackgroundJobs
         {
             var jobs = new Dictionary<string, (Type JobType, string CronSchedule)>
             {
-                { "update-user-status", (typeof(UpdateUserStatusJob), "0 * * * *") }
+                { "check-birthday-customer", (typeof(CheckBirthdayCustomerJob), "0 0 * * *") },
             };
 
             foreach (var job in jobs)
@@ -29,11 +32,7 @@ namespace Infrastructure.Services.BackgroundJobs
                 var jobType = job.Value.JobType;
                 var cronSchedule = job.Value.CronSchedule;
 
-                _recurringJobManager.AddOrUpdate(
-                    jobId,
-                    () => RunJob(jobType),
-                    cronSchedule
-                );
+                _recurringJobManager.AddOrUpdate(jobId, () => RunJob(jobType), cronSchedule);
             }
         }
 

@@ -9,5 +9,5 @@ public class AccountToken : BaseEntity<long>
     public string? FamilyId { get; set; }
     public long AccountId { get; set; }
     public Account? Account { get; set; }
-    public DateTimeOffset ExpiredTime { get; set; }
+    public int ExpiredTime { get; set; }
 }

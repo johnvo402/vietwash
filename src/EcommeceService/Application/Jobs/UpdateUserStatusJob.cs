@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data.Common;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Dtos.Requests;
 using Domain.Aggregates.Orders;
@@ -15,12 +9,13 @@ using Domain.Aggregates.Users.Specifications;
 
 namespace Application.Jobs
 {
-
-    public class UserOnlyId
+    public class OnlyId
     {
         public long Id { get; set; }
+        public string? Name { get; set; }
         public CustomerGroup? CustomerGroup { get; set; }
     }
+
     public class CheckCustomerLoyal : IJob
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -29,17 +24,15 @@ namespace Application.Jobs
         {
             _unitOfWork = unitOfWork;
         }
+
         public async Task ExecuteAsync()
         {
-            var userIds = await _unitOfWork.DynamicReadOnlyRepository<User>()
-                .ListAsync(  
+            var userIds = await _unitOfWork
+                .DynamicReadOnlyRepository<User>()
+                .ListAsync(
                     new ListCustomerWithoutIncludeSpecification(CustomerGroup.Normal),
                     new QueryParamRequest(),
-                    x => new UserOnlyId
-                    {
-                        Id = x.Id,
-                        CustomerGroup = x.CustomerGroup,
-                    },
+                    x => new OnlyId { Id = x.Id, CustomerGroup = x.CustomerGroup },
                     cancellationToken: default
                 );
 
@@ -59,10 +52,8 @@ namespace Application.Jobs
 
                     if (totalOrder >= 5 || totalRevenue > 500000)
                     {
-                        // Lấy user với AsNoTracking để tránh bị tracked  
-                        var user = await _unitOfWork
-                            .Repository<User>()
-                            .FindByIdAsync(userId);
+                        // Lấy user với AsNoTracking để tránh bị tracked
+                        var user = await _unitOfWork.Repository<User>().FindByIdAsync(userId);
 
                         if (user == null)
                             continue;

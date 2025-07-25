@@ -3,23 +3,20 @@ using Domain.Aggregates.Equipments;
 
 namespace Application.Feature.Equipments.Command.Create
 {
-	public static class CreateEquipmentMapping
-	{
-		public static Equipment ToEntity(this EquipmentModel model)
-		{
-			return new Equipment(
-				branchId: model.BranchId,
-				name: model.Name,
-				code: model.Code,
-				type: model.Type,
-				price: model.Price,
-				capacity: model.Capacity,
-				status: model.Status,
-				image: model.Image,
-				description: model.Description,
-				lastMaintenanceDate: model.LastMaintenanceDate,
-				nextMaintenanceDate: model.NextMaintenanceDate
-			);
-		}
-	}
+    public static class CreateEquipmentMapping
+    {
+        public static Equipment ToEntity(this EquipmentModel model)
+        {
+            return new Equipment(
+                branchId: model.BranchId,
+                name: model.Name,
+                code: model.Code,
+                price: model.Price,
+                status: model.Status,
+                description: model.Description,
+                lastMaintenanceOrRepairDate: model.LastMaintenanceOrRepairDate,
+                nextMaintenanceDate: model.NextMaintenanceDate
+            );
+        }
+    }
 }

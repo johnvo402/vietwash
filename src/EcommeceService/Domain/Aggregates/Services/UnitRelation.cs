@@ -8,24 +8,20 @@ namespace Domain.Aggregates.Services
 {
     public class UnitRelation : BaseEntity
     {
-		public long? ServiceId { get; set; }
-		public long? BranchProductId { get; set; }
+        public long? ServiceId { get; set; }
+        public long? BranchProductId { get; set; }
         public string Name { get; set; } = default!;
         public bool BaseUnit { get; set; } = default!;
         public decimal Price { get; set; } = default!;
         public int Multiple { get; set; } = default!;
         public decimal ProcessingTime { get; set; } = default!;
         public ActivationStatus Status { get; set; } = default!;
-
+        public long? UnitId { get; set; }
+        public Unit? Unit { get; set; }
         public Service? Service { get; set; } = default!;
-		public BranchProduct? BranchProduct { get; set; } = default!;
-
-
-		//public Product Product { get; set; } = default!;
-		public ICollection<OrderItem> OrderItems { get; set; } = [];
-
+        public BranchProduct? BranchProduct { get; set; } = default!;
+        public ICollection<OrderItem> OrderItems { get; set; } = [];
         public ICollection<ProductSupplying>? ProductSupplyings { get; set; }
-        public ICollection<EquipmentSupplying>? EquipmentSupplyings { get; set; }
 
         public void Update(
             string? name = null,

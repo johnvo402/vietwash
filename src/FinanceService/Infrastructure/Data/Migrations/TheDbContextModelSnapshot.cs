@@ -23,6 +23,194 @@ namespace Infrastructure.Data.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "citext");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Domain.Aggregates.EInvoices.EInvoice", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("CustomerEmail")
+                        .HasColumnType("text")
+                        .HasColumnName("customer_email");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("customer_name");
+
+                    b.Property<string>("CustomerPhone")
+                        .HasColumnType("text")
+                        .HasColumnName("customer_phone");
+
+                    b.Property<string>("CustomerTaxCode")
+                        .HasColumnType("text")
+                        .HasColumnName("customer_tax_code");
+
+                    b.Property<long>("InvoiceNumber")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("invoice_number");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("InvoiceNumber"));
+
+                    b.Property<string>("InvoiceSymbol")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("invoice_symbol");
+
+                    b.Property<string>("LookupCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("lookup_code");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("order_date");
+
+                    b.Property<long>("OrderId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("order_id");
+
+                    b.Property<string>("OrgAddress")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("org_address");
+
+                    b.Property<string>("OrgLogo")
+                        .HasColumnType("text")
+                        .HasColumnName("org_logo");
+
+                    b.Property<string>("OrgName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("org_name");
+
+                    b.Property<string>("OrgPhone")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("org_phone");
+
+                    b.Property<string>("OrgStamp")
+                        .HasColumnType("text")
+                        .HasColumnName("org_stamp");
+
+                    b.Property<string>("OrgTaxCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("org_tax_code");
+
+                    b.Property<string>("PdfUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("pdf_url");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
+
+                    b.Property<string>("QrCodeUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("qr_code_url");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
+
+                    b.Property<decimal>("TaxTotal")
+                        .HasColumnType("numeric")
+                        .HasColumnName("tax_total");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total");
+
+                    b.Property<decimal>("TotalWithTax")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_with_tax");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.Property<int>("VatPercent")
+                        .HasColumnType("integer")
+                        .HasColumnName("vat_percent");
+
+                    b.Property<long>("Version")
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_e_invoice");
+
+                    b.HasIndex("Id")
+                        .HasDatabaseName("ix_e_invoice_id");
+
+                    b.ToTable("e_invoice", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.EInvoices.EInvoiceItem", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<long>("EInvoiceId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("e_invoice_id");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("quantity");
+
+                    b.Property<string>("ServiceName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("service_name");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_price");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("numeric")
+                        .HasColumnName("unit_price");
+
+                    b.Property<string>("UnitRelationName")
+                        .HasColumnType("text")
+                        .HasColumnName("unit_relation_name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_e_invoice_item");
+
+                    b.HasIndex("EInvoiceId")
+                        .HasDatabaseName("ix_e_invoice_item_e_invoice_id");
+
+                    b.ToTable("e_invoice_item", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Aggregates.Funds.Fund", b =>
                 {
                     b.Property<long>("Id")
@@ -197,6 +385,10 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("customer_id");
 
+                    b.Property<object>("Metadata")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("metadata");
+
                     b.Property<string>("PublicId")
                         .IsRequired()
                         .HasColumnType("character varying(26)")
@@ -218,12 +410,11 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.Property<long>("Version")
-                        .HasColumnType("bigint")
-                        .HasColumnName("version");
-
                     b.HasKey("Id")
                         .HasName("pk_transaction");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_transaction_customer_id");
 
                     b.ToTable("transaction", (string)null);
                 });
@@ -361,6 +552,18 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("user", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Aggregates.EInvoices.EInvoiceItem", b =>
+                {
+                    b.HasOne("Domain.Aggregates.EInvoices.EInvoice", "EInvoice")
+                        .WithMany("Items")
+                        .HasForeignKey("EInvoiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_e_invoice_item_e_invoice_e_invoice_id");
+
+                    b.Navigation("EInvoice");
+                });
+
             modelBuilder.Entity("Domain.Aggregates.Funds.Fund", b =>
                 {
                     b.HasOne("Domain.Aggregates.Funds.FundBehavior", "FundBehavior")
@@ -380,6 +583,18 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Domain.Aggregates.Funds.Transaction", b =>
+                {
+                    b.HasOne("Domain.Aggregates.Users.User", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_transaction_user_customer_id");
+
+                    b.Navigation("Customer");
+                });
+
             modelBuilder.Entity("Domain.Aggregates.Users.BranchUser", b =>
                 {
                     b.HasOne("Domain.Aggregates.Users.User", null)
@@ -388,6 +603,11 @@ namespace Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_branch_user_user_user_id");
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.EInvoices.EInvoice", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Users.User", b =>

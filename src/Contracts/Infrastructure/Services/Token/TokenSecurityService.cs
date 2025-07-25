@@ -3,11 +3,11 @@ using System.Text;
 using Application.Common.Interfaces.Services.DistributedCache;
 using Contracts.Application.Common.Interfaces.Services.Token;
 using Contracts.Dtos.Responses;
-using Contracts.Extensions;
 using Infrastructure.Services.Token;
 using JWT.Algorithms;
 using JWT.Builder;
 using Microsoft.Extensions.Options;
+using Shared.Kernel.Extensions;
 using StackExchange.Redis;
 
 namespace Contracts.Infrastructure.Services.Token

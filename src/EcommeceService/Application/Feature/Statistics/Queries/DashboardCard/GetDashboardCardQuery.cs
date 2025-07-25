@@ -8,6 +8,6 @@ namespace Application.Feature.Statistics.Queries.RevenueStatistic
     public class GetDashboardCardQuery : IRequest<Result<GetDashboardCardResponse>>
     {
         [FromQuery]
-        public string BranchId { get; set; }
+        public long BranchId { get; set; }
     }
 }

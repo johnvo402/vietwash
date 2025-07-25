@@ -13,11 +13,12 @@
   </ItemGroup>
   <ItemGroup>
     <Protobuf Include="Protos/queue_log.proto" GrpcServices="Both" />
+    <Protobuf Include="Protos/notification.proto" GrpcServices="Both" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" />
     <PackageReference Include="Ardalis.GuardClauses" />
-    <!-- <PackageReference Include="Ardalis.Result.AspNetCore" /> -->
+    <PackageReference Include="Wangkanai.Detection" />
     <PackageReference Include="CaseConverter" />
     <PackageReference Include="CSharpFunctionalExtensions" />
     <PackageReference Include="PuppeteerSharp" />
@@ -55,6 +56,7 @@
     <PackageReference Include="Serilog.Sinks.Seq" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" />
+    <PackageReference Include="QRCoder" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Shared.Kernel\Shared.Kernel.csproj" />

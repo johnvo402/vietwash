@@ -6,6 +6,7 @@ namespace Application.Feature.Common.Projections.Orders
     {
         public long? CustomerId { get; set; }
         public long BranchId { get; set; }
+        public string? VoucherCode { get; set; }
         public string? Note { get; set; } = string.Empty;
         public DateTimeOffset? DeliveryTime { get; set; }
         public bool DiscountFixed { get; set; } // true = percentage, false = fixed amount

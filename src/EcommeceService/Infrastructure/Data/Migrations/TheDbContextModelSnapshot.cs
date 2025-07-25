@@ -33,10 +33,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("branch_id");
 
-                    b.Property<decimal>("Capacity")
-                        .HasColumnType("numeric")
-                        .HasColumnName("capacity");
-
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasColumnType("citext")
@@ -52,7 +48,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnName("created_by");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 
@@ -60,9 +55,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("image");
 
-                    b.Property<DateTimeOffset?>("LastMaintenanceDate")
+                    b.Property<DateTimeOffset?>("LastMaintenanceOrRepairDate")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_maintenance_date");
+                        .HasColumnName("last_maintenance_or_repair_date");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -86,10 +81,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("status");
 
-                    b.Property<byte>("Type")
-                        .HasColumnType("smallint")
-                        .HasColumnName("type");
-
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -105,10 +96,77 @@ namespace Infrastructure.Data.Migrations
                     b.HasKey("Id")
                         .HasName("pk_equipment");
 
+                    b.HasIndex("Code")
+                        .HasDatabaseName("ix_equipment_code");
+
                     b.ToTable("equipment", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Equipments.MaintenanceDetail", b =>
+            modelBuilder.Entity("Domain.Aggregates.Equipments.EquipmentActivity", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<long>("EquipmentId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("equipment_id");
+
+                    b.Property<decimal>("LaborCost")
+                        .HasColumnType("numeric")
+                        .HasColumnName("labor_cost");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
+
+                    b.Property<long>("StaffId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("staff_id");
+
+                    b.Property<decimal>("TotalCost")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_cost");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_equipment_activity");
+
+                    b.HasIndex("EquipmentId")
+                        .HasDatabaseName("ix_equipment_activity_equipment_id");
+
+                    b.HasIndex("StaffId")
+                        .HasDatabaseName("ix_equipment_activity_staff_id");
+
+                    b.ToTable("equipment_activity", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Equipments.EquipmentActivityDetail", b =>
                 {
                     b.Property<long>("Id")
                         .HasColumnType("bigint")
@@ -122,9 +180,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<long>("MaintenanceHistoryId")
+                    b.Property<long>("EquipmentActivityId")
                         .HasColumnType("bigint")
-                        .HasColumnName("maintenance_history_id");
+                        .HasColumnName("equipment_activity_id");
 
                     b.Property<string>("PartName")
                         .IsRequired()
@@ -145,15 +203,15 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnName("unit_price");
 
                     b.HasKey("Id")
-                        .HasName("pk_maintenance_detail");
+                        .HasName("pk_equipment_activity_detail");
 
-                    b.HasIndex("MaintenanceHistoryId")
-                        .HasDatabaseName("ix_maintenance_detail_maintenance_history_id");
+                    b.HasIndex("EquipmentActivityId")
+                        .HasDatabaseName("ix_equipment_activity_detail_equipment_activity_id");
 
-                    b.ToTable("maintenance_detail", (string)null);
+                    b.ToTable("equipment_activity_detail", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Equipments.MaintenanceHistory", b =>
+            modelBuilder.Entity("Domain.Aggregates.Feedbacks.Feedback", b =>
                 {
                     b.Property<long>("Id")
                         .HasColumnType("bigint")
@@ -163,141 +221,98 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("branch_id");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
+                    b.Property<string>("Comment")
                         .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<long>("EquipmentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("equipment_id");
-
-                    b.Property<DateTimeOffset>("MaintenanceDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("maintenance_date");
-
-                    b.Property<DateTimeOffset?>("NextMaintenanceDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("next_maintenance_date");
-
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
-
-                    b.Property<string>("Supervisor")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("supervisor");
-
-                    b.Property<decimal>("Total")
-                        .HasColumnType("numeric")
-                        .HasColumnName("total");
-
-                    b.HasKey("Id")
-                        .HasName("pk_maintenance_history");
-
-                    b.HasIndex("EquipmentId")
-                        .HasDatabaseName("ix_maintenance_history_equipment_id");
-
-                    b.ToTable("maintenance_history", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Equipments.RepairDetail", b =>
-                {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric")
-                        .HasColumnName("amount");
+                        .HasColumnName("comment");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("PartName")
+                    b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("part_name");
+                        .HasColumnName("created_by");
 
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
+                    b.Property<bool>("Disable")
+                        .HasColumnType("boolean")
+                        .HasColumnName("disable");
 
-                    b.Property<int>("Quantity")
+                    b.Property<long?>("ParentId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("parent_id");
+
+                    b.Property<int?>("Rating")
                         .HasColumnType("integer")
-                        .HasColumnName("quantity");
+                        .HasColumnName("rating");
 
-                    b.Property<decimal>("RepairHistoryId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("repair_history_id");
+                    b.Property<long>("ServiceId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("service_id");
 
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("numeric")
-                        .HasColumnName("unit_price");
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_repair_detail");
+                        .HasName("pk_feedback");
 
-                    b.HasIndex("RepairHistoryId")
-                        .HasDatabaseName("ix_repair_detail_repair_history_id");
+                    b.HasIndex("Id")
+                        .HasDatabaseName("ix_feedback_id");
 
-                    b.ToTable("repair_detail", (string)null);
+                    b.HasIndex("ParentId")
+                        .HasDatabaseName("ix_feedback_parent_id");
+
+                    b.HasIndex("ServiceId")
+                        .HasDatabaseName("ix_feedback_service_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_feedback_user_id");
+
+                    b.ToTable("feedback", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Equipments.RepairHistory", b =>
+            modelBuilder.Entity("Domain.Aggregates.Feedbacks.FeedbackReaction", b =>
                 {
-                    b.Property<decimal>("Id")
-                        .HasColumnType("numeric")
-                        .HasColumnName("id");
-
-                    b.Property<long>("BranchId")
+                    b.Property<long>("Id")
                         .HasColumnType("bigint")
-                        .HasColumnName("branch_id");
+                        .HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<long>("EquipmentId")
+                    b.Property<long>("CustomerId")
                         .HasColumnType("bigint")
-                        .HasColumnName("equipment_id");
+                        .HasColumnName("customer_id");
 
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
+                    b.Property<long>("FeedbackId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("feedback_id");
 
-                    b.Property<string>("ReceivedBy")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("received_by");
-
-                    b.Property<DateTimeOffset>("RepairDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("repair_date");
-
-                    b.Property<decimal>("Total")
-                        .HasColumnType("numeric")
-                        .HasColumnName("total");
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
 
                     b.HasKey("Id")
-                        .HasName("pk_repair_history");
+                        .HasName("pk_feedback_reaction");
 
-                    b.HasIndex("EquipmentId")
-                        .HasDatabaseName("ix_repair_history_equipment_id");
+                    b.HasIndex("FeedbackId")
+                        .HasDatabaseName("ix_feedback_reaction_feedback_id");
 
-                    b.ToTable("repair_history", (string)null);
+                    b.HasIndex("CustomerId", "FeedbackId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_feedback_reaction_customer_id_feedback_id");
+
+                    b.ToTable("feedback_reaction", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Inventories.EquipmentSupplying", b =>
@@ -305,10 +320,6 @@ namespace Infrastructure.Data.Migrations
                     b.Property<long>("Id")
                         .HasColumnType("bigint")
                         .HasColumnName("id");
-
-                    b.Property<decimal>("Capacity")
-                        .HasColumnType("numeric")
-                        .HasColumnName("capacity");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -318,6 +329,10 @@ namespace Infrastructure.Data.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("text")
+                        .HasColumnName("image");
 
                     b.Property<long>("InventoryDocumentId")
                         .HasColumnType("bigint")
@@ -336,18 +351,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("quantity");
 
-                    b.Property<string>("Sku")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("sku");
-
                     b.Property<long>("SupplierId")
                         .HasColumnType("bigint")
                         .HasColumnName("supplier_id");
-
-                    b.Property<long>("UnitRelationId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("unit_relation_id");
 
                     b.HasKey("Id")
                         .HasName("pk_equipment_supplying");
@@ -357,9 +363,6 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("SupplierId")
                         .HasDatabaseName("ix_equipment_supplying_supplier_id");
-
-                    b.HasIndex("UnitRelationId")
-                        .HasDatabaseName("ix_equipment_supplying_unit_relation_id");
 
                     b.ToTable("equipment_supplying", (string)null);
                 });
@@ -373,10 +376,6 @@ namespace Infrastructure.Data.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric")
                         .HasColumnName("amount");
-
-                    b.Property<string>("ArrivedAt")
-                        .HasColumnType("text")
-                        .HasColumnName("arrived_at");
 
                     b.Property<long?>("BranchId")
                         .HasColumnType("bigint")
@@ -400,21 +399,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
-                    b.Property<long?>("FromWarehouseId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_warehouse_id");
-
                     b.Property<string>("Note")
                         .HasColumnType("text")
                         .HasColumnName("note");
-
-                    b.Property<decimal>("PaidAmount")
-                        .HasColumnType("numeric")
-                        .HasColumnName("paid_amount");
-
-                    b.Property<byte?>("PaymentMethod")
-                        .HasColumnType("smallint")
-                        .HasColumnName("payment_method");
 
                     b.Property<string>("PublicId")
                         .IsRequired()
@@ -424,10 +411,6 @@ namespace Infrastructure.Data.Migrations
                     b.Property<short>("Status")
                         .HasColumnType("smallint")
                         .HasColumnName("status");
-
-                    b.Property<long?>("ToWarehouseId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("to_warehouse_id");
 
                     b.Property<DateTimeOffset?>("TransactionAt")
                         .HasColumnType("timestamp with time zone")
@@ -458,109 +441,11 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("inventory_document", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Inventories.InventoryInvoice", b =>
-                {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric")
-                        .HasColumnName("amount");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("character varying(26)")
-                        .HasColumnName("public_id");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
-
-                    b.Property<long?>("SupplierId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("supplier_id");
-
-                    b.Property<DateTimeOffset>("TransactionAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("transaction_at");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by");
-
-                    b.Property<long>("Version")
-                        .HasColumnType("bigint")
-                        .HasColumnName("version");
-
-                    b.HasKey("Id")
-                        .HasName("pk_inventory_invoice");
-
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_inventory_invoice_id");
-
-                    b.ToTable("inventory_invoice", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Inventories.InventoryRelation", b =>
-                {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric")
-                        .HasColumnName("amount");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<long?>("InventoryDocumentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("inventory_document_id");
-
-                    b.Property<long?>("InventoryInvoiceId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("inventory_invoice_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_inventory_relation");
-
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_inventory_relation_id");
-
-                    b.HasIndex("InventoryDocumentId")
-                        .HasDatabaseName("ix_inventory_relation_inventory_document_id");
-
-                    b.HasIndex("InventoryInvoiceId")
-                        .HasDatabaseName("ix_inventory_relation_inventory_invoice_id");
-
-                    b.ToTable("inventory_relation", (string)null);
-                });
-
             modelBuilder.Entity("Domain.Aggregates.Inventories.InventoryRequest", b =>
                 {
                     b.Property<long>("Id")
                         .HasColumnType("bigint")
                         .HasColumnName("id");
-
-                    b.Property<long?>("BranchId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("branch_id");
 
                     b.Property<string>("CancelReason")
                         .HasColumnType("text")
@@ -575,9 +460,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
-                    b.Property<long?>("FromWarehouseId")
+                    b.Property<long?>("FromBranchId")
                         .HasColumnType("bigint")
-                        .HasColumnName("from_warehouse_id");
+                        .HasColumnName("from_branch_id");
 
                     b.Property<string>("Note")
                         .IsRequired()
@@ -601,9 +486,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("supplier_id");
 
-                    b.Property<long?>("ToWarehouseId")
+                    b.Property<long?>("ToBranchId")
                         .HasColumnType("bigint")
-                        .HasColumnName("to_warehouse_id");
+                        .HasColumnName("to_branch_id");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer")
@@ -665,11 +550,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("quantity");
 
-                    b.Property<string>("Sku")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("sku");
-
                     b.Property<long>("SupplierId")
                         .HasColumnType("bigint")
                         .HasColumnName("supplier_id");
@@ -686,6 +566,9 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("InventoryDocumentId")
                         .HasDatabaseName("ix_product_supplying_inventory_document_id");
+
+                    b.HasIndex("ProductId")
+                        .HasDatabaseName("ix_product_supplying_product_id");
 
                     b.HasIndex("SupplierId")
                         .HasDatabaseName("ix_product_supplying_supplier_id");
@@ -714,6 +597,10 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("citext")
                         .HasColumnName("code");
+
+                    b.Property<string>("CodeConfirm")
+                        .HasColumnType("text")
+                        .HasColumnName("code_confirm");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -745,18 +632,18 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("note");
 
-                    b.Property<DateTimeOffset>("OrderDate")
+                    b.Property<DateTimeOffset?>("OrderDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("order_date");
+
+                    b.Property<byte?>("PaymentMethod")
+                        .HasColumnType("smallint")
+                        .HasColumnName("payment_method");
 
                     b.Property<string>("PublicId")
                         .IsRequired()
                         .HasColumnType("character varying(26)")
                         .HasColumnName("public_id");
-
-                    b.Property<string>("Receipt")
-                        .HasColumnType("text")
-                        .HasColumnName("receipt");
 
                     b.Property<long>("StaffId")
                         .HasColumnType("bigint")
@@ -781,6 +668,14 @@ namespace Infrastructure.Data.Migrations
                     b.Property<long>("Version")
                         .HasColumnType("bigint")
                         .HasColumnName("version");
+
+                    b.Property<string>("VoucherCode")
+                        .HasColumnType("text")
+                        .HasColumnName("voucher_code");
+
+                    b.Property<long?>("VoucherId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("voucher_id");
 
                     b.HasKey("Id")
                         .HasName("pk_order");
@@ -861,44 +756,6 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("order_item", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Orders.OrderPayment", b =>
-                {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric")
-                        .HasColumnName("amount");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<long>("OrderId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("order_id");
-
-                    b.Property<DateTimeOffset>("PaymentDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("payment_date");
-
-                    b.Property<byte>("PaymentMethod")
-                        .HasColumnType("smallint")
-                        .HasColumnName("payment_method");
-
-                    b.HasKey("Id")
-                        .HasName("pk_order_payment");
-
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_order_payment_id");
-
-                    b.HasIndex("OrderId")
-                        .HasDatabaseName("ix_order_payment_order_id");
-
-                    b.ToTable("order_payment", (string)null);
-                });
-
             modelBuilder.Entity("Domain.Aggregates.Prints.PrintTemplate", b =>
                 {
                     b.Property<long>("Id")
@@ -955,10 +812,6 @@ namespace Infrastructure.Data.Migrations
                     b.Property<long>("Id")
                         .HasColumnType("bigint")
                         .HasColumnName("id");
-
-                    b.Property<string>("Barcode")
-                        .HasColumnType("text")
-                        .HasColumnName("barcode");
 
                     b.Property<long>("BranchId")
                         .HasColumnType("bigint")
@@ -1367,6 +1220,10 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("status");
 
+                    b.Property<long?>("UnitId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("unit_id");
+
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -1386,6 +1243,9 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("ServiceId")
                         .HasDatabaseName("ix_unit_relation_service_id");
+
+                    b.HasIndex("UnitId")
+                        .HasDatabaseName("ix_unit_relation_unit_id");
 
                     b.ToTable("unit_relation", (string)null);
                 });
@@ -1812,12 +1672,11 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("discount_value");
 
-                    b.Property<DateTimeOffset>("EndAt")
+                    b.Property<DateTimeOffset?>("EndAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("end_at");
 
                     b.Property<string>("ImgUrl")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("img_url");
 
@@ -1826,7 +1685,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("character varying(26)")
                         .HasColumnName("public_id");
 
-                    b.Property<DateTimeOffset>("StartAt")
+                    b.Property<DateTimeOffset?>("StartAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("start_at");
 
@@ -1839,6 +1698,10 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("title");
 
+                    b.Property<int>("TotalQuantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("total_quantity");
+
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -1847,12 +1710,19 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
+                    b.Property<int>("UsedQuantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("used_quantity");
+
                     b.Property<long>("Version")
                         .HasColumnType("bigint")
                         .HasColumnName("version");
 
                     b.HasKey("Id")
                         .HasName("pk_voucher");
+
+                    b.HasIndex("Code")
+                        .HasDatabaseName("ix_voucher_code");
 
                     b.ToTable("voucher", (string)null);
                 });
@@ -1889,6 +1759,66 @@ namespace Infrastructure.Data.Migrations
                         .HasDatabaseName("ix_voucher_customer_voucher_id");
 
                     b.ToTable("voucher_customer", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Vouchers.VoucherUsage", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<long>("CustomerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("customer_id");
+
+                    b.Property<decimal>("DiscountApply")
+                        .HasColumnType("numeric")
+                        .HasColumnName("discount_apply");
+
+                    b.Property<long>("OrderId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("order_id");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("public_id");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.Property<long>("VoucherId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("voucher_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_voucher_usage");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_voucher_usage_customer_id");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_voucher_usage_order_id");
+
+                    b.HasIndex("VoucherId")
+                        .HasDatabaseName("ix_voucher_usage_voucher_id");
+
+                    b.ToTable("voucher_usage", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Functions.CustomerRevenueResult", b =>
@@ -1990,52 +1920,86 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("order_summary_result", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Equipments.MaintenanceDetail", b =>
-                {
-                    b.HasOne("Domain.Aggregates.Equipments.MaintenanceHistory", "MaintenanceHistory")
-                        .WithMany("MaintenanceDetails")
-                        .HasForeignKey("MaintenanceHistoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_maintenance_detail_maintenance_history_maintenance_history_");
-
-                    b.Navigation("MaintenanceHistory");
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Equipments.MaintenanceHistory", b =>
+            modelBuilder.Entity("Domain.Aggregates.Equipments.EquipmentActivity", b =>
                 {
                     b.HasOne("Domain.Aggregates.Equipments.Equipment", "Equipment")
-                        .WithMany("MaintenanceHistories")
+                        .WithMany("EquipmentActivities")
                         .HasForeignKey("EquipmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_maintenance_history_equipment_equipment_id");
+                        .HasConstraintName("fk_equipment_activity_equipment_equipment_id");
 
-                    b.Navigation("Equipment");
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Equipments.RepairDetail", b =>
-                {
-                    b.HasOne("Domain.Aggregates.Equipments.RepairHistory", "RepairHistory")
-                        .WithMany("RepairDetails")
-                        .HasForeignKey("RepairHistoryId")
+                    b.HasOne("Domain.Aggregates.Users.User", "Staff")
+                        .WithMany()
+                        .HasForeignKey("StaffId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_repair_detail_repair_history_repair_history_id");
-
-                    b.Navigation("RepairHistory");
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Equipments.RepairHistory", b =>
-                {
-                    b.HasOne("Domain.Aggregates.Equipments.Equipment", "Equipment")
-                        .WithMany("RepairHistories")
-                        .HasForeignKey("EquipmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_repair_history_equipment_equipment_id");
+                        .HasConstraintName("fk_equipment_activity_user_staff_id");
 
                     b.Navigation("Equipment");
+
+                    b.Navigation("Staff");
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Equipments.EquipmentActivityDetail", b =>
+                {
+                    b.HasOne("Domain.Aggregates.Equipments.EquipmentActivity", "EquipmentActivity")
+                        .WithMany("ActivityDetails")
+                        .HasForeignKey("EquipmentActivityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_equipment_activity_detail_equipment_activity_equipment_acti");
+
+                    b.Navigation("EquipmentActivity");
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Feedbacks.Feedback", b =>
+                {
+                    b.HasOne("Domain.Aggregates.Feedbacks.Feedback", "Parent")
+                        .WithMany("Replies")
+                        .HasForeignKey("ParentId")
+                        .HasConstraintName("fk_feedback_feedback_parent_id");
+
+                    b.HasOne("Domain.Aggregates.Services.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_feedback_service_service_id");
+
+                    b.HasOne("Domain.Aggregates.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_feedback_user_user_id");
+
+                    b.Navigation("Parent");
+
+                    b.Navigation("Service");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Aggregates.Feedbacks.FeedbackReaction", b =>
+                {
+                    b.HasOne("Domain.Aggregates.Users.User", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_feedback_reaction_user_customer_id");
+
+                    b.HasOne("Domain.Aggregates.Feedbacks.Feedback", "Feedback")
+                        .WithMany("Reactions")
+                        .HasForeignKey("FeedbackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_feedback_reaction_feedback_feedback_id");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Feedback");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Inventories.EquipmentSupplying", b =>
@@ -2054,35 +2018,9 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_equipment_supplying_supplier_supplier_id");
 
-                    b.HasOne("Domain.Aggregates.Services.UnitRelation", "UnitRelation")
-                        .WithMany("EquipmentSupplyings")
-                        .HasForeignKey("UnitRelationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_equipment_supplying_unit_relation_unit_relation_id");
-
                     b.Navigation("InventoryDocument");
 
                     b.Navigation("Supplier");
-
-                    b.Navigation("UnitRelation");
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Inventories.InventoryRelation", b =>
-                {
-                    b.HasOne("Domain.Aggregates.Inventories.InventoryDocument", "InventoryDocument")
-                        .WithMany("InventoryRelationships")
-                        .HasForeignKey("InventoryDocumentId")
-                        .HasConstraintName("fk_inventory_relation_inventory_document_inventory_document_id");
-
-                    b.HasOne("Domain.Aggregates.Inventories.InventoryInvoice", "InventoryInvoice")
-                        .WithMany("InventoryRelationships")
-                        .HasForeignKey("InventoryInvoiceId")
-                        .HasConstraintName("fk_inventory_relation_inventory_invoice_inventory_invoice_id");
-
-                    b.Navigation("InventoryDocument");
-
-                    b.Navigation("InventoryInvoice");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Inventories.ProductSupplying", b =>
@@ -2093,6 +2031,13 @@ namespace Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_product_supplying_inventory_document_inventory_document_id");
+
+                    b.HasOne("Domain.Aggregates.Products.BranchProduct", "Product")
+                        .WithMany("ProductSupplyings")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_product_supplying_branch_product_product_id");
 
                     b.HasOne("Domain.Aggregates.Suppliers.Supplier", "Supplier")
                         .WithMany("ProductSupplyings")
@@ -2109,6 +2054,8 @@ namespace Infrastructure.Data.Migrations
                         .HasConstraintName("fk_product_supplying_unit_relation_unit_relation_id");
 
                     b.Navigation("InventoryDocument");
+
+                    b.Navigation("Product");
 
                     b.Navigation("Supplier");
 
@@ -2162,18 +2109,6 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Service");
 
                     b.Navigation("UnitRelation");
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Orders.OrderPayment", b =>
-                {
-                    b.HasOne("Domain.Aggregates.Orders.Order", "Order")
-                        .WithMany("OrderPayments")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_order_payment_order_order_id");
-
-                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Products.BranchProduct", b =>
@@ -2242,9 +2177,16 @@ namespace Infrastructure.Data.Migrations
                         .HasForeignKey("ServiceId")
                         .HasConstraintName("fk_unit_relation_service_service_id");
 
+                    b.HasOne("Domain.Aggregates.Services.Unit", "Unit")
+                        .WithMany()
+                        .HasForeignKey("UnitId")
+                        .HasConstraintName("fk_unit_relation_unit_unit_id");
+
                     b.Navigation("BranchProduct");
 
                     b.Navigation("Service");
+
+                    b.Navigation("Unit");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Tariffs.ServicePriceTariffHistory", b =>
@@ -2313,7 +2255,7 @@ namespace Infrastructure.Data.Migrations
                     b.HasOne("Domain.Aggregates.Users.User", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_voucher_customer_user_customer_id");
 
@@ -2329,46 +2271,67 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Voucher");
                 });
 
+            modelBuilder.Entity("Domain.Aggregates.Vouchers.VoucherUsage", b =>
+                {
+                    b.HasOne("Domain.Aggregates.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_voucher_usage_user_customer_id");
+
+                    b.HasOne("Domain.Aggregates.Orders.Order", "Order")
+                        .WithOne("VoucherUsage")
+                        .HasForeignKey("Domain.Aggregates.Vouchers.VoucherUsage", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_voucher_usage_order_order_id");
+
+                    b.HasOne("Domain.Aggregates.Vouchers.Voucher", null)
+                        .WithMany()
+                        .HasForeignKey("VoucherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_voucher_usage_voucher_voucher_id");
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("Domain.Aggregates.Equipments.Equipment", b =>
                 {
-                    b.Navigation("MaintenanceHistories");
-
-                    b.Navigation("RepairHistories");
+                    b.Navigation("EquipmentActivities");
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Equipments.MaintenanceHistory", b =>
+            modelBuilder.Entity("Domain.Aggregates.Equipments.EquipmentActivity", b =>
                 {
-                    b.Navigation("MaintenanceDetails");
+                    b.Navigation("ActivityDetails");
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Equipments.RepairHistory", b =>
+            modelBuilder.Entity("Domain.Aggregates.Feedbacks.Feedback", b =>
                 {
-                    b.Navigation("RepairDetails");
+                    b.Navigation("Reactions");
+
+                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Inventories.InventoryDocument", b =>
                 {
                     b.Navigation("EquipmentSupplyings");
 
-                    b.Navigation("InventoryRelationships");
-
                     b.Navigation("ProductSupplyings");
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Inventories.InventoryInvoice", b =>
-                {
-                    b.Navigation("InventoryRelationships");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Orders.Order", b =>
                 {
                     b.Navigation("OrderItems");
 
-                    b.Navigation("OrderPayments");
+                    b.Navigation("VoucherUsage");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Products.BranchProduct", b =>
                 {
+                    b.Navigation("ProductSupplyings");
+
                     b.Navigation("UnitRelations");
                 });
 
@@ -2395,8 +2358,6 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Services.UnitRelation", b =>
                 {
-                    b.Navigation("EquipmentSupplyings");
-
                     b.Navigation("OrderItems");
 
                     b.Navigation("ProductSupplyings");

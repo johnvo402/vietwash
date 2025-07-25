@@ -235,68 +235,6 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("pub_sub_log", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Warehouses.Warehouse", b =>
-                {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    b.Property<long>("BranchId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("branch_id");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("citext")
-                        .HasColumnName("code");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<int>("ReorderLevel")
-                        .HasColumnType("integer")
-                        .HasColumnName("reorder_level");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by");
-
-                    b.HasKey("Id")
-                        .HasName("pk_warehouse");
-
-                    b.HasIndex("BranchId")
-                        .HasDatabaseName("ix_warehouse_branch_id");
-
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_warehouse_id");
-
-                    b.ToTable("warehouse", (string)null);
-                });
-
             modelBuilder.Entity("Domain.Aggregates.Branches.BranchUser", b =>
                 {
                     b.HasOne("Domain.Aggregates.Branches.Branch", "Branch")
@@ -309,21 +247,9 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Branch");
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Warehouses.Warehouse", b =>
-                {
-                    b.HasOne("Domain.Aggregates.Branches.Branch", null)
-                        .WithMany("Warehouses")
-                        .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_warehouse_branch_branch_id");
-                });
-
             modelBuilder.Entity("Domain.Aggregates.Branches.Branch", b =>
                 {
                     b.Navigation("BranchUsers");
-
-                    b.Navigation("Warehouses");
                 });
 #pragma warning restore 612, 618
         }

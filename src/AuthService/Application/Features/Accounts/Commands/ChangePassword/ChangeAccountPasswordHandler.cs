@@ -21,7 +21,7 @@ public class ChangeAccountPasswordHandler(IUnitOfWork unitOfWork, ICurrentAccoun
         long? userId = currentAccount.Id;
         if (userId == null)
         {
-            return Result.Failure(new UnauthorizedError("Not allow"));
+            return Result.Failure(new UnauthorizedError(Message.UNAUTHORIZED));
         }
         Account? user = await unitOfWork
             .DynamicReadOnlyRepository<Account>()

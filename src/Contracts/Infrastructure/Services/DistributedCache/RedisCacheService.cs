@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.Services.DistributedCache;
-using Contracts.Extensions;
 using Microsoft.Extensions.Options;
+using Shared.Kernel.Extensions;
 using StackExchange.Redis;
 
 namespace Infrastructure.Services.DistributedCache;
