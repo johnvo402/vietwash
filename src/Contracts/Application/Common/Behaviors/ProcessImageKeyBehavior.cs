@@ -31,7 +31,11 @@ public class ProcessImageKeyBehavior<TMessage, TResponse>(
         foreach (PropertyInfo prop in fileProps)
         {
             if (prop.GetIndexParameters().Length > 0)
-                continue;
+                continue; // indexer
+            if (typeof(Delegate).IsAssignableFrom(prop.PropertyType))
+                continue; // delegate
+            if (prop.GetMethod?.GetParameters().Length > 0)
+                continue; // method có tham số
             object? value = prop.GetValue(data);
             if (value is not string str || string.IsNullOrWhiteSpace(str))
                 continue;
@@ -46,8 +50,12 @@ public class ProcessImageKeyBehavior<TMessage, TResponse>(
         var props = data.GetType().GetProperties().Where(p => p.GetIndexParameters().Length == 0);
         foreach (PropertyInfo prop in props)
         {
-            if (prop.PropertyType == typeof(string))
-                continue;
+            if (prop.GetIndexParameters().Length > 0)
+                continue; // indexer
+            if (typeof(Delegate).IsAssignableFrom(prop.PropertyType))
+                continue; // delegate
+            if (prop.GetMethod?.GetParameters().Length > 0)
+                continue; // method có tham số
 
             object? value = prop.GetValue(data);
             if (value == null)
