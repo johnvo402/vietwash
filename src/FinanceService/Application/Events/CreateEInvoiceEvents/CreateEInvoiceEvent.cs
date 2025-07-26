@@ -17,6 +17,7 @@ namespace Application.Events.CreateEInvoiceEvents
         public string? CustomerPhone { get; set; }
         public string? CustomerEmail { get; set; }
         public decimal Total { get; set; }
+        public decimal Discount { get; set; }
         public List<EInvoiceOrderItemMessage> Items { get; set; } = new();
     }
 

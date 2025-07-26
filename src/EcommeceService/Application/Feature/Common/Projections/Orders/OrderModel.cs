@@ -1,11 +1,10 @@
-﻿using Domain.Aggregates.Orders.Enums;
-
-namespace Application.Feature.Common.Projections.Orders
+﻿namespace Application.Feature.Common.Projections.Orders
 {
     public class OrderModel
     {
         public long? CustomerId { get; set; }
         public long BranchId { get; set; }
+        public decimal Point { get; set; }
         public string? VoucherCode { get; set; }
         public string? Note { get; set; } = string.Empty;
         public DateTimeOffset? DeliveryTime { get; set; }

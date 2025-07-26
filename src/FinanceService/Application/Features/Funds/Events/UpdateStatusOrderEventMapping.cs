@@ -45,5 +45,25 @@ namespace Application.Features.Funds.Events
                 metadata: command.Metadata // Provide a value or null for metadata as required
             );
         }
+
+        public static Transaction ToTransactionUsePoint(this CreateFundEventPayload command)
+        {
+            if (command.ObjectId is null)
+                throw new ArgumentNullException(nameof(command.ObjectId));
+
+            var metadata = (command.Metadata ?? new Dictionary<string, object>()).ToDictionary(
+                kvp => kvp.Key,
+                kvp => (object?)kvp.Value
+            );
+
+            metadata["id"] = command.ReferenceId;
+            return new Transaction(
+                type: TransactionType.Point,
+                amount: -command.Point,
+                transactionAt: DateTimeOffset.UtcNow,
+                customerId: (long)command.ObjectId!,
+                metadata: command.Metadata
+            );
+        }
     }
 }

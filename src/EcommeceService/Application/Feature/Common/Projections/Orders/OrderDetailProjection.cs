@@ -3,6 +3,7 @@ using Application.Features.Common.Mapping.Users;
 using Contracts.Extensions;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
+using Domain.Aggregates.Vouchers;
 
 namespace Application.Feature.Common.Projections.Orders
 {
@@ -12,6 +13,8 @@ namespace Application.Feature.Common.Projections.Orders
         public long? StaffId { get; set; }
         public PaymentMethod? PaymentMethod { get; set; }
         public string? QrCode { get; set; }
+        public string? VoucherCode { get; set; }
+        public decimal Point { get; set; }
         public ICollection<OrderItemProjection> OrderItems { get; set; } = [];
 
         public virtual void MappingFrom(Order order)
@@ -36,6 +39,8 @@ namespace Application.Feature.Common.Projections.Orders
             BranchId = order.BranchId;
             QrCode = order.CodeConfirm;
             PaymentMethod = order.PaymentMethod;
+            VoucherCode = order.VoucherCode;
+            Point = order.Point;
             OrderItems = order
                 .OrderItems.ToListMapping(item => new OrderItemProjection
                 {

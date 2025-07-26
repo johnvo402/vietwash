@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Domain.Aggregates.Enums;
-using Domain.Aggregates.Equipments;
+﻿using Domain.Aggregates.Enums;
 using Specification;
 using Specification.Builders;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Domain.Aggregates.Vouchers.Specifications
 {

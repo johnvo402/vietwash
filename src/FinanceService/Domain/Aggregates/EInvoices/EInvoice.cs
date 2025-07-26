@@ -39,6 +39,8 @@ namespace Domain.Aggregates.EInvoices
 
         public decimal TaxTotal { get; set; }
 
+        public decimal Discount { get; set; }
+
         public decimal TotalWithTax { get; set; }
 
         public string? QrCodeUrl { get; set; }
@@ -75,6 +77,7 @@ namespace Domain.Aggregates.EInvoices
             decimal taxTotal,
             decimal totalWithTax,
             List<EInvoiceItem> items,
+            decimal discount = 0,
             string? customerEmail = null,
             string? customerPhone = null,
             string? qrCodeUrl = null,
@@ -115,6 +118,7 @@ namespace Domain.Aggregates.EInvoices
             TotalWithTax = totalWithTax;
             QrCodeUrl = qrCodeUrl;
             Items = items;
+            Discount = discount;
             Status = EInvoiceStatus.Pending;
         }
 

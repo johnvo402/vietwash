@@ -48,7 +48,8 @@ namespace Application.Events.CreateEInvoiceEvents
                 customerPhone: message.CustomerPhone,
                 qrCodeUrl: qrCodeUrl,
                 orgLogo: org.Logo,
-                orgStamp: org.Stamp
+                orgStamp: org.Stamp,
+                discount: message.Discount
             );
         }
 

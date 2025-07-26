@@ -1,9 +1,7 @@
-﻿using Application.Common.Interfaces.Services;
-using Contracts.Extensions;
+﻿using Contracts.Extensions;
 using Contracts.Utils;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
-using Domain.Aggregates.Vouchers;
 
 namespace Application.Feature.Orders.Command.Create
 {
@@ -20,13 +18,19 @@ namespace Application.Feature.Orders.Command.Create
                 voucherCode: command.VoucherCode,
                 code: code,
                 amount: amount,
-                total: CalculationTotal(amount, command.DiscountFixed, command.DiscountValue),
+                total: CalculationTotal(
+                    amount,
+                    command.DiscountFixed,
+                    command.DiscountValue,
+                    command.Point
+                ),
                 status: OrderStatus.Pending,
                 customerId: command.CustomerId,
                 discountFixed: command.DiscountFixed,
                 discountValue: command.DiscountValue,
                 note: command.Note,
-                deliveryTime: command.DeliveryTime
+                deliveryTime: command.DeliveryTime,
+                point: command.Point
             );
 
             response.OrderItems = command.OrderItems.ToListMapping(x => new OrderItem
@@ -47,9 +51,14 @@ namespace Application.Feature.Orders.Command.Create
         private static decimal CalculationTotal(
             decimal amount,
             bool discountFixed,
-            decimal discountValue
+            decimal discountValue,
+            decimal? point = null
         )
         {
+            if (point.HasValue && point > 0)
+            {
+                amount -= point.Value;
+            }
             if (discountFixed)
             {
                 return amount - (amount * discountValue / 100);

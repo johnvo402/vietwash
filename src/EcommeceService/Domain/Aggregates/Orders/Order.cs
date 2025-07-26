@@ -23,6 +23,7 @@ namespace Domain.Aggregates.Orders
         public bool DiscountFixed { get; set; } = default!;
         public PaymentMethod? PaymentMethod { get; set; }
         public decimal DiscountValue { get; set; } = default!;
+        public decimal Point { get; set; } = 0;
         public string Note { get; set; } = default!;
         public OrderStatus Status { get; set; } = default!;
         public DateTimeOffset? OrderDate { get; set; }
@@ -67,6 +68,7 @@ namespace Domain.Aggregates.Orders
             long? customerId = null,
             bool discountFixed = false,
             decimal discountValue = 0,
+            decimal point = 0,
             string? note = null,
             DateTimeOffset? deliveryTime = null
         )
@@ -88,6 +90,7 @@ namespace Domain.Aggregates.Orders
             DiscountValue = discountValue;
             Note = note ?? string.Empty;
             DeliveryTime = deliveryTime ?? DateTimeOffset.UtcNow.AddDays(1);
+            Point = point;
         }
 
         public void EmitVoucherUsageEvent(decimal discountApply, long voucherId)
@@ -134,6 +137,7 @@ namespace Domain.Aggregates.Orders
                                 ["code"] = Code,
                                 ["publicId"] = PublicId.ToString(),
                             },
+                            Point = Point,
                         }
                     );
 
@@ -157,6 +161,7 @@ namespace Domain.Aggregates.Orders
                                     ["code"] = Code,
                                     ["publicId"] = PublicId.ToString(),
                                 },
+                                Point = Point,
                             }
                         );
                     }

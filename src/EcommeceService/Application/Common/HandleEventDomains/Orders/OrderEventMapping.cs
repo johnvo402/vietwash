@@ -6,6 +6,13 @@ namespace Application.Common.HandleEventDomains.Orders
     {
         public static EInvoiceOrderMessage ToEInvoiceMessage(this Order order)
         {
+            var disCount =
+                (
+                    order.DiscountFixed
+                        ? order.DiscountValue
+                        : order.DiscountValue * order.Total / 100
+                )
+                + order.Point * 10;
             return new EInvoiceOrderMessage
             {
                 OrderId = order.Id,
@@ -17,7 +24,7 @@ namespace Application.Common.HandleEventDomains.Orders
                 CustomerEmail = order.Customer?.Email,
 
                 Total = order.Total,
-
+                Discount = disCount,
                 Items = order
                     .OrderItems.Select(i => new EInvoiceOrderItemMessage
                     {

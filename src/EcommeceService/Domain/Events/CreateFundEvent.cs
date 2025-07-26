@@ -13,5 +13,6 @@ namespace Domain.Events
         public Dictionary<string, object>? Metadata { get; set; }
         public long BranchId { get; set; } = default!;
         public long? ObjectId { get; set; }
+        public decimal Point { get; set; }
     }
 }
