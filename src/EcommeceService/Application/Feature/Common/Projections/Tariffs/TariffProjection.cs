@@ -27,4 +27,10 @@ namespace Application.Feature.Common.Projections.Tariffs
                 .ToList();
         }
     }
+
+    public class TariffByBranchProjection
+    {
+        public string Name { get; set; }
+        public long Id { get; set; }
+    }
 }

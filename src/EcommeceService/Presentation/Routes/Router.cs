@@ -40,6 +40,9 @@ namespace Presentation.Routes
         {
             public const string Tags = $"{nameof(TariffRoute)} endpoint";
             public const string Tariffs = $"{Ecommerce}/{RouterBase.prefix}{nameof(Tariffs)}";
+            public const string TariffByBranch =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Tariffs)}/{nameof(TariffByBranch)}";
+
             public const string GetUpdateDelete =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Tariffs)}/" + "{" + RouterBase.Id + "}";
             public const string GetDetail =

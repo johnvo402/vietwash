@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.Aggregates.Enums;
 using Domain.Aggregates.Equipments;
 using Specification;
 using Specification.Builders;
@@ -19,8 +20,8 @@ namespace Domain.Aggregates.Vouchers.Specifications
                 Query.Where(v =>
                     v.VoucherCustomers.Any(vc =>
                         vc.CustomerId == customerId.Value && vc.IsUsed == false
-
-                    ) && v.Status == 0
+                    )
+                    && v.Status == ActivationStatus.Active
                 );
             }
 
