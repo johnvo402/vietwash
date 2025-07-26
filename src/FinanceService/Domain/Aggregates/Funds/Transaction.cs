@@ -24,7 +24,7 @@ namespace Domain.Aggregates.Funds
         )
         {
             CustomerId = Guard.Against.NegativeOrZero(customerId, nameof(customerId));
-            Amount = Guard.Against.NegativeOrZero(amount, nameof(amount));
+            Amount = Guard.Against.Zero(amount, nameof(amount));
             TransactionAt = Guard.Against.Default(transactionAt, nameof(transactionAt));
             Type = Guard.Against.EnumOutOfRange(type, nameof(type));
             Metadata = metadata;
