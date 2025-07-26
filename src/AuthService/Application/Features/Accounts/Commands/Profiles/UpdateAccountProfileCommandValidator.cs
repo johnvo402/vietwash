@@ -1,17 +1,35 @@
 using System.Data;
+using System.Text.RegularExpressions;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Validators.Accounts;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Accounts;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Accounts.Commands.Profiles;
 
 public class UpdateAccountProfileCommandValidator : AbstractValidator<UpdateAccountProfileCommand>
 {
-    public UpdateAccountProfileCommandValidator(IActionAccessorService accessorService)
+    private readonly IUnitOfWork unitOfWork;
+    private readonly IActionAccessorService accessorService;
+    private readonly ICurrentAccount currentAccount;
+
+    public UpdateAccountProfileCommandValidator(
+        IActionAccessorService accessorService,
+        IUnitOfWork unitOfWork,
+        ICurrentAccount currentAccount
+    )
     {
+        this.unitOfWork = unitOfWork;
+        this.accessorService = accessorService;
+        this.currentAccount = currentAccount;
+    }
+
+    private void ApplyRule()
+    {
+        long? id = currentAccount.Id;
         Include(new AccountValidator(accessorService));
 
         RuleFor(x => x.Email)
@@ -23,6 +41,29 @@ public class UpdateAccountProfileCommandValidator : AbstractValidator<UpdateAcco
                     .Property(x => x.Email)
                     .Message(MessageType.Valid)
                     .Negative()
+                    .Build()
+            )
+            .NotEmpty()
+            .WithState(x =>
+                Messager
+                    .Create<Account>()
+                    .Property(x => x.Email)
+                    .Message(MessageType.Null)
+                    .Negative()
+                    .Build()
+            )
+            .MustAsync(
+                (email, cancellationToken) => IsEmailAvailableAsync(email!, id, cancellationToken)
+            )
+            .When(
+                _ => accessorService.GetHttpMethod() == HttpMethod.Put.ToString(),
+                ApplyConditionTo.CurrentValidator
+            )
+            .WithState(x =>
+                Messager
+                    .Create<Account>()
+                    .Property(x => x.Email)
+                    .Message(MessageType.Existence)
                     .Build()
             );
 
@@ -37,4 +78,18 @@ public class UpdateAccountProfileCommandValidator : AbstractValidator<UpdateAcco
                     .Build()
             );
     }
+
+    private async Task<bool> IsEmailAvailableAsync(
+        string email,
+        long? id = null,
+        CancellationToken cancellationToken = default
+    ) =>
+        !await unitOfWork
+            .Repository<Account>()
+            .AnyAsync(
+                x =>
+                    (!id.HasValue && EF.Functions.ILike(x.Email, email))
+                    || (x.Id != id && EF.Functions.ILike(x.Email, email)),
+                cancellationToken
+            );
 }
