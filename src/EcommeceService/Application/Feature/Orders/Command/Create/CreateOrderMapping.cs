@@ -59,7 +59,7 @@ namespace Application.Feature.Orders.Command.Create
             {
                 amount -= point.Value;
             }
-            if (discountFixed)
+            if (!discountFixed)
             {
                 return amount - (amount * discountValue / 100);
             }
