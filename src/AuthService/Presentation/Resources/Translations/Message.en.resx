@@ -293,4 +293,12 @@
     <value>Account</value>
     <comment></comment>
   </data>
+  <data name="OtpPhoneNumber" xml:space="preserve">
+    <value>Otp Phone number</value>
+    <comment></comment>
+  </data>
+   <data name="OtpEmail" xml:space="preserve">
+    <value>Otp Email</value>
+    <comment></comment>
+  </data>
 </root>

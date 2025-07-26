@@ -1,11 +1,12 @@
-﻿using System.Net.Http;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
-using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.DistributedCache;
 using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.Services.Mail;
 using Contracts.ApiWrapper;
+using Contracts.Dtos.Requests;
 using Domain.Otp;
+using Domain.Otp.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -37,12 +38,13 @@ namespace Infrastructure.Services.Identity
         { }
     }
 
-    public class SmsOtpClient : ISmsOtpClient
+    public class OtpClient : ISmsOtpClient
     {
         private readonly OtpOption _otpOption;
         private readonly HttpClient _httpClient;
         private readonly IRedisCacheService _cache;
         private readonly ILogger _logger;
+        private readonly IMailService _mailService;
 
         private const int OtpLength = 6;
         private const int OtpExpirationMinutes = 10;
@@ -51,17 +53,19 @@ namespace Infrastructure.Services.Identity
         private const int LockoutMinutes = 30;
         private static readonly Random _random = new();
 
-        public SmsOtpClient(
+        public OtpClient(
             IOptions<OtpOption> otpOption,
             HttpClient httpClient,
             IRedisCacheService redisCache,
-            ILogger logger
+            ILogger logger,
+            IMailService mailService
         )
         {
             _otpOption = otpOption?.Value ?? throw new ArgumentNullException(nameof(otpOption));
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _cache = redisCache ?? throw new ArgumentNullException(nameof(redisCache));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mailService = mailService ?? throw new ArgumentNullException(nameof(mailService));
 
             ConfigureHttpClient();
         }
@@ -77,13 +81,23 @@ namespace Infrastructure.Services.Identity
                 return error;
             }
 
-            error = await CheckRateLimitAsync(request.To, request.ClientIp, cancellationToken);
+            error = await CheckRateLimitAsync(
+                request.To,
+                request.ClientIp,
+                request.Type,
+                cancellationToken
+            );
             if (error != null)
             {
                 return error;
             }
 
-            error = await CheckIpBlockedAsync(request.To, request.ClientIp, cancellationToken);
+            error = await CheckIpBlockedAsync(
+                request.To,
+                request.ClientIp,
+                request.Type,
+                cancellationToken
+            );
             if (error != null)
             {
                 return error;
@@ -108,26 +122,27 @@ namespace Infrastructure.Services.Identity
             if (error != null)
             {
                 _logger.Warning("Verification failed: {Error}", error.Detail);
-                return false; // Non-critical validation errors return false
+                return false;
             }
 
-            string attemptKey = $"otp:attempts:{request.To}:{request.ClientIp}";
+            string attemptKey = $"otp:attempts:{request.To}:{request.ClientIp}:{request.Type}";
             error = await CheckVerificationAttemptsAsync(
                 attemptKey,
                 request.To,
                 request.ClientIp,
+                request.Type,
                 cancellationToken
             );
             if (error != null)
             {
                 _logger.Warning("Verification failed: {Error}", error.Detail);
-                return false; // IP blocked errors return false
+                return false;
             }
 
             bool isValid = await VerifyOtpAsync(request, cancellationToken);
             if (isValid)
             {
-                await _cache.Database.KeyDeleteAsync(attemptKey); // Clear attempts on success
+                await _cache.Database.KeyDeleteAsync(attemptKey);
             }
             return isValid;
         }
@@ -141,13 +156,18 @@ namespace Infrastructure.Services.Identity
             }
             if (string.IsNullOrWhiteSpace(request.To))
             {
-                _logger.Warning("Validation failed: Recipient phone number cannot be empty.");
-                return new ValidationError("Invalid request", "Phone number cannot be empty.");
+                _logger.Warning("Validation failed: Recipient cannot be empty.");
+                return new ValidationError("Invalid request", "Recipient cannot be empty.");
             }
             if (string.IsNullOrWhiteSpace(request.ClientIp))
             {
                 _logger.Warning("Validation failed: Client IP cannot be empty.");
                 return new ValidationError("Invalid request", "Client IP cannot be empty.");
+            }
+            if (request.Type != OtpType.Phone && request.Type != OtpType.Email)
+            {
+                _logger.Warning("Validation failed: Invalid OTP type.");
+                return new ValidationError("Invalid request", "OTP type must be Phone or Email.");
             }
             return null;
         }
@@ -161,8 +181,8 @@ namespace Infrastructure.Services.Identity
             }
             if (string.IsNullOrWhiteSpace(request.To))
             {
-                _logger.Warning("Validation failed: Recipient phone number cannot be empty.");
-                return new ValidationError("Invalid request", "Phone number cannot be empty.");
+                _logger.Warning("Validation failed: Recipient cannot be empty.");
+                return new ValidationError("Invalid request", "Recipient cannot be empty.");
             }
             if (string.IsNullOrWhiteSpace(request.Otp))
             {
@@ -174,16 +194,22 @@ namespace Infrastructure.Services.Identity
                 _logger.Warning("Validation failed: Client IP cannot be empty.");
                 return new ValidationError("Invalid request", "Client IP cannot be empty.");
             }
+            if (request.Type != OtpType.Phone && request.Type != OtpType.Email)
+            {
+                _logger.Warning("Validation failed: Invalid OTP type.");
+                return new ValidationError("Invalid request", "OTP type must be Phone or Email.");
+            }
             return null;
         }
 
         public async Task<ErrorDetails?> CheckRateLimitAsync(
-            string phoneNumber,
+            string recipient,
             string clientIp,
+            OtpType type,
             CancellationToken cancellationToken
         )
         {
-            string rateLimitKey = $"otp:ratelimit:{phoneNumber}:{clientIp}";
+            string rateLimitKey = $"otp:ratelimit:{recipient}:{clientIp}:{type}";
             var generationCount = await _cache.Database.StringIncrementAsync(rateLimitKey);
             if (generationCount == 1)
             {
@@ -193,35 +219,38 @@ namespace Infrastructure.Services.Identity
             if (generationCount > GenerationLimitPerHour)
             {
                 _logger.Warning(
-                    "OTP generation limit exceeded for phone: {Phone}, ip: {Ip}",
-                    phoneNumber,
-                    clientIp
+                    "OTP generation limit exceeded for recipient: {Recipient}, ip: {Ip}, type: {Type}",
+                    recipient,
+                    clientIp,
+                    type
                 );
                 return new RateLimitError(
                     "Rate limit exceeded",
-                    "Too many OTP requests for this phone number and IP. Please try again later."
+                    $"Too many OTP requests for this {type} and IP. Please try again later."
                 );
             }
             return null;
         }
 
         public async Task<ErrorDetails?> CheckIpBlockedAsync(
-            string phoneNumber,
+            string recipient,
             string clientIp,
+            OtpType type,
             CancellationToken cancellationToken
         )
         {
-            string ipBlockKey = $"otp:block:{phoneNumber}:{clientIp}";
+            string ipBlockKey = $"otp:block:{recipient}:{clientIp}:{type}";
             if (await _cache.Database.KeyExistsAsync(ipBlockKey))
             {
                 _logger.Warning(
-                    "IP blocked for OTP generation for phone: {Phone}, ip: {Ip}",
-                    phoneNumber,
-                    clientIp
+                    "IP blocked for OTP generation for recipient: {Recipient}, ip: {Ip}, type: {Type}",
+                    recipient,
+                    clientIp,
+                    type
                 );
                 return new IpBlockedError(
                     "IP blocked",
-                    "This IP is temporarily blocked for this phone number due to suspicious activity."
+                    $"This IP is temporarily blocked for this {type} due to suspicious activity."
                 );
             }
             return null;
@@ -229,8 +258,9 @@ namespace Infrastructure.Services.Identity
 
         public async Task<ErrorDetails?> CheckVerificationAttemptsAsync(
             string attemptKey,
-            string phoneNumber,
+            string recipient,
             string clientIp,
+            OtpType type,
             CancellationToken cancellationToken
         )
         {
@@ -245,20 +275,21 @@ namespace Infrastructure.Services.Identity
 
             if (attemptCount > MaxAttempts)
             {
-                string ipBlockKey = $"otp:block:{phoneNumber}:{clientIp}";
+                string ipBlockKey = $"otp:block:{recipient}:{clientIp}:{type}";
                 await _cache.Database.StringSetAsync(
                     ipBlockKey,
                     "blocked",
                     TimeSpan.FromMinutes(LockoutMinutes)
                 );
                 _logger.Warning(
-                    "IP blocked due to too many failed attempts for phone: {Phone}, ip: {Ip}",
-                    phoneNumber,
-                    clientIp
+                    "IP blocked due to too many failed attempts for recipient: {Recipient}, ip: {Ip}, type: {Type}",
+                    recipient,
+                    clientIp,
+                    type
                 );
                 return new IpBlockedError(
                     "Too many attempts",
-                    "Too many failed verification attempts for this phone and IP. IP temporarily blocked."
+                    $"Too many failed verification attempts for this {type} and IP. IP temporarily blocked."
                 );
             }
             return null;
@@ -282,13 +313,30 @@ namespace Infrastructure.Services.Identity
         )
         {
             string code = GenerateOtpCode();
+
+            if (request.Type == OtpType.Phone)
+            {
+                return await SendSmsOtpAsync(request, code, cancellationToken);
+            }
+            else
+            {
+                return await SendEmailOtpAsync(request, code, cancellationToken);
+            }
+        }
+
+        private async Task<(string?, ErrorDetails?)> SendSmsOtpAsync(
+            CreatePinRequest request,
+            string code,
+            CancellationToken cancellationToken
+        )
+        {
             var payload = new Dictionary<string, string>
             {
                 { "to", request.To },
                 { "message", $"[VietWash] Your verification code is: {code}" },
             };
 
-            _logger.Information("Sending SMS OTP: to={phoneNumber}, code={code}", request.To, code);
+            _logger.Information("Sending SMS OTP: to={Recipient}, code={Code}", request.To, code);
 
             try
             {
@@ -316,21 +364,61 @@ namespace Infrastructure.Services.Identity
             }
         }
 
+        private async Task<(string?, ErrorDetails?)> SendEmailOtpAsync(
+            CreatePinRequest request,
+            string code,
+            CancellationToken cancellationToken
+        )
+        {
+            _logger.Information("Sending Email OTP: to={Recipient}, code={Code}", request.To, code);
+
+            try
+            {
+                var mailData = new MailTemplateData
+                {
+                    DisplayName = "VietWash",
+                    Subject = "Your Verification Code",
+                    To = new List<string> { request.To },
+                    Template = new MailTemplate(
+                        "OtpEmail",
+                        new { Code = code, Expiry = OtpExpirationMinutes }
+                    ),
+                };
+
+                var result = await _mailService.SendWithTemplateAsync(mailData);
+                if (!result)
+                {
+                    _logger.Error("Failed to send Email OTP to: {Recipient}", request.To);
+                    return (
+                        null,
+                        new ServiceError("Email service error", "Failed to send email OTP")
+                    );
+                }
+
+                return (code, null);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error sending OTP for email: {Email}", request.To);
+                throw;
+            }
+        }
+
         private async Task StoreOtpAsync(
             CreatePinRequest request,
             string otpCode,
             CancellationToken cancellationToken
         )
         {
-            string key = $"otp:{request.To}:{request.ClientIp}";
+            string key = $"otp:{request.To}:{request.ClientIp}:{request.Type}";
 
-            // Clear any existing OTP for this phone number and IP
             await _cache.Database.StringGetAsync(key);
 
             var otpData = new
             {
                 Code = otpCode,
                 Ip = request.ClientIp,
+                Type = request.Type.ToString(),
                 ExpiresAt = DateTimeOffset
                     .UtcNow.AddMinutes(OtpExpirationMinutes)
                     .ToUnixTimeSeconds(),
@@ -343,25 +431,27 @@ namespace Infrastructure.Services.Identity
             );
 
             _logger.Information(
-                "Stored OTP for phone: {Phone}, ip: {Ip}",
+                "Stored OTP for recipient: {Recipient}, ip: {Ip}, type: {Type}",
                 request.To,
-                request.ClientIp
+                request.ClientIp,
+                request.Type
             );
         }
 
         private async Task<bool> VerifyOtpAsync(
-           VerifyPinRequest request,
-           CancellationToken cancellationToken
+            VerifyPinRequest request,
+            CancellationToken cancellationToken
         )
         {
-            string key = $"otp:{request.To}:{request.ClientIp}";
+            string key = $"otp:{request.To}:{request.ClientIp}:{request.Type}";
             var otpJson = await _cache.Database.StringGetAsync(key);
             if (!otpJson.HasValue)
             {
                 _logger.Warning(
-                    "No OTP found for phone: {Phone}, ip: {Ip}",
+                    "No OTP found for recipient: {Recipient}, ip: {Ip}, type: {Type}",
                     request.To,
-                    request.ClientIp
+                    request.ClientIp,
+                    request.Type
                 );
                 return false;
             }
@@ -374,9 +464,10 @@ namespace Infrastructure.Services.Identity
             )
             {
                 _logger.Warning(
-                    "Invalid OTP for phone: {Phone}, ip: {Ip}",
+                    "Invalid OTP for recipient: {Recipient}, ip: {Ip}, type: {Type}",
                     request.To,
-                    request.ClientIp
+                    request.ClientIp,
+                    request.Type
                 );
                 return false;
             }
@@ -388,30 +479,49 @@ namespace Infrastructure.Services.Identity
             )
             {
                 _logger.Warning(
-                    "OTP expired for phone: {Phone}, ip: {Ip}",
+                    "OTP expired for recipient: {Recipient}, ip: {Ip}, type: {Type}",
                     request.To,
-                    request.ClientIp
+                    request.ClientIp,
+                    request.Type
                 );
                 return false;
             }
 
-            if (!otpData.TryGetValue("Ip", out var storedIp) || storedIp?.ToString() != request.ClientIp)
+            if (
+                !otpData.TryGetValue("Ip", out var storedIp)
+                || storedIp?.ToString() != request.ClientIp
+            )
             {
                 _logger.Warning(
-                    "IP mismatch for phone: {Phone}, stored: {StoredIp}, provided: {ProvidedIp}",
+                    "IP mismatch for recipient: {Recipient}, stored: {StoredIp}, provided: {ProvidedIp}, type: {Type}",
                     request.To,
                     storedIp,
-                    request.ClientIp
+                    request.ClientIp,
+                    request.Type
                 );
                 return false;
             }
 
-            // Clear OTP on successful verification  
+            if (
+                !otpData.TryGetValue("Type", out var storedType)
+                || storedType?.ToString() != request.Type.ToString()
+            )
+            {
+                _logger.Warning(
+                    "Type mismatch for recipient: {Recipient}, stored: {StoredType}, provided: {ProvidedType}",
+                    request.To,
+                    storedType,
+                    request.Type
+                );
+                return false;
+            }
+
             await _cache.Database.StringGetAsync(key);
             _logger.Information(
-                "OTP verified successfully for phone: {Phone}, ip: {Ip}",
+                "OTP verified successfully for recipient: {Recipient}, ip: {Ip}, type: {Type}",
                 request.To,
-                request.ClientIp
+                request.ClientIp,
+                request.Type
             );
             return true;
         }

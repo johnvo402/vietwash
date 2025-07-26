@@ -3,10 +3,12 @@ using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Features.Accounts.Commands.RequestOtp;
 using Contracts.ApiWrapper;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Accounts;
 using Domain.Aggregates.Accounts.Specifications;
+using Domain.Otp.Enums;
 using Infrastructure.Constants;
 using Mediator;
 
@@ -15,7 +17,8 @@ namespace Application.Features.Accounts.Commands.Profiles;
 public class UpdateAccountProfileHandler(
     IUnitOfWork unitOfWork,
     ICurrentAccount currentAccount,
-    IMediaUpdateService avatarUpdate
+    IMediaUpdateService avatarUpdate,
+    ISender sender
 ) : IRequestHandler<UpdateAccountProfileCommand, Result<UpdateAccountProfileResponse>>
 {
     public async ValueTask<Result<UpdateAccountProfileResponse>> Handle(
@@ -37,6 +40,71 @@ public class UpdateAccountProfileHandler(
                     Messager.Create<Account>().Message(MessageType.Found).Negative().BuildMessage()
                 )
             );
+        }
+        if (user.Email != command.Email && !string.IsNullOrEmpty(command.Email))
+        {
+            if (command.OtpEmail == null)
+            {
+                return Result<UpdateAccountProfileResponse>.Failure(
+                    new BadRequestError(
+                        "OTP email is required",
+                        Messager
+                            .Create<UpdateAccountProfileCommand>(nameof(Account))
+                            .Property(x => x.OtpEmail)
+                            .Message(MessageType.Empty)
+                            .Negative()
+                            .BuildMessage()
+                    )
+                );
+            }
+
+            var otpResult = await sender.Send(
+                new RequestOtpCommand
+                {
+                    To = command.Email,
+                    ClientIp = currentAccount.ClientIp!,
+                    Type = OtpType.Email,
+                },
+                cancellationToken
+            );
+
+            if (otpResult.IsFailure)
+            {
+                return Result<UpdateAccountProfileResponse>.Failure(otpResult.Error!);
+            }
+        }
+
+        if (user.PhoneNumber != command.PhoneNumber && !string.IsNullOrEmpty(command.PhoneNumber))
+        {
+            if (command.OtpPhoneNumber == null)
+            {
+                return Result<UpdateAccountProfileResponse>.Failure(
+                    new BadRequestError(
+                        "OTP email is required",
+                        Messager
+                            .Create<UpdateAccountProfileCommand>(nameof(Account))
+                            .Property(x => x.OtpPhoneNumber)
+                            .Message(MessageType.Empty)
+                            .Negative()
+                            .BuildMessage()
+                    )
+                );
+            }
+
+            var otpResult = await sender.Send(
+                new RequestOtpCommand
+                {
+                    To = command.PhoneNumber,
+                    ClientIp = currentAccount.ClientIp!,
+                    Type = OtpType.Phone,
+                },
+                cancellationToken
+            );
+
+            if (otpResult.IsFailure)
+            {
+                return Result<UpdateAccountProfileResponse>.Failure(otpResult.Error!);
+            }
         }
 
         string? oldAvatar = null;

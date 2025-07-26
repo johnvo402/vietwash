@@ -32,6 +32,9 @@ namespace Presentation.Routes
                 $"{Auth}/{RouterBase.prefix}{nameof(Accounts)}/{nameof(Logout)}";
             public const string CustomerLogin =
                 $"{Auth}/{RouterBase.prefix}{nameof(Accounts)}/{nameof(CustomerLogin)}";
+
+            public const string RequestOtp =
+                $"{Auth}/{RouterBase.prefix}{nameof(Accounts)}/{nameof(RequestOtp)}";
             public const string CustomerLoginVerify =
                 $"{Auth}/{RouterBase.prefix}{nameof(Accounts)}/{nameof(CustomerLoginVerify)}";
             public const string Tags = $"{nameof(Accounts)} endpoint";
@@ -39,11 +42,11 @@ namespace Presentation.Routes
 
         public static class CustomerRoute
         {
-			public const string Customers = $"{Auth}/{RouterBase.prefix}{nameof(Customers)}";
-			public const string GetUpdateDelete =
-				$"{Auth}/{RouterBase.prefix}{nameof(Customers)}/" + "{" + RouterBase.Id + "}";
-			public const string GetRouteName = $"{Customers}DetailEndpoint";
-			public const string GetList = $"{Auth}/{RouterBase.prefix}{nameof(Customers)}";
+            public const string Customers = $"{Auth}/{RouterBase.prefix}{nameof(Customers)}";
+            public const string GetUpdateDelete =
+                $"{Auth}/{RouterBase.prefix}{nameof(Customers)}/" + "{" + RouterBase.Id + "}";
+            public const string GetRouteName = $"{Customers}DetailEndpoint";
+            public const string GetList = $"{Auth}/{RouterBase.prefix}{nameof(Customers)}";
             public const string Tags = $"{nameof(Customers)} endpoint";
         }
 

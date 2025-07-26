@@ -121,7 +121,7 @@ public static class DependencyInjection
             .AddMemoryCaching(configuration)
             .AddHangfireConfiguration(configuration)
             .AddScoped<JobScheduler>()
-            .AddScoped<ISmsOtpClient, SmsOtpClient>();
+            .AddScoped<ISmsOtpClient, OtpClient>();
 
         return services;
     }

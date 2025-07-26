@@ -11,6 +11,8 @@ public class UpdateAccountProfileCommand
 {
     public string? Email { get; set; }
     public Gender? Gender { get; set; }
+    public string? OtpPhoneNumber { get; set; }
+    public string? OtpEmail { get; set; }
 
     public List<AccountContactProjection>? AccountContacts { get; set; }
 };
