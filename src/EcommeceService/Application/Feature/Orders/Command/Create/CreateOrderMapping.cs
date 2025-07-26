@@ -57,7 +57,7 @@ namespace Application.Feature.Orders.Command.Create
         {
             if (point.HasValue && point > 0)
             {
-                amount -= point.Value;
+                amount -= point.Value * 10;
             }
             if (!discountFixed)
             {
