@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Domain.Aggregates.Orders;
-using Domain.Aggregates.Vouchers;
+﻿using Domain.Aggregates.Orders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -24,6 +18,7 @@ namespace Infrastructure.Data.Configurations
             builder.HasIndex(x => x.CustomerId);
             builder.HasOne(x => x.Customer).WithMany().HasForeignKey(x => x.CustomerId);
             builder.HasOne(x => x.Staff).WithMany().HasForeignKey(x => x.StaffId);
+            builder.HasOne(x => x.Tariff).WithMany().HasForeignKey(x => x.TariffId);
         }
     }
 }

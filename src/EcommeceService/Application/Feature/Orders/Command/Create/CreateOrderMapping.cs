@@ -30,7 +30,8 @@ namespace Application.Feature.Orders.Command.Create
                 discountValue: command.DiscountValue,
                 note: command.Note,
                 deliveryTime: command.DeliveryTime,
-                point: command.Point
+                point: command.Point,
+                tariffId: command.TariffId
             );
 
             response.OrderItems = command.OrderItems.ToListMapping(x => new OrderItem

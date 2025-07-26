@@ -1,6 +1,7 @@
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Events;
+using Domain.Aggregates.Tariffs;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Vouchers;
 using Domain.Aggregates.Vouchers.Events;
@@ -16,6 +17,7 @@ namespace Domain.Aggregates.Orders
         public long BranchId { get; set; } = default!;
         public long StaffId { get; set; } = default!;
         public long? VoucherId { get; set; }
+        public long? TariffId { get; set; }
         public string? VoucherCode { get; set; }
         public string Code { get; set; } = default!;
         public decimal Amount { get; set; } = default!;
@@ -30,6 +32,7 @@ namespace Domain.Aggregates.Orders
         public DateTimeOffset DeliveryTime { get; set; } = default!;
         public User? Staff { get; set; }
         public User? Customer { get; set; }
+        public Tariff? Tariff { get; set; }
         public virtual VoucherUsage? VoucherUsage { get; set; }
 
         public string? CodeConfirm { get; set; }
@@ -70,6 +73,7 @@ namespace Domain.Aggregates.Orders
             decimal discountValue = 0,
             decimal point = 0,
             string? note = null,
+            long? tariffId = null,
             DateTimeOffset? deliveryTime = null
         )
         {
@@ -91,6 +95,7 @@ namespace Domain.Aggregates.Orders
             Note = note ?? string.Empty;
             DeliveryTime = deliveryTime ?? DateTimeOffset.UtcNow.AddDays(1);
             Point = point;
+            TariffId = tariffId;
         }
 
         public void EmitVoucherUsageEvent(decimal discountApply, long voucherId)

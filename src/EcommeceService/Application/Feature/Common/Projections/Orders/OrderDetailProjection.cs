@@ -1,4 +1,5 @@
 ﻿using Application.Common.Security;
+using Application.Feature.Common.Projections.Tariffs;
 using Application.Features.Common.Mapping.Users;
 using Contracts.Extensions;
 using Domain.Aggregates.Orders;
@@ -15,6 +16,8 @@ namespace Application.Feature.Common.Projections.Orders
         public string? QrCode { get; set; }
         public string? VoucherCode { get; set; }
         public decimal Point { get; set; }
+        public long? TariffId { get; set; }
+        public TariffByBranchProjection? Tariff { get; set; }
         public ICollection<OrderItemProjection> OrderItems { get; set; } = [];
 
         public virtual void MappingFrom(Order order)
@@ -41,25 +44,35 @@ namespace Application.Feature.Common.Projections.Orders
             PaymentMethod = order.PaymentMethod;
             VoucherCode = order.VoucherCode;
             Point = order.Point;
-            OrderItems = order
-                .OrderItems.ToListMapping(item => new OrderItemProjection
-                {
-                    Id = item.Id,
-                    OrderId = item.OrderId,
-                    ServiceId = item.ServiceId,
-                    ServiceImage = item.Service.Image,
-                    UnitRelationId = item.UnitRelationId,
-                    Price = item.Price,
-                    Quantity = item.Quantity,
-                    UnitRelationName = item.UnitRelationName,
-                    ProcessingTime = item.ProcessingTime,
-                    ServiceName = item.ServiceName,
-                    UnitPrice = item.UnitPrice,
-                })
-                .ToList();
+            TariffId = order.TariffId;
+            Tariff =
+                order?.Tariff != null
+                    ? new TariffByBranchProjection
+                    {
+                        Id = (long)order.Tariff?.Id!,
+                        Name = order.Tariff?.Name!,
+                    }
+                    : null;
+            OrderItems =
+                order
+                    ?.OrderItems.ToListMapping(item => new OrderItemProjection
+                    {
+                        Id = item.Id,
+                        OrderId = item.OrderId,
+                        ServiceId = item.ServiceId,
+                        ServiceImage = item.Service.Image,
+                        UnitRelationId = item.UnitRelationId,
+                        Price = item.Price,
+                        Quantity = item.Quantity,
+                        UnitRelationName = item.UnitRelationName,
+                        ProcessingTime = item.ProcessingTime,
+                        ServiceName = item.ServiceName,
+                        UnitPrice = item.UnitPrice,
+                    })
+                    .ToList() ?? [];
 
-            Customer = order.Customer?.UserDTOResponse() ?? null;
-            Staff = order.Staff?.UserDTOResponse() ?? null;
+            Customer = order?.Customer?.UserDTOResponse() ?? null;
+            Staff = order?.Staff?.UserDTOResponse() ?? null;
         }
     }
 

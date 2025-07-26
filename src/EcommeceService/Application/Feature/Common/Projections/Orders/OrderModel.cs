@@ -4,6 +4,7 @@
     {
         public long? CustomerId { get; set; }
         public long BranchId { get; set; }
+        public long TariffId { get; set; }
         public decimal Point { get; set; }
         public string? VoucherCode { get; set; }
         public string? Note { get; set; } = string.Empty;
