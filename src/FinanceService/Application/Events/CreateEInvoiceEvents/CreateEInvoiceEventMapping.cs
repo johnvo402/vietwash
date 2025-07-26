@@ -16,7 +16,7 @@ namespace Application.Events.CreateEInvoiceEvents
         )
         {
             var taxTotal = Math.Round(message.Total * org.VatPercent / 100, 2);
-            var totalWithTax = message.Total + taxTotal;
+            var totalWithTax = message.Total - taxTotal - message.Discount;
 
             var items = message
                 .Items.Select(x => new EInvoiceItem
@@ -95,7 +95,7 @@ namespace Application.Events.CreateEInvoiceEvents
                 Total = einvoice.Total.FormatCurrency(),
                 VatPercent = einvoice.VatPercent,
                 TaxTotal = einvoice.TaxTotal.FormatCurrency(),
-                Discount = "0", // Nếu có chiết khấu thì bổ sung từ dữ liệu khác
+                Discount = einvoice.Discount.FormatCurrency(), // Nếu có chiết khấu thì bổ sung từ dữ liệu khác
                 TotalWithTax = einvoice.TotalWithTax.FormatCurrency(),
                 TotalInWords = NumberToTextConverter.ToVietnameseCurrencyText(
                     einvoice.TotalWithTax

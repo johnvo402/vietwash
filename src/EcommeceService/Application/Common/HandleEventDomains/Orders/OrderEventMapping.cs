@@ -23,7 +23,7 @@ namespace Application.Common.HandleEventDomains.Orders
                 CustomerPhone = order.Customer?.PhoneNumber,
                 CustomerEmail = order.Customer?.Email,
 
-                Total = order.Total,
+                Total = order.Amount,
                 Discount = disCount,
                 Items = order
                     .OrderItems.Select(i => new EInvoiceOrderItemMessage
