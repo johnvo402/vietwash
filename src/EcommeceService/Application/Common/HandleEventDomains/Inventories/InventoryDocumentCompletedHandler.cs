@@ -146,7 +146,7 @@ public sealed class InventoryDocumentCompletedHandler
             PaymentMethod = PaymentMethod.Cash,
             BranchId = document.BranchId ?? 1,
 
-            BehaviorId = 1,
+            BehaviorId = 3,
             Metadata = new Dictionary<string, object>
             {
                 ["code"] = document.Code,
