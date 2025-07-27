@@ -6,6 +6,7 @@ using Application.Feature.Services.Queries.List;
 using Application.Features.Common.Projections.Users;
 using Contracts.Application.Common;
 using Domain.Aggregates.Enums;
+using Domain.Aggregates.Inventories.Enums;
 using Domain.Aggregates.Products;
 
 namespace Application.Feature.Common.Projections.BranchProducts
@@ -67,5 +68,14 @@ namespace Application.Feature.Common.Projections.BranchProducts
             UpdatedAt = branchProduct.UpdatedAt;
             UpdatedBy = branchProduct.UpdatedBy;
         }
+    }
+
+    public class BranchProductCardInv
+    {
+        public DateTimeOffset? TransactionAt { get; set; }
+        public string DocumentCode { get; set; } = null!;
+        public int Quantity { get; set; }
+        public long ProductId { get; set; }
+        public InventoryType Type { get; set; }
     }
 }

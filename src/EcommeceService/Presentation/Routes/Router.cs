@@ -173,6 +173,8 @@ namespace Presentation.Routes
             public const string Tags = $"{nameof(BranchProductRoute)} endpoint";
             public const string BranchProducts =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(BranchProducts)}";
+            public const string BranchProductCardInv =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(BranchProductCardInv)}";
             public const string GetUpdateDelete =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(BranchProducts)}/"
                 + "{"
