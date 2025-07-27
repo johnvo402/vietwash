@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Specification;
@@ -12,21 +13,24 @@ namespace Domain.Aggregates.Funds.Specifications
     {
         public ListFundSpecification(string? from, string? to)
         {
-            if (!string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(to))
+            Query.Include(x => x.FundBehavior).AsNoTracking().AsSplitQuery();
+
+            var filter = BuildDateFilter(from, to);
+
+            if (filter is not null)
             {
-                Query
-                    .Where(x =>
-                        x.TransactionDate >= DateTime.Parse(from)
-                        && x.TransactionDate < DateTime.Parse(to)
-                    )
-                    .Include(x => x.FundBehavior)
-                    .AsNoTracking()
-                    .AsSplitQuery();
+                Query.Where(filter);
             }
-            else
+        }
+
+        private static Expression<Func<Fund, bool>>? BuildDateFilter(string? from, string? to)
+        {
+            if (DateTime.TryParse(from, out var fromDate) && DateTime.TryParse(to, out var toDate))
             {
-                Query.Include(x => x.FundBehavior).AsNoTracking().AsSplitQuery();
+                return x => x.TransactionDate >= fromDate && x.TransactionDate < toDate;
             }
+
+            return null;
         }
     }
 }
