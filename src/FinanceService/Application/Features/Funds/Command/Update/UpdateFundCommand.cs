@@ -11,6 +11,7 @@ namespace Application.Features.Funds.Command.Update
         [FromRoute(Name = RouterBase.Id)]
         public string FundId { get; set; } = string.Empty;
 
+        [FromBody]
         public UpdateFundModel UpdateFundModel { get; set; } = default!;
     }
 }

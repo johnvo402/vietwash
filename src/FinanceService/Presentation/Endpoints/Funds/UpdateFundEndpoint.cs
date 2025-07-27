@@ -1,4 +1,5 @@
-﻿using Application.Features.Funds.Command.Update;
+﻿using Application.Common.Auth;
+using Application.Features.Funds.Command.Update;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -14,6 +15,7 @@ namespace Presentation.Endpoints.Funds
     {
         [HttpPut(Router.FundRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.FundRoute.Tags], Summary = "Update fund")]
+        [AuthorizeBy]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             UpdateFundCommand command,
             CancellationToken cancellationToken = default
