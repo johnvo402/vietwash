@@ -69,6 +69,10 @@ namespace Domain.Aggregates.Funds
 
             if (Status != status && status.HasValue)
             {
+                if (status == FundStatus.Confirmed)
+                {
+                    TransactionDate = DateTimeOffset.UtcNow;
+                }
                 Status = (FundStatus)status;
             }
 
