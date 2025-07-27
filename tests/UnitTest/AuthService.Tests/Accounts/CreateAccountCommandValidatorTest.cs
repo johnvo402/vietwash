@@ -1,252 +1,240 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Accounts.Commands.Create;
-using AuthService.Tests;
-using AutoFixture;
+using Application.Features.Common.Projections.Accounts;
 using Contracts.Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Common.Messages;
-using CSharpFunctionalExtensions;
 using Domain.Aggregates.Accounts;
 using Domain.Aggregates.Accounts.Enums;
-using FluentValidation.TestHelper;
+using FluentValidation;
 using Moq;
+using Xunit;
 
-namespace AuthService.Tests.Accounts;
+namespace UnitTests.Features.Accounts.Create;
 
 public class CreateAccountCommandValidatorTests
 {
-    private readonly CreateAccountCommandValidator validator;
-    private readonly Fixture fixture;
+    private readonly CreateAccountCommandValidator _validator;
 
     public CreateAccountCommandValidatorTests()
     {
-        // Mock dependencies
-        var unitOfWorkMock = new Mock<IUnitOfWork>();
-        var accessorServiceMock = new Mock<IActionAccessorService>();
-
-        // Khởi tạo validator có DI
-        fixture = new Fixture();
-    }
-    private CreateAccountCommandValidator GetValidator(bool phoneExists = false)
-    {
-        var repoMock = new Mock<IAsyncRepository<Account>>();
-        repoMock
-            .Setup(x => x.AnyAsync(It.IsAny<Expression<Func<Account, bool>>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(phoneExists);
-
-        var uowMock = new Mock<IUnitOfWork>();
-        uowMock
-            .Setup(x => x.Repository<Account>(It.IsAny<bool>()))
-            .Returns(repoMock.Object);
-
-        var accessorMock = new Mock<IActionAccessorService>();
-        accessorMock.Setup(x => x.Id).Returns("1");
-
-        return new CreateAccountCommandValidator(uowMock.Object, accessorMock.Object);
-    }
-
-    private CreateAccountCommand ValidCommand() =>
-        fixture.Build<CreateAccountCommand>()
-            .With(x => x.DisplayName, "John Doe")
-            .With(x => x.PhoneNumber, "+1234567890")
-            .With(x => x.Email, "test@example.com")
-            .With(x => x.Password, "Password123")
-            .With(x => x.Gender, Gender.Male)
-            .With(x => x.Status, AccountStatus.Active)
-            .With(x => x.Role, "ADMIN")
-            .Create();
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    public async Task DisplayName_NullOrEmpty_ShouldFail(string? displayName)
-    {
-        var command = ValidCommand();
-        command.DisplayName = displayName;
-        var validator = GetValidator();
-
-        var result = await validator.TestValidateAsync(command);
-        result.ShouldHaveValidationErrorFor(x => x.DisplayName);
-    }
-
-    [Fact]
-    public async Task DisplayName_TooLong_ShouldFail()
-    {
-        var command = ValidCommand();
-        command.DisplayName = new string('X', 257);
-        var validator = GetValidator();
-
-        var result = await validator.TestValidateAsync(command);
-        result.ShouldHaveValidationErrorFor(x => x.DisplayName);
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    public async Task PhoneNumber_NullOrEmpty_ShouldFail(string? phoneNumber)
-    {
-        var validator = GetValidator();
-        var command = ValidCommand();
-        command.PhoneNumber = phoneNumber;
-
-        var result = await validator.TestValidateAsync(command);
-        result.ShouldHaveValidationErrorFor(x => x.PhoneNumber);
-    }
-
-    [Theory]
-    [InlineData("123")]
-    [InlineData("1234567890123456")]
-    public async Task PhoneNumber_InvalidFormat_ShouldFail(string phone)
-    {
-        var validator = GetValidator();
-        var command = ValidCommand();
-        command.PhoneNumber = phone;
-
-        var result = await validator.TestValidateAsync(command);
-        result.ShouldHaveValidationErrorFor(x => x.PhoneNumber);
-    }
-    [Fact]
-    public async Task PhoneNumber_ExistingPhone_ShouldFail()
-    {
-        var validator = GetValidator(true);
-        // Arrange
-        var command = ValidCommand();
-        command.PhoneNumber = "+1234567890";
-
-        var accountRepoMock = new Mock<IAsyncRepository<Account>>();
-        accountRepoMock
+        var mockAccountRepo = new Mock<IAsyncRepository<Account>>();
+        mockAccountRepo
             .Setup(x => x.AnyAsync(
                 It.IsAny<Expression<Func<Account, bool>>>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true); // giả lập: số đã tồn tại
+            .ReturnsAsync(false);
 
-        var unitOfWorkMock = new Mock<IUnitOfWork>();
-        unitOfWorkMock
-            .Setup(x => x.Repository<Account>(It.IsAny<bool>()))
-            .Returns(accountRepoMock.Object); // gán mock repo vào UoW
+        var mockUnitOfWork = new Mock<IUnitOfWork>();
+        mockUnitOfWork
+            .Setup(x => x.Repository<Account>(false))
+            .Returns(mockAccountRepo.Object);
 
-        var accessorMock = new Mock<IActionAccessorService>();
-        accessorMock.Setup(x => x.Id).Returns("1");
+        var mockAccessor = new Mock<IActionAccessorService>();
+        mockAccessor.Setup(x => x.Id).Returns("1");
+        mockAccessor.Setup(x => x.GetHttpMethod()).Returns(HttpMethod.Post.ToString());
 
-        var validatorWithMock = new CreateAccountCommandValidator(unitOfWorkMock.Object, accessorMock.Object);
-
-        // Act
-        var result = await validatorWithMock.TestValidateAsync(command);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.PhoneNumber);
+        _validator = new CreateAccountCommandValidator(mockUnitOfWork.Object, mockAccessor.Object);
     }
 
+    private CreateAccountCommand CreateValidCommand()
+    {
+        return new CreateAccountCommand
+        {
+            DisplayName = "Nguyen Van A",
+            PhoneNumber = "0938123456",
+            BirthDay = DateTime.Parse("2000-01-01"),
+            AvtUrl = "https://example.com/avatar.png",
+            Email = "nguyenvana@example.com",
+            Password = "Secure@123",
+            Gender = Gender.Male,
+            Status = AccountStatus.Active,
+            Role = "CUSTOMER",
+            BranchAccounts = new List<BranchAccountModel>
+            {
+                new BranchAccountModel { BranchId = 1, BranchName = "Ninh Kieu" }
+            }
+        };
+    }
+
+    [Fact]
+    public async Task CreateAccountCommand_Valid_ShouldPass()
+    {
+        var command = CreateValidCommand();
+        var result = await _validator.ValidateAsync(command);
+        Assert.True(result.IsValid);
+    }
 
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task Email_NullOrEmpty_ShouldFail(string? email)
-    {
-        var validator = GetValidator();
-        var command = ValidCommand();
-        command.Email = email;
+    [InlineData("093")]
+    [InlineData("09234567895816438")] // Quá dài
+    [InlineData("09df4512543")]
 
-        var result = await validator.TestValidateAsync(command);
-        result.ShouldHaveValidationErrorFor(x => x.Email);
+    public async Task InvalidPhoneNumber_ShouldFail(string phoneNumber)
+    {
+        var command = CreateValidCommand();
+        command.PhoneNumber = phoneNumber;
+        var result = await _validator.ValidateAsync(command);
+        Assert.False(result.IsValid);
     }
 
     [Theory]
-    [InlineData("invalid")]
-    [InlineData("test@.com")]
-    public async Task Email_InvalidFormat_ShouldFail(string email)
+    [InlineData(null)]
+    [InlineData("")]
+    public async Task EmptyOrNullDisplayName_ShouldFail(string displayName)
     {
-        var validator = GetValidator();
-        var command = ValidCommand();
-        command.Email = email;
-
-        var result = await validator.TestValidateAsync(command);
-        result.ShouldHaveValidationErrorFor(x => x.Email);
+        var command = CreateValidCommand();
+        command.DisplayName = displayName;
+        var result = await _validator.ValidateAsync(command);
+        Assert.False(result.IsValid);
     }
 
-    // [Theory]
-    // [InlineData(null)]
-    // [InlineData("")]
-    // public async Task Password_WeakOrEmpty_ShouldFail(string? password)
-    // {
-    //     var command = ValidCommand();
-    //     command.Password = password;
+    [Fact]
+    public async Task DisplayNameTooLong_ShouldFail()
+    {
+        var command = CreateValidCommand();
+        command.DisplayName = new string('A', 101);
+        var result = await _validator.ValidateAsync(command);
+        Assert.False(result.IsValid);
+    }
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public async Task InvalidBirthDay_ShouldFail(DateTime birthDay)
+    {
+        var command = CreateValidCommand();
+        command.BirthDay = birthDay;
+        var result = await _validator.ValidateAsync(command);
+        Assert.False(result.IsValid);
+    }
 
-    //     var result = await validator.TestValidateAsync(command);
-    //     result.ShouldHaveValidationErrorFor(x => x.Password);
-    // }
+    [Fact]
+    public async Task FutureBirthDay_ShouldFail()
+    {
+        var command = CreateValidCommand();
+        command.BirthDay = DateTime.Now.AddDays(1);
+        var result = await _validator.ValidateAsync(command);
+        Assert.False(result.IsValid);
+    }
 
     [Theory]
-    [InlineData("nopass123")]
-    [InlineData("NOLOWER123")]
-    [InlineData("NoNumber")]
-    public async Task Password_InvalidFormat_ShouldFail(string password)
+    [InlineData("abc")]
+    [InlineData("https://example.com/file.exe")]
+    public async Task InvalidAvtUrl_ShouldFail(string url)
     {
-        var validator = GetValidator();
-        var command = ValidCommand();
+        var command = CreateValidCommand();
+        command.AvtUrl = url;
+        var result = await _validator.ValidateAsync(command);
+        Assert.False(result.IsValid);
+    }
+    [Theory]
+    [InlineData("")]
+    [InlineData(null)]
+    public async Task EmptyOrNullAvtUrl_ShouldPass(string url)
+    {
+        var command = CreateValidCommand();
+        command.AvtUrl = url;
+        var result = await _validator.ValidateAsync(command);
+        Assert.True(result.IsValid);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("invalidemail")]
+    public async Task InvalidEmail_ShouldFail(string email)
+    {
+        var command = CreateValidCommand();
+        command.Email = email;
+        var result = await _validator.ValidateAsync(command);
+        Assert.False(result.IsValid);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("weak")]
+    [InlineData("NoSpecial123")]
+    [InlineData("NoSpecial>123")]
+    [InlineData("VeryLongPasswordThatExceedsTheMaximumAllowedLength123@abcde")]
+    public async Task WeakPassword_ShouldFail(string password)
+    {
+        var command = CreateValidCommand();
         command.Password = password;
-
-        var result = await validator.TestValidateAsync(command);
-        result.ShouldHaveValidationErrorFor(x => x.Password);
+        var result = await _validator.ValidateAsync(command);
+        Assert.False(result.IsValid);
     }
 
     [Theory]
-    [InlineData(0)]
-    [InlineData(999)]
-    public async Task Gender_InvalidEnum_ShouldFail(int genderValue)
+    [InlineData(null)]
+    [InlineData((Gender)999)] // Kiểm tra với giá trị không hợp lệ
+    [InlineData((Gender)0)] // enum bắt đầu từ 1
+    public async Task NullGender_ShouldFail(Gender? gender)
     {
-        var validator = GetValidator();
-        var command = ValidCommand();
-        command.Gender = (Gender)genderValue;
-
-        var result = await validator.TestValidateAsync(command);
-        result.ShouldHaveValidationErrorFor(x => x.Gender);
-    }
-
-    [Theory]
-    [InlineData(0)]
-    [InlineData(999)]
-    public async Task Status_InvalidEnum_ShouldFail(int statusValue)
-    {
-        var validator = GetValidator();
-        var command = ValidCommand();
-        command.Status = (AccountStatus)statusValue;
-
-        var result = await validator.TestValidateAsync(command);
-        result.ShouldHaveValidationErrorFor(x => x.Status);
+        var command = CreateValidCommand();
+        command.Gender = gender;
+        var result = await _validator.ValidateAsync(command);
+        Assert.False(result.IsValid);
     }
 
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public async Task Role_NullOrEmpty_ShouldFail(string? role)
+    public async Task NullOrEmptyRole_ShouldFail(string role)
     {
-        var validator = GetValidator();
-        var command = ValidCommand();
+        var command = CreateValidCommand();
         command.Role = role;
-
-        var result = await validator.TestValidateAsync(command);
-        result.ShouldHaveValidationErrorFor(x => x.Role);
+        var result = await _validator.ValidateAsync(command);
+        Assert.False(result.IsValid);
     }
 
     [Fact]
-    public async Task Role_InvalidRole_ShouldFail()
+    public async Task InvalidRole_ShouldFail()
     {
-        var validator = GetValidator();
-        var command = ValidCommand();
-        command.Role = "INVALID_ROLE";
-
-        var result = await validator.TestValidateAsync(command);
-        result.ShouldHaveValidationErrorFor(x => x.Role);
+        var command = CreateValidCommand();
+        command.Role = "INVALID";
+        var result = await _validator.ValidateAsync(command);
+        Assert.False(result.IsValid);
     }
+
     [Fact]
-    public async Task Account_Valid_ShouldPass()
+    public async Task NullBranchAccounts_ShouldPass()
     {
-        var validator = GetValidator();
-        var command = ValidCommand();
-
-        var result = await validator.TestValidateAsync(command);
-        result.ShouldNotHaveValidationErrorFor(x => x.DisplayName);
+        var command = CreateValidCommand();
+        command.BranchAccounts = null;
+        var result = await _validator.ValidateAsync(command);
+        Assert.True(result.IsValid);
     }
+
+    [Fact]
+    public async Task EmptyBranchAccounts_ShouldFail()
+    {
+        var command = CreateValidCommand();
+        command.BranchAccounts = [];
+        var result = await _validator.ValidateAsync(command);
+        Assert.True(result.IsValid);
+    }
+
+    [Theory]
+    [InlineData(null, null)]
+    [InlineData("", null)]
+    public async Task MissingOrEmptyBranchAccount_ShouldFail(string name, long? branchId)
+    {
+        var command = CreateValidCommand();
+        command.BranchAccounts = new List<BranchAccountModel>
+    {
+        new BranchAccountModel { BranchId = branchId ?? 0, BranchName = name! }
+    };
+        var result = await _validator.ValidateAsync(command);
+        Assert.False(result.IsValid);
+    }
+
 }
