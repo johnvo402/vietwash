@@ -1,3 +1,4 @@
+using Application.Features.Common.Enums;
 using Contracts.Dtos.Models;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Funds.Enums;
@@ -19,6 +20,7 @@ namespace Application.Features.Funds.Events
         public Dictionary<string, object>? Metadata { get; set; }
         public long BranchId { get; set; } = default!;
         public long? ObjectId { get; set; }
+        public FundEventType FundEventType { get; set; }
 
         public decimal Point { get; set; }
     }

@@ -2,6 +2,7 @@
 using Domain.Aggregates.Inventories.Enums;
 using Domain.Aggregates.Inventories.Events;
 using Domain.Aggregates.Orders.Enums;
+using Domain.Events;
 using Mediator;
 using Shared.Kernel.Common;
 

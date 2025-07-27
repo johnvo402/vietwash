@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Features.Common.Enums;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Funds;
 using Mediator;
@@ -16,22 +17,28 @@ namespace Application.Features.Funds.Events
             Fund fund = request.Payload!.ToFund();
             List<Transaction> transactions = new List<Transaction>();
 
-            Transaction transaction = request.Payload!.ToTransaction();
-            transactions.Add(transaction);
-            if (request.Payload!.Point > 0)
+            if (request.Payload?.FundEventType == FundEventType.Order)
             {
-                Transaction pointTransaction = request.Payload.ToTransactionUsePoint();
-                transactions.Add(pointTransaction);
+                Transaction transaction = request.Payload!.ToTransaction();
+                transactions.Add(transaction);
+                if (request.Payload!.Point > 0)
+                {
+                    Transaction pointTransaction = request.Payload.ToTransactionUsePoint();
+                    transactions.Add(pointTransaction);
+                }
             }
+
             try
             {
                 _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
 
                 await unitOfWork.Repository<Fund>().AddAsync(fund, cancellationToken);
-
-                await unitOfWork
-                    .Repository<Transaction>()
-                    .AddRangeAsync(transactions, cancellationToken);
+                if (transactions.Any())
+                {
+                    await unitOfWork
+                        .Repository<Transaction>()
+                        .AddRangeAsync(transactions, cancellationToken);
+                }
 
                 await unitOfWork.SaveAsync(cancellationToken);
 

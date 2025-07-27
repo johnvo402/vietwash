@@ -6,6 +6,7 @@ using Domain.Aggregates.Users;
 using Domain.Aggregates.Vouchers;
 using Domain.Aggregates.Vouchers.Events;
 using Domain.Events;
+using Domain.Events.Enums;
 using Mediator;
 using Shared.Kernel.Common;
 
@@ -143,6 +144,7 @@ namespace Domain.Aggregates.Orders
                                 ["publicId"] = PublicId.ToString(),
                             },
                             Point = Point,
+                            FundEventType = FundEventType.Order,
                         }
                     );
 
@@ -167,6 +169,7 @@ namespace Domain.Aggregates.Orders
                                     ["publicId"] = PublicId.ToString(),
                                 },
                                 Point = Point,
+                                FundEventType = FundEventType.Order,
                             }
                         );
                     }

@@ -75,7 +75,7 @@ public class DbInitializer
                 Id = 2,
             },
             new FundBehavior(
-                new FundName { vi = "Thu phiếu nhập hàng", en = "Stock Import" },
+                new FundName { vi = "Phiếu chi nhập hàng", en = "Stock Import" },
                 FundType.Spend,
                 generate: true,
                 auto: true
@@ -84,7 +84,7 @@ public class DbInitializer
                 Id = 3,
             },
             new FundBehavior(
-                new FundName { vi = "Chi phiếu xuất hàng", en = "Stock Export" },
+                new FundName { vi = "Phiếu thu xuất hàng", en = "Stock Export" },
                 FundType.Income,
                 generate: true,
                 auto: true

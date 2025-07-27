@@ -1,4 +1,5 @@
 ﻿using Domain.Aggregates.Funds;
+using Domain.Aggregates.Funds.Enums;
 
 namespace Application.Features.Funds.Command.Create
 {
@@ -10,7 +11,7 @@ namespace Application.Features.Funds.Command.Create
                 code: code,
                 name: null, // Assuming CreateFundCommand has a Name property
                 type: command.Type,
-                status: command.Status,
+                status: FundStatus.PendingConfirmation,
                 amount: command.Amount,
                 fundBehaviorId: command.FundBehaviorId,
                 note: command.Note,

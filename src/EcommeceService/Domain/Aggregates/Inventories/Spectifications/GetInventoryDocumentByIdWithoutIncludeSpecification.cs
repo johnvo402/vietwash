@@ -8,7 +8,12 @@ namespace Domain.Aggregates.Inventories.Spectifications
     {
         public GetInventoryDocumentByIdWithoutIncludeSpecification(long id)
         {
-            Query.Where(x => x.Id == id).Include(x => x.EquipmentSupplyings).AsNoTracking();
+            Query
+                .Where(x => x.Id == id)
+                .Include(x => x.EquipmentSupplyings)
+                .Include(x => x.ProductSupplyings)
+                .AsSplitQuery()
+                .AsNoTracking();
         }
     }
 }
