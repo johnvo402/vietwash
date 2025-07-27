@@ -45,7 +45,7 @@ namespace Application.Feature.Common.Projections.BranchProducts
             Description = branchProduct.Description;
             BranchId = branchProduct.BranchId;
             CategoryId = branchProduct.CategoryId;
-
+            CapitalPrice = branchProduct.CapitalPrice;
             Category = branchProduct.Category.ToCategoryService();
             UnitRelations = branchProduct
                 .UnitRelations.Select(x => x.ToUnitRelationProjectionResponse())
