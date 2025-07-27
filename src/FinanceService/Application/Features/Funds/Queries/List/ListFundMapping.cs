@@ -27,7 +27,7 @@ public static class ListFundMapping
             Metadata = fund.Metadata,
             Status = fund.Status,
             Code = fund.Code,
-            User = fund.User.ToUserDTOResponse(),
+            User = fund.User != null ? fund.User.ToUserDTOResponse() : null,
             FundBehavior = fund.FundBehavior.ToFundBehaviorProjection(),
         };
     }
