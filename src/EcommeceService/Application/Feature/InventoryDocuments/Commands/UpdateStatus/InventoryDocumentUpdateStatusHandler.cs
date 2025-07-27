@@ -19,7 +19,7 @@ namespace Application.Feature.InventoryDocuments.Commands.UpdateStatus
             var result = await unitOfWork
                 .DynamicReadOnlyRepository<InventoryDocument>()
                 .FindByConditionAsync(
-                    new GetInventoryDocumentByIdWithoutIncludeSpecification(request.Id),
+                    new GetInventoryDocumentByIdSpecification(request.Id),
                     cancellationToken
                 );
             if (result == null)

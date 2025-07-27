@@ -92,11 +92,17 @@ public sealed class InventoryDocumentCompletedHandler
 
         // Combine supplyings into a common structure for grouping
         var supplierItems = document
-            .EquipmentSupplyings.Select(s => new { s.SupplierId, Amount = s.Price * s.Quantity })
+            .EquipmentSupplyings.Select(s => new
+            {
+                s.SupplierId,
+                s.Supplier.Name,
+                Amount = s.Price * s.Quantity,
+            })
             .Concat(
                 document.ProductSupplyings.Select(s => new
                 {
                     s.SupplierId,
+                    s.Supplier.Name,
                     Amount = s.Price * s.Quantity,
                 })
             );
@@ -104,7 +110,12 @@ public sealed class InventoryDocumentCompletedHandler
         // Group by supplierId and calculate total amount
         var supplierGroups = supplierItems
             .GroupBy(s => s.SupplierId)
-            .Select(g => new { SupplierId = g.Key, TotalAmount = g.Sum(s => s.Amount) });
+            .Select(g => new
+            {
+                SupplierId = g.Key,
+                SupplierName = g.First().Name,
+                TotalAmount = g.Sum(s => s.Amount),
+            });
 
         // Publish one fund event per supplier
         foreach (var group in supplierGroups)
@@ -113,6 +124,7 @@ public sealed class InventoryDocumentCompletedHandler
                 document,
                 group.TotalAmount,
                 group.SupplierId,
+                group.SupplierName,
                 cancellationToken
             );
         }
@@ -122,6 +134,7 @@ public sealed class InventoryDocumentCompletedHandler
         InventoryDocument document,
         decimal amount,
         long supplierId,
+        string supplierName,
         CancellationToken cancellationToken
     )
     {
@@ -132,12 +145,14 @@ public sealed class InventoryDocumentCompletedHandler
             Amount = amount,
             PaymentMethod = PaymentMethod.Cash,
             BranchId = document.BranchId ?? 1,
-            ObjectId = supplierId,
+
             BehaviorId = 1,
             Metadata = new Dictionary<string, object>
             {
                 ["code"] = document.Code,
                 ["publicId"] = document.PublicId.ToString(),
+                ["supplierId"] = supplierId,
+                ["supplierName"] = supplierName,
             },
             Point = 0,
             FundEventType = FundEventType.Inventory,
@@ -150,9 +165,10 @@ public sealed class InventoryDocumentCompletedHandler
         if (!success)
         {
             _logger.Error(
-                "CreateFundEventHandler: {@ReferenceId} enqueue failed for SupplierId: {@SupplierId}",
+                "CreateFundEventHandler: {@ReferenceId} enqueue failed for SupplierId: {@SupplierId}, SupplierName: {@SupplierName}",
                 fundEvent.ReferenceId,
-                supplierId
+                supplierId,
+                supplierName
             );
         }
     }
