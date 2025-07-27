@@ -1,5 +1,4 @@
 ﻿using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Funds;
 using FluentValidation;
@@ -8,16 +7,11 @@ namespace Application.Features.Funds.Command.Update
 {
     public class UpdateFundCommandValidator : AbstractValidator<UpdateFundCommand>
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IActionAccessorService _accessorService;
+        private ICurrentAccount _currentAccount;
 
-        public UpdateFundCommandValidator(
-            IUnitOfWork unitOfWork,
-            IActionAccessorService accessorService
-        )
+        public UpdateFundCommandValidator(ICurrentAccount currentAccount)
         {
-            _unitOfWork = unitOfWork;
-            _accessorService = accessorService;
+            _currentAccount = currentAccount;
 
             ApplyRules();
         }
@@ -28,17 +22,36 @@ namespace Application.Features.Funds.Command.Update
                 .IsInEnum()
                 .WithState(x =>
                     Messager
-                        .Create<UpdateFundCommand>()
+                        .Create<UpdateFundCommand>(nameof(Fund))
                         .Property(x => x.UpdateFundModel!.PaymentMethod)
                         .Message(MessageType.Valid)
                         .Build()
                 );
-            ;
-        }
 
-        private async Task<bool> FundBehaviorExists(long id, CancellationToken ct)
-        {
-            return await _unitOfWork.Repository<FundBehavior>().AnyAsync(fb => fb.Id == id, ct);
+            RuleFor(x => x.UpdateFundModel!.Note)
+                .MaximumLength(255)
+                .When(x => !string.IsNullOrEmpty(x.UpdateFundModel!.Note))
+                .WithState(x =>
+                    Messager
+                        .Create<UpdateFundCommand>(nameof(Fund))
+                        .Property(x => x.UpdateFundModel!.Note)
+                        .Message(MessageType.MaximumLength)
+                        .Build()
+                );
+
+            RuleFor(x => x.UpdateFundModel!.Status)
+                .Must(command =>
+                {
+                    var role = _currentAccount.Session?.Role;
+                    return role == "ADMIN" || role == "MANAGER";
+                })
+                .WithState(x =>
+                    Messager
+                        .Create<UpdateFundCommand>(nameof(Fund))
+                        .Property(x => x.UpdateFundModel!.Status)
+                        .Message(MessageType.Valid)
+                        .Build()
+                );
         }
     }
 }
