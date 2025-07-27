@@ -7,7 +7,11 @@ namespace Domain.Aggregates.Products.Specifications
     {
         public GetBranchProductWithIncludeByIdSpecification(long id)
         {
-            Query.Where(x => x.Id == id && !x.Disable).Include(x => x.UnitRelations);
+            Query
+                .Where(x => x.Id == id && !x.Disable)
+                .Include(x => x.UnitRelations)
+                .ThenInclude(x => x.Unit)
+                .Include(x => x.Category);
         }
     }
 }
