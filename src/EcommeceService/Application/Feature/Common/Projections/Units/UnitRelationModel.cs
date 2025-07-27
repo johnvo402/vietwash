@@ -10,6 +10,7 @@ namespace Application.Feature.Common.Projections.Units
         public string Name { get; set; } = default!;
         public bool BaseUnit { get; set; } = default!;
         public decimal Price { get; set; } = default!;
+        public long? UnitId { get; set; }
         public int Multiple { get; set; } = 1; // Mặc định là 1 cho Service
         public decimal ProcessingTime { get; set; } = default!;
 
@@ -21,6 +22,7 @@ namespace Application.Feature.Common.Projections.Units
             Multiple = unitRelation.Multiple;
             ProcessingTime = unitRelation.ProcessingTime;
             Status = unitRelation.Status;
+            UnitId = unitRelation.UnitId;
         }
     }
 }

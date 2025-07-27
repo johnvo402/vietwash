@@ -22,7 +22,8 @@ namespace Application.Feature.Common.Mapping.Units
                 price: model.Price,
                 multiple: model.Multiple,
                 processingTime: model.ProcessingTime,
-                status: model.Status
+                status: model.Status,
+                unitId: model.UnitId
             );
             return entity;
         }
@@ -41,6 +42,7 @@ namespace Application.Feature.Common.Mapping.Units
                 Multiple = model.Multiple,
                 ProcessingTime = model.ProcessingTime,
                 Status = model.Status,
+                UnitId = model.UnitId,
             };
         }
 

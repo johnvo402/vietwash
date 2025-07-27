@@ -29,7 +29,8 @@ namespace Domain.Aggregates.Services
             decimal? price = null,
             int? multiple = null,
             decimal? processingTime = null,
-            ActivationStatus? status = null
+            ActivationStatus? status = null,
+            long? unitId = null
         )
         {
             if (!string.IsNullOrWhiteSpace(name))
@@ -44,6 +45,8 @@ namespace Domain.Aggregates.Services
                 ProcessingTime = processingTime.Value;
             if (status.HasValue)
                 Status = status.Value;
+            if (unitId.HasValue)
+                UnitId = unitId;
         }
     }
 }
