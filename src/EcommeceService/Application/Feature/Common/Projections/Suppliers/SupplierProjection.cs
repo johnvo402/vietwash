@@ -14,6 +14,8 @@ namespace Application.Feature.Common.Projections.Suppliers
         public string? Description { get; set; }
         public ActivationStatus Status { get; set; }
 
+        public decimal TotalInventory { get; set; }
+
         public virtual void MappingFrom(Supplier supplier)
         {
             Id = supplier.Id;

@@ -22,6 +22,7 @@ namespace Application.Feature.Suppliers.Query.List
                 Phone = supplier.Phone,
                 Description = supplier.Description,
                 Status = supplier.Status,
+                TotalInventory = supplier.ProductSupplyings.Sum(ps => ps.Quantity * ps.Price),
             };
     }
 }
