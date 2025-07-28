@@ -1,7 +1,9 @@
 using System.Linq.Expressions;
 using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Application.Common.Interfaces.Services.Encryptions;
+using Contracts.Dtos.Models;
 using Contracts.Dtos.Requests;
 using Contracts.Utils;
 using Domain.Aggregates.Enums;
@@ -19,6 +21,7 @@ using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Domain.Aggregates.Vouchers;
 using Infrastructure.Constants;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -37,6 +40,7 @@ public class DbInitializer
         var encryption = provider.GetRequiredService<IEncryptionService>();
         var qrGenerator = provider.GetRequiredService<IQrGenerator>();
         var logger = provider.GetRequiredService<ILogger>();
+        var media = provider.GetRequiredService<IMediaUpdateService>();
         using var dbTransaction = await unitOfWork.BeginTransactionAsync();
 
         try
@@ -82,7 +86,7 @@ public class DbInitializer
             {
                 logger.Information("Bắt đầu khởi tạo dữ liệu dịch vụ...");
 
-                await InitializeServicesAsync(unitOfWork, logger, cancellationToken);
+                await InitializeServicesAsync(unitOfWork, logger, media, cancellationToken);
 
                 logger.Information("Hoàn tất khởi tạo dữ liệu dịch vụ...");
             }
@@ -549,143 +553,149 @@ public class DbInitializer
     private static async Task InitializeServicesAsync(
         IUnitOfWork unitOfWork,
         ILogger logger,
+        IMediaUpdateService media,
         CancellationToken cancellationToken
     )
     {
-        // Query existing Categories, Branches, and Units
         var categories = (
             await unitOfWork.Repository<Category>().ListAsync(cancellationToken)
         ).ToList();
-        var user = (
-            await unitOfWork
-                .DynamicReadOnlyRepository<User>()
-                .FindByConditionAsync(
-                    new ListUserSpecification([ROLE.ADMIN]),
-                    cancellationToken: cancellationToken
-                )
-        );
-        if (user == null)
-        {
-            logger.Error("Không tìm thấy người dùng có vai trò ADMIN.");
-            throw new InvalidOperationException("Admin user not found.");
-        }
+        var user = await unitOfWork
+            .DynamicReadOnlyRepository<User>()
+            .FindByConditionAsync(
+                new ListUserSpecification([ROLE.ADMIN]),
+                cancellationToken: cancellationToken
+            );
         var units = (await unitOfWork.Repository<Unit>().ListAsync(cancellationToken)).ToList();
 
+        if (user == null)
+            throw new InvalidOperationException("Admin user not found.");
         if (!categories.Any() || !units.Any())
+            throw new InvalidOperationException("Missing required Category or Unit data.");
+
+        var servicesToSeed = new (string Name, string Description, TypeStatus Type)[]
         {
-            logger.Error("Không thể khởi tạo dịch vụ: Thiếu dữ liệu danh mục hoặc đơn vị tính.");
-            throw new InvalidOperationException("Missing required Category, Branch, or Unit data.");
-        }
+            (
+                "Combo Giặt Sấy Quần Áo",
+                "Dịch vụ combo giặt và sấy quần áo tiện lợi.",
+                TypeStatus.Combo
+            ),
+            (
+                "Combo Giặt Sấy Ủi Quần Áo",
+                "Combo toàn diện: giặt, sấy và ủi quần áo.",
+                TypeStatus.Combo
+            ),
+            ("Combo Giặt Sấy Ủi", "Gói giặt sấy ủi cho đồ dùng hàng ngày.", TypeStatus.Combo),
+            ("Combo Tuần Tháng", "Gói combo cho giặt đồ định kỳ tuần/tháng.", TypeStatus.Combo),
+            ("Giặt Chăn Mền Dày", "Làm sạch sâu chăn mền dày và nặng.", TypeStatus.SingleService),
+            ("Giặt Đồ Trẻ Em", "Giặt đồ nhẹ nhàng an toàn cho trẻ nhỏ.", TypeStatus.SingleService),
+            (
+                "Giặt Hấp Váy Dạ Hội",
+                "Giặt hấp cao cấp cho váy dạ hội và đồ cao cấp.",
+                TypeStatus.SingleService
+            ),
+            ("Giặt Khô Áo Vest", "Giặt khô chuyên dụng cho áo vest.", TypeStatus.SingleService),
+            (
+                "Giặt Nước Quần Jeans",
+                "Giặt giữ màu và chất lượng cho quần jeans.",
+                TypeStatus.SingleService
+            ),
+            (
+                "Giặt Quần Áo Trắng",
+                "Tẩy trắng, làm sạch sâu cho quần áo trắng.",
+                TypeStatus.SingleService
+            ),
+            (
+                "Giặt Tẩy Vết Bẩn Cứng Đầu",
+                "Tẩy vết bẩn khó xử lý trên quần áo.",
+                TypeStatus.SingleService
+            ),
+            (
+                "Giặt Thảm",
+                "Làm sạch thảm trải sàn tại nhà hoặc văn phòng.",
+                TypeStatus.SingleService
+            ),
+            (
+                "Sấy Khô Chăn Grab",
+                "Sấy khô chăn mền nhanh chóng và an toàn.",
+                TypeStatus.SingleService
+            ),
+            ("Sấy Khô Quần Áo", "Sấy khô quần áo chống ẩm mốc.", TypeStatus.SingleService),
+            ("Ủi Áo Sơ Mi", "Ủi áo sơ mi chuyên nghiệp, gọn gàng.", TypeStatus.SingleService),
+            (
+                "Vệ Sinh Giày Sneakers",
+                "Làm sạch chuyên sâu giày sneaker.",
+                TypeStatus.SingleService
+            ),
+        };
 
-        var random = new Random();
-        var services = new List<Service>();
+        var imageDir = Path.Combine(
+            AppContext.BaseDirectory,
+            "Resources",
+            "SeedImages",
+            "Services"
+        );
+        var category = categories.First(); // chỉnh logic nếu cần chọn theo tên
+        var unit = units.First(); // hoặc chọn theo tên nếu có logic riêng
+        var branchId = 1L;
 
-        for (int i = 1; i <= 20; i++)
+        var serviceEntities = new List<Service>();
+
+        foreach (var serviceDef in servicesToSeed)
         {
-            // Chọn ngẫu nhiên Category, Branch và Unit
-            var category = categories[random.Next(categories.Count)];
-            var unit = units[random.Next(units.Count)];
-            var type = random.Next(2) == 0 ? TypeStatus.SingleService : TypeStatus.Combo;
+            var slug = Generator.GenerateSlug(serviceDef.Name); // ví dụ: "combo-giat-say-ui-quan-ao"
+            var matchingFile = Directory
+                .EnumerateFiles(imageDir)
+                .FirstOrDefault(f =>
+                    Path.GetFileNameWithoutExtension(f)
+                        .Equals(slug, StringComparison.OrdinalIgnoreCase)
+                );
 
-            // Định nghĩa tên dịch vụ và mô tả dựa trên loại dịch vụ
-            string serviceName;
-            string description;
-            if (type == TypeStatus.SingleService)
+            string? imageUrl = null;
+            if (matchingFile != null)
             {
-                string[] singleServiceNames =
-                {
-                    "Giặt và Gấp",
-                    "Giặt Hấp",
-                    "Ủi Áo Sơ Mi",
-                    "Giặt Chăn Ga",
-                    "Giặt Quần Áo Mỏng",
-                    "Tẩy Vết Bẩn",
-                    "Dịch Vụ Ủi",
-                    "Giặt Rèm Cửa",
-                    "Giặt Đồng Phục",
-                    "Giặt Thảm",
-                };
-                string[] singleServiceDescriptions =
-                {
-                    "Giặt và gấp quần áo thông thường chuyên nghiệp.",
-                    "Giặt hấp cho vải tinh xảo và đặc biệt.",
-                    "Ủi áo sơ mi để có vẻ ngoài sắc nét.",
-                    "Làm sạch kỹ lưỡng cho chăn, ga, gối.",
-                    "Giặt nhẹ nhàng cho quần áo mỏng để bảo vệ chất lượng.",
-                    "Xử lý vết bẩn cứng đầu trên quần áo.",
-                    "Ủi quần áo cẩn thận để không còn nếp nhăn.",
-                    "Làm sạch chuyên sâu cho rèm cửa.",
-                    "Giặt và ủi đồng phục chuyên nghiệp.",
-                    "Làm sạch sâu cho thảm trải sàn.",
-                };
-                int index = (i - 1) % singleServiceNames.Length;
-                serviceName = singleServiceNames[index];
-                description = singleServiceDescriptions[index];
+                var formFile = GenerateIFormfile(matchingFile);
+                var key = media.GetKey(formFile, MediaType.Image);
+                await media.UploadMediaAsync(formFile, key);
+                imageUrl = key;
             }
             else
             {
-                string[] comboServiceNames =
-                {
-                    "Gói Giặt và Ủi",
-                    "Gói Giặt Hấp và Ủi",
-                    "Gói Giặt Toàn Diện",
-                    "Gói Chăn Ga và Khăn",
-                    "Gói Giặt Gia Đình",
-                    "Gói Giặt Nhanh",
-                    "Gói Giặt Hấp Cao Cấp",
-                    "Gói Rèm và Chăn Ga",
-                    "Gói Đồng Phục và Áo Sơ Mi",
-                    "Gói Thảm và Nội Thất",
-                };
-                string[] comboServiceDescriptions =
-                {
-                    "Dịch vụ giặt và ủi toàn diện cho quần áo.",
-                    "Giặt hấp và ủi cho vẻ ngoài chuyên nghiệp.",
-                    "Dịch vụ giặt toàn bộ đồ dùng trong nhà.",
-                    "Làm sạch chăn ga và khăn trong một gói.",
-                    "Gói giặt cho số lượng lớn của gia đình.",
-                    "Giặt và ủi nhanh chóng cho nhu cầu gấp.",
-                    "Giặt hấp cao cấp cho quần áo cao cấp.",
-                    "Làm sạch kết hợp cho rèm và chăn ga.",
-                    "Làm sạch chuyên sâu cho đồng phục và áo sơ mi.",
-                    "Làm sạch sâu cho thảm và nội thất bọc vải.",
-                };
-                int index = (i - 1) % comboServiceNames.Length;
-                serviceName = comboServiceNames[index];
-                description = comboServiceDescriptions[index];
+                logger.Warning(
+                    $"Không tìm thấy ảnh cho dịch vụ '{serviceDef.Name}' (slug: {slug})"
+                );
             }
-            var branch = 1L;
-            // Tạo dịch vụ
+
             var service = new Service(
                 categoryId: category.Id,
-                branchId: branch,
-                name: serviceName,
-                type: type,
+                branchId: branchId,
+                name: serviceDef.Name,
+                type: serviceDef.Type,
                 status: ActivationStatus.Active,
-                description: description,
-                image: null
+                description: serviceDef.Description,
+                image: imageUrl
             )
             {
                 Disable = false,
+                Slug = slug,
             };
-            service.Slug = Generator.GenerateSlug(service.Name);
 
-            // Thêm UnitRelation
-            var unitRelation = new UnitRelation
-            {
-                Name = unit.Name,
-                BaseUnit = true,
-                Price = random.Next(1000, 100000),
-                Multiple = 1,
-                ProcessingTime = (decimal)(random.NextDouble() * 4.5 + 0.5),
-                Status = ActivationStatus.Active,
-            };
-            service.UnitRelations.Add(unitRelation);
+            service.UnitRelations.Add(
+                new UnitRelation
+                {
+                    Name = unit.Name,
+                    BaseUnit = true,
+                    Price = 20000,
+                    Multiple = 1,
+                    ProcessingTime = 2.5m,
+                    Status = ActivationStatus.Active,
+                }
+            );
 
-            services.Add(service);
+            serviceEntities.Add(service);
         }
 
-        await unitOfWork.Repository<Service>().AddRangeAsync(services, cancellationToken);
+        await unitOfWork.Repository<Service>().AddRangeAsync(serviceEntities, cancellationToken);
         await unitOfWork.SaveAsync(cancellationToken);
     }
 
@@ -1109,5 +1119,32 @@ public class DbInitializer
             logger.Error(ex, "Lỗi không xác định khi lưu tariff và service_tariff.");
             throw;
         }
+    }
+
+    private static IFormFile GenerateIFormfile(string filePath)
+    {
+        byte[] fileBytes = File.ReadAllBytes(filePath);
+        var memoryStream = new MemoryStream(fileBytes);
+
+        var fileName = Path.GetFileName(filePath);
+        var formFile = new FormFile(memoryStream, 0, fileBytes.Length, "file", fileName)
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = GetContentType(filePath),
+        };
+
+        return formFile;
+    }
+
+    private static string GetContentType(string path)
+    {
+        var ext = Path.GetExtension(path).ToLowerInvariant();
+        return ext switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".gif" => "image/gif",
+            _ => "application/octet-stream",
+        };
     }
 }
