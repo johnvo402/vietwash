@@ -81,7 +81,11 @@ namespace Domain.Aggregates.Services
 
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
-            throw new NotImplementedException();
+            switch (domainEvent)
+            {
+                default:
+                    return false;
+            }
         }
     }
 }

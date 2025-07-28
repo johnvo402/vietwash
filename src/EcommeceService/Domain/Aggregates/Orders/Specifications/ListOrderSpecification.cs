@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using Domain.Aggregates.Orders.Enums;
 using Shared.Kernel.Extentions;
 using Specification;
 using Specification.Builders;
@@ -13,7 +12,8 @@ namespace Domain.Aggregates.Orders.Specifications
             string? to,
             string? branchId,
             List<string> branchs,
-            long? customerId = null
+            long? customerId = null,
+            long? serviceId = null
         )
         {
             Expression<Func<Order, bool>> criteria = x => branchs.Contains(x.BranchId.ToString());
@@ -30,6 +30,11 @@ namespace Domain.Aggregates.Orders.Specifications
             if (customerId != null)
             {
                 criteria = criteria.And(x => x.CustomerId == customerId);
+            }
+
+            if (serviceId != null)
+            {
+                criteria = criteria.And(x => x.OrderItems.Any(oi => oi.ServiceId == serviceId));
             }
 
             Query

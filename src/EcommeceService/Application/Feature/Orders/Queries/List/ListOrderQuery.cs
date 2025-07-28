@@ -18,5 +18,7 @@ namespace Application.Feature.Orders.Queries.List
 
         [FromQuery]
         public string? BranchId { get; set; }
+
+        public long? ServiceId { get; set; }
     }
 }
