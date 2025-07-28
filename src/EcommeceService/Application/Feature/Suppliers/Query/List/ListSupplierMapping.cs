@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Domain.Aggregates.Inventories.Enums;
 using Domain.Aggregates.Suppliers;
 
 namespace Application.Feature.Suppliers.Query.List
@@ -22,7 +23,11 @@ namespace Application.Feature.Suppliers.Query.List
                 Phone = supplier.Phone,
                 Description = supplier.Description,
                 Status = supplier.Status,
-                TotalInventory = supplier.ProductSupplyings.Sum(ps => ps.Quantity * ps.Price),
+                TotalInventory = supplier
+                    .ProductSupplyings.Where(x =>
+                        x.InventoryDocument.Status == InventoryStatus.Completed
+                    )
+                    .Sum(ps => ps.Quantity * ps.Price),
             };
     }
 }
