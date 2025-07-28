@@ -16,6 +16,7 @@ namespace Application.Features.Transactions.Queries.List
                 Amount = transaction.Amount,
                 Metadata = transaction.Metadata,
                 TransactionAt = transaction.TransactionAt,
+                CustomerId = transaction.CustomerId,
 
                 Customer =
                     transaction.Customer != null ? transaction.Customer.ToUserDTOResponse() : null,
