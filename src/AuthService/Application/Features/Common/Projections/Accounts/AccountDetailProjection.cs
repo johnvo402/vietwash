@@ -15,12 +15,13 @@ public class AccountDetailProjection : AccountProjection
         base.MappingFrom(account);
         BirthDay = account.BirthDay;
         Gender = account.Gender ?? Gender.Other;
+        var accountContact = new AccountContactProjection();
 
         if (account.AccountContact != null)
         {
-            AccountContact?.MappingFrom(account.AccountContact);
+            accountContact.MappingFrom(account.AccountContact);
         }
-
+        AccountContact = accountContact;
         BranchAccounts = account
             .BranchAccounts?.Select(branchAccount =>
             {
