@@ -1,4 +1,3 @@
-using Contracts.Extensions;
 using Domain.Aggregates.Accounts;
 
 namespace Application.Features.Accounts.Commands.Profiles;
@@ -20,21 +19,21 @@ public static class UpdateAccountProfileMapping
         if (!string.IsNullOrWhiteSpace(model.AvtUrl))
             entity.AvtUrl = model.AvtUrl;
 
-        if (model.AccountContacts?.Any() == true)
-        {
-            entity.AccountContacts = model.AccountContacts.ToListMapping(x => new AccountContact
-            {
-                PhoneNumber = x.PhoneNumber,
-                Address = x.Address,
-                Commune = x.Commune,
-                District = x.District,
-                Province = x.Province,
-                CommuneCode = x.CommuneCode,
-                DistrictCode = x.DistrictCode,
-                ProvinceCode = x.ProvinceCode,
-                Street = x.Street,
-            });
-        }
+        entity.AccountContact =
+            model.AccountContact != null
+                ? new AccountContact
+                {
+                    PhoneNumber = model.AccountContact.PhoneNumber,
+                    Address = model.AccountContact.Address,
+                    Commune = model.AccountContact.Commune,
+                    District = model.AccountContact.District,
+                    Province = model.AccountContact.Province,
+                    CommuneCode = model.AccountContact.CommuneCode,
+                    DistrictCode = model.AccountContact.DistrictCode,
+                    ProvinceCode = model.AccountContact.ProvinceCode,
+                    Street = model.AccountContact.Street,
+                }
+                : null;
 
         return entity;
     }

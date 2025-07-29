@@ -32,6 +32,22 @@ namespace Application.Features.Customers.Command.Create
                         BranchName = x.BranchName,
                     })
                     .ToList(),
+
+                AccountContact =
+                    command.AccountContact != null
+                        ? new AccountContact
+                        {
+                            PhoneNumber = command.AccountContact.PhoneNumber,
+                            Address = command.AccountContact.Address,
+                            Commune = command.AccountContact.Commune,
+                            District = command.AccountContact.District,
+                            Province = command.AccountContact.Province,
+                            CommuneCode = command.AccountContact.CommuneCode,
+                            DistrictCode = command.AccountContact.DistrictCode,
+                            ProvinceCode = command.AccountContact.ProvinceCode,
+                            Street = command.AccountContact.Street,
+                        }
+                        : null,
             };
         }
 

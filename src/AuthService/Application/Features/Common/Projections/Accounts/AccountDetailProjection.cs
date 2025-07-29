@@ -7,7 +7,7 @@ public class AccountDetailProjection : AccountProjection
 {
     public Gender Gender { get; set; }
     public DateOnly BirthDay { get; set; }
-    public ICollection<AccountContactProjection>? AccountContacts { get; set; }
+    public AccountContactProjection? AccountContact { get; set; }
     public ICollection<BranchAccountProjection>? BranchAccounts { get; set; }
 
     public override void MappingFrom(Account account)
@@ -15,14 +15,12 @@ public class AccountDetailProjection : AccountProjection
         base.MappingFrom(account);
         BirthDay = account.BirthDay;
         Gender = account.Gender ?? Gender.Other;
-        AccountContacts = account
-            .AccountContacts?.Select(accountContact =>
-            {
-                var userResonse = new AccountContactProjection();
-                userResonse.MappingFrom(accountContact!);
-                return userResonse;
-            })
-            .ToList();
+
+        if (account.AccountContact != null)
+        {
+            AccountContact?.MappingFrom(account.AccountContact);
+        }
+
         BranchAccounts = account
             .BranchAccounts?.Select(branchAccount =>
             {

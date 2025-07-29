@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-
 namespace Infrastructure.Data.Configurations.Identity
 {
     public class AccountContactConfiguration : IEntityTypeConfiguration<AccountContact>
@@ -11,9 +10,10 @@ namespace Infrastructure.Data.Configurations.Identity
         {
             builder.HasKey(x => x.Id);
             builder.HasIndex(x => x.Id);
-            builder.HasOne(x => x.Account)
-                .WithMany(x => x.AccountContacts)
-                .HasForeignKey(x => x.AccountId)
+            builder
+                .HasOne(x => x.Account)
+                .WithOne(x => x.AccountContact)
+                .HasForeignKey<AccountContact>(x => x.AccountId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

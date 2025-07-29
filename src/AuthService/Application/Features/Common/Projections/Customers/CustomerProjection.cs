@@ -2,7 +2,6 @@
 using Contracts.Application.Common;
 using Domain.Aggregates.Accounts;
 using Domain.Aggregates.Accounts.Enums;
-using FluentEmail.Core;
 
 namespace Application.Features.Common.Projections.Customers
 {
@@ -16,19 +15,19 @@ namespace Application.Features.Common.Projections.Customers
         public string? AvtUrl { get; set; }
         public AccountStatus Status { get; set; }
 
-		public virtual void MappingFrom(Account account)
-		{
-			Id = account.Id;
-			PublicId = account.PublicId;
-			CreatedAt = account.CreatedAt;
-			CreatedBy = account.CreatedBy;
-			UpdatedAt = account.UpdatedAt;
-			UpdatedBy = account.UpdatedBy;
+        public virtual void MappingFrom(Account account)
+        {
+            Id = account.Id;
+            PublicId = account.PublicId;
+            CreatedAt = account.CreatedAt;
+            CreatedBy = account.CreatedBy;
+            UpdatedAt = account.UpdatedAt;
+            UpdatedBy = account.UpdatedBy;
 
-			DisplayName = account.DisplayName;
-			PhoneNumber = account.PhoneNumber;
-			AvtUrl = account.AvtUrl;
-			Status = account.Status;
-		}
-	}
+            DisplayName = account.DisplayName;
+            PhoneNumber = account.PhoneNumber;
+            AvtUrl = account.AvtUrl;
+            Status = account.Status;
+        }
+    }
 }

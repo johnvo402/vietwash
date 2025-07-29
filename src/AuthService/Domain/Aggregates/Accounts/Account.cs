@@ -25,7 +25,7 @@ public class Account : AggregateRoot
     public ICollection<AccountToken>? AccountTokens { get; set; } = [];
 
     public ICollection<AccountResetPassword>? AccountResetPasswords { get; set; } = [];
-    public ICollection<AccountContact>? AccountContacts { get; set; } = [];
+    public AccountContact? AccountContact { get; set; }
     public ICollection<AccountActivity>? AccountActivities { get; set; } = [];
 
     public ICollection<BranchAccount>? BranchAccounts { get; set; } = [];

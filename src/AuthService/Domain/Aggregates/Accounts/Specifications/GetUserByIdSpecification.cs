@@ -9,7 +9,7 @@ public class GetAccountByIdSpecification : Specification<Account>
     {
         Query
             .Where(x => x.Id == id)
-            .Include(x => x.AccountContacts)
+            .Include(x => x.AccountContact)
             .Include(x => x.BranchAccounts)
             .AsSplitQuery();
     }

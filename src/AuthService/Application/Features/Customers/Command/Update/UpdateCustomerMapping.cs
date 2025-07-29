@@ -14,6 +14,20 @@ public static class UpdateCustomerMapping
             role: ROLE.CUSTOMER,
             gender: update.Gender
         );
+        if (update.AccountContact != null)
+            customer.AccountContact = new AccountContact
+            {
+                PhoneNumber = update.AccountContact.PhoneNumber,
+                Address = update.AccountContact.Address,
+                Commune = update.AccountContact.Commune,
+                District = update.AccountContact.District,
+                Province = update.AccountContact.Province,
+                CommuneCode = update.AccountContact.CommuneCode,
+                DistrictCode = update.AccountContact.DistrictCode,
+                ProvinceCode = update.AccountContact.ProvinceCode,
+                Street = update.AccountContact.Street,
+            };
+
         return customer;
     }
 }
