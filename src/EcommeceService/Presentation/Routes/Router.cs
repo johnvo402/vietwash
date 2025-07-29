@@ -159,6 +159,9 @@ namespace Presentation.Routes
         {
             public const string Tags = $"{nameof(SupplierRoute)} endpoint";
             public const string Suppliers = $"{Ecommerce}/{RouterBase.prefix}{nameof(Suppliers)}";
+
+            public const string ImportExportHistories =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(ImportExportHistories)}";
             public const string GetUpdateDelete =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Suppliers)}/" + "{" + RouterBase.Id + "}";
             public const string GetDetail =
