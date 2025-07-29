@@ -20,7 +20,6 @@ public static class AccountMapping
     {
         return new()
         {
-            PhoneNumber = contact.PhoneNumber,
             Address = contact.Address,
             Commune = contact.Commune,
             District = contact.District,

@@ -37,7 +37,6 @@ namespace Application.Features.Customers.Command.Create
                     command.AccountContact != null
                         ? new AccountContact
                         {
-                            PhoneNumber = command.AccountContact.PhoneNumber,
                             Address = command.AccountContact.Address,
                             Commune = command.AccountContact.Commune,
                             District = command.AccountContact.District,

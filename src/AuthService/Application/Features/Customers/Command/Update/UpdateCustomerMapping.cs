@@ -17,7 +17,6 @@ public static class UpdateCustomerMapping
         if (update.AccountContact != null)
             customer.AccountContact = new AccountContact
             {
-                PhoneNumber = update.AccountContact.PhoneNumber,
                 Address = update.AccountContact.Address,
                 Commune = update.AccountContact.Commune,
                 District = update.AccountContact.District,

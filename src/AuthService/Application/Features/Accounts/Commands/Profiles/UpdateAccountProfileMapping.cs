@@ -23,7 +23,6 @@ public static class UpdateAccountProfileMapping
             model.AccountContact != null
                 ? new AccountContact
                 {
-                    PhoneNumber = model.AccountContact.PhoneNumber,
                     Address = model.AccountContact.Address,
                     Commune = model.AccountContact.Commune,
                     District = model.AccountContact.District,

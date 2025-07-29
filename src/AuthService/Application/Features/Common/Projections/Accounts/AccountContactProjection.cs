@@ -4,7 +4,6 @@ namespace Application.Features.Common.Projections.Accounts
 {
     public class AccountContactProjection
     {
-        public string PhoneNumber { get; set; } = default!;
         public string Address { get; set; } = default!;
         public string Commune { get; set; } = default!;
         public string District { get; set; } = default!;
@@ -16,7 +15,6 @@ namespace Application.Features.Common.Projections.Accounts
 
         public virtual void MappingFrom(AccountContact contact)
         {
-            PhoneNumber = contact.PhoneNumber;
             Address = contact.Address;
             Commune = contact.Commune;
             District = contact.District;
