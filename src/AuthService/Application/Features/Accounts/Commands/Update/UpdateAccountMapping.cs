@@ -18,11 +18,17 @@ public static class UpdateAccountMapping
             gender: update.Gender
         );
         user.AvtUrl = update.AvtUrl;
-        user.BranchAccounts = update.BranchAccounts.ToListMapping(x => new BranchAccount
+        user.BranchAccounts?.Clear();
+
+        if (update.BranchAccounts != null)
         {
-            BranchId = x.BranchId,
-            BranchName = x.BranchName,
-        });
+            foreach (var x in update.BranchAccounts)
+            {
+                user.BranchAccounts?.Add(
+                    new BranchAccount { BranchId = x.BranchId, BranchName = x.BranchName }
+                );
+            }
+        }
         return user;
     }
 }
