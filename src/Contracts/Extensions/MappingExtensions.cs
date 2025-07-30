@@ -9,7 +9,7 @@ namespace Contracts.Extensions
             Func<TSource, TDestination> selector
         )
         {
-            return source?.Select(selector).ToArray() ?? Array.Empty<TDestination>();
+            return source?.Select(selector).ToList() ?? [];
         }
 
         public static IQueryable<TDestination> ProjectTo<TSource, TDestination>(

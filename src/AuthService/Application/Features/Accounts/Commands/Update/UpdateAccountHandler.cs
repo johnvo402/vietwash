@@ -11,10 +11,8 @@ using Mediator;
 
 namespace Application.Features.Accounts.Commands.Update;
 
-public class UpdateAccountHandler(
-    IUnitOfWork unitOfWork,
-    IMediaUpdateService mediaUpdateService
-) : IRequestHandler<UpdateAccountCommand, Result<UpdateAccountResponse>>
+public class UpdateAccountHandler(IUnitOfWork unitOfWork, IMediaUpdateService mediaUpdateService)
+    : IRequestHandler<UpdateAccountCommand, Result<UpdateAccountResponse>>
 {
     public async ValueTask<Result<UpdateAccountResponse>> Handle(
         UpdateAccountCommand command,
