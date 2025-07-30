@@ -27,7 +27,9 @@ namespace Domain.Aggregates.Funds.Specifications
         {
             if (DateTime.TryParse(from, out var fromDate) && DateTime.TryParse(to, out var toDate))
             {
-                return x => x.TransactionDate >= fromDate && x.TransactionDate < toDate;
+                return x =>
+                    !x.TransactionDate.HasValue
+                    || (x.TransactionDate >= fromDate && x.TransactionDate < toDate);
             }
 
             return null;

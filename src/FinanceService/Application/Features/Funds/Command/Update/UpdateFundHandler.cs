@@ -30,15 +30,8 @@ namespace Application.Features.Funds.Command.Update
                     )
                 );
             }
-            command.UpdateFundModel.MapUpdateToEntity(fund);
 
-            if (
-                fund.Status == FundStatus.PendingConfirmation
-                && command.UpdateFundModel!.Status == FundStatus.Confirmed
-            )
-            {
-                fund.TransactionDate = DateTimeOffset.UtcNow;
-            }
+            command.UpdateFundModel.MapUpdateToEntity(fund);
 
             try
             {

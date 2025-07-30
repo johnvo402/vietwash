@@ -19,15 +19,6 @@ namespace Application.Features.Funds.Command.Create
             string code = Generator.GenerateCode("FU-", 6);
             Fund fund = request.ToFund(code);
 
-            if (fund.Status == FundStatus.Confirmed)
-            {
-                fund.TransactionDate = DateTimeOffset.UtcNow;
-            }
-            else
-            {
-                fund.TransactionDate = null;
-            }
-
             try
             {
                 DbTransaction transaction = await unitOfWork.BeginTransactionAsync(
