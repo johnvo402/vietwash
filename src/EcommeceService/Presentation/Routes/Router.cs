@@ -154,11 +154,11 @@ namespace Presentation.Routes
             public const string CustomerRevenue =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportRoute)}/{nameof(CustomerRevenue)}";
             public const string RevenueReport =
-               $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportRoute)}/{nameof(RevenueReport)}";
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportRoute)}/{nameof(RevenueReport)}";
             public const string FinancialReport =
-                         $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportRoute)}/{nameof(FinancialReport)}";
-
-
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportRoute)}/{nameof(FinancialReport)}";
+            public const string ProductSupplierReport =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportRoute)}/{nameof(ProductSupplierReport)}";
         }
 
         public static class SupplierRoute
