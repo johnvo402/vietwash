@@ -92,6 +92,12 @@ namespace Presentation.Routes
                 + "{"
                 + RouterBase.Id
                 + "}";
+
+            public const string GetByStaff =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(GetByStaff)}/"
+                + "{"
+                + RouterBase.Id
+                + "}";
         }
 
         public static class Webhook
@@ -154,11 +160,9 @@ namespace Presentation.Routes
             public const string CustomerRevenue =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportRoute)}/{nameof(CustomerRevenue)}";
             public const string RevenueReport =
-               $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportRoute)}/{nameof(RevenueReport)}";
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportRoute)}/{nameof(RevenueReport)}";
             public const string FinancialReport =
-                         $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportRoute)}/{nameof(FinancialReport)}";
-
-
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportRoute)}/{nameof(FinancialReport)}";
         }
 
         public static class SupplierRoute
