@@ -92,6 +92,12 @@ namespace Presentation.Routes
                 + "{"
                 + RouterBase.Id
                 + "}";
+
+            public const string GetByStaff =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(GetByStaff)}/"
+                + "{"
+                + RouterBase.Id
+                + "}";
         }
 
         public static class Webhook
