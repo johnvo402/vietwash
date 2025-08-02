@@ -1,3 +1,4 @@
+using Application.Common.Security;
 using Contracts.Application.Common;
 using Domain.Aggregates.Enums;
 using Domain.Aggregates.Users;
@@ -38,6 +39,9 @@ public class UserDTO
     public string? PhoneNumber { get; set; }
     public CustomerGroup? CustomerGroup { get; set; }
 
+    [File]
+    public string? Avatar { get; set; }
+
     public virtual void MappingFrom(User user)
     {
         Id = user.Id;
@@ -46,5 +50,6 @@ public class UserDTO
         Email = user.Email;
         PhoneNumber = user.PhoneNumber;
         CustomerGroup = user.CustomerGroup;
+        Avatar = user.AvtUrl;
     }
 }
