@@ -50,5 +50,12 @@ namespace Presentation.Routes
             public const string GetByCode =
                 $"{Finance}/{RouterBase.prefix}{nameof(EInvoice)}/{nameof(GetByCode)}/" + "{Code}";
         }
+
+        public static class ReportRoute
+        {
+            public const string Tags = $"{nameof(ReportRoute)} endpoint";
+            public const string FinancialReport =
+                $"{Finance}/{RouterBase.prefix}{nameof(ReportRoute)}/{nameof(FinancialReport)}";
+        }
     }
 }
