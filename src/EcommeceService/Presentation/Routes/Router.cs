@@ -163,6 +163,8 @@ namespace Presentation.Routes
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportRoute)}/{nameof(RevenueReport)}";
             public const string FinancialReport =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportRoute)}/{nameof(FinancialReport)}";
+            public const string ProductSupplierReport =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(ReportRoute)}/{nameof(ProductSupplierReport)}";
         }
 
         public static class SupplierRoute
