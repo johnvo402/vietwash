@@ -30,11 +30,11 @@ public class RevenueReportHandler(IUnitOfWork unitOfWork)
                 && request.BranchIds != null
                 && request.BranchIds.Contains(o.BranchId)
             )
-            .GroupBy(o => o.CreatedAt.Date)
+            .GroupBy(o => new { o.CreatedAt.Date, o.BranchId })
             .Select(g => new RevenueReportResponse
             {
-                Date = DateOnly.FromDateTime(g.Key),
-                BranchId = g.Select(x => x.BranchId).FirstOrDefault(),
+                Date = DateOnly.FromDateTime(g.Key.Date),
+                BranchId = g.Key.BranchId,
                 OrderQuantity = g.Count(),
                 CustomerQuantity = g.Select(x => x.CustomerId).Distinct().Count(),
                 TotalRevenue = g.Sum(x => x.Amount),
