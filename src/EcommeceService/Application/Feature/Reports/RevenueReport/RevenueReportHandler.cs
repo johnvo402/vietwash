@@ -18,14 +18,17 @@ public class RevenueReportHandler(IUnitOfWork unitOfWork)
         CancellationToken cancellationToken
     )
     {
-        
         var from = DateTimeOffset.FromUnixTimeSeconds(request.From).ToOffset(TimeSpan.FromHours(7));
         var to = DateTimeOffset.FromUnixTimeSeconds(request.To).ToOffset(TimeSpan.FromHours(7));
 
         var query = await unitOfWork
             .Repository<Order>()
-            .QueryAsync()
-            .Where(o => (o.CreatedAt >= from && o.CreatedAt <= to) && (o.Status == OrderStatus.Completed))
+            .QueryAsync(o =>
+                (o.CreatedAt >= from && o.CreatedAt <= to)
+                && (o.Status == OrderStatus.Completed)
+                && request.BranchIds != null
+                && request.BranchIds.Contains(o.BranchId)
+            )
             .GroupBy(o => o.CreatedAt.Date)
             .Select(g => new RevenueReportResponse
             {

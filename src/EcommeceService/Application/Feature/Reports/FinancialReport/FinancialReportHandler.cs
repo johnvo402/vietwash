@@ -19,9 +19,6 @@ namespace Application.Feature.Reports.FinancialReport
             CancellationToken cancellationToken
         )
         {
-            request.From = 1704067200;
-            request.To = 1767215999;
-
             var from = DateTimeOffset
                 .FromUnixTimeSeconds(request.From)
                 .ToOffset(TimeSpan.FromHours(0));
@@ -30,7 +27,12 @@ namespace Application.Feature.Reports.FinancialReport
             var groupedOrders = await unitOfWork
                 .Repository<Order>()
                 .QueryAsync()
-                .Where(o => o.CreatedAt >= from && o.CreatedAt <= to)
+                .Where(o =>
+                    o.CreatedAt >= from
+                    && o.CreatedAt <= to
+                    && request.BranchIds != null
+                    && request.BranchIds.Contains(o.BranchId)
+                )
                 .GroupBy(o => o.Status)
                 .Select(g => new
                 {

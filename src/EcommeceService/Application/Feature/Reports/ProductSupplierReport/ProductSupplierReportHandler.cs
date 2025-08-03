@@ -37,6 +37,11 @@ namespace Application.Feature.Reports.ProductSupplierReport
                     x.ProductSupplying.CreatedAt >= from
                     && x.ProductSupplying.CreatedAt <= to
                     && x.ProductSupplying.InventoryDocument.Status == InventoryStatus.Completed
+                    && request.BranchIds != null
+                    && x.ProductSupplying.InventoryDocument.BranchId.HasValue
+                    && request.BranchIds.Contains(
+                        x.ProductSupplying.InventoryDocument.BranchId.Value
+                    )
                 )
                 .GroupBy(x => new
                 {

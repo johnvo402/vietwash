@@ -27,8 +27,12 @@ namespace Application.Feature.Reports.Queries.ServiceOrderReport
 
             var query = await unitOfWork
                 .Repository<Order>()
-                .QueryAsync()
-                .Where(o => o.CreatedAt >= from && o.CreatedAt <= to)
+                .QueryAsync(o =>
+                    o.CreatedAt >= from
+                    && o.CreatedAt <= to
+                    && request.BranchIds != null
+                    && request.BranchIds.Contains(o.BranchId)
+                )
                 .SelectMany(o => o.OrderItems)
                 .Include(x => x.Service)
                 .ThenInclude(x => x.UnitRelations)
