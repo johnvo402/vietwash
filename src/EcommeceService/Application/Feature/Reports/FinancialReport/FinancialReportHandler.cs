@@ -40,6 +40,7 @@ namespace Application.Feature.Reports.FinancialReport
                     TotalAmount = g.Sum(o => o.Amount),
                     TotalDiscount = g.Sum(o => o.DiscountValue),
                     TotalPoint = g.Sum(o => o.Point),
+                    Total = g.Sum(o => o.Total),
                 })
                 .ToListAsync(cancellationToken);
 
@@ -52,7 +53,7 @@ namespace Application.Feature.Reports.FinancialReport
                 CancelValue = cancelled?.TotalAmount ?? 0,
                 TotalDiscount = completed?.TotalDiscount ?? 0,
                 TotalPoint = completed?.TotalPoint * 10 ?? 0,
-                TotalNetRevenue = (completed?.TotalAmount ?? 0) - (completed?.TotalDiscount ?? 0), //1 point=10đ
+                TotalNetRevenue = completed?.Total ?? 0, //1 point=10đ
             };
 
             return Result<FinancialReportResponse>.Success(report);
