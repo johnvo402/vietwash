@@ -99,6 +99,34 @@ namespace Domain.Aggregates.Orders
             TariffId = tariffId;
         }
 
+        public void Update(
+            decimal? amount = null,
+            decimal? total = null,
+            decimal? point = null,
+            string? note = null,
+            long? tariffId = null,
+            DateTimeOffset? deliveryTime = null
+        )
+        {
+            if (note != null)
+                Note = note;
+
+            if (deliveryTime.HasValue)
+                DeliveryTime = deliveryTime.Value;
+
+            if (amount.HasValue)
+                Amount = amount.Value;
+
+            if (total.HasValue)
+                Total = total.Value;
+
+            if (point.HasValue)
+                Point = point.Value;
+
+            if (tariffId.HasValue)
+                TariffId = tariffId;
+        }
+
         public void EmitVoucherUsageEvent(decimal discountApply, long voucherId)
         {
             if (CustomerId.HasValue)

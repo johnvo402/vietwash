@@ -13,4 +13,13 @@
         public decimal DiscountValue { get; set; }
         public List<OrderItemModel> OrderItems { get; set; } = [];
     }
+
+    public class UpdateOrderModel
+    {
+        public long TariffId { get; set; }
+        public decimal Point { get; set; }
+        public string? Note { get; set; } = string.Empty;
+        public DateTimeOffset? DeliveryTime { get; set; }
+        public List<OrderItemModel> OrderItems { get; set; } = [];
+    }
 }
