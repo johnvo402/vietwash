@@ -24,7 +24,8 @@ public class RevenueReportHandler(IUnitOfWork unitOfWork)
         var query = await unitOfWork
             .Repository<Order>()
             .QueryAsync(o =>
-                (o.CreatedAt >= from && o.CreatedAt <= to)
+                o.CreatedAt >= from
+                && o.CreatedAt <= to
                 && (o.Status == OrderStatus.Completed)
                 && request.BranchIds != null
                 && request.BranchIds.Contains(o.BranchId)
@@ -33,6 +34,7 @@ public class RevenueReportHandler(IUnitOfWork unitOfWork)
             .Select(g => new RevenueReportResponse
             {
                 Date = DateOnly.FromDateTime(g.Key),
+                BranchId = g.Select(x => x.BranchId).FirstOrDefault(),
                 OrderQuantity = g.Count(),
                 CustomerQuantity = g.Select(x => x.CustomerId).Distinct().Count(),
                 TotalRevenue = g.Sum(x => x.Amount),

@@ -3,6 +3,8 @@
     public class RevenueReportResponse
     {
         public DateOnly Date { get; set; }
+
+        public long BranchId { get; set; }
         public int OrderQuantity { get; set; } //số lượng đơn hàng
         public int CustomerQuantity { get; set; } //số lượng khách hàng
         public decimal TotalRevenue { get; set; } // Tổng doanh thu
