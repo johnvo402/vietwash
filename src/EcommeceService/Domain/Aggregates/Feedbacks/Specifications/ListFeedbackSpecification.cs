@@ -10,7 +10,7 @@ namespace Domain.Aggregates.Feedbacks.Specifications
             Query
                 .Where(x => !x.Disable && x.ParentId == null)
                 .Include(x => x.User)
-                .Include(f => f.Replies)
+                .Include(f => f.Replies.Where(x => !x.Disable))
                 .Include(x => x.Reactions)
                 .OrderByDescending(x => x.CreatedAt)
                 .AsSplitQuery()
