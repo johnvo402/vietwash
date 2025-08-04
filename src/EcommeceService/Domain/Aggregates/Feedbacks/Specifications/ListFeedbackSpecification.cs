@@ -13,7 +13,6 @@ namespace Domain.Aggregates.Feedbacks.Specifications
                 .Include(f => f.Replies.Where(x => !x.Disable))
                 .Include(x => x.Reactions)
                 .OrderByDescending(x => x.CreatedAt)
-                .AsSplitQuery()
                 .AsNoTracking();
         }
     }
