@@ -10,7 +10,7 @@ namespace Application.Feature.InventoryDocuments.Commands.Create
     {
         public static InventoryDocument ToEntity(this InventoryDocumentModel model)
         {
-            string prefixCode = "NH";
+            string prefixCode = model.Type == InventoryType.Import ? "NH" : "XH";
             string code = Generator.GenerateCode(prefixCode, 6);
 
             var productSupplyings = model.ProductSupplyings.ToListProductSupplying() ?? [];
@@ -40,8 +40,8 @@ namespace Application.Feature.InventoryDocuments.Commands.Create
             IEnumerable<EquipmentSupplying> equipmentSupplyings
         )
         {
-            var productTotal = productSupplyings.Sum(x => x.Price * x.Quantity);
-            var equipmentTotal = equipmentSupplyings.Sum(x => x.Price * x.Quantity);
+            var productTotal = productSupplyings.Sum(x => x.Price * Math.Abs(x.Quantity));
+            var equipmentTotal = equipmentSupplyings.Sum(x => x.Price * Math.Abs(x.Quantity));
             var total = productTotal + equipmentTotal;
 
             // Validate

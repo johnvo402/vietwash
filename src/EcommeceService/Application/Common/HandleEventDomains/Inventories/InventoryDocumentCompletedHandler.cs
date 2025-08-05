@@ -6,6 +6,7 @@ using Contracts.Dtos.Requests;
 using Domain.Aggregates.Equipments;
 using Domain.Aggregates.Equipments.Enums;
 using Domain.Aggregates.Inventories;
+using Domain.Aggregates.Inventories.Enums;
 using Domain.Aggregates.Inventories.Events;
 using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.PubSubLogs;
@@ -140,13 +141,13 @@ public sealed class InventoryDocumentCompletedHandler
     {
         var fundEvent = new CreateFundEvent
         {
-            TypeId = "spend",
+            TypeId = document.Type == InventoryType.Import ? "spend" : "income",
             ReferenceId = document.Id,
-            Amount = amount,
+            Amount = document.Type == InventoryType.Import ? amount : -amount,
             PaymentMethod = PaymentMethod.Cash,
-            BranchId = document.BranchId ?? 1,
+            BranchId = (long)document.BranchId!,
 
-            BehaviorId = 3,
+            BehaviorId = document.Type == InventoryType.Import ? 3 : 4,
             Metadata = new Dictionary<string, object>
             {
                 ["code"] = document.Code,

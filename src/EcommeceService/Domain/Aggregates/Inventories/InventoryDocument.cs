@@ -28,16 +28,12 @@ namespace Domain.Aggregates.Inventories
                 Status = status;
             if (status == InventoryStatus.Completed)
             {
-                if (Type == InventoryType.Import)
-                {
-                    Emit(new InventoryDocumentCompletedEvent { InventoryDocument = this });
-                }
+                Emit(new InventoryDocumentCompletedEvent { InventoryDocument = this });
             }
             if (
-                (
-                    (Type == InventoryType.Export && status == InventoryStatus.Completed)
-                    || status == InventoryStatus.Canceled
-                ) && EquipmentSupplyings.Any()
+                Type == InventoryType.Import
+                && status == InventoryStatus.Canceled
+                && EquipmentSupplyings.Any()
             )
             {
                 Emit(new InventoryDocumentCanceledEvent { InventoryDocument = this });
