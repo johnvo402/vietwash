@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
 using Ardalis.GuardClauses;
@@ -79,6 +80,11 @@ public static class FilterExtension
             {
                 PropertyInfo propertyInfo = type.GetNestedPropertyInfo(propertyName);
                 Type propertyType = propertyInfo.PropertyType;
+
+                // Log property type
+                Console.WriteLine(
+                    $"FilterExpression: Property {propertyName} has type {propertyType.Name}"
+                );
 
                 Expression memberExpression = paramOrMember.MemberExpression(type, propertyName);
 
@@ -172,6 +178,11 @@ public static class FilterExtension
     private static BinaryExpression Compare(string operationString, Expression left, object right)
     {
         OperationType operationType = GetOperationType(operationString);
+
+        // Log operation
+        Console.WriteLine(
+            $"Compare: Operation {operationString} with right value {right} (Type: {right?.GetType()?.Name})"
+        );
 
         if (operationType == OperationType.Between)
         {
@@ -354,7 +365,7 @@ public static class FilterExtension
             {
                 if (type == typeof(DateTimeOffset) && item is string dateStr)
                 {
-                    convertedValue = DateTimeOffset.Parse(dateStr);
+                    convertedValue = DateTimeOffset.Parse(dateStr, CultureInfo.InvariantCulture);
                 }
                 else
                 {
@@ -364,7 +375,8 @@ public static class FilterExtension
             catch (Exception ex)
             {
                 throw new InvalidCastException(
-                    $"Failed to convert '{item}' to {type}: {ex.Message}"
+                    $"Failed to convert '{item}' to {type}: {ex.Message}",
+                    ex
                 );
             }
 
@@ -381,7 +393,9 @@ public static class FilterExtension
         Type? rightType = right?.GetType();
 
         // Log for debugging
-        Console.WriteLine($"Parse: leftType={leftType}, rightType={rightType}, rightValue={right}");
+        Console.WriteLine(
+            $"Parse: leftType={leftType.Name}, rightType={rightType?.Name ?? "null"}, rightValue={right}, member={left.Member.Name}"
+        );
 
         // Handle DateTimeOffset and DateTimeOffset?
         if (leftType == typeof(DateTimeOffset) || leftType == typeof(DateTimeOffset?))
@@ -390,7 +404,14 @@ public static class FilterExtension
             {
                 try
                 {
-                    if (DateTimeOffset.TryParse(dateStr, out var parsedDate))
+                    if (
+                        DateTimeOffset.TryParse(
+                            dateStr,
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.None,
+                            out var parsedDate
+                        )
+                    )
                     {
                         return new(
                             member,
@@ -421,7 +442,52 @@ public static class FilterExtension
             else
             {
                 throw new InvalidCastException(
-                    $"Expected string or DateTimeOffset for {leftType}, got {rightType?.Name ?? "null"}"
+                    $"Expected string or DateTimeOffset for {leftType.Name}, got {rightType?.Name ?? "null"}"
+                );
+            }
+        }
+
+        // Handle DateTime and DateTime? as a fallback
+        if (leftType == typeof(DateTime) || leftType == typeof(DateTime?))
+        {
+            if (right is string dateStr)
+            {
+                try
+                {
+                    if (
+                        DateTime.TryParse(
+                            dateStr,
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.None,
+                            out var parsedDate
+                        )
+                    )
+                    {
+                        return new(
+                            member,
+                            parsedDate,
+                            Expression.Constant(parsedDate, leftType),
+                            leftType
+                        );
+                    }
+                    throw new FormatException($"Cannot parse '{dateStr}' to DateTime");
+                }
+                catch (FormatException ex)
+                {
+                    throw new FormatException(
+                        $"Cannot parse '{dateStr}' to DateTime: {ex.Message}",
+                        ex
+                    );
+                }
+            }
+            else if (right is DateTime dateTime)
+            {
+                return new(member, dateTime, Expression.Constant(dateTime, leftType), leftType);
+            }
+            else
+            {
+                throw new InvalidCastException(
+                    $"Expected string or DateTime for {leftType.Name}, got {rightType?.Name ?? "null"}"
                 );
             }
         }
@@ -462,6 +528,31 @@ public static class FilterExtension
 
             try
             {
+                // Additional check for ISO 8601-like strings
+                if (right is string str && str.Contains("T") && str.EndsWith("Z"))
+                {
+                    if (targetType == typeof(DateTimeOffset))
+                    {
+                        var parsedDate = DateTimeOffset.Parse(str, CultureInfo.InvariantCulture);
+                        return new(
+                            member,
+                            parsedDate,
+                            Expression.Constant(parsedDate, leftType),
+                            leftType
+                        );
+                    }
+                    else if (targetType == typeof(DateTime))
+                    {
+                        var parsedDate = DateTime.Parse(str, CultureInfo.InvariantCulture);
+                        return new(
+                            member,
+                            parsedDate,
+                            Expression.Constant(parsedDate, leftType),
+                            leftType
+                        );
+                    }
+                }
+
                 object? changedTypeValue = Convert.ChangeType(right, targetType);
                 return new(
                     member,
@@ -473,7 +564,7 @@ public static class FilterExtension
             catch (Exception ex)
             {
                 throw new InvalidCastException(
-                    $"Failed to convert '{right}' to {targetType}: {ex.Message}",
+                    $"Failed to convert '{right}' to {targetType.Name}: {ex.Message}",
                     ex
                 );
             }
