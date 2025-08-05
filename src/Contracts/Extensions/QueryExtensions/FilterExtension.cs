@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -20,9 +21,9 @@ public static class FilterExtension
         ParameterExpression parameter = Expression.Parameter(type, "a");
         Expression expression = FilterExpression(filterObject, parameter, type, "b");
 
-        var lamda = Expression.Lambda<Func<T, bool>>(expression, parameter);
+        var lambda = Expression.Lambda<Func<T, bool>>(expression, parameter);
 
-        return query.Where(lamda);
+        return query.Where(lambda);
     }
 
     public static IEnumerable<T> Filter<T>(this IEnumerable<T> query, object? filterObject) =>
@@ -42,6 +43,11 @@ public static class FilterExtension
         {
             string propertyName = dynamicFilter.Key;
             object value = dynamicFilter.Value;
+
+            // Log for debugging
+            Console.WriteLine(
+                $"FilterExpression: Processing filter {propertyName} with value {value}"
+            );
 
             int isAndOperator = string.Compare(
                 propertyName,
@@ -74,11 +80,11 @@ public static class FilterExtension
                 PropertyInfo propertyInfo = type.GetNestedPropertyInfo(propertyName);
                 Type propertyType = propertyInfo.PropertyType;
 
-                Expression memeberExpression = paramOrMember.MemberExpression(type, propertyName);
+                Expression memberExpression = paramOrMember.MemberExpression(type, propertyName);
 
                 expression = ProcessObject(
                     propertyInfo,
-                    new(memeberExpression, propertyType, parameterName.NextUniformSequence(), value)
+                    new(memberExpression, propertyType, parameterName.NextUniformSequence(), value)
                 );
             }
 
@@ -88,13 +94,6 @@ public static class FilterExtension
         return body;
     }
 
-    /// <summary>
-    /// Process array object property in filter
-    /// </summary>
-    /// <param name="values"></param>
-    /// <param name="payload"></param>
-    /// <param name="isAndOperator"></param>
-    /// <returns></returns>
     private static Expression ProcessList(
         IEnumerable<object> values,
         FilterExpressionPayload payload,
@@ -124,12 +123,6 @@ public static class FilterExtension
         return body;
     }
 
-    /// <summary>
-    /// Process object property in filter
-    /// </summary>
-    /// <param name="propertyInfo"></param>
-    /// <param name="payload"></param>
-    /// <returns></returns>
     private static Expression ProcessObject(
         PropertyInfo propertyInfo,
         FilterExpressionPayload payload
@@ -137,7 +130,6 @@ public static class FilterExtension
     {
         Type propertyType = payload.Type;
 
-        //current property is array object then generate nested any
         if (propertyType.IsArrayGenericType())
         {
             propertyType = propertyInfo.PropertyType.GetGenericArguments()[0];
@@ -153,14 +145,14 @@ public static class FilterExtension
                 payload.ParameterName
             );
 
-            LambdaExpression anyLamda = Expression.Lambda(operationBody, anyParameter);
+            LambdaExpression anyLambda = Expression.Lambda(operationBody, anyParameter);
 
             return Expression.Call(
                 typeof(Enumerable),
                 nameof(Enumerable.Any),
                 [propertyType],
                 payload.ParamOrMember,
-                anyLamda
+                anyLambda
             );
         }
 
@@ -172,13 +164,6 @@ public static class FilterExtension
         );
     }
 
-    /// <summary>
-    /// Do compararison
-    /// </summary>
-    /// <param name="operationString"></param>
-    /// <param name="left"></param>
-    /// <param name="right"></param>
-    /// <returns></returns>
     private static BinaryExpression Compare(string operationString, Expression left, object right)
     {
         OperationType operationType = GetOperationType(operationString);
@@ -287,11 +272,11 @@ public static class FilterExtension
             return NotOr(operationType, expression);
         }
 
-        Expression outter = left;
+        Expression outer = left;
         Expression inner = Expression.Constant(right);
         if (operationType.ToString().EndsWith("i", StringComparison.OrdinalIgnoreCase))
         {
-            outter = Expression.Call(left, nameof(string.ToLower), Type.EmptyTypes);
+            outer = Expression.Call(left, nameof(string.ToLower), Type.EmptyTypes);
             inner = Expression.Call(
                 Expression.Constant(right),
                 nameof(string.ToLower),
@@ -300,7 +285,7 @@ public static class FilterExtension
         }
 
         MethodCallExpression result = Expression.Call(
-            outter,
+            outer,
             callMethodType.Key.GetMethod(callMethodType.Value, [typeof(string)])!,
             inner
         );
@@ -313,24 +298,12 @@ public static class FilterExtension
             ? Expression.Equal(expression, Expression.Constant(false))
             : Expression.Equal(expression, Expression.Constant(true));
 
-    /// <summary>
-    /// Change both types to the same type
-    /// </summary>
-    /// <param name="memberExpression"></param>
-    /// <param name="value"></param>
-    /// <returns></returns>
     private static ConvertExpressionTypeResult ParseObject(MemberExpression left, object right)
     {
         ConvertObjectTypeResult parse = Parse(left, right);
         return new(parse.Member, parse.Constant);
     }
 
-    /// <summary>
-    /// Change both types to the same type for array value in $in and $notIn
-    /// </summary>
-    /// <param name="memberExpression"></param>
-    /// <param name="values"></param>
-    /// <returns></returns>
     private static ConvertObjectTypeResult ParseArray(MemberExpression left, object right)
     {
         IList rightValues = (IList)right;
@@ -357,22 +330,13 @@ public static class FilterExtension
         return new(member!, list, Expression.Constant(list, convertedType), type);
     }
 
-    /// <summary>
-    /// Convert list object to explicit type
-    /// </summary>
-    /// <param name="sourceList"></param>
-    /// <param name="targetType"></param>
-    /// <returns></returns>
     static (IList, Type) ConvertListToType(List<object> sourceList, Type targetType)
     {
-        // Step 1: Create a generic List<T> where T is the targetType
         Type listType = typeof(List<>).MakeGenericType(targetType);
         IList typedList = (IList)Activator.CreateInstance(listType)!;
 
-        // Step 2: Iterate through the source list and convert each item to the targetType
         foreach (var item in sourceList)
         {
-            // Step 3: Add each item to the typed list (casting to the target type)
             Type type = targetType;
 
             if (targetType.IsNullable() && targetType.GenericTypeArguments.Length > 0)
@@ -391,10 +355,13 @@ public static class FilterExtension
         Type leftType = left.GetMemberExpressionType();
         Type? rightType = right?.GetType();
 
-        // Xử lý DateTimeOffset và DateTimeOffset?
+        // Log for debugging
+        Console.WriteLine($"Parse: leftType={leftType}, rightType={rightType}, rightValue={right}");
+
+        // Handle DateTimeOffset and DateTimeOffset?
         if (
-            (leftType == typeof(DateTimeOffset) || leftType == typeof(DateTimeOffset?))
-            && right is string dateStr
+            right is string dateStr
+            && (leftType == typeof(DateTimeOffset) || leftType == typeof(DateTimeOffset?))
         )
         {
             if (DateTimeOffset.TryParse(dateStr, out var parsedDate))
@@ -404,14 +371,14 @@ public static class FilterExtension
             throw new FormatException($"Cannot parse '{dateStr}' to DateTimeOffset");
         }
 
-        // Xử lý Ulid
+        // Handle Ulid
         if (leftType == typeof(Ulid))
         {
             Ulid ulid = right == null ? Ulid.Empty : Ulid.Parse(right.ToString());
             return new(member, ulid, Expression.Constant(ulid, leftType), leftType);
         }
 
-        // Xử lý Enum
+        // Handle Enum
         if (
             (
                 leftType.IsNullable()
@@ -429,38 +396,40 @@ public static class FilterExtension
             );
         }
 
-        // Convert mặc định
-        if (leftType != rightType)
+        // Default conversion
+        if (leftType != rightType && right != null)
         {
             Type targetType = leftType;
             if (targetType.IsNullable() && targetType.GenericTypeArguments.Length > 0)
             {
                 targetType = targetType.GenericTypeArguments[0];
             }
-            object? changedTypeValue = Convert.ChangeType(right, targetType);
-            return new(
-                member,
-                changedTypeValue,
-                Expression.Constant(changedTypeValue, leftType),
-                leftType
-            );
+
+            try
+            {
+                object? changedTypeValue = Convert.ChangeType(right, targetType);
+                return new(
+                    member,
+                    changedTypeValue,
+                    Expression.Constant(changedTypeValue, leftType),
+                    leftType
+                );
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidCastException(
+                    $"Failed to convert '{right}' to {targetType}: {ex.Message}"
+                );
+            }
         }
 
-        return new(member, right, Expression.Constant(right), leftType);
+        return new(member, right, Expression.Constant(right, leftType), leftType);
     }
 
-    /// <summary>
-    /// Convert string operation to enum
-    /// </summary>
-    /// <param name="operationString"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentException"></exception>
     private static OperationType GetOperationType(string operationString)
     {
-        // Extract the operation substring (remove the first character, e.g., '$')
         string operation = operationString[1..];
 
-        // Try to parse the enum, handling case-insensitive matching
         if (
             Enum.TryParse(typeof(OperationType), operation, true, out var result)
             && result is OperationType parsedOperation
@@ -469,7 +438,6 @@ public static class FilterExtension
             return parsedOperation;
         }
 
-        // Handle the case where no valid enum was found (optional, you can throw or return default)
         throw new ArgumentException($"Invalid operation: {operationString}");
     }
 
@@ -510,6 +478,8 @@ internal record ConvertObjectTypeResult(
     ConstantExpression Constant,
     Type Type
 );
+
+internal record ConvertExpressionTypeResult(Expression Member, ConstantExpression Value);
 
 internal record FilterExpressionPayload(
     Expression ParamOrMember,
