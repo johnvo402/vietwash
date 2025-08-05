@@ -386,46 +386,68 @@ public static class FilterExtension
     }
 
     private static ConvertObjectTypeResult Parse(MemberExpression left, object? right)
-{
-    Expression member = left;
-    Type leftType = left.GetMemberExpressionType();
-    Type? rightType = right?.GetType();
-
-    // Thêm xử lý DateTimeOffset
-    if (leftType == typeof(DateTimeOffset) && right is string dateStr)
     {
-        DateTimeOffset parsedDate = DateTimeOffset.Parse(dateStr);
-        return new(member, parsedDate, Expression.Constant(parsedDate, leftType), leftType);
-    }
+        Expression member = left;
+        Type leftType = left.GetMemberExpressionType();
+        Type? rightType = right?.GetType();
 
-    if (leftType == typeof(Ulid))
-    {
-        Ulid ulid = right == null ? Ulid.Empty : Ulid.Parse(right.ToString());
-        return new(member, ulid, Expression.Constant(ulid, leftType), leftType);
-    }
-
-    if (
-        (leftType.IsNullable() && leftType.GenericTypeArguments.Length > 0 && leftType.GenericTypeArguments[0].IsEnum)
-        || leftType.IsEnum
-    )
-    {
-        Type type = rightType ?? typeof(long);
-        return new(Expression.Convert(member, type), right, Expression.Constant(right, type), type);
-    }
-
-    if (leftType != rightType)
-    {
-        Type targetType = leftType;
-        if (targetType.IsNullable() && targetType.GenericTypeArguments.Length > 0)
+        // Xử lý DateTimeOffset và DateTimeOffset?
+        if (
+            (leftType == typeof(DateTimeOffset) || leftType == typeof(DateTimeOffset?))
+            && right is string dateStr
+        )
         {
-            targetType = targetType.GenericTypeArguments[0];
+            if (DateTimeOffset.TryParse(dateStr, out var parsedDate))
+            {
+                return new(member, parsedDate, Expression.Constant(parsedDate, leftType), leftType);
+            }
+            throw new FormatException($"Cannot parse '{dateStr}' to DateTimeOffset");
         }
-        object? changedTypeValue = Convert.ChangeType(right, targetType);
-        return new(member, changedTypeValue, Expression.Constant(changedTypeValue, leftType), leftType);
-    }
 
-    return new(member, right, Expression.Constant(right), leftType);
-}
+        // Xử lý Ulid
+        if (leftType == typeof(Ulid))
+        {
+            Ulid ulid = right == null ? Ulid.Empty : Ulid.Parse(right.ToString());
+            return new(member, ulid, Expression.Constant(ulid, leftType), leftType);
+        }
+
+        // Xử lý Enum
+        if (
+            (
+                leftType.IsNullable()
+                && leftType.GenericTypeArguments.Length > 0
+                && leftType.GenericTypeArguments[0].IsEnum
+            ) || leftType.IsEnum
+        )
+        {
+            Type type = rightType ?? typeof(long);
+            return new(
+                Expression.Convert(member, type),
+                right,
+                Expression.Constant(right, type),
+                type
+            );
+        }
+
+        // Convert mặc định
+        if (leftType != rightType)
+        {
+            Type targetType = leftType;
+            if (targetType.IsNullable() && targetType.GenericTypeArguments.Length > 0)
+            {
+                targetType = targetType.GenericTypeArguments[0];
+            }
+            object? changedTypeValue = Convert.ChangeType(right, targetType);
+            return new(
+                member,
+                changedTypeValue,
+                Expression.Constant(changedTypeValue, leftType),
+                leftType
+            );
+        }
+
+        return new(member, right, Expression.Constant(right), leftType);
+    }
 
     /// <summary>
     /// Convert string operation to enum
@@ -454,34 +476,32 @@ public static class FilterExtension
     private static readonly Dictionary<
         OperationType,
         Func<Expression, Expression, BinaryExpression>
-    > BinaryCompararisions =
-        new()
-        {
-            { OperationType.Eq, Expression.Equal },
-            { OperationType.EqI, Expression.Equal },
-            { OperationType.Ne, Expression.NotEqual },
-            { OperationType.NeI, Expression.NotEqual },
-            { OperationType.Lt, Expression.LessThan },
-            { OperationType.Lte, Expression.LessThanOrEqual },
-            { OperationType.Gt, Expression.GreaterThan },
-            { OperationType.Gte, Expression.GreaterThanOrEqual },
-        };
+    > BinaryCompararisions = new()
+    {
+        { OperationType.Eq, Expression.Equal },
+        { OperationType.EqI, Expression.Equal },
+        { OperationType.Ne, Expression.NotEqual },
+        { OperationType.NeI, Expression.NotEqual },
+        { OperationType.Lt, Expression.LessThan },
+        { OperationType.Lte, Expression.LessThanOrEqual },
+        { OperationType.Gt, Expression.GreaterThan },
+        { OperationType.Gte, Expression.GreaterThanOrEqual },
+    };
 
     private static readonly Dictionary<
         OperationType,
         KeyValuePair<Type, string>
-    > MethodCallCompararisions =
-        new()
-        {
-            { OperationType.In, new(typeof(Enumerable), nameof(Enumerable.Contains)) },
-            { OperationType.NotIn, new(typeof(Enumerable), nameof(Enumerable.Contains)) },
-            { OperationType.Contains, new(typeof(string), nameof(string.Contains)) },
-            { OperationType.ContainsI, new(typeof(string), nameof(string.Contains)) },
-            { OperationType.NotContains, new(typeof(string), nameof(string.Contains)) },
-            { OperationType.NotContainsI, new(typeof(string), nameof(string.Contains)) },
-            { OperationType.StartsWith, new(typeof(string), nameof(string.StartsWith)) },
-            { OperationType.EndsWith, new(typeof(string), nameof(string.EndsWith)) },
-        };
+    > MethodCallCompararisions = new()
+    {
+        { OperationType.In, new(typeof(Enumerable), nameof(Enumerable.Contains)) },
+        { OperationType.NotIn, new(typeof(Enumerable), nameof(Enumerable.Contains)) },
+        { OperationType.Contains, new(typeof(string), nameof(string.Contains)) },
+        { OperationType.ContainsI, new(typeof(string), nameof(string.Contains)) },
+        { OperationType.NotContains, new(typeof(string), nameof(string.Contains)) },
+        { OperationType.NotContainsI, new(typeof(string), nameof(string.Contains)) },
+        { OperationType.StartsWith, new(typeof(string), nameof(string.StartsWith)) },
+        { OperationType.EndsWith, new(typeof(string), nameof(string.EndsWith)) },
+    };
 }
 
 internal record ConvertObjectTypeResult(
