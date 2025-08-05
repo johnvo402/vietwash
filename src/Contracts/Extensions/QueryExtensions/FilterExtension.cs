@@ -479,8 +479,6 @@ internal record ConvertObjectTypeResult(
     Type Type
 );
 
-internal record ConvertExpressionTypeResult(Expression Member, ConstantExpression Value);
-
 internal record FilterExpressionPayload(
     Expression ParamOrMember,
     Type Type,
