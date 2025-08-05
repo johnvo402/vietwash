@@ -375,7 +375,7 @@ public static class FilterExtension
             catch (Exception ex)
             {
                 throw new InvalidCastException(
-                    $"Failed to convert '{item}' to {type}: {ex.Message}",
+                    $"Failed to convert '{item}' to {type.Name}: {ex.Message}",
                     ex
                 );
             }
@@ -447,7 +447,7 @@ public static class FilterExtension
             }
         }
 
-        // Handle DateTime and DateTime? as a fallback
+        // Handle DateTime and DateTime?
         if (leftType == typeof(DateTime) || leftType == typeof(DateTime?))
         {
             if (right is string dateStr)
@@ -492,6 +492,42 @@ public static class FilterExtension
             }
         }
 
+        // Handle string fields with ISO 8601 dates
+        if (
+            leftType == typeof(string)
+            && right is string str
+            && str.Contains("T")
+            && str.EndsWith("Z")
+        )
+        {
+            try
+            {
+                // Parse as DateTimeOffset and compare as strings
+                DateTimeOffset parsedDate = DateTimeOffset.Parse(str, CultureInfo.InvariantCulture);
+                // Convert the member to DateTimeOffset for comparison
+                Expression parsedMember = Expression.Call(
+                    typeof(DateTimeOffset),
+                    nameof(DateTimeOffset.Parse),
+                    null,
+                    member,
+                    Expression.Constant(CultureInfo.InvariantCulture)
+                );
+                return new(
+                    parsedMember,
+                    parsedDate,
+                    Expression.Constant(parsedDate, typeof(DateTimeOffset)),
+                    typeof(DateTimeOffset)
+                );
+            }
+            catch (FormatException ex)
+            {
+                throw new FormatException(
+                    $"Cannot parse string '{str}' as ISO 8601 date for comparison: {ex.Message}",
+                    ex
+                );
+            }
+        }
+
         // Handle Ulid
         if (leftType == typeof(Ulid))
         {
@@ -528,31 +564,6 @@ public static class FilterExtension
 
             try
             {
-                // Additional check for ISO 8601-like strings
-                if (right is string str && str.Contains("T") && str.EndsWith("Z"))
-                {
-                    if (targetType == typeof(DateTimeOffset))
-                    {
-                        var parsedDate = DateTimeOffset.Parse(str, CultureInfo.InvariantCulture);
-                        return new(
-                            member,
-                            parsedDate,
-                            Expression.Constant(parsedDate, leftType),
-                            leftType
-                        );
-                    }
-                    else if (targetType == typeof(DateTime))
-                    {
-                        var parsedDate = DateTime.Parse(str, CultureInfo.InvariantCulture);
-                        return new(
-                            member,
-                            parsedDate,
-                            Expression.Constant(parsedDate, leftType),
-                            leftType
-                        );
-                    }
-                }
-
                 object? changedTypeValue = Convert.ChangeType(right, targetType);
                 return new(
                     member,
