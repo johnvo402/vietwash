@@ -46,7 +46,7 @@ public static class FilterExtension
 
             // Log for debugging
             Console.WriteLine(
-                $"FilterExpression: Processing filter {propertyName} with value {value}"
+                $"FilterExpression: Processing filter {propertyName} with value {value} (Type: {value?.GetType()?.Name})"
             );
 
             int isAndOperator = string.Compare(
@@ -67,7 +67,7 @@ public static class FilterExtension
             }
 
             Expression expression = null!;
-            if (value is IEnumerable<object> values)
+            if (value is IEnumerable<object> values && !(value is string))
             {
                 expression = ProcessList(
                     values,
@@ -103,6 +103,11 @@ public static class FilterExtension
         Expression body = null!;
         foreach (var value in values)
         {
+            // Log for debugging
+            Console.WriteLine(
+                $"ProcessList: Processing value {value} (Type: {value?.GetType()?.Name})"
+            );
+
             Expression expression = FilterExpression(
                 value,
                 payload.ParamOrMember,
@@ -343,10 +348,30 @@ public static class FilterExtension
             {
                 type = targetType.GenericTypeArguments[0];
             }
-            typedList.Add(Convert.ChangeType(item, type));
+
+            object convertedValue;
+            try
+            {
+                if (type == typeof(DateTimeOffset) && item is string dateStr)
+                {
+                    convertedValue = DateTimeOffset.Parse(dateStr);
+                }
+                else
+                {
+                    convertedValue = Convert.ChangeType(item, type);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidCastException(
+                    $"Failed to convert '{item}' to {type}: {ex.Message}"
+                );
+            }
+
+            typedList.Add(convertedValue);
         }
 
-        return new(typedList, listType);
+        return (typedList, listType);
     }
 
     private static ConvertObjectTypeResult Parse(MemberExpression left, object? right)
@@ -359,16 +384,46 @@ public static class FilterExtension
         Console.WriteLine($"Parse: leftType={leftType}, rightType={rightType}, rightValue={right}");
 
         // Handle DateTimeOffset and DateTimeOffset?
-        if (
-            right is string dateStr
-            && (leftType == typeof(DateTimeOffset) || leftType == typeof(DateTimeOffset?))
-        )
+        if (leftType == typeof(DateTimeOffset) || leftType == typeof(DateTimeOffset?))
         {
-            if (DateTimeOffset.TryParse(dateStr, out var parsedDate))
+            if (right is string dateStr)
             {
-                return new(member, parsedDate, Expression.Constant(parsedDate, leftType), leftType);
+                try
+                {
+                    if (DateTimeOffset.TryParse(dateStr, out var parsedDate))
+                    {
+                        return new(
+                            member,
+                            parsedDate,
+                            Expression.Constant(parsedDate, leftType),
+                            leftType
+                        );
+                    }
+                    throw new FormatException($"Cannot parse '{dateStr}' to DateTimeOffset");
+                }
+                catch (FormatException ex)
+                {
+                    throw new FormatException(
+                        $"Cannot parse '{dateStr}' to DateTimeOffset: {ex.Message}",
+                        ex
+                    );
+                }
             }
-            throw new FormatException($"Cannot parse '{dateStr}' to DateTimeOffset");
+            else if (right is DateTimeOffset dateTimeOffset)
+            {
+                return new(
+                    member,
+                    dateTimeOffset,
+                    Expression.Constant(dateTimeOffset, leftType),
+                    leftType
+                );
+            }
+            else
+            {
+                throw new InvalidCastException(
+                    $"Expected string or DateTimeOffset for {leftType}, got {rightType?.Name ?? "null"}"
+                );
+            }
         }
 
         // Handle Ulid
@@ -418,7 +473,8 @@ public static class FilterExtension
             catch (Exception ex)
             {
                 throw new InvalidCastException(
-                    $"Failed to convert '{right}' to {targetType}: {ex.Message}"
+                    $"Failed to convert '{right}' to {targetType}: {ex.Message}",
+                    ex
                 );
             }
         }
