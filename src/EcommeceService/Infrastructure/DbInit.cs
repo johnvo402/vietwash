@@ -1,4 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
@@ -11,6 +17,7 @@ using Domain.Aggregates.Inventories;
 using Domain.Aggregates.Inventories.Enums;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
+using Domain.Aggregates.Orders.Specifications;
 using Domain.Aggregates.Products;
 using Domain.Aggregates.Services;
 using Domain.Aggregates.Services.Enums;
@@ -31,6 +38,26 @@ namespace Infrastructure.Data;
 
 public class DbInitializer
 {
+    private static readonly DateTimeOffset StartDate = new DateTimeOffset(
+        2024,
+        10,
+        1,
+        0,
+        0,
+        0,
+        TimeSpan.Zero
+    );
+    private static readonly DateTimeOffset EndDate = new DateTimeOffset(
+        2025,
+        8,
+        6,
+        18,
+        14,
+        0,
+        TimeSpan.Zero
+    );
+    private static readonly TimeSpan TotalPeriod = EndDate - StartDate;
+
     public static async Task InitializeAsync(
         IServiceProvider provider,
         CancellationToken cancellationToken = default
@@ -41,72 +68,78 @@ public class DbInitializer
         var qrGenerator = provider.GetRequiredService<IQrGenerator>();
         var logger = provider.GetRequiredService<ILogger>();
         var media = provider.GetRequiredService<IMediaUpdateService>();
+
         using var dbTransaction = await unitOfWork.BeginTransactionAsync();
 
         try
         {
-            if (!await unitOfWork.Repository<Unit>().AnyAsync())
+            if (!await unitOfWork.Repository<Unit>().AnyAsync(cancellationToken: cancellationToken))
             {
                 logger.Information("Bắt đầu khởi tạo dữ liệu đơn vị tính...");
-
                 await InitializeUnitsAsync(unitOfWork, cancellationToken);
+                logger.Information("Hoàn tất khởi tạo dữ liệu đơn vị tính.");
+            }
 
-                logger.Information("Hoàn tất khởi tạo dữ liệu đơn vị tính...");
-            }
-            else
-            {
-                logger.Information("Dữ liệu đơn vị tính đã tồn tại, bỏ qua khởi tạo.");
-            }
-            if (!await unitOfWork.Repository<Category>().AnyAsync())
+            if (
+                !await unitOfWork
+                    .Repository<Category>()
+                    .AnyAsync(cancellationToken: cancellationToken)
+            )
             {
                 logger.Information("Bắt đầu khởi tạo dữ liệu danh mục...");
-
                 await InitializeCategoriesAsync(unitOfWork, cancellationToken);
-
-                logger.Information("Hoàn tất khởi tạo dữ liệu danh mục...");
-            }
-            else
-            {
-                logger.Information("Dữ liệu danh mục đã tồn tại, bỏ qua khởi tạo.");
+                logger.Information("Hoàn tất khởi tạo dữ liệu danh mục.");
             }
 
-            if (!await unitOfWork.Repository<Supplier>().AnyAsync())
+            if (
+                !await unitOfWork
+                    .Repository<Supplier>()
+                    .AnyAsync(cancellationToken: cancellationToken)
+            )
             {
                 logger.Information("Bắt đầu khởi tạo dữ liệu nhà cung cấp...");
-
                 await InitializeSuppliersAsync(unitOfWork, cancellationToken);
+                logger.Information("Hoàn tất khởi tạo dữ liệu nhà cung cấp.");
+            }
 
-                logger.Information("Hoàn tất khởi tạo dữ liệu nhà cung cấp...");
-            }
-            else
-            {
-                logger.Information("Dữ liệu nhà cung cấp đã tồn tại, bỏ qua khởi tạo.");
-            }
-            if (!await unitOfWork.Repository<Service>().AnyAsync())
+            if (
+                !await unitOfWork
+                    .Repository<Service>()
+                    .AnyAsync(cancellationToken: cancellationToken)
+            )
             {
                 logger.Information("Bắt đầu khởi tạo dữ liệu dịch vụ...");
-
                 await InitializeServicesAsync(unitOfWork, logger, media, cancellationToken);
+                logger.Information("Hoàn tất khởi tạo dữ liệu dịch vụ.");
+            }
 
-                logger.Information("Hoàn tất khởi tạo dữ liệu dịch vụ...");
-            }
-            else
+            if (
+                !await unitOfWork
+                    .Repository<Tariff>()
+                    .AnyAsync(cancellationToken: cancellationToken)
+            )
             {
-                logger.Information("Dữ liệu dịch vụ đã tồn tại, bỏ qua khởi tạo.");
+                logger.Information("Bắt đầu khởi tạo biểu phí...");
+                await InitializeTariffsAsync(unitOfWork, logger, cancellationToken);
+                logger.Information("Hoàn tất khởi tạo biểu phí.");
             }
-            if (!await unitOfWork.Repository<Voucher>().AnyAsync())
+
+            if (
+                !await unitOfWork
+                    .Repository<Voucher>()
+                    .AnyAsync(cancellationToken: cancellationToken)
+            )
             {
                 logger.Information("Bắt đầu khởi tạo dữ liệu voucher...");
-
-                await InitVouchersAsync(unitOfWork, qrGenerator, cancellationToken);
-
-                logger.Information("Hoàn tất khởi tạo dữ liệu voucher...");
+                await InitVouchersAsync(unitOfWork, qrGenerator, logger, cancellationToken);
+                logger.Information("Hoàn tất khởi tạo dữ liệu voucher.");
             }
-            // Initialize Orders
-            if (!await unitOfWork.Repository<Order>().AnyAsync())
+
+            if (
+                !await unitOfWork.Repository<Order>().AnyAsync(cancellationToken: cancellationToken)
+            )
             {
                 logger.Information("Bắt đầu khởi tạo dữ liệu đơn hàng...");
-
                 await InitializeOrdersAsync(
                     unitOfWork,
                     logger,
@@ -114,43 +147,37 @@ public class DbInitializer
                     encryption,
                     qrGenerator
                 );
+                logger.Information("Hoàn tất khởi tạo dữ liệu đơn hàng.");
+            }
 
-                logger.Information("Hoàn tất khởi tạo dữ liệu đơn hàng...");
-            }
-            else
-            {
-                logger.Information("Dữ liệu đơn hàng đã tồn tại, bỏ qua khởi tạo.");
-            }
-            if (!await unitOfWork.Repository<BranchProduct>().AnyAsync())
+            if (
+                !await unitOfWork
+                    .Repository<BranchProduct>()
+                    .AnyAsync(cancellationToken: cancellationToken)
+            )
             {
                 logger.Information("Bắt đầu khởi tạo dữ liệu sản phẩm chi nhánh...");
-
                 await InitializeBranchProductsAsync(unitOfWork, logger, cancellationToken);
-
-                logger.Information("Hoàn tất khởi tạo dữ liệu sản phẩm chi nhánh...");
+                logger.Information("Hoàn tất khởi tạo dữ liệu sản phẩm chi nhánh.");
             }
-            if (!await unitOfWork.Repository<InventoryDocument>().AnyAsync())
+
+            if (
+                !await unitOfWork
+                    .Repository<InventoryDocument>()
+                    .AnyAsync(cancellationToken: cancellationToken)
+            )
             {
                 logger.Information("Bắt đầu khởi tạo phiếu nhập kho...");
-
                 await InitializeInventoryDocumentsAsync(unitOfWork, logger, cancellationToken);
-
                 logger.Information("Hoàn tất khởi tạo phiếu nhập kho.");
             }
-            if (!await unitOfWork.Repository<Tariff>().AnyAsync())
-            {
-                logger.Information("Bắt đầu khởi tạo phiếu nhập kho...");
 
-                await InitializeTariffsAsync(unitOfWork, logger, cancellationToken);
-
-                logger.Information("Hoàn tất khởi tạo phiếu nhập kho.");
-            }
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(cancellationToken);
         }
         catch (Exception ex)
         {
-            await unitOfWork.RollbackAsync();
-            logger.Error("Lỗi xảy ra trong khi khởi tạo dữ liệu đơn hàng: {Message}", ex.Message);
+            await unitOfWork.RollbackAsync(cancellationToken);
+            logger.Error(ex, "Lỗi xảy ra trong khi khởi tạo dữ liệu: {Message}", ex.Message);
             throw;
         }
     }
@@ -158,188 +185,86 @@ public class DbInitializer
     private static Expression<Func<User, ListIds>> SelectOnlyId() =>
         user => new ListIds { Id = user.Id };
 
-    private static async Task InitializeOrdersAsync(
+    private static DateTimeOffset GenerateDistributedDate(int index, int totalCount)
+    {
+        if (totalCount <= 1)
+            return StartDate;
+
+        // Giữ fraction trong [0, 1]
+        double fraction = Math.Clamp((double)index / (totalCount - 1), 0.0, 1.0);
+
+        // Tính ticks và đảm bảo không vượt quá phạm vi hợp lệ
+        long maxTicks = DateTimeOffset.MaxValue.Ticks;
+        long minTicks = DateTimeOffset.MinValue.Ticks;
+
+        long ticks = StartDate.Ticks + (long)(fraction * TotalPeriod.Ticks);
+        ticks = Math.Clamp(ticks, minTicks, maxTicks);
+
+        return new DateTimeOffset(ticks, TimeSpan.Zero);
+    }
+
+    private static async Task InitializeUnitsAsync(
         IUnitOfWork unitOfWork,
-        ILogger logger,
-        CancellationToken cancellationToken,
-        IEncryptionService encryption,
-        IQrGenerator barcode
+        CancellationToken cancellationToken
     )
     {
-        // Fetch customer IDs
-        var customerResult = await unitOfWork
-            .DynamicReadOnlyRepository<User>()
-            .ListAsync(
-                new ListUserSpecification([ROLE.CUSTOMER]),
-                new QueryParamRequest { },
-                SelectOnlyId(),
-                cancellationToken
-            );
-
-        if (!customerResult.Any())
+        var units = new List<(string Name, string Description)>
         {
-            logger.Warning("Không tìm thấy khách hàng trong cơ sở dữ liệu.");
-            return;
+            ("Kg", "Khối lượng tính bằng kilogam, dùng cho dịch vụ giặt hoặc sấy quần áo."),
+            ("Bộ", "Đơn vị tính cho một bộ đồ hoặc chăn mền."),
+            ("Mét", "Đơn vị tính cho thảm hoặc các vật liệu dạng mét vuông."),
+            ("Lít", "Đơn vị tính cho nước giặt, nước xả hoặc chất tẩy rửa."),
+            ("Đôi", "Đơn vị tính cho giày hoặc các vật phẩm theo cặp."),
+            ("Hộp", "Đơn vị tính cho bột giặt hoặc viên giặt đóng gói."),
+            ("Thùng", "Đơn vị tính cho các sản phẩm đóng thùng lớn."),
+            ("Chai", "Đơn vị tính cho chai nước giặt, nước xả hoặc chất tẩy rửa."),
+        };
+
+        for (int i = 0; i < units.Count; i++)
+        {
+            var (name, description) = units[i];
+            var unit = new Unit(name: name, status: ActivationStatus.Active)
+            {
+                CreatedAt = GenerateDistributedDate(i, units.Count),
+            };
+            await unitOfWork.Repository<Unit>().AddAsync(unit, cancellationToken);
+            await unitOfWork.SaveAsync(cancellationToken);
         }
+    }
 
-        // Fetch staff IDs
-        var staffResult = await unitOfWork
-            .DynamicReadOnlyRepository<User>()
-            .ListAsync(
-                new ListUserSpecification([ROLE.STAFF]),
-                new QueryParamRequest { },
-                SelectOnlyId(),
-                cancellationToken
-            );
-
-        if (!staffResult.Any())
+    private static async Task InitializeCategoriesAsync(
+        IUnitOfWork unitOfWork,
+        CancellationToken cancellationToken
+    )
+    {
+        var categories = new List<(string Name, string Code)>
         {
-            logger.Warning("Không tìm thấy nhân viên trong cơ sở dữ liệu.");
-            return;
-        }
+            ("Giặt", "DM_GIAT"),
+            ("Ủi", "DM_UI"),
+            ("Sấy", "DM_SAY"),
+            ("Vệ Sinh", "DM_VESINH"),
+            ("Combo", "DM_COMBO"),
+            ("Giặt Đặc Biệt", "DM_GIATDB"),
+            ("Nước giặt", "DM_NUOCGIAT"),
+            ("Nước xả", "DM_NUOCXA"),
+            ("Nước vệ sinh", "DM_NUOCVESINH"),
+        };
 
-        var random = new Random();
-        var paymentMethods = Enum.GetValues(typeof(PaymentMethod)).Cast<PaymentMethod>().ToArray();
-
-        for (int i = 1; i <= 50; i++)
+        for (int i = 0; i < categories.Count; i++)
         {
-            long? customerId = customerResult[random.Next(customerResult.Count())].Id;
-            long staffId = staffResult[random.Next(staffResult.Count())].Id;
-
-            int itemCount = random.Next(1, 4); // Số lượng mục trong đơn hàng
-            var orderItems = new List<OrderItem>();
-            decimal totalPrice = 0;
-            var services = await unitOfWork
-                .DynamicReadOnlyRepository<Service>()
-                .ListAsync(
-                    new ListServiceSpecification(),
-                    new QueryParamRequest { },
-                    s => new
-                    {
-                        s.Id,
-                        s.Name,
-                        UnitRelations = s
-                            .UnitRelations.Where(x =>
-                                x.Status.Equals(ActivationStatus.Active) && x.Price > 0
-                            )
-                            .Select(x => new
-                            {
-                                x.Id,
-                                x.Name,
-                                x.Price,
-                                x.ProcessingTime,
-                                x.Status,
-                            })
-                            .ToList(),
-                    },
-                    cancellationToken
-                );
-
-            if (!services.Any())
+            var (name, code) = categories[i];
+            var category = new Category(
+                name: name,
+                parentId: null,
+                status: ActivationStatus.Active,
+                code: code
+            )
             {
-                logger.Warning("Không tìm thấy dịch vụ trong cơ sở dữ liệu.");
-                continue;
-            }
-
-            for (int j = 0; j < itemCount; j++)
-            {
-                var service = services.OrderBy(x => random.Next()).First();
-                long serviceId = service.Id;
-                string serviceName = service.Name;
-
-                var unitRelations = service
-                    .UnitRelations.Where(x =>
-                        x.Status.Equals(ActivationStatus.Active) && x.Price > 0
-                    )
-                    .ToList();
-
-                if (!unitRelations.Any())
-                {
-                    logger.Warning($"Không tìm thấy unit_relation cho dịch vụ ID {serviceId}.");
-                    continue;
-                }
-
-                var unitRelation = unitRelations.OrderBy(x => random.Next()).First();
-                long unitRelationId = unitRelation.Id;
-                string unitRelationName = unitRelation.Name;
-                int processingTime = (int)unitRelation.ProcessingTime;
-                decimal unitPrice = unitRelation.Price;
-
-                if (unitPrice == 0)
-                {
-                    logger.Warning(
-                        $"Giá đơn vị cho unit_relation ID {unitRelationId} không hợp lệ."
-                    );
-                    continue;
-                }
-
-                int quantity = 1 + random.Next(3);
-
-                var orderItem = new OrderItem
-                {
-                    ServiceId = serviceId,
-                    UnitRelationId = unitRelationId,
-                    Price = quantity * unitPrice,
-                    Quantity = quantity,
-                    CreatedAt = DateTimeOffset.UtcNow,
-                    UnitRelationName = unitRelationName,
-                    ProcessingTime = processingTime,
-                    ServiceName = serviceName,
-                    UnitPrice = unitPrice,
-                };
-
-                orderItems.Add(orderItem);
-                totalPrice += orderItem.Price;
-            }
-
-            if (!orderItems.Any())
-            {
-                logger.Warning($"Không tạo được OrderItem cho đơn hàng {i}.");
-                continue;
-            }
-
-            string code = Generator.GenerateCode("OD", 6);
-
-            var statusValues = Enum.GetValues(typeof(OrderStatus))
-                .Cast<OrderStatus>()
-                .Where(s => s != OrderStatus.Cancelled)
-                .ToArray();
-
-            OrderStatus status =
-                statusValues.Length > 0
-                    ? statusValues[random.Next(statusValues.Length)]
-                    : OrderStatus.Pending;
-
-            var order = new Order(
-                branchId: 1,
-                staffId: staffId,
-                code: code,
-                amount: totalPrice,
-                total: totalPrice,
-                status: status,
-                customerId: customerId,
-                discountFixed: true,
-                discountValue: 0,
-                note: $"Đơn hàng tự động {i}",
-                deliveryTime: DateTimeOffset.UtcNow.AddDays(1)
-            );
-            var codeEncrypt = encryption.Encrypt(order.Code);
-            var barcodeConfirm = barcode.GenerateQrBase64(codeEncrypt);
-            order.CodeConfirm = barcodeConfirm;
-            order.PublicId = Ulid.NewUlid();
-            foreach (var orderItem in orderItems)
-            {
-                order.OrderItems.Add(orderItem);
-            }
-
-            if (status == OrderStatus.Completed)
-            {
-                var paymentMethod = paymentMethods[random.Next(paymentMethods.Length)];
-                order.PaymentMethod = paymentMethod;
-            }
-
-            await unitOfWork.Repository<Order>().AddAsync(order, cancellationToken);
-            order.UpdateStatus(status);
+                Disabled = false,
+                Path = code.ToLowerInvariant(),
+                CreatedAt = GenerateDistributedDate(i, categories.Count),
+            };
+            await unitOfWork.Repository<Category>().AddAsync(category, cancellationToken);
             await unitOfWork.SaveAsync(cancellationToken);
         }
     }
@@ -353,199 +278,48 @@ public class DbInitializer
         {
             new Supplier(
                 name: "Điện Máy Xanh",
-                code: "DMX",
+                code: Generator.GenerateCode("DMX", 6),
                 status: ActivationStatus.Active,
                 email: "cskh@thegioididong.com",
                 address: "172B Đường 3/2, Phường Hưng Lợi, Quận Ninh Kiều, Thành phố Cần Thơ",
                 phone: "02838125960",
-                description: "Siêu thị Điện máy XANH tại 172B Đường 3/2, Phường Hưng Lợi, Quận Ninh Kiều, TP. Cần Thơ chính thức khai trương từ ngày 10/07/2015, mang đến không gian mua sắm hiện đại với hàng ngàn sản phẩm chính hãng đa dạng từ điện lạnh, gia dụng đến điện tử, viễn thông. Khách hàng sẽ được trải nghiệm dịch vụ chuyên nghiệp với đội ngũ nhân viên thân thiện, tư vấn tận tình, chính sách trả góp linh hoạt, giao hàng và lắp đặt tận nơi, cùng chương trình bảo hành – đổi trả hấp dẫn. Ngoài ra, siêu thị còn hỗ trợ thanh toán qua thẻ và có khu vực để xe tiện lợi với bảo vệ phục vụ chu đáo. Điện máy XANH cam kết mang đến sản phẩm chất lượng, giá tốt và trải nghiệm mua sắm tối ưu cho khách hàng."
+                description: "Siêu thị Điện máy XANH tại Cần Thơ cung cấp sản phẩm chính hãng đa dạng từ điện lạnh, gia dụng đến điện tử, viễn thông."
             )
             {
                 Disable = false,
+                CreatedAt = GenerateDistributedDate(0, 3),
             },
             new Supplier(
                 name: "Siêu Thị Điện Máy Chợ Lớn",
-                code: "STDMCL",
+                code: Generator.GenerateCode("STDMCL", 6),
                 status: ActivationStatus.Active,
                 email: "dienmaycantho2@dienmaycholon.com.vn",
                 address: "161 Đường 3/2, Phường Hưng Lợi, Quận Ninh Kiều, TP.Cần Thơ",
                 phone: "02839505060",
-                description: "Với hơn 20 năm kinh nghiệm trong lĩnh vực kim khí điện máy, có trụ sở chính đặt tại Quận 5 và hệ thống chi nhánh trên toàn quốc Siêu Thị Điện Máy – Nội Thất Chợ Lớn chi nhánh Ninh Kiều, Cần Thơ được đặt tại địa chỉ số 161 Đường 3/2, P. Hưng Lợi, Q. Ninh Kiều, TP. Cần Thơ với tổng diện tích là 1100m2 cho không gian trưng bày rộng lớn với các quầy kệ trưng bày đa dạng các sản phẩm tiện ích mang đến Quý khách hàng trải nghiệm mua sắm đích thực."
+                description: "Siêu Thị Điện Máy Chợ Lớn chi nhánh Ninh Kiều, Cần Thơ với không gian trưng bày rộng lớn và đa dạng sản phẩm."
             )
             {
                 Disable = false,
+                CreatedAt = GenerateDistributedDate(1, 3),
             },
             new Supplier(
                 name: "Siêu Thị GO! VIETNAM",
-                code: "STG",
+                code: Generator.GenerateCode("STG", 6),
                 status: ActivationStatus.Active,
                 email: "crv.dvkh@vn.centralretail.com",
                 address: "Lô số 1, KDC Hưng Phú 1, Phường Hưng Phú, Quận Cái Răng, TP. Cần Thơ",
                 phone: "02923737575",
-                description: "Là đơn vị tiên phong trong lĩnh vực cung cấp và setup hệ thống giặt là cho khách sạn , xưởng giặt là , bệnh viện cho nên chúng tôi luôn có chất lượng sản phẩm tốt , giá thành cạnh tranh trên thị trường hiện nay ."
+                description: "Đơn vị tiên phong cung cấp và setup hệ thống giặt là cho khách sạn, xưởng giặt là, bệnh viện."
             )
             {
                 Disable = false,
+                CreatedAt = GenerateDistributedDate(2, 3),
             },
         };
 
         foreach (var supplier in suppliers)
         {
             await unitOfWork.Repository<Supplier>().AddAsync(supplier, cancellationToken);
-            await unitOfWork.SaveAsync(cancellationToken);
-        }
-    }
-
-    private static async Task InitializeCategoriesAsync(
-        IUnitOfWork unitOfWork,
-        CancellationToken cancellationToken
-    )
-    {
-        var categories = new List<Category>();
-
-        // Root categories
-        string code = Generator.GenerateCode("DM", 6);
-        var giatCategory = new Category(
-            name: "Giặt",
-            parentId: null,
-            status: ActivationStatus.Active,
-            code: code
-        )
-        {
-            Disabled = false,
-            Path = code.ToLowerInvariant(),
-        };
-        categories.Add(giatCategory);
-
-        code = Generator.GenerateCode("DM", 6);
-        var uiCategory = new Category(
-            name: "Ủi",
-            parentId: null,
-            status: ActivationStatus.Active,
-            code: code
-        )
-        {
-            Disabled = false,
-            Path = code.ToLowerInvariant(),
-        };
-        categories.Add(uiCategory);
-
-        code = Generator.GenerateCode("DM", 6);
-        var sayCategory = new Category(
-            name: "Sấy",
-            parentId: null,
-            status: ActivationStatus.Active,
-            code: code
-        )
-        {
-            Disabled = false,
-            Path = code.ToLowerInvariant(),
-        };
-        categories.Add(sayCategory);
-
-        code = Generator.GenerateCode("DM", 6);
-        var veSinhCategory = new Category(
-            name: "Vệ Sinh",
-            parentId: null,
-            status: ActivationStatus.Active,
-            code: code
-        )
-        {
-            Disabled = false,
-            Path = code.ToLowerInvariant(),
-        };
-        categories.Add(veSinhCategory);
-
-        code = Generator.GenerateCode("DM", 6);
-        var comboCategory = new Category(
-            name: "Combo",
-            parentId: null,
-            status: ActivationStatus.Active,
-            code: code
-        )
-        {
-            Disabled = false,
-            Path = code.ToLowerInvariant(),
-        };
-        categories.Add(comboCategory);
-
-        // Child categories
-        code = Generator.GenerateCode("DM", 6);
-        var giatDacBietCategory = new Category(
-            name: "Giăt Đặc Biệt",
-            parentId: null,
-            status: ActivationStatus.Active,
-            code: code
-        )
-        {
-            Disabled = false,
-            Path = code.ToLowerInvariant(),
-        };
-        categories.Add(giatDacBietCategory);
-
-        code = Generator.GenerateCode("DM", 6);
-        var nuocGiatCategory = new Category(
-            name: "Nước giặt",
-            parentId: null,
-            status: ActivationStatus.Active,
-            code: code
-        )
-        {
-            Disabled = false,
-            Path = code.ToLowerInvariant(),
-        };
-        categories.Add(nuocGiatCategory);
-
-        code = Generator.GenerateCode("DM", 6);
-        var nuocXaCategory = new Category(
-            name: "Nước xả",
-            parentId: null,
-            status: ActivationStatus.Active,
-            code: code
-        )
-        {
-            Disabled = false,
-            Path = code.ToLowerInvariant(),
-        };
-        categories.Add(nuocXaCategory);
-
-        code = Generator.GenerateCode("DM", 6);
-        var nuocVeSinhCategory = new Category(
-            name: "Nước vệ sinh",
-            parentId: null,
-            status: ActivationStatus.Active,
-            code: code
-        )
-        {
-            Disabled = false,
-            Path = code.ToLowerInvariant(),
-        };
-        categories.Add(nuocVeSinhCategory);
-        foreach (var category in categories)
-        {
-            await unitOfWork.Repository<Category>().AddAsync(category, cancellationToken);
-            await unitOfWork.SaveAsync(cancellationToken);
-        }
-    }
-
-    private static async Task InitializeUnitsAsync(
-        IUnitOfWork unitOfWork,
-        CancellationToken cancellationToken
-    )
-    {
-        var units = new List<Unit>
-        {
-            new Unit(name: "Kg", status: ActivationStatus.Active),
-            new Unit(name: "Bộ", status: ActivationStatus.Active),
-            new Unit(name: "Mét", status: ActivationStatus.Active),
-            new Unit(name: "Lít", status: ActivationStatus.Active),
-            new Unit(name: "Đôi", status: ActivationStatus.Active),
-            new Unit(name: "Hộp", status: ActivationStatus.Active),
-            new Unit(name: "Thùng", status: ActivationStatus.Active),
-        };
-        foreach (var unit in units)
-        {
-            await unitOfWork.Repository<Unit>().AddAsync(unit, cancellationToken);
             await unitOfWork.SaveAsync(cancellationToken);
         }
     }
@@ -559,73 +333,148 @@ public class DbInitializer
     {
         var categories = (
             await unitOfWork.Repository<Category>().ListAsync(cancellationToken)
-        ).ToList();
+        ).ToDictionary(c => c.Name, c => c.Id);
         var user = await unitOfWork
             .DynamicReadOnlyRepository<User>()
             .FindByConditionAsync(
                 new ListUserSpecification([ROLE.ADMIN]),
                 cancellationToken: cancellationToken
             );
-        var units = (await unitOfWork.Repository<Unit>().ListAsync(cancellationToken)).ToList();
+        var units = (await unitOfWork.Repository<Unit>().ListAsync(cancellationToken)).ToDictionary(
+            u => u.Name,
+            u => u
+        );
 
         if (user == null)
             throw new InvalidOperationException("Admin user not found.");
         if (!categories.Any() || !units.Any())
             throw new InvalidOperationException("Missing required Category or Unit data.");
 
-        var servicesToSeed = new (string Name, string Description, TypeStatus Type)[]
+        var servicesToSeed = new (
+            string Name,
+            string Description,
+            TypeStatus Type,
+            string Category,
+            (
+                string Unit,
+                bool IsBaseUnit,
+                decimal Multiple,
+                decimal Price,
+                decimal ProcessingTime
+            )[] Units
+        )[]
         {
             (
                 "Combo Giặt Sấy Quần Áo",
                 "Dịch vụ combo giặt và sấy quần áo tiện lợi.",
-                TypeStatus.Combo
+                TypeStatus.Combo,
+                "Combo",
+                new[] { ("Kg", true, 1m, 30000m, 20m) }
             ),
             (
                 "Combo Giặt Sấy Ủi Quần Áo",
                 "Combo toàn diện: giặt, sấy và ủi quần áo.",
-                TypeStatus.Combo
+                TypeStatus.Combo,
+                "Combo",
+                new[] { ("Kg", true, 1m, 45000m, 30m) }
             ),
-            ("Combo Giặt Sấy Ủi", "Gói giặt sấy ủi cho đồ dùng hàng ngày.", TypeStatus.Combo),
-            ("Combo Tuần Tháng", "Gói combo cho giặt đồ định kỳ tuần/tháng.", TypeStatus.Combo),
-            ("Giặt Chăn Mền Dày", "Làm sạch sâu chăn mền dày và nặng.", TypeStatus.SingleService),
-            ("Giặt Đồ Trẻ Em", "Giặt đồ nhẹ nhàng an toàn cho trẻ nhỏ.", TypeStatus.SingleService),
+            (
+                "Combo Giặt Sấy Ủi",
+                "Gói giặt sấy ủi cho đồ dùng hàng ngày.",
+                TypeStatus.Combo,
+                "Combo",
+                new[] { ("Bộ", true, 1m, 40000m, 60m) }
+            ),
+            (
+                "Combo Tuần Tháng",
+                "Gói combo cho giặt đồ định kỳ tuần/tháng.",
+                TypeStatus.Combo,
+                "Combo",
+                new[] { ("Kg", true, 1m, 35000m, 20m) }
+            ),
+            (
+                "Giặt Chăn Mền Dày",
+                "Làm sạch sâu chăn mền dày và nặng.",
+                TypeStatus.SingleService,
+                "Giặt",
+                new[] { ("Bộ", true, 1m, 50000m, 60m) }
+            ),
+            (
+                "Giặt Đồ Trẻ Em",
+                "Giặt đồ nhẹ nhàng an toàn cho trẻ nhỏ.",
+                TypeStatus.SingleService,
+                "Giặt",
+                new[] { ("Kg", true, 1m, 25000m, 20m) }
+            ),
             (
                 "Giặt Hấp Váy Dạ Hội",
                 "Giặt hấp cao cấp cho váy dạ hội và đồ cao cấp.",
-                TypeStatus.SingleService
+                TypeStatus.SingleService,
+                "Giặt Đặc Biệt",
+                new[] { ("Bộ", true, 1m, 80000m, 90m) }
             ),
-            ("Giặt Khô Áo Vest", "Giặt khô chuyên dụng cho áo vest.", TypeStatus.SingleService),
+            (
+                "Giặt Khô Áo Vest",
+                "Giặt khô chuyên dụng cho áo vest.",
+                TypeStatus.SingleService,
+                "Giặt Đặc Biệt",
+                new[] { ("Bộ", true, 1m, 60000m, 60m) }
+            ),
             (
                 "Giặt Nước Quần Jeans",
                 "Giặt giữ màu và chất lượng cho quần jeans.",
-                TypeStatus.SingleService
+                TypeStatus.SingleService,
+                "Giặt",
+                new[] { ("Bộ", true, 1m, 30000m, 30m) }
             ),
             (
                 "Giặt Quần Áo Trắng",
                 "Tẩy trắng, làm sạch sâu cho quần áo trắng.",
-                TypeStatus.SingleService
+                TypeStatus.SingleService,
+                "Giặt",
+                new[] { ("Kg", true, 1m, 28000m, 20m) }
             ),
             (
                 "Giặt Tẩy Vết Bẩn Cứng Đầu",
                 "Tẩy vết bẩn khó xử lý trên quần áo.",
-                TypeStatus.SingleService
+                TypeStatus.SingleService,
+                "Giặt Đặc Biệt",
+                new[] { ("Bộ", true, 1m, 40000m, 30m) }
             ),
             (
                 "Giặt Thảm",
                 "Làm sạch thảm trải sàn tại nhà hoặc văn phòng.",
-                TypeStatus.SingleService
+                TypeStatus.SingleService,
+                "Giặt",
+                new[] { ("Mét", true, 1m, 35000m, 30m) }
             ),
             (
                 "Sấy Khô Chăn Grab",
                 "Sấy khô chăn mền nhanh chóng và an toàn.",
-                TypeStatus.SingleService
+                TypeStatus.SingleService,
+                "Sấy",
+                new[] { ("Bộ", true, 1m, 25000m, 30m) }
             ),
-            ("Sấy Khô Quần Áo", "Sấy khô quần áo chống ẩm mốc.", TypeStatus.SingleService),
-            ("Ủi Áo Sơ Mi", "Ủi áo sơ mi chuyên nghiệp, gọn gàng.", TypeStatus.SingleService),
+            (
+                "Sấy Khô Quần Áo",
+                "Sấy khô quần áo chống ẩm mốc.",
+                TypeStatus.SingleService,
+                "Sấy",
+                new[] { ("Kg", true, 1m, 20000m, 15m) }
+            ),
+            (
+                "Ủi Áo Sơ Mi",
+                "Ủi áo sơ mi chuyên nghiệp, gọn gàng.",
+                TypeStatus.SingleService,
+                "Ủi",
+                new[] { ("Bộ", true, 1m, 15000m, 15m) }
+            ),
             (
                 "Vệ Sinh Giày Sneakers",
                 "Làm sạch chuyên sâu giày sneaker.",
-                TypeStatus.SingleService
+                TypeStatus.SingleService,
+                "Vệ Sinh",
+                new[] { ("Đôi", true, 1m, 40000m, 30m) }
             ),
         };
 
@@ -635,17 +484,15 @@ public class DbInitializer
             "SeedImages",
             "Services"
         );
-        var category = categories.First(); // chỉnh logic nếu cần chọn theo tên
-        var unit = units.First(); // hoặc chọn theo tên nếu có logic riêng
-        var branchId = 1L;
-
         var serviceEntities = new List<Service>();
 
-        foreach (var serviceDef in servicesToSeed)
+        for (int i = 0; i < servicesToSeed.Length; i++)
         {
-            var slug = Generator.GenerateSlug(serviceDef.Name); // ví dụ: "combo-giat-say-ui-quan-ao"
+            var (name, description, type, categoryName, unitsData) = servicesToSeed[i];
+            var slug = Generator.GenerateSlug(name);
             var matchingFile = Directory
-                .EnumerateFiles(imageDir)
+                .EnumerateFiles(imageDir, "*.png", SearchOption.AllDirectories)
+                .Concat(Directory.EnumerateFiles(imageDir, "*.jpg", SearchOption.AllDirectories))
                 .FirstOrDefault(f =>
                     Path.GetFileNameWithoutExtension(f)
                         .Equals(slug, StringComparison.OrdinalIgnoreCase)
@@ -654,43 +501,91 @@ public class DbInitializer
             string? imageUrl = null;
             if (matchingFile != null)
             {
-                var formFile = GenerateIFormfile(matchingFile);
-                var key = media.GetKey(formFile, MediaType.Image);
-                await media.UploadMediaAsync(formFile, key);
-                imageUrl = key;
+                try
+                {
+                    var formFile = GenerateIFormFile(matchingFile);
+                    var key = media.GetKey(formFile, MediaType.Image);
+                    await media.UploadMediaAsync(formFile, key);
+                    imageUrl = key;
+                }
+                catch (Exception ex)
+                {
+                    logger.Warning(
+                        ex,
+                        $"Lỗi khi upload ảnh cho dịch vụ '{name}' (slug: {slug}): {ex.Message}"
+                    );
+                }
             }
             else
             {
-                logger.Warning(
-                    $"Không tìm thấy ảnh cho dịch vụ '{serviceDef.Name}' (slug: {slug})"
-                );
+                logger.Warning($"Không tìm thấy ảnh cho dịch vụ '{name}' (slug: {slug})");
+            }
+
+            if (!categories.ContainsKey(categoryName))
+            {
+                logger.Warning($"Danh mục '{categoryName}' không tồn tại cho dịch vụ '{name}'.");
+                continue;
             }
 
             var service = new Service(
-                categoryId: category.Id,
-                branchId: branchId,
-                name: serviceDef.Name,
-                type: serviceDef.Type,
+                categoryId: categories[categoryName],
+                branchId: 1L,
+                name: name,
+                type: type,
                 status: ActivationStatus.Active,
-                description: serviceDef.Description,
+                description: description,
                 image: imageUrl
             )
             {
                 Disable = false,
                 Slug = slug,
+                CreatedAt = GenerateDistributedDate(i, servicesToSeed.Length),
             };
 
-            service.UnitRelations.Add(
-                new UnitRelation
+            foreach (var (unitName, isBaseUnit, multiple, price, processingTime) in unitsData)
+            {
+                if (!units.ContainsKey(unitName))
                 {
-                    Name = unit.Name,
-                    BaseUnit = true,
-                    Price = 20000,
-                    Multiple = 1,
-                    ProcessingTime = 2.5m,
-                    Status = ActivationStatus.Active,
+                    logger.Warning($"Đơn vị '{unitName}' không tồn tại cho dịch vụ '{name}'.");
+                    continue;
                 }
-            );
+
+                if (isBaseUnit && multiple != 1m)
+                {
+                    logger.Warning(
+                        $"Đơn vị cơ bản '{unitName}' cho dịch vụ '{name}' phải có Multiple = 1."
+                    );
+                    continue;
+                }
+
+                if (!isBaseUnit && multiple <= 0)
+                {
+                    logger.Warning(
+                        $"Đơn vị không cơ bản '{unitName}' cho dịch vụ '{name}' phải có Multiple > 0."
+                    );
+                    continue;
+                }
+
+                service.UnitRelations.Add(
+                    new UnitRelation
+                    {
+                        UnitId = units[unitName].Id,
+                        Name = unitName,
+                        BaseUnit = isBaseUnit,
+                        Price = price,
+                        Multiple = (int)multiple,
+                        ProcessingTime = processingTime,
+                        Status = ActivationStatus.Active,
+                        CreatedAt = service.CreatedAt,
+                    }
+                );
+            }
+
+            if (!service.UnitRelations.Any(r => r.BaseUnit))
+            {
+                logger.Warning($"Dịch vụ '{name}' thiếu đơn vị cơ bản.");
+                continue;
+            }
 
             serviceEntities.Add(service);
         }
@@ -705,8 +600,13 @@ public class DbInitializer
         CancellationToken cancellationToken
     )
     {
-        var categories = await unitOfWork.Repository<Category>().ListAsync(cancellationToken);
-        var units = await unitOfWork.Repository<Unit>().ListAsync(cancellationToken);
+        var categories = (
+            await unitOfWork.Repository<Category>().ListAsync(cancellationToken)
+        ).ToDictionary(c => c.Name, c => c.Id);
+        var units = (await unitOfWork.Repository<Unit>().ListAsync(cancellationToken)).ToDictionary(
+            u => u.Name,
+            u => u
+        );
 
         if (!categories.Any() || !units.Any())
         {
@@ -714,58 +614,174 @@ public class DbInitializer
             return;
         }
 
-        var branchId = 1L; // Chi nhánh mặc định
-        var random = new Random();
-        var products = new List<BranchProduct>();
-
-        string[] productNames =
+        var productsToSeed = new (
+            string Name,
+            string Category,
+            (
+                string Unit,
+                bool IsBaseUnit,
+                decimal Multiple,
+                decimal RetailPrice,
+                decimal CapitalPrice
+            )[] Units
+        )[]
         {
-            "Bột giặt Omo",
-            "Nước xả Downy",
-            "Túi giặt lưới",
-            "Chất tẩy Javel",
-            "Xịt thơm quần áo",
-            "Nước giặt Ariel",
-            "Viên giặt Tide",
-            "Nước vệ sinh máy",
-            "Chổi lông gà",
-            "Găng tay cao su",
+            (
+                "Bột giặt Omo",
+                "Nước giặt",
+                new[]
+                {
+                    ("Hộp", true, 1m, 95000m, 80000m), // Base unit: 1 box
+                }
+            ),
+            (
+                "Nước xả Downy",
+                "Nước xả",
+                new[]
+                {
+                    ("Chai", true, 1m, 75000m, 60000m), // Base unit: 1 bottle
+                    ("Lít", false, 3m, 25000m, 20000m), // 3 liters = 1 bottle
+                }
+            ),
+            (
+                "Túi giặt lưới",
+                "Combo",
+                new[]
+                {
+                    ("Bộ", true, 1m, 30000m, 20000m), // Base unit: 1 set
+                }
+            ),
+            (
+                "Chất tẩy Javel",
+                "Nước vệ sinh",
+                new[]
+                {
+                    ("Chai", true, 1m, 35000m, 25000m), // Base unit: 1 bottle
+                    ("Lít", false, 1m, 35000m, 25000m), // 1 liter = 1 bottle
+                }
+            ),
+            (
+                "Xịt thơm quần áo",
+                "Nước xả",
+                new[]
+                {
+                    ("Chai", true, 1m, 50000m, 40000m), // Base unit: 1 bottle
+                    ("Lít", false, 0.5m, 100000m, 80000m), // 0.5 liters = 1 bottle
+                }
+            ),
+            (
+                "Nước giặt Ariel",
+                "Nước giặt",
+                new[]
+                {
+                    ("Chai", true, 1m, 85000m, 70000m), // Base unit: 1 bottle
+                    ("Lít", false, 3m, 28333.33m, 23333.33m), // 3 liters = 1 bottle
+                }
+            ),
+            (
+                "Viên giặt Tide",
+                "Nước giặt",
+                new[]
+                {
+                    ("Hộp", true, 1m, 110000m, 90000m), // Base unit: 1 box
+                }
+            ),
+            (
+                "Nước vệ sinh máy",
+                "Nước vệ sinh",
+                new[]
+                {
+                    ("Chai", true, 1m, 40000m, 30000m), // Base unit: 1 bottle
+                    ("Lít", false, 1m, 40000m, 30000m), // 1 liter = 1 bottle
+                }
+            ),
+            (
+                "Chổi lông gà",
+                "Vệ Sinh",
+                new[]
+                {
+                    ("Bộ", true, 1m, 25000m, 15000m), // Base unit: 1 set
+                }
+            ),
+            (
+                "Găng tay cao su",
+                "Vệ Sinh",
+                new[]
+                {
+                    ("Đôi", true, 1m, 30000m, 20000m), // Base unit: 1 pair
+                }
+            ),
         };
 
-        for (int i = 0; i < 10; i++)
+        var products = new List<BranchProduct>();
+        for (int i = 0; i < productsToSeed.Length; i++)
         {
-            var name = productNames[i];
-            var sku = Generator.GenerateCode(10);
-            var price = random.Next(10000, 100000);
-            var categoriesList = categories.ToList();
-            var categoryId = categoriesList[random.Next(categoriesList.Count)].Id;
-            var unitList = units.ToList();
-            var unit = unitList[random.Next(unitList.Count)];
+            var (name, categoryName, unitsData) = productsToSeed[i];
+            if (!categories.ContainsKey(categoryName))
+            {
+                logger.Warning($"Danh mục '{categoryName}' không tồn tại cho sản phẩm '{name}'.");
+                continue;
+            }
 
             var product = new BranchProduct(
-                branchId: branchId,
+                branchId: 1L,
                 name: name,
-                sku: sku,
+                sku: Generator.GenerateCode("BP", 6),
                 status: ActivationStatus.Active,
-                capitalPrice: price,
-                categoryId: categoryId,
+                capitalPrice: unitsData.First(u => u.IsBaseUnit).CapitalPrice, // Use base unit capital price
+                categoryId: categories[categoryName],
                 description: $"Sản phẩm dùng trong giặt ủi: {name}",
                 image: null
-            );
-
-            var unitRelation = new UnitRelation
+            )
             {
-                Name = unit.Name,
-                BaseUnit = true,
-                Price = price + random.Next(1000, 5000),
-                Multiple = 1,
-                ProcessingTime = (decimal)(random.NextDouble() * 3 + 1), // 1 -> 4 giờ
-                Status = ActivationStatus.Active,
-                BranchProductId = null,
-                ServiceId = null,
+                CreatedAt = GenerateDistributedDate(i, productsToSeed.Length),
             };
 
-            product.UnitRelations.Add(unitRelation);
+            foreach (var (unitName, isBaseUnit, multiple, retailPrice, capitalPrice) in unitsData)
+            {
+                if (!units.ContainsKey(unitName))
+                {
+                    logger.Warning($"Đơn vị '{unitName}' không tồn tại cho sản phẩm '{name}'.");
+                    continue;
+                }
+
+                if (isBaseUnit && multiple != 1m)
+                {
+                    logger.Warning(
+                        $"Đơn vị cơ bản '{unitName}' cho sản phẩm '{name}' phải có Multiple = 1."
+                    );
+                    continue;
+                }
+
+                if (!isBaseUnit && multiple <= 0)
+                {
+                    logger.Warning(
+                        $"Đơn vị không cơ bản '{unitName}' cho sản phẩm '{name}' phải có Multiple > 0."
+                    );
+                    continue;
+                }
+
+                product.UnitRelations.Add(
+                    new UnitRelation
+                    {
+                        UnitId = units[unitName].Id, // Reference Unit.Id from Unit table
+                        Name = unitName, // For display purposes (optional if UnitId is sufficient)
+                        BaseUnit = isBaseUnit,
+                        Price = retailPrice,
+                        Multiple = (int)multiple,
+                        ProcessingTime = 0,
+                        Status = ActivationStatus.Active,
+                        CreatedAt = product.CreatedAt,
+                    }
+                );
+            }
+
+            if (!product.UnitRelations.Any(r => r.BaseUnit))
+            {
+                logger.Warning($"Sản phẩm '{name}' thiếu đơn vị cơ bản.");
+                continue;
+            }
+
             products.Add(product);
         }
 
@@ -773,207 +789,12 @@ public class DbInitializer
         await unitOfWork.SaveAsync(cancellationToken);
     }
 
-    private static async Task InitializeInventoryDocumentsAsync(
+    private static async Task InitializeTariffsAsync(
         IUnitOfWork unitOfWork,
         ILogger logger,
         CancellationToken cancellationToken
     )
     {
-        var suppliers = await unitOfWork.Repository<Supplier>().ListAsync(cancellationToken);
-        var products = await unitOfWork.Repository<BranchProduct>().ListAsync(cancellationToken);
-        var units = await unitOfWork.Repository<Unit>().ListAsync(cancellationToken);
-        var random = new Random();
-
-        if (!suppliers.Any() || !products.Any() || !units.Any())
-        {
-            logger.Warning("Thiếu nhà cung cấp, sản phẩm hoặc đơn vị tính.");
-            return;
-        }
-
-        var supplierList = suppliers.ToList();
-        var supplier = supplierList[random.Next(supplierList.Count)];
-        var branchId = 1L;
-
-        decimal totalProductAmount = 0;
-        var productSupplyings = new List<ProductSupplying>();
-
-        foreach (var product in products)
-        {
-            var unitRelation = product.UnitRelations.FirstOrDefault();
-            if (unitRelation == null)
-            {
-                logger.Warning($"Sản phẩm {product.Name} chưa có đơn vị tính.");
-                continue;
-            }
-
-            int quantity = 10;
-            decimal amount = unitRelation.Price * quantity;
-
-            totalProductAmount += amount;
-
-            productSupplyings.Add(
-                new ProductSupplying
-                {
-                    ProductId = product.Id,
-                    SupplierId = supplier.Id,
-                    Quantity = quantity,
-                    LotNumber = Generator.GenerateCode("LOT", 4),
-                    Price = unitRelation.Price,
-                    UnitRelationId = unitRelation.Id,
-                    ExpiryDate = DateTimeOffset.UtcNow.AddMonths(12),
-                }
-            );
-        }
-
-        decimal totalEquipmentAmount = 0;
-        var equipmentSupplyings = new List<EquipmentSupplying>();
-
-        for (int i = 1; i <= 20; i++)
-        {
-            decimal price = 1500000 + i * 100000;
-
-            totalEquipmentAmount += price;
-
-            equipmentSupplyings.Add(
-                new EquipmentSupplying
-                {
-                    Name = $"Máy {(i % 2 == 0 ? "Sấy" : "Giặt")} {i}",
-                    Code = Generator.GenerateCode("EQ", 6),
-                    Price = price,
-                    Quantity = 1,
-                    SupplierId = supplier.Id,
-                }
-            );
-        }
-
-        decimal totalAmount = totalProductAmount + totalEquipmentAmount;
-        decimal paidAmount = totalAmount;
-
-        var document = new InventoryDocument(
-            code: Generator.GenerateCode("IM", 6),
-            amount: totalAmount,
-            type: InventoryType.Import,
-            branchId: branchId,
-            note: "Nhập hàng khởi tạo"
-        );
-
-        foreach (var p in productSupplyings)
-        {
-            document.ProductSupplyings.Add(p);
-        }
-
-        foreach (var e in equipmentSupplyings)
-        {
-            document.EquipmentSupplyings.Add(e);
-        }
-
-        foreach (var p in productSupplyings)
-        {
-            p.InventoryDocument = document;
-        }
-        foreach (var e in equipmentSupplyings)
-        {
-            e.InventoryDocument = document;
-        }
-
-        await unitOfWork.Repository<InventoryDocument>().AddAsync(document, cancellationToken);
-        await unitOfWork.SaveAsync(cancellationToken);
-
-        // 👉 Update status và phát event
-        document.UpdateStatus(InventoryStatus.Completed);
-        await unitOfWork.SaveAsync(cancellationToken);
-    }
-
-    private static async Task InitVouchersAsync(
-        IUnitOfWork unitOfWork,
-        IQrGenerator barcode,
-        CancellationToken cancellationToken
-    )
-    {
-        var random = new Random();
-        var customerResult = await unitOfWork
-            .Repository<User>()
-            .QueryAsync(x => x.Role == "CUSTOMER")
-            .Select(SelectOnlyId())
-            .ToListAsync();
-        var vouchers = new List<Voucher>
-        {
-            new Voucher(
-                code: "GIATUI10",
-                title: "Giảm Giá Chào Mừng",
-                imgUrl: null,
-                barcode: barcode.GenerateQrBase64("FIXED20K"),
-                discountFixed: false,
-                discountValue: 10.0m,
-                startAt: DateTimeOffset.UtcNow,
-                endAt: DateTimeOffset.UtcNow.AddMonths(1),
-                status: ActivationStatus.Active,
-                description: "Giảm 10% cho khách hàng mới sử dụng dịch vụ giặt ủi"
-            )
-            {
-                VoucherCustomers = customerResult
-                    .Select(x => new VoucherCustomer { CustomerId = x.Id, IsUsed = false })
-                    .ToList(),
-            },
-            new Voucher(
-                code: "HAPPYBIRTHDAY",
-                title: "Giảm Giá Sinh Nhật",
-                imgUrl: null,
-                barcode: barcode.GenerateQrBase64("FIXED20K"),
-                discountFixed: false,
-                discountValue: 10.0m,
-                startAt: DateTimeOffset.UtcNow,
-                endAt: DateTimeOffset.UtcNow.AddDays(1),
-                status: ActivationStatus.Active,
-                description: "Giảm 10% cho khách hàng mới sử dụng dịch vụ giặt ủi"
-            ),
-            new Voucher(
-                code: "SUMMER15",
-                title: "Ưu Đãi Mùa Hè",
-                imgUrl: null,
-                barcode: barcode.GenerateQrBase64("FIXED20K"),
-                discountFixed: false,
-                discountValue: 15.0m,
-                startAt: DateTimeOffset.UtcNow,
-                endAt: DateTimeOffset.UtcNow.AddMonths(2),
-                status: ActivationStatus.Active,
-                description: "Giảm 15% cho tất cả dịch vụ giặt ủi trong mùa hè"
-            )
-            {
-                VoucherCustomers = customerResult
-                    .Select(x => new VoucherCustomer { CustomerId = x.Id, IsUsed = false })
-                    .ToList(),
-            },
-            new Voucher(
-                code: "FIXED20K",
-                title: "Giảm Giá Cố Định",
-                imgUrl: null,
-                barcode: barcode.GenerateQrBase64("FIXED20K"),
-                discountFixed: true,
-                discountValue: 20000.0m,
-                startAt: DateTimeOffset.UtcNow,
-                endAt: DateTimeOffset.UtcNow.AddMonths(3),
-                status: ActivationStatus.Active,
-                description: "Giảm 20.000 VNĐ cho hóa đơn giặt ủi tiếp theo"
-            )
-            {
-                VoucherCustomers = customerResult
-                    .Select(x => new VoucherCustomer { CustomerId = x.Id, IsUsed = false })
-                    .ToList(),
-            },
-        };
-
-        await unitOfWork.Repository<Voucher>().AddRangeAsync(vouchers, cancellationToken);
-        await unitOfWork.SaveAsync(cancellationToken);
-    }
-
-    public static async Task InitializeTariffsAsync(
-        IUnitOfWork unitOfWork,
-        ILogger logger,
-        CancellationToken cancellationToken
-    )
-    {
-        // Lấy danh sách service và unit_relations hợp lệ
         var services = await unitOfWork
             .DynamicReadOnlyRepository<Service>()
             .ListAsync(
@@ -990,6 +811,7 @@ public class DbInitializer
                         .Select(x => new
                         {
                             x.Id,
+                            x.UnitId,
                             x.Name,
                             x.Price,
                             x.ProcessingTime,
@@ -1002,90 +824,115 @@ public class DbInitializer
 
         if (!services.Any())
         {
-            logger.Warning("Không tìm thấy service nào trong cơ sở dữ liệu.");
+            logger.Warning("Không tìm thấy dịch vụ nào trong cơ sở dữ liệu.");
             return;
         }
 
-        // Lọc các service có unit_relations hợp lệ
         var validServices = services.Where(s => s.UnitRelations.Any()).ToList();
         if (!validServices.Any())
         {
-            logger.Warning(
-                "Không tìm thấy service nào có unit_relations hợp lệ (status = Active và price > 0)."
-            );
+            logger.Warning("Không tìm thấy dịch vụ nào có unit_relations hợp lệ.");
             return;
         }
 
-        logger.Debug(
-            $"Tìm thấy {validServices.Count} service với {validServices.Sum(s => s.UnitRelations.Count)} unit_relations hợp lệ."
-        );
-
-        var random = new Random();
-        var branchIds = new long[] { 1, 2, 3 }; // Thay bằng truy vấn động nếu cần
-        var tariffNames = new[]
+        var branchIds = new long[] { 1, 2, 3 };
+        var tariffMonths = new List<(string Name, DateTimeOffset StartAt, DateTimeOffset EndAt)>
         {
-            "Basic plan",
-            "Premium plan",
-            "Enterprise plan",
-            "Starter plan",
-            "Advanced plan",
+            (
+                "Bảng Giá Tháng 10/2024",
+                new DateTimeOffset(2024, 10, 1, 0, 0, 0, TimeSpan.Zero),
+                new DateTimeOffset(2024, 10, 31, 23, 59, 59, TimeSpan.Zero)
+            ),
+            (
+                "Bảng Giá Tháng 11/2024",
+                new DateTimeOffset(2024, 11, 1, 0, 0, 0, TimeSpan.Zero),
+                new DateTimeOffset(2024, 11, 30, 23, 59, 59, TimeSpan.Zero)
+            ),
+            (
+                "Bảng Giá Tháng 12/2024",
+                new DateTimeOffset(2024, 12, 1, 0, 0, 0, TimeSpan.Zero),
+                new DateTimeOffset(2024, 12, 31, 23, 59, 59, TimeSpan.Zero)
+            ),
+            (
+                "Bảng Giá Tháng 1/2025",
+                new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                new DateTimeOffset(2025, 1, 31, 23, 59, 59, TimeSpan.Zero)
+            ),
+            (
+                "Bảng Giá Tháng 2/2025",
+                new DateTimeOffset(2025, 2, 1, 0, 0, 0, TimeSpan.Zero),
+                new DateTimeOffset(2025, 2, 28, 23, 59, 59, TimeSpan.Zero)
+            ),
+            (
+                "Bảng Giá Tháng 3/2025",
+                new DateTimeOffset(2025, 3, 1, 0, 0, 0, TimeSpan.Zero),
+                new DateTimeOffset(2025, 3, 31, 23, 59, 59, TimeSpan.Zero)
+            ),
+            (
+                "Bảng Giá Tháng 4/2025",
+                new DateTimeOffset(2025, 4, 1, 0, 0, 0, TimeSpan.Zero),
+                new DateTimeOffset(2025, 4, 30, 23, 59, 59, TimeSpan.Zero)
+            ),
+            (
+                "Bảng Giá Tháng 5/2025",
+                new DateTimeOffset(2025, 5, 1, 0, 0, 0, TimeSpan.Zero),
+                new DateTimeOffset(2025, 5, 31, 23, 59, 59, TimeSpan.Zero)
+            ),
+            (
+                "Bảng Giá Tháng 6/2025",
+                new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero),
+                new DateTimeOffset(2025, 6, 30, 23, 59, 59, TimeSpan.Zero)
+            ),
+            (
+                "Bảng Giá Tháng 7/2025",
+                new DateTimeOffset(2025, 7, 1, 0, 0, 0, TimeSpan.Zero),
+                new DateTimeOffset(2025, 7, 31, 23, 59, 59, TimeSpan.Zero)
+            ),
+            (
+                "Bảng Giá Tháng 8/2025",
+                new DateTimeOffset(2025, 8, 1, 0, 0, 0, TimeSpan.Zero),
+                new DateTimeOffset(2025, 8, 6, 23, 59, 59, TimeSpan.Zero)
+            ),
         };
-        var statusValues = Enum.GetValues(typeof(ActivationStatus))
-            .Cast<ActivationStatus>()
-            .ToArray();
+
         int tariffsCreated = 0;
         int serviceTariffsCreated = 0;
 
-        for (int i = 1; i <= 20; i++)
+        for (int i = 0; i < tariffMonths.Count; i++)
         {
-            // Tạo Tariff mới
+            var (name, startAt, endAt) = tariffMonths[i];
             var tariff = new Tariff(
-                name: tariffNames[random.Next(tariffNames.Length)],
-                branchId: branchIds[random.Next(branchIds.Length)],
-                status: statusValues[random.Next(statusValues.Length)],
-                startAt: DateTimeOffset.UtcNow.AddDays(-random.Next(0, 30)),
-                endAt: random.Next(0, 2) == 0
-                    ? DateTimeOffset.UtcNow.AddDays(random.Next(30, 90))
-                    : null
-            );
-
-            // Theo dõi các cặp service_id và unit_relation_id đã sử dụng
-            var usedServiceUnitPairs = new HashSet<(long serviceId, long unitRelationId)>();
-
-            // Tạo 1-3 ServiceTariff cho Tariff này
-            int serviceTariffCount = random.Next(1, Math.Min(4, validServices.Count + 1)); // Đảm bảo không vượt quá số service hợp lệ
-            for (int j = 0; j < serviceTariffCount; j++)
+                name: name,
+                branchId: branchIds[i % branchIds.Length],
+                status: startAt <= DateTimeOffset.Now
+                    ? ActivationStatus.Active
+                    : ActivationStatus.Inactive,
+                startAt: startAt,
+                endAt: endAt
+            )
             {
-                // Chọn service ngẫu nhiên và đảm bảo không trùng
-                var availableServices = validServices
-                    .Where(s =>
-                        s.UnitRelations.Any(ur => !usedServiceUnitPairs.Contains((s.Id, ur.Id)))
-                    )
-                    .ToList();
+                CreatedAt = startAt,
+            };
 
-                if (!availableServices.Any())
-                {
-                    logger.Warning(
-                        $"Hết service hoặc unit_relation hợp lệ để tạo service_tariff cho tariff {tariff.Name}."
-                    );
-                    break;
-                }
+            var usedServiceUnitPairs = new HashSet<(long serviceId, long unitRelationId)>();
+            var selectedServices = validServices.Take(4).ToList();
 
-                var service = availableServices.OrderBy(x => random.Next()).First();
-                var unitRelation = service
-                    .UnitRelations.Where(ur => !usedServiceUnitPairs.Contains((service.Id, ur.Id)))
-                    .OrderBy(x => random.Next())
-                    .First();
+            foreach (var service in selectedServices)
+            {
+                var unitRelation = service.UnitRelations.FirstOrDefault();
+                if (unitRelation == null)
+                    continue;
 
                 var serviceTariff = new ServiceTariff
                 {
                     TariffId = tariff.Id,
                     ServiceId = service.Id,
                     UnitRelationId = unitRelation.Id,
-                    Price = unitRelation.Price * (1 + (decimal)random.NextDouble() * 0.2m),
+                    Price = unitRelation.Price,
                     Tariff = tariff,
-                    Service = null!, // EF Core navigation
-                    UnitRelation = null!, // EF Core navigation
+                    Service = null!,
+                    UnitRelation = null!,
+                    CreatedAt = startAt,
                 };
 
                 tariff.ServiceTariffs.Add(serviceTariff);
@@ -1093,16 +940,18 @@ public class DbInitializer
                 serviceTariffsCreated++;
             }
 
-            // Lưu Tariff (cho phép lưu ngay cả khi không có service_tariff, tùy thuộc vào quy tắc nghiệp vụ)
-            await unitOfWork.Repository<Tariff>().AddAsync(tariff, cancellationToken);
-            tariffsCreated++;
+            if (tariff.ServiceTariffs.Any())
+            {
+                await unitOfWork.Repository<Tariff>().AddAsync(tariff, cancellationToken);
+                tariffsCreated++;
+            }
         }
 
         try
         {
             await unitOfWork.SaveAsync(cancellationToken);
             logger.Information(
-                $"Đã khởi tạo {tariffsCreated} tariff và {serviceTariffsCreated} service_tariff."
+                $"Đã khởi tạo {tariffsCreated} bảng giá và {serviceTariffsCreated} dịch vụ trong bảng giá."
             );
         }
         catch (DbUpdateException ex)
@@ -1116,23 +965,393 @@ public class DbInitializer
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Lỗi không xác định khi lưu tariff và service_tariff.");
+            logger.Error(ex, "Lỗi không xác định khi lưu bảng giá và dịch vụ trong bảng giá.");
             throw;
         }
     }
 
-    private static IFormFile GenerateIFormfile(string filePath)
+    private static async Task InitVouchersAsync(
+        IUnitOfWork unitOfWork,
+        IQrGenerator barcode,
+        ILogger logger,
+        CancellationToken cancellationToken
+    )
     {
+        var customerResult = await unitOfWork
+            .Repository<User>()
+            .QueryAsync(x => x.Role == "CUSTOMER")
+            .Select(SelectOnlyId())
+            .ToListAsync(cancellationToken);
+
+        if (!customerResult.Any())
+        {
+            logger.Warning("Không tìm thấy khách hàng để khởi tạo voucher.");
+            return;
+        }
+
+        var vouchersToSeed = new (
+            string Code,
+            string Title,
+            bool DiscountFixed,
+            decimal DiscountValue,
+            string Description,
+            int ValidDays
+        )[]
+        {
+            (
+                "GIATUI10",
+                "Giảm Giá Chào Mừng",
+                false,
+                10.0m,
+                "Giảm 10% cho khách hàng mới sử dụng dịch vụ giặt ủi",
+                30
+            ),
+            (
+                "HAPPYBIRTHDAY",
+                "Giảm Giá Sinh Nhật",
+                false,
+                10.0m,
+                "Giảm 10% cho khách hàng trong tháng sinh nhật",
+                7
+            ),
+            (
+                "SUMMER15",
+                "Ưu Đãi Mùa Hè",
+                false,
+                15.0m,
+                "Giảm 15% cho tất cả dịch vụ giặt ủi trong mùa hè",
+                60
+            ),
+            (
+                "FIXED20K",
+                "Giảm Giá Cố Định",
+                true,
+                20000.0m,
+                "Giảm 20.000 VNĐ cho hóa đơn giặt ủi tiếp theo",
+                90
+            ),
+        };
+
+        var vouchers = new List<Voucher>();
+        for (int i = 0; i < vouchersToSeed.Length; i++)
+        {
+            var (code, title, discountFixed, discountValue, description, validDays) =
+                vouchersToSeed[i];
+            var startAt = GenerateDistributedDate(i, vouchersToSeed.Length);
+            var voucher = new Voucher(
+                code: code,
+                title: title,
+                imgUrl: null,
+                barcode: barcode.GenerateQrBase64(code),
+                discountFixed: discountFixed,
+                discountValue: discountValue,
+                startAt: startAt,
+                endAt: startAt.AddDays(validDays),
+                status: ActivationStatus.Active,
+                description: description
+            )
+            {
+                CreatedAt = startAt,
+                VoucherCustomers = customerResult
+                    .Select(x => new VoucherCustomer
+                    {
+                        CustomerId = x.Id,
+                        IsUsed = startAt < EndDate.AddMonths(-1),
+                    })
+                    .ToList(),
+            };
+            vouchers.Add(voucher);
+        }
+
+        await unitOfWork.Repository<Voucher>().AddRangeAsync(vouchers, cancellationToken);
+        await unitOfWork.SaveAsync(cancellationToken);
+    }
+
+    private static async Task InitializeOrdersAsync(
+        IUnitOfWork unitOfWork,
+        ILogger logger,
+        CancellationToken cancellationToken,
+        IEncryptionService encryption,
+        IQrGenerator barcode
+    )
+    {
+        var customerResult = await unitOfWork
+            .DynamicReadOnlyRepository<User>()
+            .ListAsync(
+                new ListUserSpecification([ROLE.CUSTOMER]),
+                new QueryParamRequest { },
+                SelectOnlyId(),
+                cancellationToken
+            );
+        var staffResult = await unitOfWork
+            .DynamicReadOnlyRepository<User>()
+            .ListAsync(
+                new ListUserSpecification([ROLE.STAFF]),
+                new QueryParamRequest { },
+                SelectOnlyId(),
+                cancellationToken
+            );
+        var tariffs = await unitOfWork
+            .Repository<Tariff>()
+            .QueryAsync(x => x.Status == ActivationStatus.Active)
+            .ToListAsync(cancellationToken);
+        var services = await unitOfWork
+            .DynamicReadOnlyRepository<Service>()
+            .ListAsync(
+                new ListServiceSpecification(),
+                new QueryParamRequest { },
+                s => new
+                {
+                    s.Id,
+                    s.Name,
+                    s.Type,
+                    UnitRelations = s
+                        .UnitRelations.Where(x =>
+                            x.Status.Equals(ActivationStatus.Active) && x.Price > 0
+                        )
+                        .Select(x => new
+                        {
+                            x.Id,
+                            x.UnitId,
+                            x.Name,
+                            x.Price,
+                            x.ProcessingTime,
+                            x.Status,
+                        })
+                        .ToList(),
+                },
+                cancellationToken
+            );
+
+        if (!customerResult.Any() || !staffResult.Any() || !tariffs.Any() || !services.Any())
+        {
+            logger.Warning(
+                "Thiếu dữ liệu khách hàng, nhân viên, bảng giá hoặc dịch vụ để khởi tạo đơn hàng."
+            );
+            return;
+        }
+
+        const int totalOrders = 50;
+        var statusValues = new[]
+        {
+            OrderStatus.Pending,
+            OrderStatus.InProgress,
+            OrderStatus.Processed,
+            OrderStatus.Completed,
+        };
+
+        for (int i = 0; i < totalOrders; i++)
+        {
+            var createdAt = GenerateDistributedDate(i, totalOrders);
+            long? customerId = customerResult[i % customerResult.Count].Id;
+            long staffId = staffResult[i % staffResult.Count].Id;
+            var tariff = tariffs[i % tariffs.Count];
+            int itemCount = services.Any(s => s.Type == TypeStatus.Combo) ? 2 : 1;
+            var orderItems = new List<OrderItem>();
+            decimal totalPrice = 0;
+
+            for (int j = 0; j < itemCount; j++)
+            {
+                var service = services[j % services.Count];
+                var unitRelations = service.UnitRelations.ToList();
+                if (!unitRelations.Any())
+                {
+                    logger.Warning($"Không tìm thấy unit_relation cho dịch vụ ID {service.Id}.");
+                    continue;
+                }
+
+                var unitRelation = unitRelations.First();
+                int quantity = service.Type == TypeStatus.Combo ? 3 : 1;
+                decimal unitPrice = unitRelation.Price;
+
+                var orderItem = new OrderItem
+                {
+                    ServiceId = service.Id,
+                    UnitRelationId = unitRelation.Id,
+                    Price = quantity * unitPrice,
+                    Quantity = quantity,
+                    CreatedAt = createdAt,
+                    UnitRelationName = unitRelation.Name,
+                    ProcessingTime = (int)unitRelation.ProcessingTime,
+                    ServiceName = service.Name,
+                    UnitPrice = unitPrice,
+                };
+
+                orderItems.Add(orderItem);
+                totalPrice += orderItem.Price;
+            }
+
+            if (!orderItems.Any())
+            {
+                logger.Warning($"Không tạo được OrderItem cho đơn hàng {i + 1}.");
+                continue;
+            }
+
+            string code = Generator.GenerateCode("OD", 6);
+            OrderStatus status = statusValues[i % statusValues.Length];
+
+            var order = new Order(
+                branchId: tariff.BranchId,
+                staffId: staffId,
+                code: code,
+                amount: totalPrice,
+                total: totalPrice,
+                status: status,
+                customerId: customerId,
+                tariffId: tariff.Id,
+                deliveryTime: createdAt.AddDays(3)
+            )
+            {
+                CreatedAt = createdAt,
+            };
+
+            var codeEncrypt = encryption.Encrypt(order.Code);
+            var barcodeConfirm = barcode.GenerateQrBase64(codeEncrypt);
+            order.CodeConfirm = barcodeConfirm;
+            order.PublicId = Ulid.NewUlid();
+
+            foreach (var orderItem in orderItems)
+            {
+                order.OrderItems.Add(orderItem);
+            }
+
+            if (status == OrderStatus.Completed)
+            {
+                var paymentMethods = Enum.GetValues(typeof(PaymentMethod))
+                    .Cast<PaymentMethod>()
+                    .ToArray();
+                order.PaymentMethod = paymentMethods[i % paymentMethods.Length];
+            }
+
+            await unitOfWork.Repository<Order>().AddAsync(order, cancellationToken);
+
+            await unitOfWork.SaveAsync(cancellationToken);
+            Order? orderUpdate = await unitOfWork
+                .DynamicReadOnlyRepository<Order>()
+                .FindByConditionAsync(new GetOrderByIdSpecification(order.Id), cancellationToken);
+            if (orderUpdate != null)
+            {
+                orderUpdate.UpdateStatus(status);
+                await unitOfWork.Repository<Order>().UpdateAsync(orderUpdate);
+
+                await unitOfWork.SaveAsync(cancellationToken);
+            }
+        }
+    }
+
+    private static async Task InitializeInventoryDocumentsAsync(
+        IUnitOfWork unitOfWork,
+        ILogger logger,
+        CancellationToken cancellationToken
+    )
+    {
+        var suppliers = await unitOfWork.Repository<Supplier>().ListAsync(cancellationToken);
+        var products = await unitOfWork.Repository<BranchProduct>().ListAsync(cancellationToken);
+        var units = await unitOfWork.Repository<Unit>().ListAsync(cancellationToken);
+
+        if (!suppliers.Any() || !products.Any() || !units.Any())
+        {
+            logger.Warning("Thiếu nhà cung cấp, sản phẩm hoặc đơn vị tính.");
+            return;
+        }
+
+        var createdAt = GenerateDistributedDate(0, 1);
+        var supplier = suppliers.First();
+        decimal totalProductAmount = 0;
+        var productSupplyings = new List<ProductSupplying>();
+
+        foreach (var product in products)
+        {
+            var unitRelation = product.UnitRelations.FirstOrDefault(r => r.BaseUnit);
+            if (unitRelation == null)
+            {
+                logger.Warning($"Sản phẩm {product.Name} chưa có đơn vị cơ bản.");
+                continue;
+            }
+
+            int quantity = product.Name.Contains("giặt", StringComparison.OrdinalIgnoreCase)
+                ? 20
+                : 10;
+            decimal amount = unitRelation.Price * quantity;
+            totalProductAmount += amount;
+
+            productSupplyings.Add(
+                new ProductSupplying
+                {
+                    ProductId = product.Id,
+                    SupplierId = supplier.Id,
+                    Quantity = quantity,
+                    LotNumber = Generator.GenerateCode("LOT", 4),
+                    Price = unitRelation.Price,
+                    UnitRelationId = unitRelation.Id,
+                    ExpiryDate = createdAt.AddMonths(12),
+                    CreatedAt = createdAt,
+                }
+            );
+        }
+
+        decimal totalEquipmentAmount = 0;
+        var equipmentSupplyings = new List<EquipmentSupplying>
+        {
+            new EquipmentSupplying
+            {
+                Name = "Máy Giặt Công Nghiệp",
+                Code = Generator.GenerateCode("EQ", 6),
+                Price = 20000000,
+                Quantity = 2,
+                SupplierId = supplier.Id,
+                CreatedAt = createdAt,
+            },
+            new EquipmentSupplying
+            {
+                Name = "Máy Sấy Công Nghiệp",
+                Code = Generator.GenerateCode("EQ", 6),
+                Price = 15000000,
+                Quantity = 1,
+                SupplierId = supplier.Id,
+                CreatedAt = createdAt,
+            },
+        };
+        totalEquipmentAmount = equipmentSupplyings.Sum(e => e.Price * e.Quantity);
+
+        var document = new InventoryDocument(
+            code: Generator.GenerateCode("IM", 6),
+            amount: totalProductAmount + totalEquipmentAmount,
+            type: InventoryType.Import,
+            branchId: 1L,
+            note: "Nhập hàng khởi tạo"
+        )
+        {
+            CreatedAt = createdAt,
+        };
+
+        foreach (var p in productSupplyings)
+        {
+            document.ProductSupplyings.Add(p);
+        }
+
+        foreach (var e in equipmentSupplyings)
+        {
+            document.EquipmentSupplyings.Add(e);
+        }
+
+        await unitOfWork.Repository<InventoryDocument>().AddAsync(document, cancellationToken);
+        await unitOfWork.SaveAsync(cancellationToken);
+    }
+
+    private static IFormFile GenerateIFormFile(string filePath)
+    {
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException($"Không tìm thấy file tại {filePath}");
+
         byte[] fileBytes = File.ReadAllBytes(filePath);
         var memoryStream = new MemoryStream(fileBytes);
-
         var fileName = Path.GetFileName(filePath);
         var formFile = new FormFile(memoryStream, 0, fileBytes.Length, "file", fileName)
         {
             Headers = new HeaderDictionary(),
             ContentType = GetContentType(filePath),
         };
-
         return formFile;
     }
 

@@ -1,6 +1,9 @@
-﻿using Application.Common.Interfaces.UnitOfWorks;
+﻿using Application.Common.Interfaces.Services.Identity;
+using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.Dtos.Models;
 using Domain.Aggregates.Accounts;
 using Domain.Aggregates.Accounts.Enums;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -12,6 +15,7 @@ public class DbInitializer
     {
         var unitOfWork = provider.GetRequiredService<IUnitOfWork>();
         var logger = provider.GetRequiredService<ILogger>();
+        var media = provider.GetRequiredService<IMediaUpdateService>();
 
         using var dbTransaction = await unitOfWork.BeginTransactionAsync();
 
@@ -24,7 +28,7 @@ public class DbInitializer
             {
                 logger.Information("Seeding user data is starting.............");
 
-                List<Account> users = InitializeUserData();
+                List<Account> users = await InitializeUserDataAsync(media);
 
                 foreach (var user in users)
                 {
@@ -45,7 +49,7 @@ public class DbInitializer
         }
     }
 
-    private static List<Account> InitializeUserData()
+    private static async Task<List<Account>> InitializeUserDataAsync(IMediaUpdateService media)
     {
         List<Account> users = new()
         {
@@ -302,8 +306,70 @@ public class DbInitializer
                 Gender = Gender.Male,
             },
         };
+        var random = new Random();
+        users.ForEach(u =>
+        {
+            u.Status = AccountStatus.Active;
+            u.CreatedAt = new DateTimeOffset(
+                year: 2024, // Năm 2020-2024
+                month: random.Next(1, 13), // Tháng 1-12
+                day: random.Next(1, 28), // Ngày 1-27 (tránh lỗi tháng thiếu ngày)
+                hour: random.Next(0, 24), // Giờ 0-23
+                minute: random.Next(0, 60), // Phút 0-59
+                second: random.Next(0, 60), // Giây 0-59
+                offset: TimeSpan.FromHours(0)
+            );
+        });
+        var avatarDir = Path.Combine(AppContext.BaseDirectory, "Resources", "SeedImages", "Avatar");
+        var maleAvatars = Directory.EnumerateFiles(avatarDir, "male*").ToList();
+        var femaleAvatars = Directory.EnumerateFiles(avatarDir, "female*").ToList();
 
-        users.ForEach(u => u.Status = AccountStatus.Active);
+        // Gán avatar theo giới tính
+        foreach (var account in users)
+        {
+            var avatarList = account.Gender == Gender.Female ? femaleAvatars : maleAvatars;
+
+            if (avatarList.Any())
+            {
+                var filePath = avatarList[random.Next(avatarList.Count)];
+                var formFile = GenerateIFormfile(filePath);
+                var key = media.GetKey(formFile, MediaType.Image);
+
+                await media.UploadMediaAsync(formFile, key);
+                account.AvtUrl = key; // Thuộc tính Avatar trong Account
+            }
+            else
+            {
+                Console.WriteLine($"[Warning] Không có avatar cho giới tính {account.Gender}.");
+            }
+        }
         return users;
+    }
+
+    private static IFormFile GenerateIFormfile(string filePath)
+    {
+        byte[] fileBytes = File.ReadAllBytes(filePath);
+        var memoryStream = new MemoryStream(fileBytes);
+
+        var fileName = Path.GetFileName(filePath);
+        var formFile = new FormFile(memoryStream, 0, fileBytes.Length, "file", fileName)
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = GetContentType(filePath),
+        };
+
+        return formFile;
+    }
+
+    private static string GetContentType(string path)
+    {
+        var ext = Path.GetExtension(path).ToLowerInvariant();
+        return ext switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".gif" => "image/gif",
+            _ => "application/octet-stream",
+        };
     }
 }

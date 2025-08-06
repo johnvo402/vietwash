@@ -35,7 +35,7 @@ public class UpdateAuditableEntityInterceptor(ICurrentAccount currentUser) : Sav
             switch (entry.State)
             {
                 case EntityState.Added:
-                    SetAuditOnCreate(entry, currentTime);
+                    SetAuditOnCreate(entry);
                     break;
 
                 case EntityState.Modified:
@@ -45,7 +45,7 @@ public class UpdateAuditableEntityInterceptor(ICurrentAccount currentUser) : Sav
         }
     }
 
-    private void SetAuditOnCreate(EntityEntry entry, DateTimeOffset currentTime)
+    private void SetAuditOnCreate(EntityEntry entry)
     {
         if (
             entry.Entity is BaseEntity
@@ -57,8 +57,6 @@ public class UpdateAuditableEntityInterceptor(ICurrentAccount currentUser) : Sav
                 currentUser.Id?.ToString() ?? ANONYMOUS_CREATED_BY;
             return;
         }
-
-        entry.Property(nameof(DefaultEntity.CreatedAt)).CurrentValue = currentTime;
     }
 
     private void SetAuditOnUpdate(EntityEntry entry, DateTimeOffset currentTime)
