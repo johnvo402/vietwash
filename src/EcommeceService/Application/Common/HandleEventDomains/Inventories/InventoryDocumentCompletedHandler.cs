@@ -143,7 +143,7 @@ public sealed class InventoryDocumentCompletedHandler
         {
             TypeId = document.Type == InventoryType.Import ? "spend" : "income",
             ReferenceId = document.Id,
-            Amount = document.Type == InventoryType.Import ? amount : -amount,
+            Amount = amount,
             PaymentMethod = PaymentMethod.Cash,
             BranchId = (long)document.BranchId!,
 
