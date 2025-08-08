@@ -1,8 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using Domain.Aggregates.Inventories.Enums;
 using Domain.Aggregates.Inventories.Events;
-using Domain.Aggregates.Orders.Enums;
-using Domain.Events;
 using Mediator;
 using Shared.Kernel.Common;
 
@@ -21,6 +19,7 @@ namespace Domain.Aggregates.Inventories
 
         public ICollection<EquipmentSupplying> EquipmentSupplyings { get; set; } = [];
         public ICollection<ProductSupplying> ProductSupplyings { get; set; } = [];
+        public ICollection<InventorySupplierReceipt> InventorySupplierReceipts { get; set; } = [];
 
         public void UpdateStatus(InventoryStatus status, string? cancelReason = null)
         {

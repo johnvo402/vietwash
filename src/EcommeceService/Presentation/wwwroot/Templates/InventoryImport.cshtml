@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Phiếu Nhập Hàng</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .receipt {
+            max-width: 800px;
+            margin: auto;
+            border: 1px solid #000;
+            padding: 20px;
+            page-break-after: always;
+        }
+
+        .receipt.original {
+            background-color: #fff;
+        }
+
+        .receipt.copy1 {
+            background-color: #e6f3ff; /* Light blue */
+        }
+
+        .receipt.copy2 {
+            background-color: #fffde7; /* Light yellow */
+        }
+
+        .header {
+            text-align: center;
+        }
+
+        .header img {
+            width: 120px;
+            margin-bottom: 10px;
+        }
+
+        .header h1 {
+            margin: 5px 0;
+            font-size: 20px;
+        }
+
+        .header h2 {
+            margin: 5px 0;
+            font-size: 18px;
+        }
+
+        .header p {
+            margin: 2px 0;
+            font-size: 12px;
+        }
+
+        .info {
+            margin-top: 15px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .info-left,
+        .info-right {
+            width: 48%;
+        }
+
+        .info p {
+            margin: 3px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #000;
+        }
+
+        th,
+        td {
+            padding: 6px;
+            text-align: center;
+        }
+
+        .footer {
+            margin-top: 15px;
+            font-size: 12px;
+        }
+
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            font-size: 12px;
+        }
+
+        .signatures > div {
+            text-align: center;
+            width: 32%;
+        }
+
+        .stamp {
+            width: 100px;
+            height: auto;
+            margin-top: 5px;
+        }
+
+        .text-left {
+            text-align: left !important;
+        }
+
+        .text-right {
+            text-align: right !important;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .normal {
+            font-weight: normal;
+            display: inline;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Original Receipt -->
+    <div class="receipt original">
+        <div class="header">
+            <img src="@Model.LogoUrl" alt="Logo" />
+            <h1>@Model.OrgName</h1>
+            <p><strong>Địa chỉ (Address):</strong> @Model.OrgAddress</p>
+            <h1>PHIẾU NHẬP HÀNG</h1>
+            <h2>INVENTORY RECEIPT</h2>
+            <p><strong>Mã phiếu (Receipt Code):</strong> @Model.Code</p>
+            <p><strong>Ngày giao dịch (Transaction Date):</strong> @Model.TransactionAt.ToString("dd/MM/yyyy")</p>
+        </div>
+        <div class="info">
+            <div class="info-left">
+                <p><strong>Nhà cung cấp (Supplier):</strong> @Model.SupplierName</p>
+                <p><strong>Mã nhà cung cấp (Supplier Code):</strong> @Model.Code</p>
+            </div>
+            <div class="info-right">
+                <p><strong>Chi nhánh (Branch):</strong> @Model.BranchName</p>
+                <p><strong>Người tạo (Created By):</strong> @Model.CreatedBy</p>
+                <p><strong>Ngày tạo (Created At):</strong> @Model.CreatedAt.ToString("dd/MM/yyyy")</p>
+            </div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>STT<br>(No.)</th>
+                    <th>Tên hàng hóa<br>(Item Name)</th>
+                    <th>ĐVT<br>(Unit)</th>
+                    <th>Số lượng<br>(Quantity)</th>
+                    <th>Đơn giá<br>(Unit Price)</th>
+                    <th>Thành tiền<br>(Amount)</th>
+                </tr>
+                <tr>
+                    <th>(1)</th>
+                    <th>(2)</th>
+                    <th>(3)</th>
+                    <th>(4)</th>
+                    <th>(5)</th>
+                    <th>(6) = (4) x (5)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int index = 1;
+                    foreach (var item in Model.EquipmentSupplyings)
+                    {
+                        <tr>
+                            <td>@index</td>
+                            <td class="text-left">@item.Name</td>
+                            <td>Máy</td>
+                            <td>@item.Quantity</td>
+                            <td class="text-right">@item.Price</td>
+                            <td class="text-right">@item.Total</td>
+                        </tr>
+                        index++;
+                    }
+                    foreach (var item in Model.ProductSupplyings)
+                    {
+                        <tr>
+                            <td>@index</td>
+                            <td class="text-left">@item.ProductName</td>
+                            <td>@item.UnitName</td>
+                            <td>@item.Quantity</td>
+                            <td class="text-right">@item.Price</td>
+                            <td class="text-right">@item.Total</td>
+                        </tr>
+                        index++;
+                    }
+                }
+                <tr class="bold">
+                    <td colspan="5" class="text-right">Tổng cộng (Total):</td>
+                    <td class="text-right">@Model.Amount</td>
+                </tr>
+                <tr class="bold">
+                    <td colspan="8" class="text-left">Số tiền viết bằng chữ (Amount in words): <span class="normal">@Model.AmountInWords</span></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="signatures">
+            <div>
+                <p>Người nhận hàng (Receiver)</p>
+                <p>(Ký, ghi rõ họ tên / Sign & full name)</p>
+            </div>
+            <div>
+                <p>Người giao hàng (Supplier)</p>
+                <p>(Ký, ghi rõ họ tên / Sign & full name)</p>
+            </div>
+            <div>
+                <p>Người lập phiếu (Issuer)</p>
+                <p>(Đã đóng dấu / Stamped)</p>
+                <img src="@Model.StampUrl" alt="Con dấu" class="stamp" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Copy 1 (Light Blue) -->
+    <div class="receipt copy1">
+        <div class="header">
+            <img src="@Model.LogoUrl" alt="Logo" />
+            <h1>@Model.OrgName</h1>
+            <p><strong>Địa chỉ (Address):</strong> @Model.OrgAddress</p>
+            <h1>PHIẾU NHẬP HÀNG</h1>
+            <h2>INVENTORY RECEIPT</h2>
+            <p><strong>Mã phiếu (Receipt Code):</strong> @Model.Code</p>
+            <p><strong>Ngày giao dịch (Transaction Date):</strong> @Model.TransactionAt.ToString("dd/MM/yyyy")</p>
+        </div>
+        <div class="info">
+            <div class="info-left">
+                <p><strong>Nhà cung cấp (Supplier):</strong> @Model.SupplierName</p>
+                <p><strong>Mã nhà cung cấp (Supplier Code):</strong> @Model.Code</p>
+            </div>
+            <div class="info-right">
+                <p><strong>Chi nhánh (Branch):</strong> @Model.BranchName</p>
+                <p><strong>Người tạo (Created By):</strong> @Model.CreatedBy</p>
+                <p><strong>Ngày tạo (Created At):</strong> @Model.CreatedAt.ToString("dd/MM/yyyy")</p>
+            </div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>STT<br>(No.)</th>
+                    <th>Tên hàng hóa<br>(Item Name)</th>
+                    <th>ĐVT<br>(Unit)</th>
+                    <th>Số lượng<br>(Quantity)</th>
+                    <th>Đơn giá<br>(Unit Price)</th>
+                    <th>Thành tiền<br>(Amount)</th>
+                </tr>
+                <tr>
+                    <th>(1)</th>
+                    <th>(2)</th>
+                    <th>(3)</th>
+                    <th>(4)</th>
+                    <th>(5)</th>
+                    <th>(6) = (4) x (5)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int index2 = 1;
+                    foreach (var item in Model.EquipmentSupplyings)
+                    {
+                        <tr>
+                            <td>@index2</td>
+                            <td class="text-left">@item.Name</td>
+                            <td>Máy</td>
+                            <td>@item.Quantity</td>
+                            <td class="text-right">@item.Price</td>
+                            <td class="text-right">@item.Total</td>
+                        </tr>
+                        index2++;
+                    }
+                    foreach (var item in Model.ProductSupplyings)
+                    {
+                        <tr>
+                            <td>@index2</td>
+                            <td class="text-left">@item.ProductName</td>
+                            <td>@item.UnitName</td>
+                            <td>@item.Quantity</td>
+                            <td class="text-right">@item.Price</td>
+                            <td class="text-right">@item.Total</td>
+                        </tr>
+                        index2++;
+                    }
+                }
+                <tr class="bold">
+                    <td colspan="5" class="text-right">Tổng cộng (Total):</td>
+                    <td class="text-right">@Model.Amount</td>
+                </tr>
+                <tr class="bold">
+                    <td colspan="8" class="text-left">Số tiền viết bằng chữ (Amount in words): <span class="normal">@Model.AmountInWords</span></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="signatures">
+            <div>
+                <p>Người nhận hàng (Receiver)</p>
+                <p>(Ký, ghi rõ họ tên / Sign & full name)</p>
+            </div>
+            <div>
+                <p>Người giao hàng (Supplier)</p>
+                <p>(Ký, ghi rõ họ tên / Sign & full name)</p>
+            </div>
+            <div>
+                <p>Người lập phiếu (Issuer)</p>
+                <p>(Đã đóng dấu / Stamped)</p>
+                <img src="@Model.StampUrl" alt="Con dấu" class="stamp" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Copy 2 (Light Yellow) -->
+    <div class="receipt copy2">
+        <div class="header">
+            <img src="@Model.LogoUrl" alt="Logo" />
+            <h1>@Model.OrgName</h1>
+            <p><strong>Địa chỉ (Address):</strong> @Model.OrgAddress</p>
+            <h1>PHIẾU NHẬP HÀNG</h1>
+            <h2>INVENTORY RECEIPT</h2>
+            <p><strong>Mã phiếu (Receipt Code):</strong> @Model.Code</p>
+            <p><strong>Ngày giao dịch (Transaction Date):</strong> @Model.TransactionAt.ToString("dd/MM/yyyy")</p>
+        </div>
+        <div class="info">
+            <div class="info-left">
+                <p><strong>Nhà cung cấp (Supplier):</strong> @Model.SupplierName</p>
+                <p><strong>Mã nhà cung cấp (Supplier Code):</strong> @Model.Code</p>
+            </div>
+            <div class="info-right">
+                <p><strong>Chi nhánh (Branch):</strong> @Model.BranchName</p>
+                <p><strong>Người tạo (Created By):</strong> @Model.CreatedBy</p>
+                <p><strong>Ngày tạo (Created At):</strong> @Model.CreatedAt.ToString("dd/MM/yyyy")</p>
+            </div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>STT<br>(No.)</th>
+                    <th>Tên hàng hóa<br>(Item Name)</th>
+                    <th>ĐVT<br>(Unit)</th>
+                    <th>Số lượng<br>(Quantity)</th>
+                    <th>Đơn giá<br>(Unit Price)</th>
+                    <th>Thành tiền<br>(Amount)</th>
+                </tr>
+                <tr>
+                    <th>(1)</th>
+                    <th>(2)</th>
+                    <th>(3)</th>
+                    <th>(4)</th>
+                    <th>(5)</th>
+                    <th>(6) = (4) x (5)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int index3 = 1;
+                    foreach (var item in Model.EquipmentSupplyings)
+                    {
+                        <tr>
+                            <td>@index3</td>
+                            <td class="text-left">@item.Name</td>
+                            <td>Máy</td>
+                            <td>@item.Quantity</td>
+                            <td class="text-right">@item.Price</td>
+                            <td class="text-right">@item.Total</td>
+                        </tr>
+                        index3++;
+                    }
+                    foreach (var item in Model.ProductSupplyings)
+                    {
+                        <tr>
+                            <td>@index3</td>
+                            <td class="text-left">@item.ProductName</td>
+                            <td>@item.UnitName</td>
+                            <td>@item.Quantity</td>
+                            <td class="text-right">@item.Price</td>
+                            <td class="text-right">@item.Total</td>
+                        </tr>
+                        index3++;
+                    }
+                }
+                <tr class="bold">
+                    <td colspan="5" class="text-right">Tổng cộng (Total):</td>
+                    <td class="text-right">@Model.Amount</td>
+                </tr>
+                <tr class="bold">
+                    <td colspan="8" class="text-left">Số tiền viết bằng chữ (Amount in words): <span class="normal">@Model.AmountInWords</span></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="signatures">
+            <div>
+                <p>Người nhận hàng (Receiver)</p>
+                <p>(Ký, ghi rõ họ tên / Sign & full name)</p>
+            </div>
+            <div>
+                <p>Người giao hàng (Supplier)</p>
+                <p>(Ký, ghi rõ họ tên / Sign & full name)</p>
+            </div>
+            <div>
+                <p>Người lập phiếu (Issuer)</p>
+                <p>(Đã đóng dấu / Stamped)</p>
+                <img src="@Model.StampUrl" alt="Con dấu" class="stamp" />
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

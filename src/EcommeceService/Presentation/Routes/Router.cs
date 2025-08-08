@@ -123,11 +123,12 @@ namespace Presentation.Routes
                 + RouterBase.Id
                 + "}";
 
-            public const string GetBill =
-                $"{Ecommerce}/{RouterBase.prefix}{nameof(Inventories)}/{nameof(GetBill)}/"
+            public const string GetReceipt =
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Inventories)}/{nameof(GetReceipt)}/"
                 + "{"
                 + RouterBase.Id
-                + "}";
+                + "}/"
+                + "{SupplierId}";
         }
 
         public static class SaleResultRoute

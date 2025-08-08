@@ -29,7 +29,7 @@ namespace Presentation.Endpoints.Inventories
         )
         {
             var result = await sender.Send(request, cancellationToken);
-            return result.ToCreatedResult();
+            return result.ToActionResult();
         }
     }
 }

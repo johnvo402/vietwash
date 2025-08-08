@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    partial class TheDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250808130242_20250808200204_Ecommerce_Migration")]
+    partial class _20250808200204_Ecommerce_Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -403,6 +406,10 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("note");
 
+                    b.Property<string>("PdfUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("pdf_url");
+
                     b.Property<string>("PublicId")
                         .IsRequired()
                         .HasColumnType("character varying(26)")
@@ -513,41 +520,6 @@ namespace Infrastructure.Data.Migrations
                         .HasDatabaseName("ix_inventory_request_id");
 
                     b.ToTable("inventory_request", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Aggregates.Inventories.InventorySupplierReceipt", b =>
-                {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<long>("InventoryDocumentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("inventory_document_id");
-
-                    b.Property<string>("PdfUrl")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("pdf_url");
-
-                    b.Property<long>("SupplierId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("supplier_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_inventory_supplier_receipt");
-
-                    b.HasIndex("InventoryDocumentId")
-                        .HasDatabaseName("ix_inventory_supplier_receipt_inventory_document_id");
-
-                    b.HasIndex("SupplierId")
-                        .HasDatabaseName("ix_inventory_supplier_receipt_supplier_id");
-
-                    b.ToTable("inventory_supplier_receipt", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Inventories.ProductSupplying", b =>
@@ -2072,27 +2044,6 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Supplier");
                 });
 
-            modelBuilder.Entity("Domain.Aggregates.Inventories.InventorySupplierReceipt", b =>
-                {
-                    b.HasOne("Domain.Aggregates.Inventories.InventoryDocument", "InventoryDocument")
-                        .WithMany("InventorySupplierReceipts")
-                        .HasForeignKey("InventoryDocumentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_inventory_supplier_receipt_inventory_document_inventory_doc");
-
-                    b.HasOne("Domain.Aggregates.Suppliers.Supplier", "Supplier")
-                        .WithMany()
-                        .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_inventory_supplier_receipt_supplier_supplier_id");
-
-                    b.Navigation("InventoryDocument");
-
-                    b.Navigation("Supplier");
-                });
-
             modelBuilder.Entity("Domain.Aggregates.Inventories.ProductSupplying", b =>
                 {
                     b.HasOne("Domain.Aggregates.Inventories.InventoryDocument", "InventoryDocument")
@@ -2394,8 +2345,6 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Domain.Aggregates.Inventories.InventoryDocument", b =>
                 {
                     b.Navigation("EquipmentSupplyings");
-
-                    b.Navigation("InventorySupplierReceipts");
 
                     b.Navigation("ProductSupplyings");
                 });

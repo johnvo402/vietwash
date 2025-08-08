@@ -117,6 +117,7 @@
 
         .normal {
             font-weight: normal;
+            display: inline;
         }
 
         .qr-box {
@@ -218,7 +219,9 @@
                     <td class="text-right">@Model.TotalWithTax</td>
                 </tr>
                 <tr class="bold">
-                    <td colspan="6" class="text-left">Số tiền viết bằng chữ (Amount in words): <p class="normal">@Model.TotalInWords</p></td>
+                    <td colspan="6" class="text-left">Số tiền viết bằng chữ (Amount in words): <p class="normal">
+                            @Model.TotalInWords</p>
+                    </td>
                 </tr>
             </tbody>
         </table>
