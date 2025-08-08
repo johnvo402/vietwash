@@ -1337,6 +1337,8 @@ public class DbInitializer
 
         await unitOfWork.Repository<InventoryDocument>().AddAsync(document, cancellationToken);
         await unitOfWork.SaveAsync(cancellationToken);
+        document.UpdateStatus(InventoryStatus.Completed);
+        await unitOfWork.SaveAsync(cancellationToken);
     }
 
     private static IFormFile GenerateIFormFile(string filePath)
