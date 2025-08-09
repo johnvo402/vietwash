@@ -54,10 +54,11 @@ builder.Services.AddRateLimiter(options =>
         "customPolicy",
         opt =>
         {
-            opt.PermitLimit = 4;
-            opt.Window = TimeSpan.FromSeconds(12);
+            opt.PermitLimit = 100;
+            opt.Window = TimeSpan.FromSeconds(10);
             opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-            opt.QueueLimit = 2;
+            opt.QueueLimit = 50;
+            opt.AutoReplenishment = true;
         }
     );
 });
@@ -72,8 +73,7 @@ builder.Services.AddCors(options =>
                 .WithOrigins(
                     "http://localhost:3000",
                     "https://vietwash.vercel.app",
-                    "https://api-app.payos.vn",
-                    "http://localhost:5500"
+                    "https://api-app.payos.vn"
                 )
                 .AllowAnyMethod()
                 .AllowAnyHeader()
@@ -86,10 +86,7 @@ var app = builder.Build();
 
 app.UseCors("AllowFrontend");
 
-app.UseWebSockets(new WebSocketOptions
-{
-    KeepAliveInterval = TimeSpan.FromMinutes(2)
-});
+app.UseWebSockets(new WebSocketOptions { KeepAliveInterval = TimeSpan.FromMinutes(2) });
 app.UseRateLimiter();
 app.MapGet("/", () => "Run oke!");
 
