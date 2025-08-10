@@ -81,16 +81,10 @@ namespace Application.Feature.Common.Validators.Inventories
                         );
 
                     item.RuleFor(x => x.SupplierId)
-                        .NotEmpty()
-                        .WithState(x =>
-                            Messager
-                                .Create<ProductSupplyingModel>(nameof(ProductSupplyingModel))
-                                .Property(x => x.SupplierId)
-                                .Message(MessageType.Null)
-                                .Negative()
-                                .Build()
+                        .MustAsync(
+                            (common, value, cts) => CheckSupplierExistenceAsync((long)value!, cts)
                         )
-                        .MustAsync(CheckSupplierExistenceAsync)
+                        .When(x => x.SupplierId.HasValue)
                         .WithState(x =>
                             Messager
                                 .Create<ProductSupplyingModel>(nameof(ProductSupplyingModel))

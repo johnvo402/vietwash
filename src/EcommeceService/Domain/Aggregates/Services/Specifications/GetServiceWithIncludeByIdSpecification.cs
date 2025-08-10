@@ -11,6 +11,11 @@ public class GetServiceWithIncludeByIdSpecification : Specification<Service>
         Query
             .Where(x => x.Id == id && x.Disable == false)
             .Include(x => x.UnitRelations)
+            .ThenInclude(x => x.AsUnitRelation)
+            .ThenInclude(x => x.BranchProduct)
+            .Include(x => x.UnitRelations)
+            .ThenInclude(x => x.AsUnitRelation)
+            .ThenInclude(x => x.UnitProduct)
             .Include(x => x.Category);
     }
 }

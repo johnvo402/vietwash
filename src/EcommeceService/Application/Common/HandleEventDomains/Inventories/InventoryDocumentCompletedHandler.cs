@@ -95,17 +95,19 @@ public sealed class InventoryDocumentCompletedHandler
         var supplierItems = document
             .EquipmentSupplyings.Select(s => new
             {
-                s.SupplierId,
+                SupplierId = (long?)s.SupplierId, // now nullable
                 s.Supplier.Name,
                 Amount = s.Price * s.Quantity,
             })
             .Concat(
-                document.ProductSupplyings.Select(s => new
-                {
-                    s.SupplierId,
-                    s.Supplier.Name,
-                    Amount = s.Price * s.Quantity,
-                })
+                document
+                    .ProductSupplyings.Where(x => x.SupplierId.HasValue && x.Supplier != null)
+                    .Select(s => new
+                    {
+                        s.SupplierId,
+                        s.Supplier!.Name,
+                        Amount = s.Price * s.Quantity,
+                    })
             );
 
         // Group by supplierId and calculate total amount
@@ -124,7 +126,7 @@ public sealed class InventoryDocumentCompletedHandler
             await PublishFundEvent(
                 document,
                 group.TotalAmount,
-                group.SupplierId,
+                (long)group.SupplierId!,
                 group.SupplierName,
                 cancellationToken
             );
@@ -154,6 +156,7 @@ public sealed class InventoryDocumentCompletedHandler
                 ["publicId"] = document.PublicId.ToString(),
                 ["supplierId"] = supplierId,
                 ["supplierName"] = supplierName,
+                ["type"] = FundEventType.Inventory,
             },
             Point = 0,
             FundEventType = FundEventType.Inventory,

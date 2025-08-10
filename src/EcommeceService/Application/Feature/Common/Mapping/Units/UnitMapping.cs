@@ -1,4 +1,5 @@
-﻿using Application.Feature.Common.Projections.Units;
+﻿using Application.Feature.Common.Projections.Services;
+using Application.Feature.Common.Projections.Units;
 using Domain.Aggregates.Services;
 
 namespace Application.Feature.Common.Mapping.Units
@@ -28,6 +29,20 @@ namespace Application.Feature.Common.Mapping.Units
             return entity;
         }
 
+        public static List<ServiceResource>? ToListServiceResource(
+            this List<ServiceResourceModel>? serviceResources
+        ) => serviceResources?.Select(ToServiceResourceEntity).ToList();
+
+        public static ServiceResource ToServiceResourceEntity(this ServiceResourceModel model)
+        {
+            return new ServiceResource
+            {
+                ProductId = model.ProductId,
+                UnitProductId = model.UnitProductId,
+                Quantity = model.Quantity,
+            };
+        }
+
         public static List<UnitRelation>? ToListUnitRelation(
             this List<UnitRelationModel>? unitRelations
         ) => unitRelations?.Select(ToUnitRelationEntity).ToList();
@@ -43,6 +58,7 @@ namespace Application.Feature.Common.Mapping.Units
                 ProcessingTime = model.ProcessingTime,
                 Status = model.Status,
                 UnitId = model.UnitId,
+                AsUnitProduct = model.ServiceResources.ToListServiceResource() ?? [],
             };
         }
 
@@ -57,6 +73,21 @@ namespace Application.Feature.Common.Mapping.Units
                 Multiple = ur.Multiple,
                 ProcessingTime = ur.ProcessingTime,
                 Status = ur.Status,
+                ServiceResources = ur
+                    .AsUnitRelation.Select(x => x.ToServiceResourceProjectionResponse())
+                    .ToList(),
+            };
+        }
+
+        public static ServiceResourceProjection ToServiceResourceProjectionResponse(
+            this ServiceResource serviceResource
+        )
+        {
+            return new()
+            {
+                ProductName = serviceResource.BranchProduct.Name,
+                UnitName = serviceResource.UnitProduct.Name,
+                Quantity = serviceResource.Quantity,
             };
         }
     }

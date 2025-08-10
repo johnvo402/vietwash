@@ -10,8 +10,12 @@ namespace Application.Feature.InventoryDocuments.Commands.Create
     {
         public static InventoryDocument ToEntity(this InventoryDocumentModel model)
         {
-            string prefixCode = model.Type == InventoryType.Import ? "NH" : "XH";
-            string code = Generator.GenerateCode(prefixCode, 6);
+            string? code = model.Code;
+            if (string.IsNullOrEmpty(code))
+            {
+                string prefixCode = model.Type == InventoryType.Import ? "NH" : "XH";
+                code = Generator.GenerateCode(prefixCode, 6);
+            }
 
             var productSupplyings = model.ProductSupplyings.ToListProductSupplying() ?? [];
             var equipmentSupplyings = model.EquipmentSupplyings.ToListEquipmentSupplying() ?? [];

@@ -13,18 +13,13 @@ namespace Application.Feature.Common.Mapping.Inventories
         {
             return productSupplyings?.ToListMapping(x =>
             {
-                string lotNumber = "UNKNOWN";
-                if (x.IsLot)
-                    lotNumber = Generator.GenerateCode("LO", 6);
                 return new ProductSupplying
                 {
                     ProductId = x.ProductId,
                     SupplierId = x.SupplierId,
                     Quantity = x.Quantity,
-                    LotNumber = lotNumber,
                     Price = x.Price,
                     UnitRelationId = x.UnitRelationId,
-                    ExpiryDate = x.ExpiryDate,
                 };
             });
         }

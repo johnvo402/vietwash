@@ -20,7 +20,6 @@ using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Specifications;
 using Domain.Aggregates.Products;
 using Domain.Aggregates.Services;
-using Domain.Aggregates.Services.Enums;
 using Domain.Aggregates.Services.Specifications;
 using Domain.Aggregates.Suppliers;
 using Domain.Aggregates.Tariffs;
@@ -353,7 +352,6 @@ public class DbInitializer
         var servicesToSeed = new (
             string Name,
             string Description,
-            TypeStatus Type,
             string Category,
             (
                 string Unit,
@@ -367,112 +365,96 @@ public class DbInitializer
             (
                 "Combo Giặt Sấy Quần Áo",
                 "Dịch vụ combo giặt và sấy quần áo tiện lợi.",
-                TypeStatus.Combo,
                 "Combo",
                 new[] { ("Kg", true, 1m, 30000m, 20m) }
             ),
             (
                 "Combo Giặt Sấy Ủi Quần Áo",
                 "Combo toàn diện: giặt, sấy và ủi quần áo.",
-                TypeStatus.Combo,
                 "Combo",
                 new[] { ("Kg", true, 1m, 45000m, 30m) }
             ),
             (
                 "Combo Giặt Sấy Ủi",
                 "Gói giặt sấy ủi cho đồ dùng hàng ngày.",
-                TypeStatus.Combo,
                 "Combo",
                 new[] { ("Bộ", true, 1m, 40000m, 60m) }
             ),
             (
                 "Combo Tuần Tháng",
                 "Gói combo cho giặt đồ định kỳ tuần/tháng.",
-                TypeStatus.Combo,
                 "Combo",
                 new[] { ("Kg", true, 1m, 35000m, 20m) }
             ),
             (
                 "Giặt Chăn Mền Dày",
                 "Làm sạch sâu chăn mền dày và nặng.",
-                TypeStatus.SingleService,
                 "Giặt",
                 new[] { ("Bộ", true, 1m, 50000m, 60m) }
             ),
             (
                 "Giặt Đồ Trẻ Em",
                 "Giặt đồ nhẹ nhàng an toàn cho trẻ nhỏ.",
-                TypeStatus.SingleService,
                 "Giặt",
                 new[] { ("Kg", true, 1m, 25000m, 20m) }
             ),
             (
                 "Giặt Hấp Váy Dạ Hội",
                 "Giặt hấp cao cấp cho váy dạ hội và đồ cao cấp.",
-                TypeStatus.SingleService,
                 "Giặt Đặc Biệt",
                 new[] { ("Bộ", true, 1m, 80000m, 90m) }
             ),
             (
                 "Giặt Khô Áo Vest",
                 "Giặt khô chuyên dụng cho áo vest.",
-                TypeStatus.SingleService,
                 "Giặt Đặc Biệt",
                 new[] { ("Bộ", true, 1m, 60000m, 60m) }
             ),
             (
                 "Giặt Nước Quần Jeans",
                 "Giặt giữ màu và chất lượng cho quần jeans.",
-                TypeStatus.SingleService,
                 "Giặt",
                 new[] { ("Bộ", true, 1m, 30000m, 30m) }
             ),
             (
                 "Giặt Quần Áo Trắng",
                 "Tẩy trắng, làm sạch sâu cho quần áo trắng.",
-                TypeStatus.SingleService,
                 "Giặt",
                 new[] { ("Kg", true, 1m, 28000m, 20m) }
             ),
             (
                 "Giặt Tẩy Vết Bẩn Cứng Đầu",
                 "Tẩy vết bẩn khó xử lý trên quần áo.",
-                TypeStatus.SingleService,
                 "Giặt Đặc Biệt",
                 new[] { ("Bộ", true, 1m, 40000m, 30m) }
             ),
             (
                 "Giặt Thảm",
                 "Làm sạch thảm trải sàn tại nhà hoặc văn phòng.",
-                TypeStatus.SingleService,
                 "Giặt",
                 new[] { ("Mét", true, 1m, 35000m, 30m) }
             ),
             (
                 "Sấy Khô Chăn Grab",
                 "Sấy khô chăn mền nhanh chóng và an toàn.",
-                TypeStatus.SingleService,
                 "Sấy",
                 new[] { ("Bộ", true, 1m, 25000m, 30m) }
             ),
             (
                 "Sấy Khô Quần Áo",
                 "Sấy khô quần áo chống ẩm mốc.",
-                TypeStatus.SingleService,
                 "Sấy",
                 new[] { ("Kg", true, 1m, 20000m, 15m) }
             ),
             (
                 "Ủi Áo Sơ Mi",
                 "Ủi áo sơ mi chuyên nghiệp, gọn gàng.",
-                TypeStatus.SingleService,
                 "Ủi",
                 new[] { ("Bộ", true, 1m, 15000m, 15m) }
             ),
             (
                 "Vệ Sinh Giày Sneakers",
                 "Làm sạch chuyên sâu giày sneaker.",
-                TypeStatus.SingleService,
                 "Vệ Sinh",
                 new[] { ("Đôi", true, 1m, 40000m, 30m) }
             ),
@@ -488,7 +470,7 @@ public class DbInitializer
 
         for (int i = 0; i < servicesToSeed.Length; i++)
         {
-            var (name, description, type, categoryName, unitsData) = servicesToSeed[i];
+            var (name, description, categoryName, unitsData) = servicesToSeed[i];
             var slug = Generator.GenerateSlug(name);
             var matchingFile = Directory
                 .EnumerateFiles(imageDir, "*.png", SearchOption.AllDirectories)
@@ -531,7 +513,6 @@ public class DbInitializer
                 categoryId: categories[categoryName],
                 branchId: 1L,
                 name: name,
-                type: type,
                 status: ActivationStatus.Active,
                 description: description,
                 image: imageUrl
@@ -1104,7 +1085,6 @@ public class DbInitializer
                 {
                     s.Id,
                     s.Name,
-                    s.Type,
                     UnitRelations = s
                         .UnitRelations.Where(x =>
                             x.Status.Equals(ActivationStatus.Active) && x.Price > 0
@@ -1142,11 +1122,12 @@ public class DbInitializer
 
         for (int i = 0; i < totalOrders; i++)
         {
+            var random = new Random();
             var createdAt = GenerateDistributedDate(i, totalOrders);
             long? customerId = customerResult[i % customerResult.Count].Id;
             long staffId = staffResult[i % staffResult.Count].Id;
             var tariff = tariffs[i % tariffs.Count];
-            int itemCount = services.Any(s => s.Type == TypeStatus.Combo) ? 2 : 1;
+            int itemCount = random.Next(1, 2);
             var orderItems = new List<OrderItem>();
             decimal totalPrice = 0;
 
@@ -1161,7 +1142,7 @@ public class DbInitializer
                 }
 
                 var unitRelation = unitRelations.First();
-                int quantity = service.Type == TypeStatus.Combo ? 3 : 1;
+                int quantity = random.Next(1, 3);
                 decimal unitPrice = unitRelation.Price;
 
                 var orderItem = new OrderItem
@@ -1281,10 +1262,8 @@ public class DbInitializer
                     ProductId = product.Id,
                     SupplierId = supplier.Id,
                     Quantity = quantity,
-                    LotNumber = Generator.GenerateCode("LOT", 4),
                     Price = unitRelation.Price,
                     UnitRelationId = unitRelation.Id,
-                    ExpiryDate = createdAt.AddMonths(12),
                     CreatedAt = createdAt,
                 }
             );

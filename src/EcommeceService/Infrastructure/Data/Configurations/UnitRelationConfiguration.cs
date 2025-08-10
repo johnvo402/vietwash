@@ -22,6 +22,15 @@ namespace Infrastructure.Data.Configurations
                 .HasOne(x => x.BranchProduct)
                 .WithMany(x => x.UnitRelations)
                 .HasForeignKey(x => x.BranchProductId);
+            builder
+                .HasMany(x => x.AsUnitProduct)
+                .WithOne(c => c.UnitProduct)
+                .HasForeignKey(c => c.UnitProductId);
+
+            builder
+                .HasMany(x => x.AsUnitRelation)
+                .WithOne(c => c.UnitRelation)
+                .HasForeignKey(c => c.UnitRelationId);
         }
     }
 }

@@ -19,7 +19,6 @@ public class ListServiceMapping
 
             // Từ ServiceProjection
             Name = service.Name,
-            Type = service.Type,
             Image = service.Image,
             Status = service.Status,
             CategoryId = service.CategoryId,

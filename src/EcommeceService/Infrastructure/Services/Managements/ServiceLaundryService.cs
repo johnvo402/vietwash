@@ -13,10 +13,8 @@ namespace Infrastructure.Services.Managements
         private readonly IDbContext _context;
         private readonly ILogger _logger;
         private readonly DbSet<Service> _serviceContext;
-        private readonly DbSet<Group> _groupContext;
         private readonly DbSet<Unit> _unitContext;
         private readonly DbSet<Category> _categoryContext;
-        private readonly DbSet<GroupService> _groupServiceContext;
         private readonly DbSet<UnitRelation> _unitRelationContext;
 
         public ServiceLaundryService(IDbContext context, ILogger logger)
@@ -24,15 +22,12 @@ namespace Infrastructure.Services.Managements
             _context = context;
             _logger = logger;
             _serviceContext = context.Set<Service>();
-            _groupContext = context.Set<Group>();
             _unitContext = context.Set<Unit>();
             _categoryContext = context.Set<Category>();
-            _groupServiceContext = context.Set<GroupService>();
             _unitRelationContext = context.Set<UnitRelation>();
         }
 
         public DbSet<Service> Services => _serviceContext;
-        public DbSet<Group> Groups => _groupContext;
         public DbSet<Unit> Units => _unitContext;
         public DbSet<UnitRelation> UnitRelations => _unitRelationContext;
 
@@ -124,110 +119,6 @@ namespace Infrastructure.Services.Managements
             {
                 _logger.Error(ex, "Error updating service {ServiceId}", service.Id);
                 if (!hasExternalTransaction)
-                    await _context.DatabaseFacade.RollbackTransactionAsync();
-                throw;
-            }
-        }
-
-        public async Task CreateGroupAsync(Group group, DbTransaction? transaction = null)
-        {
-            var isOwnerTransaction = transaction != null;
-            try
-            {
-                if (!isOwnerTransaction && _context.DatabaseFacade.CurrentTransaction == null)
-                    await _context.DatabaseFacade.BeginTransactionAsync();
-
-                await _groupContext.AddAsync(group);
-                await _context.SaveChangesAsync();
-
-                if (!isOwnerTransaction)
-                    await _context.DatabaseFacade.CommitTransactionAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(
-                    ex,
-                    "Error in method {MethodName}. Exception Type: {ExceptionType}. Error Message: {ErrorMessage}. StackTrace: {StackTrace}",
-                    nameof(CreateGroupAsync),
-                    ex.GetType().Name,
-                    ex.Message,
-                    ex.StackTrace
-                );
-
-                if (!isOwnerTransaction)
-                    await _context.DatabaseFacade.RollbackTransactionAsync();
-                throw;
-            }
-        }
-
-        public async Task UpdateGroupAsync(
-            Group group,
-            IEnumerable<Service> services,
-            DbTransaction? transaction = null
-        )
-        {
-            var isOwnerTransaction = transaction != null;
-            try
-            {
-                if (!isOwnerTransaction && _context.DatabaseFacade.CurrentTransaction == null)
-                    await _context.DatabaseFacade.BeginTransactionAsync();
-
-                // Update the group
-                _groupContext.Update(group);
-                await _context.SaveChangesAsync();
-
-                // Update services if provided
-                if (services?.Any() == true)
-                {
-                    // Get current services for this group using the many-to-many relationship
-                    var currentGroupServices = await _groupServiceContext
-                        .Where(gs => gs.GroupId == group.Id)
-                        .ToListAsync();
-
-                    var currentServiceIds = currentGroupServices
-                        .Select(gs => gs.ServiceId)
-                        .ToList();
-                    var newServiceIds = services.Select(s => s.Id).ToList();
-
-                    // Find services to add to the group
-                    var servicesToAdd = newServiceIds.Except(currentServiceIds).ToList();
-
-                    // Find services to remove from the group
-                    var servicesToRemove = currentServiceIds.Except(newServiceIds).ToList();
-
-                    // Add new group-service relationships
-                    foreach (var serviceId in servicesToAdd)
-                    {
-                        await _groupServiceContext.AddAsync(
-                            new GroupService { GroupId = group.Id, ServiceId = serviceId }
-                        );
-                    }
-
-                    // Remove old group-service relationships
-                    var groupServicesToRemove = currentGroupServices
-                        .Where(gs => servicesToRemove.Contains(gs.ServiceId))
-                        .ToList();
-
-                    _groupServiceContext.RemoveRange(groupServicesToRemove);
-
-                    await _context.SaveChangesAsync();
-                }
-
-                if (!isOwnerTransaction)
-                    await _context.DatabaseFacade.CommitTransactionAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(
-                    ex,
-                    "Error in method {MethodName}. Exception Type: {ExceptionType}. Error Message: {ErrorMessage}. StackTrace: {StackTrace}",
-                    nameof(UpdateGroupAsync),
-                    ex.GetType().Name,
-                    ex.Message,
-                    ex.StackTrace
-                );
-
-                if (!isOwnerTransaction)
                     await _context.DatabaseFacade.RollbackTransactionAsync();
                 throw;
             }
@@ -386,12 +277,5 @@ namespace Infrastructure.Services.Managements
         //        .Where(s => s.GroupServices.Any(gs => gs.GroupId == groupId))
         //        .ToListAsync();
         //}
-
-        public async Task<List<Group>> GetGroupsByServiceIdAsync(long serviceId)
-        {
-            return await _groupContext
-                .Where(g => g.GroupServices.Any(gs => gs.ServiceId == serviceId))
-                .ToListAsync();
-        }
     }
 }

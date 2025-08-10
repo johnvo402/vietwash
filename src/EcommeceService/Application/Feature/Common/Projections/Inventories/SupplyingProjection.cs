@@ -8,14 +8,12 @@ namespace Application.Feature.Common.Projections.Inventories
     {
         public long ProductId { get; set; } = default!;
         public string ProductName { get; set; } = default!;
-        public long SupplierId { get; set; } = default!;
+        public long? SupplierId { get; set; }
         public int Quantity { get; set; } = default!;
-        public string LotNumber { get; set; } = default!;
         public decimal Price { get; set; } = default!;
         public long UnitRelationId { get; set; } = default!;
-        public DateTimeOffset? ExpiryDate { get; set; }
         public string UnitName { get; set; } = default!;
-        public string SupplierName { get; set; } = default!;
+        public string? SupplierName { get; set; }
 
         public virtual void MappingFrom(ProductSupplying supplying)
         {
@@ -24,12 +22,10 @@ namespace Application.Feature.Common.Projections.Inventories
             ProductName = supplying.Product.Name;
             SupplierId = supplying.SupplierId;
             Quantity = supplying.Quantity;
-            LotNumber = supplying.LotNumber;
             Price = supplying.Price;
             UnitRelationId = supplying.UnitRelationId;
-            ExpiryDate = supplying.ExpiryDate;
             UnitName = supplying.UnitRelation.Unit?.Name ?? supplying.UnitRelation.Name;
-            SupplierName = supplying.Supplier.Name;
+            SupplierName = supplying.Supplier?.Name;
         }
     }
 

@@ -1,4 +1,5 @@
-﻿using Application.Feature.Common.Mapping.Units;
+﻿using Application.Feature.Common.Mapping.Services;
+using Application.Feature.Common.Mapping.Units;
 using Application.Feature.Common.Projections.Services;
 using Domain.Aggregates.Services;
 
@@ -13,7 +14,6 @@ namespace Application.Feature.Services.Command.Update
                 status: model.Status,
                 categoryId: model.CategoryId,
                 branchId: model.BranchId,
-                type: model.Type,
                 description: model.Description,
                 image: model.Image
             );
@@ -21,5 +21,3 @@ namespace Application.Feature.Services.Command.Update
         }
     }
 }
-
-

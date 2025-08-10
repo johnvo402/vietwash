@@ -11,4 +11,11 @@
         public string? ServiceName { get; set; }
         public decimal UnitPrice { get; set; }
     }
+
+    public class OrderEquipmentModel
+    {
+        public long EquipmentId { get; set; }
+
+        public string EquipmentName { get; set; } = default!;
+    }
 }

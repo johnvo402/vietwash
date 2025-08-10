@@ -11,5 +11,14 @@ namespace Application.Feature.Common.Projections.Units
         public int Multiple { get; set; }
         public decimal ProcessingTime { get; set; }
         public ActivationStatus Status { get; set; }
+
+        public ICollection<ServiceResourceProjection> ServiceResources { get; set; } = [];
+    }
+
+    public class ServiceResourceProjection
+    {
+        public string UnitName { get; set; }
+        public string ProductName { get; set; }
+        public decimal Quantity { get; set; }
     }
 }

@@ -23,6 +23,9 @@ namespace Domain.Aggregates.Services
         public ICollection<OrderItem> OrderItems { get; set; } = [];
         public ICollection<ProductSupplying>? ProductSupplyings { get; set; }
 
+        public ICollection<ServiceResource> AsUnitProduct { get; set; } = [];
+        public ICollection<ServiceResource> AsUnitRelation { get; set; } = [];
+
         public void Update(
             string? name = null,
             bool? baseUnit = null,
