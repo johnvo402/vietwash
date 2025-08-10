@@ -38,7 +38,7 @@ namespace Application.Feature.Common.Projections.BranchProducts
             // CreatedBy = branchProduct.CreatedBy;
             // UpdatedAt = branchProduct.UpdatedAt;
             // UpdatedBy = branchProduct.UpdatedBy;
-
+            Sku = branchProduct.Sku;
             Name = branchProduct.Name;
             Image = branchProduct.Image;
             Status = branchProduct.Status;

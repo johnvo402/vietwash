@@ -131,6 +131,21 @@ namespace Application.Feature.Common.Validators.Orders
                                 .Build()
                         );
                 });
+
+            RuleForEach(x => x.OrderEquipments)
+                .ChildRules(item =>
+                {
+                    item.RuleFor(x => x.EquipmentName)
+                        .NotEmpty()
+                        .WithState(x =>
+                            Messager
+                                .Create<OrderEquipmentModel>(nameof(OrderItem))
+                                .Property(x => x.EquipmentName)
+                                .Message(MessageType.Empty)
+                                .Negative()
+                                .Build()
+                        );
+                });
         }
     }
 }

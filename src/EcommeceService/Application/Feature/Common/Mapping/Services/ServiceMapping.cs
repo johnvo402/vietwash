@@ -1,4 +1,6 @@
-﻿using Application.Feature.Common.Projections.Suppliers;
+﻿using Application.Feature.Common.Projections.Services;
+using Application.Feature.Common.Projections.Suppliers;
+using Domain.Aggregates.Services;
 using Domain.Aggregates.Suppliers;
 
 namespace Application.Feature.Common.Mapping.Services

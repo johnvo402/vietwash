@@ -32,7 +32,6 @@ namespace Application.Feature.Common.Projections.Inventories
         public string ProductName { get; set; }
         public int Quantity { get; set; }
         public string Price { get; set; }
-        public DateTimeOffset? ExpiryDate { get; set; }
         public string UnitName { get; set; }
         public string Total { get; set; }
     }

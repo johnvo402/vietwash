@@ -22,6 +22,8 @@ namespace Application.Common.HandleEventDomains.Orders
                 CustomerName = order.Customer?.DisplayName ?? "",
                 CustomerPhone = order.Customer?.PhoneNumber,
                 CustomerEmail = order.Customer?.Email,
+                Vat = order.Vat,
+                VatAmount = order.VatAmount,
 
                 Total = order.Amount,
                 Discount = disCount,

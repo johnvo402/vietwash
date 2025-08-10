@@ -6,6 +6,9 @@ namespace Application.Common.HandleEventDomains.Orders
         public string OrderCode { get; set; } = default!;
         public DateTimeOffset CompletedAt { get; set; }
 
+        public int Vat { get; set; }
+        public decimal VatAmount { get; set; }
+
         public string CustomerName { get; set; } = default!;
         public string? CustomerPhone { get; set; }
         public string? CustomerEmail { get; set; }

@@ -6,6 +6,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Contracts.Application.Common.Interfaces.Services.Encryptions;
 using Contracts.Common.Messages;
+using Contracts.Infrastructure.Common;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Specifications;
 using Domain.Aggregates.Vouchers;
@@ -17,6 +18,7 @@ namespace Application.Feature.Orders.Command.Create
     public class CreateOrderHandler(
         IUnitOfWork unitOfWork,
         ICurrentAccount _currentAccount,
+        OrgSetting orgSetting,
         IEncryptionService encryption,
         IQrGenerator barcode
     ) : IRequestHandler<CreateOrderCommand, Result<CreateOrderResponse>>
@@ -26,8 +28,7 @@ namespace Application.Feature.Orders.Command.Create
             CancellationToken cancellationToken
         )
         {
-            Order order = request.ToEntity((long)_currentAccount.Id!);
-
+            Order order = request.ToEntity((long)_currentAccount.Id!, orgSetting.VatPercent);
             var codeEncrypt = encryption.Encrypt(order.Code);
             var barcodeConfirm = barcode.GenerateQrBase64(codeEncrypt);
             order.CodeConfirm = barcodeConfirm;

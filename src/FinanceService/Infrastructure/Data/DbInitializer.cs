@@ -1,6 +1,7 @@
 using Application.Common.Interfaces.UnitOfWorks;
 using Domain.Aggregates.Funds;
 using Domain.Aggregates.Funds.Enums;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -22,32 +23,44 @@ public class DbInitializer
 
         try
         {
-            if (
-                (
-                    await unitOfWork
-                        .Repository<FundBehavior>()
-                        .FindByConditionAsync(x => x.Generate == true)
-                ) == null
-            )
+            // Danh sách chuẩn cần có
+            List<FundBehavior> desired = InitializeFundBehaviorAsync();
+
+            // Lấy các ID đã có trong DB (chỉ các bản ghi generate = true)
+            var existingIds = await unitOfWork
+                .Repository<FundBehavior>()
+                .QueryAsync(x => x.Generate == true)
+                .Select(x => x.Id)
+                .ToListAsync();
+
+            // Chỉ thêm những bản ghi còn thiếu
+            var toInsert = desired.Where(x => !existingIds.Contains(x.Id)).ToList();
+
+            if (toInsert.Count > 0)
             {
-                logger.Information("Bắt đầu khởi tạo dữ liệu hành vi quỹ...");
+                logger.Information(
+                    "Bắt đầu khởi tạo mới {Count} hành vi quỹ: {Ids}",
+                    toInsert.Count,
+                    string.Join(", ", toInsert.Select(i => i.Id))
+                );
 
-                List<FundBehavior> danhSachHanhViQuy = InitializeFundBehaviorAsync();
+                foreach (var item in toInsert)
+                    await unitOfWork.Repository<FundBehavior>().AddAsync(item);
 
-                foreach (var hanhViQuy in danhSachHanhViQuy)
-                {
-                    await unitOfWork.Repository<FundBehavior>().AddAsync(hanhViQuy);
-                    await unitOfWork.SaveAsync();
-                }
-
-                logger.Information("Hoàn tất khởi tạo dữ liệu hành vi quỹ...");
+                await unitOfWork.SaveAsync();
+                logger.Information("Hoàn tất khởi tạo dữ liệu hành vi quỹ mới.");
             }
+            else
+            {
+                logger.Information("Dữ liệu hành vi quỹ đã đầy đủ. Không có bản ghi mới cần thêm.");
+            }
+
             await unitOfWork.CommitAsync();
         }
         catch (Exception ex)
         {
             await unitOfWork.RollbackAsync();
-            logger.Information("Lỗi xảy ra trong khi khởi tạo dữ liệu hành vi quỹ: {message}", ex);
+            logger.Error(ex, "Lỗi khởi tạo dữ liệu hành vi quỹ: {Message}", ex.Message);
             throw;
         }
     }
@@ -109,6 +122,19 @@ public class DbInitializer
             )
             {
                 Id = 6,
+            },
+            new FundBehavior(
+                new FundName
+                {
+                    vi = "Sửa chửa/Bảo hành thiết bị",
+                    en = "Equipment Repair/Warranty",
+                },
+                FundType.Spend,
+                generate: true,
+                auto: false
+            )
+            {
+                Id = 7,
             },
         };
 

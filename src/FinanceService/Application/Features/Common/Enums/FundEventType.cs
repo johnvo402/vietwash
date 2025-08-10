@@ -4,5 +4,6 @@ namespace Application.Features.Common.Enums
     {
         Order,
         Inventory,
+        EquipmentActivity,
     }
 }

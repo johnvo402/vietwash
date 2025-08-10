@@ -5,6 +5,7 @@ namespace Application.Feature.Common.Projections.Inventories
 {
     public class InventoryDocumentModel
     {
+        public string? Code { get; set; } = null;
         public DateTimeOffset? TransactionAt { get; set; } = DateTimeOffset.UtcNow;
         public long BranchId { get; set; }
         public InventoryType Type { get; set; }

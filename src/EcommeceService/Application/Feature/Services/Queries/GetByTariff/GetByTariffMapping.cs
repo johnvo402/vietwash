@@ -18,7 +18,6 @@ namespace Application.Feature.Services.Queries.GetByTariff
                     {
                         Id = service.Id,
                         Name = service.Name,
-                        Type = service.Type,
                         Image = service.Image,
                         Status = service.Status,
                         CategoryId = service.CategoryId,

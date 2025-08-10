@@ -16,6 +16,8 @@ namespace Application.Events.CreateEInvoiceEvents
         public string CustomerName { get; set; } = default!;
         public string? CustomerPhone { get; set; }
         public string? CustomerEmail { get; set; }
+        public int Vat { get; set; }
+        public decimal VatAmount { get; set; }
         public decimal Total { get; set; }
         public decimal Discount { get; set; }
         public List<EInvoiceOrderItemMessage> Items { get; set; } = new();

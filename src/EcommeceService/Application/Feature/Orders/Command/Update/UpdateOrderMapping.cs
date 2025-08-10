@@ -8,15 +8,18 @@ namespace Application.Feature.Orders.Command.Update
         public static void FromUpdateModel(this Order entity, UpdateOrderModel model)
         {
             decimal amount = model.OrderItems.Sum(i => i.Price * i.Quantity);
+            decimal temptTotal = CalculationTotal(
+                amount,
+                entity.DiscountFixed,
+                entity.DiscountValue,
+                model.Point
+            );
+            decimal vatAmount = CalculateVatAmount(temptTotal, entity.Vat);
 
             entity.Update(
                 amount: amount,
-                total: CalculationTotal(
-                    amount,
-                    entity.DiscountFixed,
-                    entity.DiscountValue,
-                    model.Point
-                ),
+                vatAmount: vatAmount,
+                total: temptTotal + vatAmount,
                 deliveryTime: model.DeliveryTime,
                 tariffId: model.TariffId,
                 note: model.Note,
@@ -43,6 +46,22 @@ namespace Application.Feature.Orders.Command.Update
                     );
                 }
             }
+
+            entity.OrderEquipments.Clear();
+
+            if (model.OrderEquipments != null)
+            {
+                foreach (var x in model.OrderEquipments)
+                {
+                    entity.OrderEquipments.Add(
+                        new OrderEquipment
+                        {
+                            EquipmentId = x.EquipmentId,
+                            EquipmentName = x.EquipmentName,
+                        }
+                    );
+                }
+            }
         }
 
         private static decimal CalculationTotal(
@@ -64,6 +83,13 @@ namespace Application.Feature.Orders.Command.Update
             {
                 return amount - discountValue;
             }
+        }
+
+        private static decimal CalculateVatAmount(decimal amount, int vatPercent)
+        {
+            if (vatPercent <= 0)
+                return 0;
+            return amount * vatPercent / 100;
         }
     }
 }

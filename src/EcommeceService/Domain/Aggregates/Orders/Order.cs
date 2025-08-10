@@ -22,6 +22,9 @@ namespace Domain.Aggregates.Orders
         public string? VoucherCode { get; set; }
         public string Code { get; set; } = default!;
         public decimal Amount { get; set; } = default!;
+
+        public int Vat { get; set; }
+        public decimal VatAmount { get; set; }
         public decimal Total { get; set; } = default!;
         public bool DiscountFixed { get; set; } = default!;
         public PaymentMethod? PaymentMethod { get; set; }
@@ -40,13 +43,14 @@ namespace Domain.Aggregates.Orders
 
         public ICollection<OrderItem> OrderItems { get; set; } = [];
 
+        public ICollection<OrderEquipment> OrderEquipments { get; set; } = [];
+
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
             switch (domainEvent)
             {
                 case CreateFundEvent:
                     return true;
-
                 case VoucherUsageEvent:
                     return true;
                 case UpdateStatusOrderEvent:
@@ -67,6 +71,8 @@ namespace Domain.Aggregates.Orders
             decimal amount,
             decimal total,
             OrderStatus status,
+            int vat = 0,
+            decimal vatAmount = 0,
             long? voucherId = null,
             string? voucherCode = null,
             long? customerId = null,
@@ -80,7 +86,8 @@ namespace Domain.Aggregates.Orders
         {
             Guard.Against.Null(code, nameof(code));
             Guard.Against.Null(status, nameof(status));
-
+            Vat = vat;
+            VatAmount = vatAmount;
             BranchId = branchId;
             StaffId = staffId;
             VoucherId = voucherId;
@@ -103,6 +110,7 @@ namespace Domain.Aggregates.Orders
             decimal? amount = null,
             decimal? total = null,
             decimal? point = null,
+            decimal? vatAmount = null,
             string? note = null,
             long? tariffId = null,
             DateTimeOffset? deliveryTime = null
@@ -116,6 +124,8 @@ namespace Domain.Aggregates.Orders
 
             if (amount.HasValue)
                 Amount = amount.Value;
+            if (vatAmount.HasValue)
+                VatAmount = vatAmount.Value;
 
             if (total.HasValue)
                 Total = total.Value;
@@ -146,12 +156,12 @@ namespace Domain.Aggregates.Orders
 
         public void UpdateStatus(OrderStatus status)
         {
+            if (Status != status)
+            {
+                Emit(new UpdateStatusOrderEvent() { Order = this });
+            }
             switch (status)
             {
-                case OrderStatus.Processed:
-                    Status = OrderStatus.Processed;
-                    Emit(new UpdateStatusOrderEvent() { Order = this });
-                    break;
                 case OrderStatus.Completed:
                     Status = OrderStatus.Completed;
                     OrderDate = DateTimeOffset.UtcNow;
@@ -170,6 +180,7 @@ namespace Domain.Aggregates.Orders
                             {
                                 ["code"] = Code,
                                 ["publicId"] = PublicId.ToString(),
+                                ["type"] = FundEventType.Order,
                             },
                             Point = Point,
                             FundEventType = FundEventType.Order,
@@ -195,6 +206,7 @@ namespace Domain.Aggregates.Orders
                                 {
                                     ["code"] = Code,
                                     ["publicId"] = PublicId.ToString(),
+                                    ["type"] = FundEventType.Order,
                                 },
                                 Point = Point,
                                 FundEventType = FundEventType.Order,

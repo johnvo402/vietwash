@@ -3,12 +3,10 @@ namespace Application.Feature.Common.Projections.Inventories
     public class ProductSupplyingModel
     {
         public long ProductId { get; set; } = default!;
-        public long SupplierId { get; set; } = default!;
+        public long? SupplierId { get; set; }
         public int Quantity { get; set; } = default!;
-        public bool IsLot { get; set; } = default!;
         public decimal Price { get; set; } = default!;
         public long UnitRelationId { get; set; } = default!;
-        public DateTimeOffset? ExpiryDate { get; set; }
     }
 
     public class EquipmentSupplyingModel

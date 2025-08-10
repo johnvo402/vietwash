@@ -15,10 +15,13 @@ namespace Application.Feature.Common.Projections.Orders
         public PaymentMethod? PaymentMethod { get; set; }
         public string? QrCode { get; set; }
         public string? VoucherCode { get; set; }
+        public int Vat { get; set; }
+        public decimal VatAmount { get; set; }
         public decimal Point { get; set; }
         public long? TariffId { get; set; }
         public TariffByBranchProjection? Tariff { get; set; }
         public ICollection<OrderItemProjection> OrderItems { get; set; } = [];
+        public ICollection<OrderEquipmentProjection> OrderEquipments { get; set; } = [];
 
         public virtual void MappingFrom(Order order)
         {
@@ -31,6 +34,8 @@ namespace Application.Feature.Common.Projections.Orders
 
             Code = order.Code;
             Amount = order.Amount;
+            Vat = order.Vat;
+            VatAmount = order.VatAmount;
             Total = order.Total;
             DiscountFixed = order.DiscountFixed;
             DiscountValue = order.DiscountValue;
@@ -70,10 +75,29 @@ namespace Application.Feature.Common.Projections.Orders
                         UnitPrice = item.UnitPrice,
                     })
                     .ToList() ?? [];
+            OrderEquipments =
+                order
+                    ?.OrderEquipments.ToListMapping(item => new OrderEquipmentProjection
+                    {
+                        Code = item.Equipment.Code,
+                        Image = item.Equipment.Image,
+                        EquipmentName = item.Equipment.Name,
+                    })
+                    .ToList() ?? [];
 
             Customer = order?.Customer?.UserDTOResponse() ?? null;
             Staff = order?.Staff?.UserDTOResponse() ?? null;
         }
+    }
+
+    public class OrderEquipmentProjection
+    {
+        public string Code { get; set; }
+
+        [File]
+        public string? Image { get; set; }
+
+        public string EquipmentName { get; set; }
     }
 
     public class OrderItemProjection

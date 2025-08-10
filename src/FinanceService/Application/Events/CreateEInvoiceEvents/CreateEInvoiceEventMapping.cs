@@ -15,8 +15,7 @@ namespace Application.Events.CreateEInvoiceEvents
             string? qrCodeUrl = null
         )
         {
-            var taxTotal = Math.Round(message.Total * org.VatPercent / 100, 2);
-            var totalWithTax = message.Total - taxTotal - message.Discount;
+            var totalWithTax = message.Total + message.VatAmount - message.Discount;
 
             var items = message
                 .Items.Select(x => new EInvoiceItem
@@ -40,8 +39,8 @@ namespace Application.Events.CreateEInvoiceEvents
                 orgPhone: org.OrgPhone,
                 customerName: message.CustomerName,
                 total: message.Total,
-                vatPercent: org.VatPercent,
-                taxTotal: taxTotal,
+                vatPercent: message.Vat,
+                taxTotal: message.VatAmount,
                 totalWithTax: totalWithTax,
                 items: items,
                 customerEmail: message.CustomerEmail,

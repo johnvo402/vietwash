@@ -1,6 +1,5 @@
 ﻿using Domain.Aggregates.Enums;
 using Domain.Aggregates.Services;
-using Domain.Aggregates.Services.Enums;
 
 namespace Application.Feature.Common.Projections.Units
 {
@@ -14,6 +13,8 @@ namespace Application.Feature.Common.Projections.Units
         public int Multiple { get; set; } = 1; // Mặc định là 1 cho Service
         public decimal ProcessingTime { get; set; } = default!;
 
+        public List<ServiceResourceModel> ServiceResources { get; set; } = [];
+
         public virtual void MappingFrom(UnitRelation unitRelation)
         {
             Name = unitRelation.Name;
@@ -24,5 +25,12 @@ namespace Application.Feature.Common.Projections.Units
             Status = unitRelation.Status;
             UnitId = unitRelation.UnitId;
         }
+    }
+
+    public class ServiceResourceModel
+    {
+        public long UnitProductId { get; set; }
+        public long ProductId { get; set; }
+        public decimal Quantity { get; set; }
     }
 }

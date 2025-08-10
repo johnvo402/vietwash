@@ -4,5 +4,7 @@ namespace Domain.Events.Enums
     {
         Order,
         Inventory,
+
+        EquipmentActivity,
     }
 }

@@ -61,7 +61,6 @@ namespace Application.Feature.Common.Mapping.Inventories
                         ProductName = p.Product?.Name ?? "--",
                         Quantity = p.Quantity,
                         Price = p.Price.FormatCurrency(),
-                        ExpiryDate = p.ExpiryDate,
                         UnitName = p.UnitRelation?.Name ?? "--",
                         Total = (p.Quantity * p.Price).FormatCurrency(),
                     })

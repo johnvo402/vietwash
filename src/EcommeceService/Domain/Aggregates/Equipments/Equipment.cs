@@ -1,5 +1,9 @@
 ﻿using Ardalis.GuardClauses;
 using Domain.Aggregates.Equipments.Enums;
+using Domain.Aggregates.Orders;
+using Domain.Aggregates.Orders.Enums;
+using Domain.Events;
+using Domain.Events.Enums;
 using Mediator;
 using Shared.Kernel.Common;
 
@@ -23,6 +27,8 @@ namespace Domain.Aggregates.Equipments
 
         public ICollection<EquipmentActivity> EquipmentActivities { get; set; } = [];
 
+        public ICollection<OrderEquipment> OrderEquipments { get; set; } = [];
+
         public Equipment(
             long branchId,
             string name,
@@ -44,6 +50,30 @@ namespace Domain.Aggregates.Equipments
             NextMaintenanceDate = nextMaintenanceDate;
         }
 
+        public void AddActivity(EquipmentActivity equipmentActivities)
+        {
+            this.EquipmentActivities.Add(equipmentActivities);
+            Emit(
+                new CreateFundEvent()
+                {
+                    TypeId = "spend",
+                    ReferenceId = Id,
+                    Amount = equipmentActivities.TotalCost,
+                    PaymentMethod = PaymentMethod.Cash,
+                    BranchId = BranchId,
+                    BehaviorId = 7,
+                    Metadata = new Dictionary<string, object>
+                    {
+                        ["code"] = Code,
+                        ["publicId"] = PublicId.ToString(),
+                        ["type"] = FundEventType.EquipmentActivity,
+                    },
+                    Point = 0,
+                    FundEventType = FundEventType.EquipmentActivity,
+                }
+            );
+        }
+
         public void Update(
             string? name = null,
             string? description = null,
@@ -62,7 +92,13 @@ namespace Domain.Aggregates.Equipments
 
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
-            throw new NotImplementedException();
+            switch (domainEvent)
+            {
+                case CreateFundEvent:
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }
