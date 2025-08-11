@@ -57,6 +57,8 @@ namespace Domain.Aggregates.Orders
                     return true;
                 case EInvoiceEvent:
                     return true;
+                case UseEquipmentOrder:
+                    return true;
                 default:
                     return false;
             }
