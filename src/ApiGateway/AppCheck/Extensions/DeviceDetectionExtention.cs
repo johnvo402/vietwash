@@ -27,7 +27,10 @@ public static class DeviceDetectionExtension
         var browser = detection.Browser.Name.ToString().ToLower();
         var platform = detection.Platform.Name.ToString().ToLower();
         var userAgent = detection.UserAgent.ToString().ToLower();
-
+        Console.WriteLine($"[DEBUG] UA: {userAgent}");
+        Console.WriteLine($"[DEBUG] Device: {device}");
+        Console.WriteLine($"[DEBUG] Browser: {browser}");
+        Console.WriteLine($"[DEBUG] Platform: {platform}");
         // Xác định mobile/tablet từ Device.Type hoặc từ User-Agent thủ công
         bool isMobileDevice =
             device == Device.Mobile
