@@ -38,15 +38,13 @@ public static class DeviceDetectionExtension
             || userAgent.Contains("android")
             || userAgent.Contains("iphone")
             || userAgent.Contains("ipad")
-            || userAgent.Contains("mobile")
-            || userAgent.Contains("dart"); // Flutter app
+            || userAgent.Contains("mobile"); // Flutter app
 
         // Xác định browser là unknown hoặc là Dart runtime
         bool isUnknownBrowser =
             string.IsNullOrEmpty(browser)
             || browser.Contains("unknown")
-            || browser.Contains("dart")
-            || browser.Contains("dart:io");
+            || browser.Contains("others");
 
         return isMobileDevice && isUnknownBrowser;
     }
