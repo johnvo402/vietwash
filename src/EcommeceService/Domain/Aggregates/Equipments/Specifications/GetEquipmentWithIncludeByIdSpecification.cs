@@ -11,7 +11,8 @@ namespace Domain.Aggregates.Equipments.Specifications
                 .Where(x => x.Id == id)
                 .Include(x => x.EquipmentActivities)
                 .ThenInclude(a => a.ActivityDetails)
-                .Include(x => x.OrderEquipments);
+                .Include(x => x.OrderEquipments)
+                .ThenInclude(x => x.Order);
         }
     }
 }
