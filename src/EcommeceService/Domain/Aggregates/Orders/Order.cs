@@ -169,12 +169,24 @@ namespace Domain.Aggregates.Orders
                     if (orderEquipment != null)
                     {
                         OrderEquipments = orderEquipment;
-                        Emit(new UseEquipmentOrder { OrderEquipments = [.. orderEquipment] });
+                        Emit(
+                            new UseEquipmentOrder
+                            {
+                                OrderEquipments = [.. orderEquipment],
+                                Using = true,
+                            }
+                        );
                     }
                     break;
                 case OrderStatus.Processed:
                     Status = OrderStatus.Processed;
-                    Emit(new UseEquipmentOrder { OrderEquipments = [.. this.OrderEquipments] });
+                    Emit(
+                        new UseEquipmentOrder
+                        {
+                            OrderEquipments = [.. this.OrderEquipments],
+                            Using = false,
+                        }
+                    );
                     break;
                 case OrderStatus.Completed:
                     Status = OrderStatus.Completed;

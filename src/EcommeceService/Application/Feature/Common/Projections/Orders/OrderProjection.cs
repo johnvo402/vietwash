@@ -16,6 +16,7 @@ namespace Application.Feature.Common.Projections.Orders
         public DateTimeOffset? OrderDate { get; set; }
         public DateTimeOffset DeliveryTime { get; set; }
         public OrderStatus Status { get; set; }
+        public decimal TotalProcessTime { get; set; }
         public long BranchId { get; set; }
         public UserDTO? Customer { get; set; }
         public UserDTO? Staff { get; set; }

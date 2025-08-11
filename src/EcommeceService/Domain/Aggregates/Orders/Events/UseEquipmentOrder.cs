@@ -5,5 +5,7 @@ namespace Domain.Aggregates.Orders.Events
     public class UseEquipmentOrder : INotification
     {
         public List<OrderEquipment> OrderEquipments { get; set; }
+
+        public bool Using { get; set; }
     }
 }

@@ -28,6 +28,7 @@ namespace Application.Feature.Orders.Queries.List
                 Status = order.Status,
                 BranchId = order.BranchId,
                 Customer = order.Customer != null ? order.Customer.UserDTOResponse() : null,
+                TotalProcessTime = order.OrderItems.Sum(x => x.ProcessingTime),
             };
     }
 }

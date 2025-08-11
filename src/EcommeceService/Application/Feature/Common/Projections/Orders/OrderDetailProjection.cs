@@ -87,6 +87,7 @@ namespace Application.Feature.Common.Projections.Orders
 
             Customer = order?.Customer?.UserDTOResponse() ?? null;
             Staff = order?.Staff?.UserDTOResponse() ?? null;
+            TotalProcessTime = order?.OrderItems.Sum(x => x.ProcessingTime) ?? 0;
         }
     }
 

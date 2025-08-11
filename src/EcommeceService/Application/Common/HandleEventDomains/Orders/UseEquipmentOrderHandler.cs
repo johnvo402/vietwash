@@ -31,7 +31,7 @@ namespace Application.Common.HandleEventDomains.Orders
 
                     if (equipment != null)
                     {
-                        equipment.Using = !equipment.Using;
+                        equipment.Using = notification.Using;
                         await _unitOfWork.Repository<Equipment>().UpdateAsync(equipment);
                     }
                 }
