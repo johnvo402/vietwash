@@ -42,8 +42,15 @@ namespace Application.Feature.Equipments.Command.CreateActivities
                 .WithState(_ =>
                     Messager
                         .Create<EquipmentActivity>()
-                        .Property(x => x.Id)
                         .Message(MessageType.Found)
+                        .Negative()
+                        .Build()
+                )
+                .MustAsync(CanAddActivity)
+                .WithState(_ =>
+                    Messager
+                        .Create<EquipmentActivity>()
+                        .Message(MessageType.Valid)
                         .Negative()
                         .Build()
                 );
@@ -68,6 +75,26 @@ namespace Application.Feature.Equipments.Command.CreateActivities
             return await _unitOfWork
                 .Repository<Equipment>()
                 .AnyAsync(x => x.Id == equipmentId, cancellation);
+        }
+
+        private async Task<bool> CanAddActivity(
+            CreateEquipmentActivityCommand command,
+            long equipmentId,
+            CancellationToken cancellation
+        )
+        {
+            return await _unitOfWork
+                .Repository<Equipment>()
+                .AnyAsync(
+                    x =>
+                        x.Id == equipmentId
+                        && (
+                            x.Status == EquipmentStatus.UnderMaintenance
+                            || x.Status == EquipmentStatus.UnderRepair
+                        )
+                        && !x.Using,
+                    cancellation
+                );
         }
 
         private async Task<bool> MatchActivityTypeWithEquipmentStatusAsync(

@@ -39,9 +39,9 @@ namespace Application.Feature.Orders.Command.UpdateStatus
                     );
                 }
 
-                if (request.Status.HasValue)
+                if (request.Model.Status.HasValue)
                 {
-                    if (request.Status.Value < order.Status)
+                    if (request.Model.Status.Value < order.Status)
                         return Result.Failure(
                             new BadRequestError(
                                 "Status invalid",
@@ -53,18 +53,52 @@ namespace Application.Feature.Orders.Command.UpdateStatus
                                     .BuildMessage()
                             )
                         );
+                    var equipmentOrder = new List<OrderEquipment>();
+                    if (
+                        request.Model.Status == OrderStatus.InProgress
+                        && (
+                            request.Model.OrderEquipments == null
+                            || request.Model.OrderEquipments.Count == 0
+                        )
+                    )
+                    {
+                        return Result.Failure(
+                            new BadRequestError(
+                                "OrderEquipments Empty",
+                                Messager
+                                    .Create<Order>()
+                                    .Property(x => x.OrderEquipments)
+                                    .Message(MessageType.Empty)
+                                    .Negative()
+                                    .BuildMessage()
+                            )
+                        );
+                    }
+                    else
+                    {
+                        foreach (var x in request.Model.OrderEquipments!)
+                        {
+                            equipmentOrder.Add(
+                                new OrderEquipment
+                                {
+                                    EquipmentId = x.EquipmentId,
+                                    EquipmentName = x.EquipmentName,
+                                }
+                            );
+                        }
+                    }
 
-                    order.UpdateStatus(request.Status.Value);
+                    order.UpdateStatus(request.Model.Status.Value, equipmentOrder);
 
                     if (
-                        request.Status == OrderStatus.Completed
+                        request.Model.Status == OrderStatus.Completed
                         && order.Status != OrderStatus.Completed
                     )
                     {
                         order.EmitVoucherUsageEvent(order.DiscountValue, order.VoucherId.Value);
                     }
 
-                    order.PaymentMethod = request.PaymentMethod;
+                    order.PaymentMethod = request.Model.PaymentMethod;
                 }
                 using var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
 

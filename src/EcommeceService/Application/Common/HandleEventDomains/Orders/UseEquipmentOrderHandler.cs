@@ -1,0 +1,49 @@
+using Application.Common.Interfaces.UnitOfWorks;
+using Domain.Aggregates.Equipments;
+using Domain.Aggregates.Orders.Events;
+using Mediator;
+
+namespace Application.Common.HandleEventDomains.Orders
+{
+    public class UseEquipmentOrderHandler : INotificationHandler<UseEquipmentOrder>
+    {
+        private readonly IUnitOfWork _unitOfWork;
+
+        public UseEquipmentOrderHandler(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        public async ValueTask Handle(
+            UseEquipmentOrder notification,
+            CancellationToken cancellationToken
+        )
+        {
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync(cancellationToken);
+
+                foreach (var x in notification.OrderEquipments)
+                {
+                    var equipment = await _unitOfWork
+                        .Repository<Equipment>()
+                        .FindByIdAsync(x.EquipmentId, cancellationToken);
+
+                    if (equipment != null)
+                    {
+                        equipment.Using = !equipment.Using;
+                        await _unitOfWork.Repository<Equipment>().UpdateAsync(equipment);
+                    }
+                }
+
+                await _unitOfWork.SaveAsync(cancellationToken);
+                await _unitOfWork.CommitAsync(cancellationToken);
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackAsync(cancellationToken);
+                throw;
+            }
+        }
+    }
+}

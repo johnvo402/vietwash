@@ -19,6 +19,8 @@ namespace Domain.Aggregates.Equipments
 
         public decimal Price { get; set; } = default!;
 
+        public bool Using { get; set; } = false;
+
         public DateTimeOffset? LastMaintenanceOrRepairDate { get; set; }
 
         public DateTimeOffset? NextMaintenanceDate { get; set; }

@@ -154,7 +154,7 @@ namespace Domain.Aggregates.Orders
             }
         }
 
-        public void UpdateStatus(OrderStatus status)
+        public void UpdateStatus(OrderStatus status, List<OrderEquipment>? orderEquipment = null)
         {
             if (Status != status)
             {
@@ -162,6 +162,16 @@ namespace Domain.Aggregates.Orders
             }
             switch (status)
             {
+                case OrderStatus.InProgress:
+                    if (orderEquipment != null)
+                    {
+                        OrderEquipments = orderEquipment;
+                        Emit(new UseEquipmentOrder { OrderEquipments = [.. orderEquipment] });
+                    }
+                    break;
+                case OrderStatus.Processed:
+                    Emit(new UseEquipmentOrder { OrderEquipments = [.. this.OrderEquipments] });
+                    break;
                 case OrderStatus.Completed:
                     Status = OrderStatus.Completed;
                     OrderDate = DateTimeOffset.UtcNow;
