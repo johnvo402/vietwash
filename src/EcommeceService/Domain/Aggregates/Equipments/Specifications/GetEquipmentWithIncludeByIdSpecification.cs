@@ -10,7 +10,8 @@ namespace Domain.Aggregates.Equipments.Specifications
             Query
                 .Where(x => x.Id == id)
                 .Include(x => x.EquipmentActivities)
-                .ThenInclude(a => a.ActivityDetails);
+                .ThenInclude(a => a.ActivityDetails)
+                .Include(x => x.OrderEquipments);
         }
     }
 }
