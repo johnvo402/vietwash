@@ -163,7 +163,7 @@ namespace Domain.Aggregates.Orders
             switch (status)
             {
                 case OrderStatus.InProgress:
-                    Status = OrderStatus.Completed;
+                    Status = OrderStatus.InProgress;
                     if (orderEquipment != null)
                     {
                         OrderEquipments = orderEquipment;
@@ -171,7 +171,7 @@ namespace Domain.Aggregates.Orders
                     }
                     break;
                 case OrderStatus.Processed:
-                    Status = OrderStatus.Completed;
+                    Status = OrderStatus.Processed;
                     Emit(new UseEquipmentOrder { OrderEquipments = [.. this.OrderEquipments] });
                     break;
                 case OrderStatus.Completed:
