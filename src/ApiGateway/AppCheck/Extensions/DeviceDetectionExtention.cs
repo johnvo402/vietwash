@@ -21,17 +21,29 @@ public static class DeviceDetectionExtension
         return device == Device.Desktop || (device != Device.Desktop && isBrowser);
     }
 
-    public static bool IsMobileOrTablet(this IDetectionService _detection)
+    public static bool IsMobileOrTablet(this IDetectionService detection)
     {
-        // Nếu device là Mobile/Tablet và browser không phải là web browser => khả năng cao là native app
-        var device = _detection.Device.Type;
-        var browser = _detection.Browser.Name.ToString().ToLower();
-        var platform = _detection.Platform.Name.ToString().ToLower();
+        var device = detection.Device.Type;
+        var browser = detection.Browser.Name.ToString().ToLower();
+        var platform = detection.Platform.Name.ToString().ToLower();
+        var userAgent = detection.UserAgent.ToString().ToLower();
 
-        bool isMobileDevice = device == Device.Mobile || device == Device.Tablet;
+        // Xác định mobile/tablet từ Device.Type hoặc từ User-Agent thủ công
+        bool isMobileDevice =
+            device == Device.Mobile
+            || device == Device.Tablet
+            || userAgent.Contains("android")
+            || userAgent.Contains("iphone")
+            || userAgent.Contains("ipad")
+            || userAgent.Contains("mobile")
+            || userAgent.Contains("dart"); // Flutter app
 
-        // Nếu browser không rõ ràng hoặc là unknown => khả năng cao là native app
-        bool isUnknownBrowser = string.IsNullOrEmpty(browser) || browser.Contains("unknown");
+        // Xác định browser là unknown hoặc là Dart runtime
+        bool isUnknownBrowser =
+            string.IsNullOrEmpty(browser)
+            || browser.Contains("unknown")
+            || browser.Contains("dart")
+            || browser.Contains("dart:io");
 
         return isMobileDevice && isUnknownBrowser;
     }
