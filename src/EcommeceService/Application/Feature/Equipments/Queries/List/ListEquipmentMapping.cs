@@ -23,6 +23,7 @@ namespace Application.Feature.Equipments.Queries.List
                 Price = equipment.Price,
                 Status = equipment.Status,
                 Image = equipment.Image,
+                Using = equipment.Using,
             };
         }
     }

@@ -1,4 +1,5 @@
-﻿using Contracts.ApiWrapper;
+﻿using Application.Feature.Common.Projections.Orders;
+using Contracts.ApiWrapper;
 using Contracts.Routers;
 using Domain.Aggregates.Orders.Enums;
 using Mediator;
@@ -10,7 +11,8 @@ namespace Application.Feature.Orders.Command.UpdateStatus
     {
         [FromRoute(Name = RouterBase.Id)]
         public string OrderId { get; set; } = string.Empty;
-        public OrderStatus? Status { get; set; }
-        public PaymentMethod? PaymentMethod { get; set; }
+
+        [FromBody]
+        public OrderUpdateStatus Model { get; set; }
     }
 }

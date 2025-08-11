@@ -49,11 +49,6 @@ namespace Application.Feature.Orders.Command.Create
                 ServiceName = x.ServiceName,
                 UnitPrice = x.UnitPrice,
             });
-            response.OrderEquipments = command.OrderEquipments.ToListMapping(x => new OrderEquipment
-            {
-                EquipmentId = x.EquipmentId,
-                EquipmentName = x.EquipmentName,
-            });
 
             return response;
         }

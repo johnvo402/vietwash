@@ -3,6 +3,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.ApiWrapper;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Orders;
+using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Specifications;
 using Mediator;
 
@@ -31,6 +32,19 @@ namespace Application.Feature.Orders.Command.Update
                         Messager
                             .Create<Order>()
                             .Message(MessageType.Found)
+                            .Negative()
+                            .BuildMessage()
+                    )
+                );
+            }
+            if (order.Status != OrderStatus.Pending)
+            {
+                return Result.Failure(
+                    new NotFoundError(
+                        "Order can't update",
+                        Messager
+                            .Create<Order>()
+                            .Message(MessageType.Valid)
                             .Negative()
                             .BuildMessage()
                     )

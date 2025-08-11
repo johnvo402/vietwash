@@ -18,6 +18,8 @@ namespace Application.Feature.Common.Projections.Equipments
         public decimal Price { get; set; }
         public EquipmentStatus Status { get; set; }
 
+        public bool Using { get; set; }
+
         public virtual void MappingFrom(Equipment equipment)
         {
             Id = equipment.Id;
@@ -34,6 +36,7 @@ namespace Application.Feature.Common.Projections.Equipments
             Price = equipment.Price;
             Status = equipment.Status;
             Image = equipment.Image;
+            Using = equipment.Using;
         }
     }
 }

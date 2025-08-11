@@ -33,8 +33,11 @@ namespace Presentation.Endpoints.Webhooks
                 var requestSend = new UpdateStatusCommand
                 {
                     OrderId = data.orderCode.ToString(),
-                    Status = OrderStatus.Completed,
-                    PaymentMethod = PaymentMethod.Card,
+                    Model = new()
+                    {
+                        Status = OrderStatus.Completed,
+                        PaymentMethod = PaymentMethod.Card,
+                    },
                 };
                 var response = await sender.Send(requestSend, cancellationToken);
                 return response.ToActionResult();

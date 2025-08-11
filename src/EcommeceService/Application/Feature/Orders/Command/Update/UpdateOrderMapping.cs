@@ -46,22 +46,6 @@ namespace Application.Feature.Orders.Command.Update
                     );
                 }
             }
-
-            entity.OrderEquipments.Clear();
-
-            if (model.OrderEquipments != null)
-            {
-                foreach (var x in model.OrderEquipments)
-                {
-                    entity.OrderEquipments.Add(
-                        new OrderEquipment
-                        {
-                            EquipmentId = x.EquipmentId,
-                            EquipmentName = x.EquipmentName,
-                        }
-                    );
-                }
-            }
         }
 
         private static decimal CalculationTotal(
