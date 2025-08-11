@@ -82,7 +82,8 @@ namespace Application.Common.HandleEventDomains.Orders
                             Price = g.First().Price, // cùng UnitRelation nên price đồng nhất
                         })
                         .ToList();
-
+                    if (issueLines.Count <= 0)
+                        break;
                     var doc = new CreateInventoryDocumentCommand
                     {
                         BranchId = orderInProgress.BranchId,
