@@ -16,12 +16,13 @@ namespace Application.Feature.Statistics.Queries.BranchNetRevenue
         >
     {
         public async ValueTask<Result<IEnumerable<GetNetRevenueBranchResponse>>> Handle(
-            [FromQuery] GetNetRevenueBranchQuery request,
+            GetNetRevenueBranchQuery request,
             CancellationToken cancellationToken
         )
         {
             var queryParamRequest = new QueryParamRequest();
             var listBranchUser = currentUser.Session!.Branches!.ToList();
+
             var orders = await unitOfWork
                 .DynamicReadOnlyRepository<Order>()
                 .ListAsync(
@@ -34,16 +35,19 @@ namespace Application.Feature.Statistics.Queries.BranchNetRevenue
 
             foreach (var order in orders)
             {
+                // Giả sử Amount là doanh thu cần tính
+                var netRevenue = order.Total;
+
                 if (revenueByBranch.TryGetValue(order.BranchId, out var existBranch))
                 {
-                    existBranch.TotalNetRevenue += order.Amount;
+                    existBranch.TotalNetRevenue += netRevenue;
                 }
                 else
                 {
                     revenueByBranch[order.BranchId] = new GetNetRevenueBranchResponse
                     {
                         BranchId = order.BranchId,
-                        TotalNetRevenue = order.Amount,
+                        TotalNetRevenue = netRevenue,
                     };
                 }
             }
@@ -53,11 +57,11 @@ namespace Application.Feature.Statistics.Queries.BranchNetRevenue
             {
                 foreach (var branch in revenueByBranch.Values)
                 {
-                    branch.Percentage =
-                        (float)Math.Ceiling((branch.TotalNetRevenue / totalRevenue) * 100 * 100)
-                        / 100;
+                    branch.Percentage = (float)
+                        Math.Round((branch.TotalNetRevenue / totalRevenue) * 100, 2);
                 }
             }
+
             return Result<IEnumerable<GetNetRevenueBranchResponse>>.Success(revenueByBranch.Values);
         }
     }
