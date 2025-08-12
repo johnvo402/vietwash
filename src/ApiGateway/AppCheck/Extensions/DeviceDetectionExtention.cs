@@ -24,29 +24,20 @@ public static class DeviceDetectionExtension
     public static bool IsMobileOrTablet(this IDetectionService detection)
     {
         var device = detection.Device.Type;
-        var browser = detection.Browser.Name.ToString().ToLower();
-        var platform = detection.Platform.Name.ToString().ToLower();
         var userAgent = detection.UserAgent.ToString().ToLower();
         Console.WriteLine($"[DEBUG] UA: {userAgent}");
         Console.WriteLine($"[DEBUG] Device: {device}");
-        Console.WriteLine($"[DEBUG] Browser: {browser}");
-        Console.WriteLine($"[DEBUG] Platform: {platform}");
-        // Xác định mobile/tablet từ Device.Type hoặc từ User-Agent thủ công
         bool isMobileDevice =
             device == Device.Mobile
             || device == Device.Tablet
             || userAgent.Contains("android")
             || userAgent.Contains("iphone")
             || userAgent.Contains("ipad")
-            || userAgent.Contains("mobile"); // Flutter app
+            || userAgent.Contains("mobile")
+            || userAgent.Contains("flutter");
 
-        // Xác định browser là unknown hoặc là Dart runtime
-        bool isUnknownBrowser =
-            string.IsNullOrEmpty(browser)
-            || browser.Contains("unknown")
-            || browser.Contains("others");
-
-        return isMobileDevice && isUnknownBrowser;
+        // Bỏ điều kiện isUnknownBrowser nếu userAgent đến từ app native
+        return isMobileDevice;
     }
 
     public static Device GetDeviceType(this IDetectionService _detection)
