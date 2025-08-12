@@ -216,19 +216,19 @@ namespace Infrastructure.Services.Identity
                 await _cache.Database.KeyExpireAsync(rateLimitKey, TimeSpan.FromHours(1));
             }
 
-            if (generationCount > GenerationLimitPerHour)
-            {
-                _logger.Warning(
-                    "OTP generation limit exceeded for recipient: {Recipient}, ip: {Ip}, type: {Type}",
-                    recipient,
-                    clientIp,
-                    type
-                );
-                return new RateLimitError(
-                    "Rate limit exceeded",
-                    $"Too many OTP requests for this {type} and IP. Please try again later."
-                );
-            }
+            // if (generationCount > GenerationLimitPerHour)
+            // {
+            //     _logger.Warning(
+            //         "OTP generation limit exceeded for recipient: {Recipient}, ip: {Ip}, type: {Type}",
+            //         recipient,
+            //         clientIp,
+            //         type
+            //     );
+            //     return new RateLimitError(
+            //         "Rate limit exceeded",
+            //         $"Too many OTP requests for this {type} and IP. Please try again later."
+            //     );
+            // }
             return null;
         }
 
