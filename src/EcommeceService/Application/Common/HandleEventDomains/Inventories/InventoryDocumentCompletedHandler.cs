@@ -8,6 +8,7 @@ using Domain.Aggregates.Equipments.Enums;
 using Domain.Aggregates.Inventories;
 using Domain.Aggregates.Inventories.Enums;
 using Domain.Aggregates.Inventories.Events;
+using Domain.Aggregates.Inventories.Spectifications;
 using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.PubSubLogs;
 using Domain.Aggregates.Users;
@@ -46,7 +47,17 @@ public sealed class InventoryDocumentCompletedHandler
         CancellationToken cancellationToken
     )
     {
-        var document = notification.InventoryDocument;
+        var document = await _unitOfWork
+            .DynamicReadOnlyRepository<InventoryDocument>()
+            .FindByConditionAsync(
+                new GetInventoryDocumentByIdSpecification(notification.InventoryDocument.Id),
+                cancellationToken
+            );
+        if (document == null)
+        {
+            return;
+        }
+
         var newEquipments = new List<Equipment>();
 
         // Process supplyings and create consolidated fund events by supplier

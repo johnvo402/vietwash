@@ -17,11 +17,8 @@ namespace Application.Feature.InventoryDocuments.Commands.UpdateStatus
         )
         {
             var result = await unitOfWork
-                .DynamicReadOnlyRepository<InventoryDocument>()
-                .FindByConditionAsync(
-                    new GetInventoryDocumentByIdSpecification(request.Id),
-                    cancellationToken
-                );
+                .Repository<InventoryDocument>()
+                .FindByIdAsync(request.Id, cancellationToken);
             if (result == null)
             {
                 return Result.Failure(
