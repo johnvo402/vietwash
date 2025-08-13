@@ -199,6 +199,7 @@ namespace Domain.Aggregates.Orders
                             ReferenceId = Id,
                             Amount = Total,
                             PaymentMethod = PaymentMethod ?? Enums.PaymentMethod.Cash,
+                            TransactionAt = (DateTimeOffset)OrderDate,
                             BranchId = BranchId,
                             ObjectId = CustomerId,
                             BehaviorId = 1,
@@ -214,33 +215,34 @@ namespace Domain.Aggregates.Orders
                     );
 
                     break;
-                case OrderStatus.Cancelled:
+                // case OrderStatus.Cancelled:
 
-                    if (Status == OrderStatus.Completed)
-                    {
-                        Emit(
-                            new CreateFundEvent()
-                            {
-                                TypeId = "Spend",
-                                ReferenceId = Id,
-                                Amount = Total,
-                                PaymentMethod = PaymentMethod ?? Enums.PaymentMethod.Cash,
-                                BranchId = BranchId,
-                                ObjectId = CustomerId,
-                                BehaviorId = 2,
-                                Metadata = new Dictionary<string, object>
-                                {
-                                    ["code"] = Code,
-                                    ["publicId"] = PublicId.ToString(),
-                                    ["type"] = FundEventType.Order,
-                                },
-                                Point = Point,
-                                FundEventType = FundEventType.Order,
-                            }
-                        );
-                    }
-                    Status = OrderStatus.Cancelled;
-                    break;
+                //     if (Status == OrderStatus.Completed)
+                //     {
+                //         Emit(
+                //             new CreateFundEvent()
+                //             {
+                //                 TypeId = "Spend",
+                //                 ReferenceId = Id,
+                //                 Amount = Total,
+                //                 PaymentMethod = PaymentMethod ?? Enums.PaymentMethod.Cash,
+                //                 BranchId = BranchId,
+                //                 ObjectId = CustomerId,
+                //                 BehaviorId = 2,
+                //                 Metadata = new Dictionary<string, object>
+                //                 {
+                //                     ["code"] = Code,
+                //                     ["publicId"] = PublicId.ToString(),
+                //                     ["type"] = FundEventType.Order,
+                //                 },
+                //                 Point = Point,
+                //                 TransactionAt = DateTimeOffset.UtcNow,
+                //                 FundEventType = FundEventType.Order,
+                //             }
+                //         );
+                //     }
+                //     Status = OrderStatus.Cancelled;
+                //     break;
                 default:
                     Status = status;
                     break;

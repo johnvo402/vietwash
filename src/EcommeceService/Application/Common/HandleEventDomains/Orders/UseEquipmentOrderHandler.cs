@@ -33,8 +33,6 @@ namespace Application.Common.HandleEventDomains.Orders
                         await _unitOfWork.Repository<Equipment>().UpdateAsync(equipment);
                     }
                 }
-
-                await _unitOfWork.SaveAsync(cancellationToken);
             }
             catch (Exception)
             {
