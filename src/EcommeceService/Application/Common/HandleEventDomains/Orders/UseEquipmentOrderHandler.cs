@@ -19,24 +19,28 @@ namespace Application.Common.HandleEventDomains.Orders
             CancellationToken cancellationToken
         )
         {
-            try
+            foreach (var x in notification.OrderEquipments)
             {
-                foreach (var x in notification.OrderEquipments)
-                {
-                    var equipment = await _unitOfWork
-                        .Repository<Equipment>()
-                        .FindByIdAsync(x.EquipmentId, cancellationToken);
+                var equipment = await _unitOfWork
+                    .Repository<Equipment>()
+                    .FindByIdAsync(x.EquipmentId, cancellationToken);
 
-                    if (equipment != null)
+                if (equipment != null)
+                {
+                    try
                     {
+                        _ = await _unitOfWork.BeginTransactionAsync(cancellationToken);
                         equipment.Using = notification.Using;
                         await _unitOfWork.Repository<Equipment>().UpdateAsync(equipment);
+                        await _unitOfWork.SaveAsync(cancellationToken);
+                        await _unitOfWork.CommitAsync(cancellationToken);
+                    }
+                    catch (Exception)
+                    {
+                        await _unitOfWork.RollbackAsync(cancellationToken);
+                        throw;
                     }
                 }
-            }
-            catch (Exception)
-            {
-                throw;
             }
         }
     }
