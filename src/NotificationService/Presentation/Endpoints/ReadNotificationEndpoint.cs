@@ -12,7 +12,7 @@ namespace Presentation.Endpoints
     public class ReadNotificationEndpoint(ISender sender)
         : EndpointBaseAsync.WithRequest<ReadNotifyCommand>.WithActionResult
     {
-        [HttpPatch(Router.ReadOneNotify)]
+        [HttpPut(Router.ReadOneNotify)]
         [SwaggerOperation(Tags = [Router.Tags], Summary = "list Notify")]
         [AuthorizeBy]
         public override async Task<ActionResult> HandleAsync(

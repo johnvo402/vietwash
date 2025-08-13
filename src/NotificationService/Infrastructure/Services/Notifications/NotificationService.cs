@@ -103,6 +103,7 @@ namespace Infrastructure.Services.Notifications
                 try
                 {
                     _ = await unitOfWork.BeginTransactionAsync();
+                    notification.IsRead = true;
                     await unitOfWork.Repository<Notification>().UpdateAsync(notification);
                     await unitOfWork.SaveAsync();
                     await unitOfWork.CommitAsync();
