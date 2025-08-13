@@ -26,7 +26,8 @@ public class GetDashboardCardHandler(IUnitOfWork unitOfWork, ICurrentAccount cur
 
         // Orders hôm nay
         var completedTodayOrders = await repo.QueryAsync(o =>
-                (listBranchUser.Contains(o.BranchId.ToString()) || o.BranchId == request.BranchId)
+                listBranchUser.Contains(o.BranchId.ToString())
+                && o.BranchId == request.BranchId
                 && o.OrderDate != null
                 && o.Status == OrderStatus.Completed
                 && o.OrderDate.Value >= today

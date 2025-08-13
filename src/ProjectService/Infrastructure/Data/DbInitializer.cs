@@ -69,7 +69,7 @@ public class DbInitializer
             )
             {
                 Disable = false,
-                Id = 1, // Ensure Id is set
+                Id = 3, // Ensure Id is set
                 PublicId = Ulid.NewUlid(), // Generate PublicId
                 // PublicId, CreatedAt, CreatedBy, Version handled by AggregateRoot
             },
@@ -114,7 +114,7 @@ public class DbInitializer
             )
             {
                 Disable = false,
-                Id = 3, // Ensure Id is set
+                Id = 4, // Ensure Id is set
                 PublicId = Ulid.NewUlid(), // Generate PublicId
             },
             new Branch(
@@ -136,7 +136,7 @@ public class DbInitializer
             )
             {
                 Disable = false,
-                Id = 4, // Ensure Id is set
+                Id = 1, // Ensure Id is set
                 PublicId = Ulid.NewUlid(), // Generate PublicId
             },
         };

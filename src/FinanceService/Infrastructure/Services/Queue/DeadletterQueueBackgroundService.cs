@@ -62,7 +62,7 @@ public class DeadletterPubSubBackgroundService : BackgroundService
             "DeadletterPubSubBackgroundService started, subscribing to dead-letter queue."
         );
 
-        pubSubService.Subscribe<CreateAccountEvent>(
+        pubSubService.Subscribe<CreateUserCommand>(
             async message =>
             {
                 // Limit concurrent tasks
@@ -84,11 +84,10 @@ public class DeadletterPubSubBackgroundService : BackgroundService
                         var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
                         var pubSubLogService =
                             scope.ServiceProvider.GetRequiredService<IPubSubLogService>();
-                        var request = new CreateUserCommand { Payload = message };
                         await ProcessMessageAsync<
                             CreateUserCommand,
                             PubSubResponse<CreateUserCommand>
-                        >(request, sender, pubSubLogService, logger, stoppingToken);
+                        >(message, sender, pubSubLogService, logger, stoppingToken);
                     },
                     stoppingToken
                 );
@@ -121,7 +120,7 @@ public class DeadletterPubSubBackgroundService : BackgroundService
             },
             "CreateAccountEvent"
         );
-        pubSubService.Subscribe<CreateFundEventPayload>(
+        pubSubService.Subscribe<UpdateStatusOrderEvent>(
             async message =>
             {
                 // Limit concurrent tasks
@@ -143,11 +142,10 @@ public class DeadletterPubSubBackgroundService : BackgroundService
                         var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
                         var pubSubLogService =
                             scope.ServiceProvider.GetRequiredService<IPubSubLogService>();
-                        var request = new UpdateStatusOrderEvent { Payload = message };
                         await ProcessMessageAsync<
                             UpdateStatusOrderEvent,
                             PubSubResponse<UpdateStatusOrderEvent>
-                        >(request, sender, pubSubLogService, logger, stoppingToken);
+                        >(message, sender, pubSubLogService, logger, stoppingToken);
                     },
                     stoppingToken
                 );
@@ -181,7 +179,7 @@ public class DeadletterPubSubBackgroundService : BackgroundService
             "CreateFundEvent"
         );
 
-        pubSubService.Subscribe<EInvoiceOrderMessage>(
+        pubSubService.Subscribe<CreateEInvoiceEvent>(
             async message =>
             {
                 // Limit concurrent tasks
@@ -203,11 +201,10 @@ public class DeadletterPubSubBackgroundService : BackgroundService
                         var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
                         var pubSubLogService =
                             scope.ServiceProvider.GetRequiredService<IPubSubLogService>();
-                        var request = new CreateEInvoiceEvent { Payload = message };
                         await ProcessMessageAsync<
                             CreateEInvoiceEvent,
                             PubSubResponse<CreateEInvoiceEvent>
-                        >(request, sender, pubSubLogService, logger, stoppingToken);
+                        >(message, sender, pubSubLogService, logger, stoppingToken);
                     },
                     stoppingToken
                 );
@@ -240,7 +237,7 @@ public class DeadletterPubSubBackgroundService : BackgroundService
             },
             "EInvoiceEvent"
         );
-        pubSubService.Subscribe<BranchCreateEvent>(
+        pubSubService.Subscribe<BranchUserCommand>(
             async message =>
             {
                 // Limit concurrent tasks
@@ -262,11 +259,10 @@ public class DeadletterPubSubBackgroundService : BackgroundService
                         var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
                         var pubSubLogService =
                             scope.ServiceProvider.GetRequiredService<IPubSubLogService>();
-                        var request = new BranchUserCommand { Payload = message };
                         await ProcessMessageAsync<
                             BranchUserCommand,
                             PubSubResponse<BranchUserCommand>
-                        >(request, sender, pubSubLogService, logger, stoppingToken);
+                        >(message, sender, pubSubLogService, logger, stoppingToken);
                     },
                     stoppingToken
                 );

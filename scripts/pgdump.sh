@@ -35,6 +35,12 @@ sql() {
   echo "Running: scp -r -P $REMOTE_SERVER_PORT $REMOTE_SERVER_USER@$REMOTE_SERVER_IP:~/micro/.pgdump ."
   scp -r -P $REMOTE_SERVER_PORT $REMOTE_SERVER_USER@$REMOTE_SERVER_IP:~/micro/.pgdump .
 }
+sql_to_server() {
+  echo "Running: scp -r -P $REMOTE_SERVER_PORT .pgdump \
+    $REMOTE_SERVER_USER@$REMOTE_SERVER_IP:~/micro/"
+  scp -r -P $REMOTE_SERVER_PORT .pgdump \
+    $REMOTE_SERVER_USER@$REMOTE_SERVER_IP:~/micro/
+}
 restore() {
   for db in ${DB_LIST[@]}; do
     case "$db" in
@@ -58,6 +64,9 @@ backup)
   ;;
 sql)
   sql
+  ;;
+sql_to_server)
+  sql_to_server
   ;;
 restore)
   restore

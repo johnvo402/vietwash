@@ -39,6 +39,7 @@ public class TheDbContext(DbContextOptions<TheDbContext> options) : DbContext(op
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         modelBuilder.HasPostgresExtension("citext");
+        modelBuilder.HasPostgresExtension("hstore");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>

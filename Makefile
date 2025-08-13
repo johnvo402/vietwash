@@ -73,6 +73,9 @@ restore:
 .PHONY: sql
 sql:
 	./scripts/pgdump.sh sql
+.PHONY: sql_to_server
+sql_to_server:
+	./scripts/pgdump.sh sql_to_server
 # Mục mục tiêu mặc định
 all: help
 
