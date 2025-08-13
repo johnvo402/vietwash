@@ -100,7 +100,7 @@ namespace Application.Feature.Orders.Command.UpdateStatus
 
                     order.PaymentMethod = request.Model.PaymentMethod;
                 }
-                using var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
+                _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
 
                 await unitOfWork.Repository<Order>().UpdateAsync(order);
                 await unitOfWork.SaveAsync(cancellationToken);
