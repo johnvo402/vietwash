@@ -17,6 +17,8 @@ namespace Application.Feature.Common.Projections.Units
 
     public class ServiceResourceProjection
     {
+        public long UnitProductId { get; set; }
+        public long ProductId { get; set; }
         public string UnitName { get; set; }
         public string ProductName { get; set; }
         public decimal Quantity { get; set; }

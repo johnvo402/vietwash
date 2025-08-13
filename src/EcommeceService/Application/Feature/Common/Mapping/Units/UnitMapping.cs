@@ -85,6 +85,8 @@ namespace Application.Feature.Common.Mapping.Units
         {
             return new()
             {
+                UnitProductId = serviceResource.UnitProductId,
+                ProductId = serviceResource.ProductId,
                 ProductName = serviceResource.BranchProduct.Name,
                 UnitName = serviceResource.UnitProduct.Name,
                 Quantity = serviceResource.Quantity,
