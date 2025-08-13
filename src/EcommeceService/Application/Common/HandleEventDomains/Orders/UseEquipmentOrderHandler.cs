@@ -21,8 +21,6 @@ namespace Application.Common.HandleEventDomains.Orders
         {
             try
             {
-                await _unitOfWork.BeginTransactionAsync(cancellationToken);
-
                 foreach (var x in notification.OrderEquipments)
                 {
                     var equipment = await _unitOfWork
@@ -37,11 +35,9 @@ namespace Application.Common.HandleEventDomains.Orders
                 }
 
                 await _unitOfWork.SaveAsync(cancellationToken);
-                await _unitOfWork.CommitAsync(cancellationToken);
             }
             catch (Exception)
             {
-                await _unitOfWork.RollbackAsync(cancellationToken);
                 throw;
             }
         }
