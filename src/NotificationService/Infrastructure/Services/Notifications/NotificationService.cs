@@ -27,6 +27,10 @@ namespace Infrastructure.Services.Notifications
             }
 
             var notifications = new List<Notification>();
+            if (!DateTimeOffset.TryParse(request.Time, out var createdAt))
+            {
+                createdAt = DateTimeOffset.UtcNow;
+            }
             foreach (var userId in request.UserIds)
             {
                 var notification = new Notification
@@ -38,6 +42,7 @@ namespace Infrastructure.Services.Notifications
                     Content = content,
                     ContentHtml = contentHtml,
                     Data = request.Data,
+                    CreatedAt = createdAt,
                 };
 
                 var notificationDto = new NotificationProjection

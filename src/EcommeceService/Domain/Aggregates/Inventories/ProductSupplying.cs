@@ -10,7 +10,7 @@ namespace Domain.Aggregates.Inventories
         public long ProductId { get; set; } = default!;
         public long? SupplierId { get; set; }
         public long InventoryDocumentId { get; set; } = default!;
-        public int Quantity { get; set; } = default!;
+        public decimal Quantity { get; set; } = default!;
         public decimal Price { get; set; } = default!;
         public long UnitRelationId { get; set; } = default!;
         public UnitRelation UnitRelation { get; set; } = default!;

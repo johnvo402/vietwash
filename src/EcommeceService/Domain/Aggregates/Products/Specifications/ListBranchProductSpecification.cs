@@ -16,11 +16,10 @@ namespace Domain.Aggregates.Products.Specifications
                 .Where(x => !x.Disable)
                 .Include(x => x.Category)
                 .Include(x => x.UnitRelations)
-                .Include(x =>
-                    x.ProductSupplyings.Where(x =>
-                        x.InventoryDocument.Status == InventoryStatus.Completed
-                    )
-                )
+                .Include(s => s.ProductSupplyings)
+                .ThenInclude(ps => ps.UnitRelation)
+                .Include(s => s.ProductSupplyings)
+                .ThenInclude(x => x.InventoryDocument)
                 .AsSplitQuery()
                 .AsNoTracking();
         }

@@ -26,6 +26,7 @@ namespace Infrastructure.Services.gRPC.Notifications
                     Data =
                         request.Data?.ToDictionary(entry => entry.Key, entry => entry.Value)
                         ?? null,
+                    Time = request.Time,
                 };
 
                 var result = await sender.Send(command);

@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Application.Feature.Common.Mapping.Categories;
 using Application.Feature.Common.Mapping.Units;
+using Domain.Aggregates.Inventories.Enums;
 using Domain.Aggregates.Products;
 
 namespace Application.Feature.BranchProducts.Queries.List
@@ -21,7 +22,11 @@ namespace Application.Feature.BranchProducts.Queries.List
                 BranchId = products.BranchId,
                 Sku = products.Sku,
                 CapitalPrice = products.CapitalPrice,
-                StockQuantity = products.ProductSupplyings.Sum(i => i.Quantity),
+                StockQuantity = products
+                    .ProductSupplyings.Where(x =>
+                        x.InventoryDocument.Status == InventoryStatus.Completed
+                    )
+                    .Sum(i => i.Quantity * i.UnitRelation.Multiple),
                 Category = products.Category.ToCategoryService(),
                 UnitRelations = products
                     .UnitRelations.Select(x => x.ToUnitRelationProjectionResponse())

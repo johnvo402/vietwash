@@ -1,4 +1,5 @@
-﻿using Specification;
+﻿using Domain.Aggregates.Inventories.Enums;
+using Specification;
 using Specification.Builders;
 
 namespace Domain.Aggregates.Products.Specifications
@@ -8,10 +9,14 @@ namespace Domain.Aggregates.Products.Specifications
         public GetBranchProductWithIncludeByIdSpecification(long id)
         {
             Query
-                .Where(x => x.Id == id && !x.Disable)
-                .Include(x => x.UnitRelations)
-                .ThenInclude(x => x.Unit)
-                .Include(x => x.Category);
+                .Where(s => s.Id == id && !s.Disable)
+                .Include(s => s.UnitRelations)
+                .ThenInclude(ur => ur.Unit)
+                .Include(s => s.ProductSupplyings)
+                .ThenInclude(ps => ps.UnitRelation)
+                .Include(s => s.ProductSupplyings)
+                .ThenInclude(x => x.InventoryDocument)
+                .Include(s => s.Category);
         }
     }
 }

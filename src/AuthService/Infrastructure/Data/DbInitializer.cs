@@ -305,6 +305,18 @@ public class DbInitializer
                 BirthDay = new DateOnly(1997, 3, 15),
                 Gender = Gender.Male,
             },
+            new Account(
+                "Nguyễn Nhật Trường",
+                HashPassword("truong2003"),
+                "nguyennhantruong2003@gmail.com",
+                "0978468427",
+                "MANAGER",
+                "CUS00020"
+            )
+            {
+                BirthDay = new DateOnly(1997, 3, 15),
+                Gender = Gender.Male,
+            },
         };
         var random = new Random();
         users.ForEach(u =>
@@ -312,7 +324,7 @@ public class DbInitializer
             u.Status = AccountStatus.Active;
             u.CreatedAt = new DateTimeOffset(
                 year: 2024, // Năm 2020-2024
-                month: random.Next(1, 13), // Tháng 1-12
+                month: 12, // Tháng 1-12
                 day: random.Next(1, 28), // Ngày 1-27 (tránh lỗi tháng thiếu ngày)
                 hour: random.Next(0, 24), // Giờ 0-23
                 minute: random.Next(0, 60), // Phút 0-59

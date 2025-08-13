@@ -11,6 +11,8 @@ public class ListServiceSpecification : Specification<Service>
             .Where(x => !x.Disable)
             .Include(x => x.Category)
             .Include(x => x.UnitRelations)
+            .ThenInclude(x => x.AsUnitProduct)
+            .ThenInclude(x => x.BranchProduct)
             .AsNoTracking()
             .AsSplitQuery();
         string key = GetUniqueCachedKey();

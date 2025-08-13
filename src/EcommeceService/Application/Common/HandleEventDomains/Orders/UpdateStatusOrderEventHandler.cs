@@ -120,6 +120,7 @@ namespace Application.Common.HandleEventDomains.Orders
                         var notifySend = new SendNotificationRequest
                         {
                             TemplateId = "laundry_processed",
+                            Time = order.CreatedAt.ToString(),
                         };
                         notifySend.Parameters["order_code"] = order.Code;
                         notifySend.Parameters["branch_name"] = branchName?.Name;

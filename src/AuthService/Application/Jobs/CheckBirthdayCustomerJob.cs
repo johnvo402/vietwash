@@ -69,7 +69,11 @@ namespace Application.Jobs
                 );
                 try
                 {
-                    var notifySend = new SendNotificationRequest { TemplateId = "happy_birthday" };
+                    var notifySend = new SendNotificationRequest
+                    {
+                        TemplateId = "happy_birthday",
+                        Time = DateTimeOffset.UtcNow.ToString(),
+                    };
                     notifySend.Parameters["customer_name"] = customer.DisplayName;
                     notifySend.Parameters["voucher_expiry"] = now.AddDays(7)
                         .ToString("HH:mm:ss dd/MM/yyyy");

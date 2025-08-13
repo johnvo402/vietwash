@@ -15,6 +15,7 @@ namespace Domain.Events
         public long BranchId { get; set; } = default!;
         public long? ObjectId { get; set; }
         public decimal Point { get; set; }
+        public DateTimeOffset TransactionAt { get; set; }
         public FundEventType FundEventType { get; set; }
     }
 }

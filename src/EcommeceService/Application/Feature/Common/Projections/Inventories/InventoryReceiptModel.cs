@@ -30,7 +30,7 @@ namespace Application.Feature.Common.Projections.Inventories
     public class ProductSupplyingReceipt
     {
         public string ProductName { get; set; }
-        public int Quantity { get; set; }
+        public decimal Quantity { get; set; }
         public string Price { get; set; }
         public string UnitName { get; set; }
         public string Total { get; set; }

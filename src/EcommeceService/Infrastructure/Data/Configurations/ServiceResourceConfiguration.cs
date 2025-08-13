@@ -19,5 +19,6 @@ public class ServiceResourceConfiguration : IEntityTypeConfiguration<ServiceReso
             .HasOne(x => x.UnitProduct)
             .WithMany(x => x.AsUnitProduct)
             .HasForeignKey(x => x.UnitProductId);
+        builder.HasOne(x => x.BranchProduct).WithMany().HasForeignKey(x => x.ProductId);
     }
 }

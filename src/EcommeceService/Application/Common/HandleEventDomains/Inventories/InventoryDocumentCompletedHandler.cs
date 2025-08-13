@@ -148,7 +148,7 @@ public sealed class InventoryDocumentCompletedHandler
             Amount = amount,
             PaymentMethod = PaymentMethod.Cash,
             BranchId = (long)document.BranchId!,
-
+            TransactionAt = (DateTimeOffset)document.TransactionAt!,
             BehaviorId = document.Type == InventoryType.Import ? 3 : 4,
             Metadata = new Dictionary<string, object>
             {
@@ -223,6 +223,7 @@ public sealed class InventoryDocumentCompletedHandler
             var notifySend = new SendNotificationRequest
             {
                 TemplateId = "inventory_import",
+                Time = document.TransactionAt.ToString(),
                 Parameters =
                 {
                     ["code"] = document.Code,

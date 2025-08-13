@@ -9,14 +9,14 @@ namespace Application.Features.Funds.Events
         public static Fund ToFund(this CreateFundEventPayload command)
         {
             string code = Generator.GenerateCode("FU-", 6);
-            return new Fund(
+            var fund = new Fund(
                 code: code,
                 name: null, // Assuming CreateFundCommand has a Name property
                 type: Enum.Parse<FundType>(command.TypeId, ignoreCase: true),
                 status: FundStatus.Confirmed,
                 amount: command.Amount,
                 fundBehaviorId: command.BehaviorId,
-                transactionDate: DateTimeOffset.UtcNow, // Provide a DateTimeOffset? value as required
+                transactionDate: command.TransactionAt, // Provide a DateTimeOffset? value as required
                 paymentMethod: command.PaymentMethod,
                 branchId: command.BranchId,
                 note: null, // Assuming no note is provided in UpdateStatusOrderEvent
@@ -24,6 +24,8 @@ namespace Application.Features.Funds.Events
                 objectId: command.ObjectId, // Provide a value or null for objectId as required
                 metadata: command.Metadata // Provide a value or null for metadata as required
             );
+            fund.CreatedAt = command.TransactionAt;
+            return fund;
         }
 
         public static Transaction ToTransaction(this CreateFundEventPayload command)

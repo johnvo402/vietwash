@@ -63,6 +63,7 @@ namespace Domain.Aggregates.Equipments
                     Amount = equipmentActivities.TotalCost,
                     PaymentMethod = PaymentMethod.Cash,
                     BranchId = BranchId,
+                    TransactionAt = equipmentActivities.CreatedAt,
                     BehaviorId = 7,
                     Metadata = new Dictionary<string, object>
                     {

@@ -67,6 +67,11 @@ namespace Application.Feature.Common.Projections.BranchProducts
             CreatedBy = branchProduct.CreatedBy;
             UpdatedAt = branchProduct.UpdatedAt;
             UpdatedBy = branchProduct.UpdatedBy;
+            StockQuantity = branchProduct
+                .ProductSupplyings.Where(x =>
+                    x.InventoryDocument.Status == InventoryStatus.Completed
+                )
+                .Sum(i => i.Quantity * i.UnitRelation.Multiple);
         }
     }
 
@@ -74,7 +79,7 @@ namespace Application.Feature.Common.Projections.BranchProducts
     {
         public DateTimeOffset? TransactionAt { get; set; }
         public string DocumentCode { get; set; } = null!;
-        public int Quantity { get; set; }
+        public decimal Quantity { get; set; }
         public long ProductId { get; set; }
         public InventoryType Type { get; set; }
     }
