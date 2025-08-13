@@ -56,6 +56,7 @@ namespace Application.Common.HandleEventDomains.Orders
                         .ThenInclude(oi => oi.UnitRelation)
                         .ThenInclude(ur => ur.AsUnitRelation)
                         .ThenInclude(sr => sr.BranchProduct)
+                        .Include(x => x.OrderEquipments)
                         .FirstAsync(cancellationToken);
 
                     if (orderInProgress == null)
@@ -128,7 +129,7 @@ namespace Application.Common.HandleEventDomains.Orders
                         );
                     }
 
-                    foreach (var x in notification.Order.OrderEquipments)
+                    foreach (var x in orderInProgress.OrderEquipments)
                     {
                         var equipment = await _unitOfWork
                             .Repository<Equipment>()
@@ -167,8 +168,14 @@ namespace Application.Common.HandleEventDomains.Orders
                 }
 
                 case OrderStatus.Processed:
-
-                    foreach (var x in notification.Order.OrderEquipments)
+                    var orderInProgress = await _unitOfWork
+                        .Repository<Order>()
+                        .QueryAsync(o => o.Id == order.Id)
+                        .Include(x => x.OrderEquipments)
+                        .FirstAsync(cancellationToken);
+                    if (orderInProgress == null)
+                        break;
+                    foreach (var x in orderInProgress.OrderEquipments)
                     {
                         var equipment = await _unitOfWork
                             .Repository<Equipment>()
