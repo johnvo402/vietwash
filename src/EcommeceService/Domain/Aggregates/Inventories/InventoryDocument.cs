@@ -40,6 +40,8 @@ namespace Domain.Aggregates.Inventories
             CancelReason = cancelReason;
         }
 
+        public InventoryDocument() { }
+
         public InventoryDocument(
             string code,
             decimal amount,

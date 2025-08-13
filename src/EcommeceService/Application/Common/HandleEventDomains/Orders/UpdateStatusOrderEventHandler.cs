@@ -39,6 +39,8 @@ namespace Application.Common.HandleEventDomains.Orders
         )
         {
             var order = notification.Order;
+            var equipmentsToUpdate = new List<Equipment>();
+
             switch (order.Status)
             {
                 case OrderStatus.InProgress:
@@ -58,6 +60,7 @@ namespace Application.Common.HandleEventDomains.Orders
 
                     if (orderInProgress == null)
                         break;
+                    var exportDocument = new InventoryDocument();
 
                     var issueLines = orderInProgress
                         .OrderItems.SelectMany(oi =>
@@ -100,7 +103,7 @@ namespace Application.Common.HandleEventDomains.Orders
                     if (issueLines.Any())
                     {
                         decimal totalProductAmount = issueLines.Sum(x => x.Price * x.Quantity);
-                        var exportDocument = new InventoryDocument(
+                        exportDocument = new InventoryDocument(
                             code: Generator.GenerateCode("XH", 6),
                             amount: totalProductAmount,
                             type: InventoryType.Export,
@@ -123,49 +126,47 @@ namespace Application.Common.HandleEventDomains.Orders
                                 })
                                 .ToList()
                         );
-                        var equipmentsToUpdate = new List<Equipment>();
+                    }
 
-                        foreach (var x in notification.Order.OrderEquipments)
+                    foreach (var x in notification.Order.OrderEquipments)
+                    {
+                        var equipment = await _unitOfWork
+                            .Repository<Equipment>()
+                            .FindByIdAsync(x.EquipmentId, cancellationToken);
+
+                        if (equipment != null)
                         {
-                            var equipment = await _unitOfWork
-                                .Repository<Equipment>()
-                                .FindByIdAsync(x.EquipmentId, cancellationToken);
-
-                            if (equipment != null)
-                            {
-                                equipment.Using = true;
-                                equipmentsToUpdate.Add(equipment);
-                            }
+                            equipment.Using = true;
+                            equipmentsToUpdate.Add(equipment);
                         }
-                        try
+                    }
+                    try
+                    {
+                        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+                        if (equipmentsToUpdate.Any())
                         {
-                            await _unitOfWork.BeginTransactionAsync(cancellationToken);
-                            if (equipmentsToUpdate.Any())
-                            {
-                                await _unitOfWork
-                                    .Repository<Equipment>()
-                                    .UpdateRangeAsync(equipmentsToUpdate);
-                                await _unitOfWork.SaveAsync(cancellationToken);
-                            }
                             await _unitOfWork
-                                .Repository<InventoryDocument>()
-                                .AddAsync(exportDocument, cancellationToken);
+                                .Repository<Equipment>()
+                                .UpdateRangeAsync(equipmentsToUpdate);
                             await _unitOfWork.SaveAsync(cancellationToken);
-                            exportDocument.UpdateStatus(InventoryStatus.Completed);
-                            await _unitOfWork.SaveAsync(cancellationToken);
-                            await _unitOfWork.CommitAsync(cancellationToken);
                         }
-                        catch (System.Exception)
-                        {
-                            await _unitOfWork.RollbackAsync(cancellationToken);
-                            throw;
-                        }
+                        await _unitOfWork
+                            .Repository<InventoryDocument>()
+                            .AddAsync(exportDocument, cancellationToken);
+                        await _unitOfWork.SaveAsync(cancellationToken);
+                        exportDocument.UpdateStatus(InventoryStatus.Completed);
+                        await _unitOfWork.SaveAsync(cancellationToken);
+                        await _unitOfWork.CommitAsync(cancellationToken);
+                    }
+                    catch (System.Exception)
+                    {
+                        await _unitOfWork.RollbackAsync(cancellationToken);
+                        throw;
                     }
                     break;
                 }
 
                 case OrderStatus.Processed:
-                    var equipmentsToUpdate = new List<Equipment>();
 
                     foreach (var x in notification.Order.OrderEquipments)
                     {
