@@ -11,6 +11,7 @@ namespace Application.Feature.Common.Projections.Services
     {
         public string Name { get; set; } = default!;
         public long? CategoryId { get; set; }
+        public long BranchId { get; set; }
 
         [File]
         public string? Image { get; set; }
@@ -31,6 +32,7 @@ namespace Application.Feature.Common.Projections.Services
             Image = service.Image;
             Status = service.Status;
             CategoryId = service.CategoryId;
+            BranchId = service.BranchId;
         }
     }
 }

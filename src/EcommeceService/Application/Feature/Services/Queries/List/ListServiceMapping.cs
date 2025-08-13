@@ -22,7 +22,7 @@ public class ListServiceMapping
             Image = service.Image,
             Status = service.Status,
             CategoryId = service.CategoryId,
-            // Navigation properties
+            BranchId = service.BranchId, // Navigation properties
             Category =
                 service.Category == null
                     ? null
