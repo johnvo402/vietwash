@@ -22,7 +22,7 @@ services:
     container_name: gateway
     image: gateway
     ports:
-      - "8080"
+      - "80:8080"
     restart: always
   gateway-2:
     container_name: gateway-2
