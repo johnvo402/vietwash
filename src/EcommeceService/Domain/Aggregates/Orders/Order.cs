@@ -164,30 +164,6 @@ namespace Domain.Aggregates.Orders
             }
             switch (status)
             {
-                case OrderStatus.InProgress:
-                    Status = OrderStatus.InProgress;
-                    if (orderEquipment != null)
-                    {
-                        OrderEquipments = orderEquipment;
-                        Emit(
-                            new UseEquipmentOrder
-                            {
-                                OrderEquipments = [.. orderEquipment],
-                                Using = true,
-                            }
-                        );
-                    }
-                    break;
-                case OrderStatus.Processed:
-                    Status = OrderStatus.Processed;
-                    Emit(
-                        new UseEquipmentOrder
-                        {
-                            OrderEquipments = [.. this.OrderEquipments],
-                            Using = false,
-                        }
-                    );
-                    break;
                 case OrderStatus.Completed:
                     Status = OrderStatus.Completed;
                     OrderDate = DateTimeOffset.UtcNow;

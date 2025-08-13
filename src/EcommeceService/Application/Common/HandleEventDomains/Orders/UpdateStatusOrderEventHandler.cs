@@ -4,6 +4,7 @@ using Application.Feature.InventoryDocuments.Commands.Create;
 using Application.Jobs;
 using Contracts.Application.Common.Interfaces.Services.Notifications;
 using Contracts.Utils;
+using Domain.Aggregates.Equipments;
 using Domain.Aggregates.Inventories;
 using Domain.Aggregates.Inventories.Enums;
 using Domain.Aggregates.Orders;
@@ -122,15 +123,37 @@ namespace Application.Common.HandleEventDomains.Orders
                                 })
                                 .ToList()
                         );
+                        var equipmentsToUpdate = new List<Equipment>();
+
+                        foreach (var x in notification.Order.OrderEquipments)
+                        {
+                            var equipment = await _unitOfWork
+                                .Repository<Equipment>()
+                                .FindByIdAsync(x.EquipmentId, cancellationToken);
+
+                            if (equipment != null)
+                            {
+                                equipment.Using = true;
+                                equipmentsToUpdate.Add(equipment);
+                            }
+                        }
                         try
                         {
                             await _unitOfWork.BeginTransactionAsync(cancellationToken);
+                            if (equipmentsToUpdate.Any())
+                            {
+                                await _unitOfWork
+                                    .Repository<Equipment>()
+                                    .UpdateRangeAsync(equipmentsToUpdate);
+                                await _unitOfWork.SaveAsync(cancellationToken);
+                            }
                             await _unitOfWork
                                 .Repository<InventoryDocument>()
                                 .AddAsync(exportDocument, cancellationToken);
                             await _unitOfWork.SaveAsync(cancellationToken);
                             exportDocument.UpdateStatus(InventoryStatus.Completed);
                             await _unitOfWork.SaveAsync(cancellationToken);
+                            await _unitOfWork.CommitAsync(cancellationToken);
                         }
                         catch (System.Exception)
                         {
@@ -142,6 +165,37 @@ namespace Application.Common.HandleEventDomains.Orders
                 }
 
                 case OrderStatus.Processed:
+                    var equipmentsToUpdate = new List<Equipment>();
+
+                    foreach (var x in notification.Order.OrderEquipments)
+                    {
+                        var equipment = await _unitOfWork
+                            .Repository<Equipment>()
+                            .FindByIdAsync(x.EquipmentId, cancellationToken);
+
+                        if (equipment != null)
+                        {
+                            equipment.Using = true;
+                            equipmentsToUpdate.Add(equipment);
+                        }
+                    }
+                    try
+                    {
+                        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+                        if (equipmentsToUpdate.Any())
+                        {
+                            await _unitOfWork
+                                .Repository<Equipment>()
+                                .UpdateRangeAsync(equipmentsToUpdate);
+                            await _unitOfWork.SaveAsync(cancellationToken);
+                            await _unitOfWork.CommitAsync(cancellationToken);
+                        }
+                    }
+                    catch (System.Exception)
+                    {
+                        await _unitOfWork.RollbackAsync(cancellationToken);
+                        throw;
+                    }
                     var branchName = await _unitOfWork
                         .Repository<BranchUser>()
                         .FindByConditionAsync(
