@@ -834,7 +834,7 @@ public class DbInitializer
                             CreatedAt = service.CreatedAt,
                         };
 
-                        unitRelation.AsUnitProduct.Add(serviceResource);
+                        unitRelation.AsUnitRelation.Add(serviceResource);
                     }
 
                     service.UnitRelations.Add(unitRelation);
@@ -1241,7 +1241,7 @@ public class DbInitializer
             var voucher = new Voucher(
                 code: code,
                 title: title,
-                imgUrl: null,
+                imgUrl: "voucher.1.webp",
                 barcode: barcode.GenerateQrBase64(code),
                 discountFixed: discountFixed,
                 discountValue: discountValue,
@@ -1326,8 +1326,8 @@ public class DbInitializer
                                 x.Status,
                                 x.BaseUnit,
                                 x.Multiple,
-                                AsUnitProduct = x
-                                    .AsUnitProduct.Select(sr => new
+                                AsUnitRelation = x
+                                    .AsUnitRelation.Select(sr => new
                                     {
                                         sr.Quantity,
                                         BranchProductId = sr.BranchProduct.Id,
@@ -1462,7 +1462,7 @@ public class DbInitializer
 
                     bool discountFixed = selectedVoucher?.DiscountFixed ?? false;
                     decimal discountValue = selectedVoucher?.DiscountValue ?? 0m;
-                    decimal point = random.Next(0, 11) * 50;
+                    decimal point = random.Next(0, 10);
 
                     decimal tempTotal = amount;
                     if (point > 0)
@@ -1528,97 +1528,94 @@ public class DbInitializer
                     order.OrderEquipments.AddRangeSafe(orderEquipments);
                     orders.Add(order);
 
-                        var issueLines = orderItems
-                            .SelectMany(oi =>
-                            {
-                                var unitRelation = services
-                                    .SelectMany(s => s.UnitRelations)
-                                    .FirstOrDefault(ur => ur.Id == oi.UnitRelationId);
-                                if (unitRelation == null)
-                                {
-                                    logger.Warning(
-                                        $"No UnitRelation found for UnitRelation ID {oi.UnitRelationId}."
-                                    );
-                                    return Enumerable.Empty<IssueLine>();
-                                }
-
-                                if (!unitRelation.AsUnitProduct.Any())
-                                {
-                                    logger.Warning(
-                                        $"No ServiceResource found for UnitRelation ID {oi.UnitRelationId}."
-                                    );
-                                    return Enumerable.Empty<IssueLine>();
-                                }
-
-                                return unitRelation.AsUnitProduct.Select(sr =>
-                                {
-                                    decimal serviceFactor = unitRelation.BaseUnit
-                                        ? 1m
-                                        : (decimal)unitRelation.Multiple;
-                                    decimal requireQty = sr.Quantity * serviceFactor * oi.Quantity;
-
-                                    return new IssueLine(
-                                        sr.BranchProductId,
-                                        sr.UnitProductId, // Use UnitProductId for material unit
-                                        requireQty,
-                                        sr.UnitProductPrice
-                                    );
-                                });
-                            })
-                            .GroupBy(x => new { x.BranchProductId, x.UnitRelationId })
-                            .Select(g => new IssueLine(
-                                g.Key.BranchProductId,
-                                g.Key.UnitRelationId,
-                                g.Sum(x => x.Quantity),
-                                g.First().Price
-                            ))
-                            .ToList();
-
-                        if (issueLines.Any())
+                    var issueLines = orderItems
+                        .SelectMany(oi =>
                         {
-                            decimal totalProductAmount = issueLines.Sum(x => x.Price * x.Quantity);
-                            var exportDocument = new InventoryDocument(
-                                code: Generator.GenerateCode("XH", 6),
-                                amount: totalProductAmount,
-                                type: InventoryType.Export,
-                                branchId: tariffChung.BranchId,
-                                note: $"Phiếu xuất cho đơn hàng #{code}"
-                            )
+                            var unitRelation = services
+                                .SelectMany(s => s.UnitRelations)
+                                .FirstOrDefault(ur => ur.Id == oi.UnitRelationId);
+                            if (unitRelation == null)
                             {
-                                TransactionAt = createdAt,
-                                CreatedAt = createdAt,
-                            };
+                                logger.Warning(
+                                    $"No UnitRelation found for UnitRelation ID {oi.UnitRelationId}."
+                                );
+                                return Enumerable.Empty<IssueLine>();
+                            }
 
-                            exportDocument.ProductSupplyings.AddRangeSafe(
-                                issueLines
-                                    .Select(x => new ProductSupplying
-                                    {
-                                        ProductId = x.BranchProductId,
-                                        UnitRelationId = x.UnitRelationId,
-                                        Price = x.Price,
-                                        SupplierId = null,
-                                        Quantity = -(int)Math.Ceiling(x.Quantity),
-                                        CreatedAt = createdAt,
-                                    })
-                                    .ToList()
-                            );
-                            await unitOfWork
-                                .Repository<InventoryDocument>()
-                                .AddAsync(exportDocument, cancellationToken);
-                            await unitOfWork.SaveAsync(cancellationToken);
-                            exportDocument.UpdateStatus(InventoryStatus.Completed);
-                            await unitOfWork.SaveAsync(cancellationToken);
-                            logger.Information(
-                                $"Created export inventory document for order {code}."
-                            );
-                        }
-                        else
+                            if (!unitRelation.AsUnitRelation.Any())
+                            {
+                                logger.Warning(
+                                    $"No ServiceResource found for UnitRelation ID {oi.UnitRelationId}."
+                                );
+                                return Enumerable.Empty<IssueLine>();
+                            }
+
+                            return unitRelation.AsUnitRelation.Select(sr =>
+                            {
+                                decimal serviceFactor = unitRelation.BaseUnit
+                                    ? 1m
+                                    : (decimal)unitRelation.Multiple;
+                                decimal requireQty = sr.Quantity * serviceFactor * oi.Quantity;
+
+                                return new IssueLine(
+                                    sr.BranchProductId,
+                                    sr.UnitProductId, // Use UnitProductId for material unit
+                                    requireQty,
+                                    sr.UnitProductPrice
+                                );
+                            });
+                        })
+                        .GroupBy(x => new { x.BranchProductId, x.UnitRelationId })
+                        .Select(g => new IssueLine(
+                            g.Key.BranchProductId,
+                            g.Key.UnitRelationId,
+                            g.Sum(x => x.Quantity),
+                            g.First().Price
+                        ))
+                        .ToList();
+
+                    if (issueLines.Any())
+                    {
+                        decimal totalProductAmount = issueLines.Sum(x => x.Price * x.Quantity);
+                        var exportDocument = new InventoryDocument(
+                            code: Generator.GenerateCode("XH", 6),
+                            amount: totalProductAmount,
+                            type: InventoryType.Export,
+                            branchId: tariffChung.BranchId,
+                            note: $"Phiếu xuất cho đơn hàng #{code}"
+                        )
                         {
-                            logger.Warning(
-                                $"No materials required for order {code}. Skipping export document."
-                            );
-                        }
-                    
+                            TransactionAt = createdAt,
+                            CreatedAt = createdAt,
+                        };
+
+                        exportDocument.ProductSupplyings.AddRangeSafe(
+                            issueLines
+                                .Select(x => new ProductSupplying
+                                {
+                                    ProductId = x.BranchProductId,
+                                    UnitRelationId = x.UnitRelationId,
+                                    Price = x.Price,
+                                    SupplierId = null,
+                                    Quantity = -x.Quantity,
+                                    CreatedAt = createdAt,
+                                })
+                                .ToList()
+                        );
+                        await unitOfWork
+                            .Repository<InventoryDocument>()
+                            .AddAsync(exportDocument, cancellationToken);
+                        await unitOfWork.SaveAsync(cancellationToken);
+                        exportDocument.UpdateStatus(InventoryStatus.Completed);
+                        await unitOfWork.SaveAsync(cancellationToken);
+                        logger.Information($"Created export inventory document for order {code}.");
+                    }
+                    else
+                    {
+                        logger.Warning(
+                            $"No materials required for order {code}. Skipping export document."
+                        );
+                    }
 
                     orderIndex++;
                 }
@@ -1709,6 +1706,7 @@ public class DbInitializer
                 CodePrefix = "EQ",
                 UnitPrice = 20000000m,
                 InitialQuantity = 10,
+                Image = "may-giat.1.jpg",
             },
             new
             {
@@ -1716,6 +1714,7 @@ public class DbInitializer
                 CodePrefix = "EQ",
                 UnitPrice = 15000000m,
                 InitialQuantity = 5,
+                Image = "may-say.1.jpg",
             },
             new
             {
@@ -1723,6 +1722,7 @@ public class DbInitializer
                 CodePrefix = "EQ",
                 UnitPrice = 5000000m,
                 InitialQuantity = 2,
+                Image = "banui.jpg",
             },
         };
 
@@ -1760,7 +1760,7 @@ public class DbInitializer
                         continue;
                     }
 
-                    int quantity = (isFirstMonth ? 100 : random.Next(200, 500)) / (int)branchId;
+                    int quantity = (isFirstMonth ? 100 : random.Next(200, 500));
 
                     decimal amount = unitRelation.Price * quantity;
                     totalProductAmount += amount;
@@ -1796,6 +1796,7 @@ public class DbInitializer
                                 Quantity = quantity,
                                 SupplierId = supplier.Id,
                                 CreatedAt = currentMonth,
+                                Image = eq.Image,
                             }
                         );
 

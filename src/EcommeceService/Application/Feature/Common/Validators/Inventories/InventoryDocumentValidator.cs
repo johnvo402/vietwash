@@ -94,17 +94,6 @@ namespace Application.Feature.Common.Validators.Inventories
                                 .Build()
                         );
 
-                    item.RuleFor(x => x.Quantity)
-                        .GreaterThan(0)
-                        .WithState(x =>
-                            Messager
-                                .Create<ProductSupplyingModel>(nameof(ProductSupplyingModel))
-                                .Property(x => x.Quantity)
-                                .Message(MessageType.GreaterThan)
-                                .Negative()
-                                .Build()
-                        );
-
                     item.RuleFor(x => x.Price)
                         .GreaterThan(0)
                         .WithState(x =>
