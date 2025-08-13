@@ -22,17 +22,14 @@ namespace Application.Common.HandleEventDomains.Orders
         private readonly IUnitOfWork _unitOfWork;
 
         private readonly INotificationGrpc _notification;
-        private readonly ISender _sender;
 
         public UpdateStatusOrderEventHandler(
             IUnitOfWork _unitOfWork,
-            INotificationGrpc notification,
-            ISender sender
+            INotificationGrpc notification
         )
         {
-            _unitOfWork = _unitOfWork;
+            this._unitOfWork = _unitOfWork;
             _notification = notification;
-            _sender = sender;
         }
 
         public async ValueTask Handle(
@@ -57,6 +54,9 @@ namespace Application.Common.HandleEventDomains.Orders
                         .ThenInclude(ur => ur.AsUnitRelation)
                         .ThenInclude(sr => sr.BranchProduct)
                         .FirstAsync(cancellationToken);
+
+                    if (orderInProgress == null)
+                        break;
 
                     var issueLines = orderInProgress
                         .OrderItems.SelectMany(oi =>
