@@ -4,7 +4,7 @@ namespace Application.Feature.Common.Projections.Inventories
     {
         public long ProductId { get; set; } = default!;
         public long? SupplierId { get; set; }
-        public int Quantity { get; set; } = default!;
+        public decimal Quantity { get; set; } = default!;
         public decimal Price { get; set; } = default!;
         public long UnitRelationId { get; set; } = default!;
     }
