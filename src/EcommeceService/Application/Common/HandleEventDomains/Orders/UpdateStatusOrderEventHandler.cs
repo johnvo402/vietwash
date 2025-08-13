@@ -176,7 +176,7 @@ namespace Application.Common.HandleEventDomains.Orders
 
                         if (equipment != null)
                         {
-                            equipment.Using = true;
+                            equipment.Using = false;
                             equipmentsToUpdate.Add(equipment);
                         }
                     }
