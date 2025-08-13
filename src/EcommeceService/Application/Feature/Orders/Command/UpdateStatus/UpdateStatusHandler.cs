@@ -100,11 +100,9 @@ namespace Application.Feature.Orders.Command.UpdateStatus
 
                     order.PaymentMethod = request.Model.PaymentMethod;
                 }
-                _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
-
+                await unitOfWork.BeginTransactionAsync(cancellationToken);
                 await unitOfWork.Repository<Order>().UpdateAsync(order);
                 await unitOfWork.SaveAsync(cancellationToken);
-
                 await unitOfWork.CommitAsync(cancellationToken);
                 return Result.Success();
             }

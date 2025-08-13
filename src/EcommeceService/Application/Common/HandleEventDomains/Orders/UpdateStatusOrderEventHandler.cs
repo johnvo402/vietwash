@@ -3,6 +3,8 @@ using Application.Feature.Common.Projections.Inventories;
 using Application.Feature.InventoryDocuments.Commands.Create;
 using Application.Jobs;
 using Contracts.Application.Common.Interfaces.Services.Notifications;
+using Contracts.Utils;
+using Domain.Aggregates.Inventories;
 using Domain.Aggregates.Inventories.Enums;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
@@ -11,6 +13,7 @@ using Domain.Aggregates.Users;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Notification_Grpc;
+using Wangkanai.Extensions;
 
 namespace Application.Common.HandleEventDomains.Orders
 {
@@ -22,12 +25,12 @@ namespace Application.Common.HandleEventDomains.Orders
         private readonly ISender _sender;
 
         public UpdateStatusOrderEventHandler(
-            IUnitOfWork unitOfWork,
+            IUnitOfWork _unitOfWork,
             INotificationGrpc notification,
             ISender sender
         )
         {
-            _unitOfWork = unitOfWork;
+            _unitOfWork = _unitOfWork;
             _notification = notification;
             _sender = sender;
         }
@@ -57,53 +60,84 @@ namespace Application.Common.HandleEventDomains.Orders
 
                     var issueLines = orderInProgress
                         .OrderItems.SelectMany(oi =>
-                            oi.UnitRelation.AsUnitRelation.Select(sr =>
+                        {
+                            var unitRelation = oi.UnitRelation;
+                            if (unitRelation == null)
                             {
-                                decimal serviceFactor = oi.UnitRelation.BaseUnit
+                                return Enumerable.Empty<IssueLine>();
+                            }
+
+                            if (!unitRelation.AsUnitRelation.Any())
+                            {
+                                return Enumerable.Empty<IssueLine>();
+                            }
+
+                            return unitRelation.AsUnitRelation.Select(sr =>
+                            {
+                                decimal serviceFactor = unitRelation.BaseUnit
                                     ? 1m
-                                    : (decimal)oi.UnitRelation.Multiple;
+                                    : (decimal)unitRelation.Multiple;
                                 decimal requireQty = sr.Quantity * serviceFactor * oi.Quantity;
 
-                                return new
-                                {
-                                    BranchProductId = sr.BranchProduct.Id,
-                                    UnitRelationId = sr.UnitProduct.Id, // đơn vị xuất kho
-                                    Quantity = requireQty,
-                                    Price = sr.UnitProduct.Price, // ✅ lấy price từ UnitRelation của product
-                                };
-                            })
-                        )
+                                return new IssueLine(
+                                    sr.ProductId,
+                                    sr.UnitProductId,
+                                    requireQty,
+                                    sr.BranchProduct.CapitalPrice
+                                );
+                            });
+                        })
                         .GroupBy(x => new { x.BranchProductId, x.UnitRelationId })
-                        .Select(g => new
-                        {
+                        .Select(g => new IssueLine(
                             g.Key.BranchProductId,
                             g.Key.UnitRelationId,
-                            Quantity = g.Sum(x => x.Quantity),
-                            Price = g.First().Price, // cùng UnitRelation nên price đồng nhất
-                        })
+                            g.Sum(x => x.Quantity),
+                            g.First().Price
+                        ))
                         .ToList();
-                    if (issueLines.Count <= 0)
-                        break;
-                    var doc = new CreateInventoryDocumentCommand
-                    {
-                        BranchId = orderInProgress.BranchId,
-                        Type = InventoryType.Export,
-                        Note = $"#{orderInProgress.Code}",
-                        TransactionAt = DateTimeOffset.UtcNow,
-                        ProductSupplyings =
-                        [
-                            .. issueLines.Select(x => new ProductSupplyingModel
-                            {
-                                ProductId = x.BranchProductId,
-                                UnitRelationId = x.UnitRelationId,
-                                Price = x.Price, // ✅ set price theo UnitProduct.Price
-                                SupplierId = null,
-                                Quantity = -(int)Math.Ceiling(x.Quantity),
-                            }),
-                        ],
-                    };
 
-                    await _sender.Send(doc, cancellationToken);
+                    if (issueLines.Any())
+                    {
+                        decimal totalProductAmount = issueLines.Sum(x => x.Price * x.Quantity);
+                        var exportDocument = new InventoryDocument(
+                            code: Generator.GenerateCode("XH", 6),
+                            amount: totalProductAmount,
+                            type: InventoryType.Export,
+                            branchId: order.BranchId,
+                            note: $"Phiếu xuất cho đơn hàng #{order.Code}"
+                        )
+                        {
+                            TransactionAt = DateTimeOffset.UtcNow,
+                        };
+
+                        exportDocument.ProductSupplyings.AddRangeSafe(
+                            issueLines
+                                .Select(x => new ProductSupplying
+                                {
+                                    ProductId = x.BranchProductId,
+                                    UnitRelationId = x.UnitRelationId,
+                                    Price = x.Price,
+                                    SupplierId = null,
+                                    Quantity = -x.Quantity,
+                                })
+                                .ToList()
+                        );
+                        try
+                        {
+                            await _unitOfWork.BeginTransactionAsync(cancellationToken);
+                            await _unitOfWork
+                                .Repository<InventoryDocument>()
+                                .AddAsync(exportDocument, cancellationToken);
+                            await _unitOfWork.SaveAsync(cancellationToken);
+                            exportDocument.UpdateStatus(InventoryStatus.Completed);
+                            await _unitOfWork.SaveAsync(cancellationToken);
+                        }
+                        catch (System.Exception)
+                        {
+                            await _unitOfWork.RollbackAsync(cancellationToken);
+                            throw;
+                        }
+                    }
                     break;
                 }
 
@@ -143,4 +177,11 @@ namespace Application.Common.HandleEventDomains.Orders
             }
         }
     }
+
+    public record IssueLine(
+        long BranchProductId,
+        long UnitRelationId,
+        decimal Quantity,
+        decimal Price
+    );
 }
