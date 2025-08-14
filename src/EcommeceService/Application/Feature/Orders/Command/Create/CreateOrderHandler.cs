@@ -28,19 +28,15 @@ namespace Application.Feature.Orders.Command.Create
             CancellationToken cancellationToken
         )
         {
-            Order order = request.ToEntity((long)_currentAccount.Id!, orgSetting.VatPercent);
-            var codeEncrypt = encryption.Encrypt(order.Code);
-            var barcodeConfirm = barcode.GenerateQrBase64(codeEncrypt);
-            order.CodeConfirm = barcodeConfirm;
             Voucher? getVoucher = null;
-            if (order.CustomerId != null && order.VoucherCode != null)
+            if (request.CustomerId != null && request.VoucherCode != null)
             {
                 getVoucher = await unitOfWork
                     .DynamicReadOnlyRepository<Voucher>()
                     .FindByConditionAsync(
                         new GetVoucherByCodeSpecification(
-                            order.VoucherCode,
-                            order.CustomerId.Value
+                            request.VoucherCode,
+                            request.CustomerId.Value
                         ),
                         cancellationToken
                     );
@@ -54,13 +50,18 @@ namespace Application.Feature.Orders.Command.Create
                         )
                     );
                 }
-                order.DiscountValue = getVoucher.DiscountValue;
-                order.DiscountFixed = getVoucher.DiscountFixed;
+                request.DiscountValue = getVoucher.DiscountValue;
+                request.DiscountFixed = getVoucher.DiscountFixed;
                 foreach (var voucherCus in getVoucher.VoucherCustomers)
                 {
                     voucherCus.IsUsed = true;
                 }
             }
+            Order order = request.ToEntity((long)_currentAccount.Id!, orgSetting.VatPercent);
+            var codeEncrypt = encryption.Encrypt(order.Code);
+            var barcodeConfirm = barcode.GenerateQrBase64(codeEncrypt);
+            order.CodeConfirm = barcodeConfirm;
+
             try
             {
                 DbTransaction transaction = await unitOfWork.BeginTransactionAsync(
