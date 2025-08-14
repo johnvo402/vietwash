@@ -19,7 +19,7 @@ namespace Application.Features.Branches.Commands.Create
                 request.Code = Generator.GenerateCode("BR", 6);
             }
             Domain.Aggregates.Branches.Branch mappingBranch = request.ToEntity();
-
+            mappingBranch.CreateEvent();
             try
             {
                 DbTransaction transaction = await unitOfWork.BeginTransactionAsync(
