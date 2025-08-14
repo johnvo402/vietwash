@@ -48,7 +48,9 @@ public class UpdateAccountProfileCommandValidator : AbstractValidator<UpdateAcco
                 (email, cancellationToken) => IsEmailAvailableAsync(email, id, cancellationToken)
             )
             .When(
-                _ => accessorService.GetHttpMethod() == HttpMethod.Put.ToString(),
+                (x, _) =>
+                    accessorService.GetHttpMethod() == HttpMethod.Put.ToString()
+                    && !string.IsNullOrEmpty(x.Email),
                 ApplyConditionTo.CurrentValidator
             )
             .WithState(x =>
