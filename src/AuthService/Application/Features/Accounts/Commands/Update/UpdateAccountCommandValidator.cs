@@ -51,6 +51,7 @@ public partial class UpdateAccountCommandValidator : AbstractValidator<UpdateAcc
             );
         RuleFor(x => x.Account!.Email)
             .NotEmpty()
+            .When(x => x.Account!.Role != "CUSTOMER")
             .WithState(x =>
                 Messager
                     .Create<Account>()
@@ -64,6 +65,7 @@ public partial class UpdateAccountCommandValidator : AbstractValidator<UpdateAcc
                 Regex regex = EmailValidationRegex();
                 return regex.IsMatch(x!);
             })
+            .When(x => x.Account!.Role != "CUSTOMER")
             .WithState(x =>
                 Messager
                     .Create<Account>()
@@ -75,6 +77,7 @@ public partial class UpdateAccountCommandValidator : AbstractValidator<UpdateAcc
             .MustAsync(
                 (email, cancellationToken) => IsEmailAvailableAsync(email!, id, cancellationToken)
             )
+            .When(x => x.Account!.Role != "CUSTOMER")
             .WithState(x =>
                 Messager
                     .Create<Account>()
