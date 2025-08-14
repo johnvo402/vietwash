@@ -101,7 +101,7 @@ namespace Application.Feature.Suppliers.Command.Update
 
         private async Task<bool> CodeExists(
             UpdateSupplierCommand model,
-            string code,
+            string? code,
             CancellationToken cancellationToken
         )
         {

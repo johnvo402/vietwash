@@ -168,14 +168,14 @@ namespace Application.Common.HandleEventDomains.Orders
                 }
 
                 case OrderStatus.Processed:
-                    var orderInProgress = await _unitOfWork
+                    var orderProcessed = await _unitOfWork
                         .Repository<Order>()
                         .QueryAsync(o => o.Id == order.Id)
                         .Include(x => x.OrderEquipments)
                         .FirstAsync(cancellationToken);
-                    if (orderInProgress == null)
+                    if (orderProcessed == null)
                         break;
-                    foreach (var x in orderInProgress.OrderEquipments)
+                    foreach (var x in orderProcessed.OrderEquipments)
                     {
                         var equipment = await _unitOfWork
                             .Repository<Equipment>()
