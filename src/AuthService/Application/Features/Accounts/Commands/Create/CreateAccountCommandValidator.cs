@@ -12,23 +12,16 @@ namespace Application.Features.Accounts.Commands.Create;
 public partial class CreateAccountCommandValidator : AbstractValidator<CreateAccountCommand>
 {
     private readonly IUnitOfWork unitOfWork;
-    private readonly IActionAccessorService accessorService;
 
-    public CreateAccountCommandValidator(
-        IUnitOfWork unitOfWork,
-        IActionAccessorService accessorService
-    )
+    public CreateAccountCommandValidator(IUnitOfWork unitOfWork)
     {
         this.unitOfWork = unitOfWork;
-        this.accessorService = accessorService;
-
         ApplyRules();
     }
 
     private void ApplyRules()
     {
-        Include(new AccountValidator(accessorService));
-        _ = long.TryParse(accessorService.Id, out long id);
+        Include(new AccountValidator());
         RuleFor(x => x.Email)
             .NotEmpty()
             .WithState(x =>
@@ -53,26 +46,7 @@ public partial class CreateAccountCommandValidator : AbstractValidator<CreateAcc
                     .Build()
             )
             .MustAsync(
-                (email, cancellationToken) => IsEmailAvailableAsync(email!, id, cancellationToken)
-            )
-            .When(
-                _ => accessorService.GetHttpMethod() == HttpMethod.Put.ToString(),
-                ApplyConditionTo.CurrentValidator
-            )
-            .WithState(x =>
-                Messager
-                    .Create<Account>()
-                    .Property(x => x.Email)
-                    .Message(MessageType.Existence)
-                    .Build()
-            )
-            .MustAsync(
-                (email, cancellationToken) =>
-                    IsEmailAvailableAsync(email!, cancellationToken: cancellationToken)
-            )
-            .When(
-                _ => accessorService.GetHttpMethod() == HttpMethod.Post.ToString(),
-                ApplyConditionTo.CurrentValidator
+                (email, cancellationToken) => IsEmailAvailableAsync(email!, cancellationToken)
             )
             .WithState(x =>
                 Messager
@@ -156,17 +130,11 @@ public partial class CreateAccountCommandValidator : AbstractValidator<CreateAcc
 
     private async Task<bool> IsEmailAvailableAsync(
         string email,
-        long? id = null,
         CancellationToken cancellationToken = default
     ) =>
         !await unitOfWork
             .Repository<Account>()
-            .AnyAsync(
-                x =>
-                    (!id.HasValue && EF.Functions.ILike(x.Email, email))
-                    || (x.Id != id && EF.Functions.ILike(x.Email, email)),
-                cancellationToken
-            );
+            .AnyAsync(x => EF.Functions.ILike(x.Email, email), cancellationToken);
 
     [GeneratedRegex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$")]
     private static partial Regex EmailValidationRegex();

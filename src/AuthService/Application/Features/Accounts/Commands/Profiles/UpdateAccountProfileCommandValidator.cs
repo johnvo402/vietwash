@@ -25,12 +25,13 @@ public class UpdateAccountProfileCommandValidator : AbstractValidator<UpdateAcco
         this.unitOfWork = unitOfWork;
         this.accessorService = accessorService;
         this.currentAccount = currentAccount;
+        ApplyRule();
     }
 
     private void ApplyRule()
     {
         long? id = currentAccount.Id;
-        Include(new AccountValidator(accessorService));
+        Include(new AccountValidator());
 
         RuleFor(x => x.Email)
             .EmailAddress()

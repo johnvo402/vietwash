@@ -9,18 +9,13 @@ namespace Application.Features.Common.Validators.Accounts;
 
 public partial class AccountValidator : AbstractValidator<AccountModel>
 {
-    private readonly IActionAccessorService accessorService;
-
-    public AccountValidator(IActionAccessorService accessorService)
+    public AccountValidator()
     {
-        this.accessorService = accessorService;
         ApplyRules();
     }
 
     private void ApplyRules()
     {
-        _ = long.TryParse(accessorService.Id, out long id);
-
         RuleFor(x => x.DisplayName)
             .NotEmpty()
             .WithState(x =>
