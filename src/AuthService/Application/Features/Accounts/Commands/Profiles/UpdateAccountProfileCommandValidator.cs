@@ -44,17 +44,8 @@ public class UpdateAccountProfileCommandValidator : AbstractValidator<UpdateAcco
                     .Negative()
                     .Build()
             )
-            .NotEmpty()
-            .WithState(x =>
-                Messager
-                    .Create<Account>()
-                    .Property(x => x.Email)
-                    .Message(MessageType.Null)
-                    .Negative()
-                    .Build()
-            )
             .MustAsync(
-                (email, cancellationToken) => IsEmailAvailableAsync(email!, id, cancellationToken)
+                (email, cancellationToken) => IsEmailAvailableAsync(email, id, cancellationToken)
             )
             .When(
                 _ => accessorService.GetHttpMethod() == HttpMethod.Put.ToString(),
@@ -81,11 +72,14 @@ public class UpdateAccountProfileCommandValidator : AbstractValidator<UpdateAcco
     }
 
     private async Task<bool> IsEmailAvailableAsync(
-        string email,
+        string? email,
         long? id = null,
         CancellationToken cancellationToken = default
-    ) =>
-        !await unitOfWork
+    )
+    {
+        if (string.IsNullOrEmpty(email))
+            return true;
+        return !await unitOfWork
             .Repository<Account>()
             .AnyAsync(
                 x =>
@@ -93,4 +87,5 @@ public class UpdateAccountProfileCommandValidator : AbstractValidator<UpdateAcco
                     || (x.Id != id && EF.Functions.ILike(x.Email, email)),
                 cancellationToken
             );
+    }
 }
