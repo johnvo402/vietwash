@@ -29,7 +29,8 @@ namespace Application.Feature.Feedbacks.Queries.List
                 CreatedAt = feedback.CreatedAt,
                 UpdatedAt = feedback.UpdatedAt,
                 Replies = feedback
-                    .Replies.Select(reply => new ReplyProjection
+                    .Replies.Where(x => !x.Disable)
+                    .Select(reply => new ReplyProjection
                     {
                         Id = reply.Id,
                         StaffId = reply.UserId,
