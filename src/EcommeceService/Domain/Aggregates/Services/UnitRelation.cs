@@ -15,7 +15,7 @@ namespace Domain.Aggregates.Services
         public decimal Price { get; set; } = default!;
         public int Multiple { get; set; } = default!;
         public decimal ProcessingTime { get; set; } = default!;
-        public ActivationStatus Status { get; set; } = default!;
+        public ActivationStatus Status { get; set; } = ActivationStatus.Active;
         public long? UnitId { get; set; }
         public Unit? Unit { get; set; }
         public Service? Service { get; set; } = default!;
