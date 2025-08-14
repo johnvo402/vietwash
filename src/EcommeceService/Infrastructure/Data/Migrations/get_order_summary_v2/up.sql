@@ -24,7 +24,7 @@ AS $BODY$
         o.branch_id,
         u.display_name as customer_name,
         COUNT(oi.id) AS order_item_count,
-        COALESCE(SUM(o.amount), 0) AS amount,
+        o.amount AS amount,
         o.order_date
     FROM "order" o
     LEFT JOIN order_item oi ON oi.order_id = o.id
