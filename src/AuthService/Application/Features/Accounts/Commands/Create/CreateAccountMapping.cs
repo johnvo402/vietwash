@@ -25,6 +25,7 @@ public static class CreateAccountMapping
                 BranchId = x.BranchId,
                 BranchName = x.BranchName,
             }),
+            AvtUrl = command.AvtUrl,
         };
     }
 

@@ -22,7 +22,7 @@ public class CreateAccountHandler(IUnitOfWork unitOfWork, IMediaUpdateService me
         string code = Generator.GenerateAccountCode(command.Role);
         Account mappingAccount = command.ToAccount(code);
 
-        string? userAvatar = null;
+        string? userAvatar = command.AvtUrl;
         try
         {
             _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
