@@ -58,7 +58,7 @@ namespace Application.Feature.Common.Mapping.Units
                 ProcessingTime = model.ProcessingTime,
                 Status = model.Status,
                 UnitId = model.UnitId,
-                AsUnitProduct = model.ServiceResources.ToListServiceResource() ?? [],
+                AsUnitRelation = model.ServiceResources.ToListServiceResource() ?? [],
             };
         }
 
