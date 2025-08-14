@@ -11,7 +11,11 @@ namespace Infrastructure.Data.Configurations
             builder.HasKey(x => x.Id);
             builder.HasIndex(x => x.Id);
             builder.HasMany(x => x.ProductSupplyings).WithOne().HasForeignKey(x => x.ProductId);
-            builder.HasMany(x => x.UnitRelations).WithOne().HasForeignKey(x => x.BranchProductId);
+            builder
+                .HasMany(x => x.UnitRelations)
+                .WithOne(x => x.BranchProduct)
+                .HasForeignKey(x => x.BranchProductId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
