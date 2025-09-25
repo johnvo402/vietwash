@@ -2,8 +2,11 @@
 
 The **VietWash Backend** is a **microservices-based** system built with **.NET 8** to streamline laundry shop operations, including authentication, order processing, inventory, financial reporting, and branch management. It integrates seamlessly with the **VietWash frontend** (Next.js 14) and supports features like user authentication, service management, and reporting. The architecture is modular, leveraging **CQRS**, **MediatR**, and **Entity Framework Core** for robust data handling and scalability. 🛠️
 
+
+
 ## Table of Contents
 
+- [System Design](#system-design)
 - [Features](#features-✨)
 - [Prerequisites](#prerequisites-📋)
 - [Setup for Windows](#setup-for-windows-🪟)
@@ -20,6 +23,10 @@ The **VietWash Backend** is a **microservices-based** system built with **.NET 8
   - [Filtering](#filtering-📊)
 - [Contributing](#contributing-🤝)
 - [License](#license-📜)
+
+## System Design
+
+<img src="./docs/images/system-design.png" alt="System Design" style="width:50%;">
 
 ## Features ✨
 
