@@ -1,0 +1,1608 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "AuthService Documentation",
+        "description": "Well come to the AuthService API",
+        "contact": {
+            "name": "Thanh Thu",
+            "email": "thanhthu040202@gmail.com"
+        },
+        "version": "v1"
+    },
+    "paths": {
+        "/Finance/api/Funds": {
+            "post": {
+                "tags": [
+                    "FundRoute endpoint"
+                ],
+                "summary": "create fund",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateFundCommand"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateFundCommand"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateFundCommand"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "FundRoute endpoint"
+                ],
+                "summary": "list Fund",
+                "parameters": [
+                    {
+                        "name": "From",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "To",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Page",
+                        "in": "query",
+                        "description": "The current page",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "PageSize",
+                        "in": "query",
+                        "description": "Maximum items that display per page",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "Before",
+                        "in": "query",
+                        "description": "Cursor pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "After",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Keyword",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Targets",
+                        "in": "query",
+                        "description": "Fields want to search for",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "Sort",
+                        "in": "query",
+                        "description": "example : Sort=Age:desc,Name:asc\r\ndefault is asc",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Filter",
+                        "in": "query",
+                        "schema": {}
+                    },
+                    {
+                        "name": "OriginFilters",
+                        "in": "query",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListFundResponsePaginationResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListFundResponsePaginationResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListFundResponsePaginationResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Finance/api/FundBehaviors": {
+            "post": {
+                "tags": [
+                    "FundBehaviorRoute endpoint"
+                ],
+                "summary": "create fundBehavior",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateFundBehaviorCommand"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateFundBehaviorCommand"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateFundBehaviorCommand"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "FundBehaviorRoute endpoint"
+                ],
+                "summary": "list Fundbehavior",
+                "parameters": [
+                    {
+                        "name": "Page",
+                        "in": "query",
+                        "description": "The current page",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "PageSize",
+                        "in": "query",
+                        "description": "Maximum items that display per page",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "Before",
+                        "in": "query",
+                        "description": "Cursor pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "After",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Keyword",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Targets",
+                        "in": "query",
+                        "description": "Fields want to search for",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "Sort",
+                        "in": "query",
+                        "description": "example : Sort=Age:desc,Name:asc\r\ndefault is asc",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Filter",
+                        "in": "query",
+                        "schema": {}
+                    },
+                    {
+                        "name": "OriginFilters",
+                        "in": "query",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListFundBehaviorResponseIEnumerableApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListFundBehaviorResponseIEnumerableApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListFundBehaviorResponseIEnumerableApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Finance/api/ReportRoute/FinancialReport": {
+            "get": {
+                "tags": [
+                    "ReportRoute endpoint"
+                ],
+                "summary": "Report financial",
+                "parameters": [
+                    {
+                        "name": "From",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "To",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "BranchIds",
+                        "in": "query",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer",
+                                "format": "int64"
+                            }
+                        }
+                    },
+                    {
+                        "name": "SearchKeywords",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Page",
+                        "in": "query",
+                        "description": "The current page",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "PageSize",
+                        "in": "query",
+                        "description": "Maximum items that display per page",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "Before",
+                        "in": "query",
+                        "description": "Cursor pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "After",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Keyword",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Targets",
+                        "in": "query",
+                        "description": "Fields want to search for",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "Sort",
+                        "in": "query",
+                        "description": "example : Sort=Age:desc,Name:asc\r\ndefault is asc",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Filter",
+                        "in": "query",
+                        "schema": {}
+                    },
+                    {
+                        "name": "OriginFilters",
+                        "in": "query",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FinancialReportResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FinancialReportResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FinancialReportResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Finance/api/EInvoice/GetByCode/{Code}": {
+            "get": {
+                "tags": [
+                    "EInvoiceRoute endpoint"
+                ],
+                "summary": "get EInvoiceRoute",
+                "parameters": [
+                    {
+                        "name": "Code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetEInvoiceByCodeResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetEInvoiceByCodeResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetEInvoiceByCodeResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Finance/api/EInvoice/GetByOrderId/{OrderId}": {
+            "get": {
+                "tags": [
+                    "EInvoiceRoute endpoint"
+                ],
+                "summary": "create EInvoiceRoute",
+                "parameters": [
+                    {
+                        "name": "OrderId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetEInvoiceByOrderIdResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetEInvoiceByOrderIdResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetEInvoiceByOrderIdResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Finance/api/Funds/{id}": {
+            "get": {
+                "tags": [
+                    "FundRoute endpoint"
+                ],
+                "summary": "Detail Order",
+                "operationId": "Finance/api/Funds/{id}",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetFundDetailResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetFundDetailResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetFundDetailResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "FundRoute endpoint"
+                ],
+                "summary": "Update fund",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateFundModel"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateFundModel"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateFundModel"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Finance/api/Transaction/GetPointByCustomerId/{id}": {
+            "get": {
+                "tags": [
+                    "TransactionRoute endpoint"
+                ],
+                "summary": "Transaction",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetPointCustomerResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetPointCustomerResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetPointCustomerResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Finance/api/Transaction/GetCustomerPoint": {
+            "get": {
+                "tags": [
+                    "TransactionRoute endpoint"
+                ],
+                "summary": "Transaction",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PointCustomerResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PointCustomerResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PointCustomerResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Finance/api/Transaction": {
+            "get": {
+                "tags": [
+                    "TransactionRoute endpoint"
+                ],
+                "summary": "list Transaction",
+                "parameters": [
+                    {
+                        "name": "Page",
+                        "in": "query",
+                        "description": "The current page",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "PageSize",
+                        "in": "query",
+                        "description": "Maximum items that display per page",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "Before",
+                        "in": "query",
+                        "description": "Cursor pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "After",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Keyword",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Targets",
+                        "in": "query",
+                        "description": "Fields want to search for",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "Sort",
+                        "in": "query",
+                        "description": "example : Sort=Age:desc,Name:asc\r\ndefault is asc",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Filter",
+                        "in": "query",
+                        "schema": {}
+                    },
+                    {
+                        "name": "OriginFilters",
+                        "in": "query",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListTransactionResponsePaginationResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListTransactionResponsePaginationResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListTransactionResponsePaginationResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "CreateFundBehaviorCommand": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "nullable": true
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/FundType"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "CreateFundCommand": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "$ref": "#/components/schemas/FundType"
+                    },
+                    "amount": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "fundBehaviorId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "note": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "paymentMethod": {
+                        "$ref": "#/components/schemas/PaymentMethod"
+                    },
+                    "branchId": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "CustomerGroup": {
+                "enum": [
+                    "Loyal",
+                    "Normal"
+                ],
+                "type": "string"
+            },
+            "FinancialReportResponse": {
+                "type": "object",
+                "properties": {
+                    "totalStockImport": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "totalStockExport": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "totalOtherIncome": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "totalOtherSpend": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "FinancialReportResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/FinancialReportResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "FundBehaviorProjection": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "createdBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "name": {
+                        "nullable": true
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/FundType"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "FundStatus": {
+                "enum": [
+                    "PendingConfirmation",
+                    "Confirmed",
+                    "Cancelled"
+                ],
+                "type": "string"
+            },
+            "FundType": {
+                "enum": [
+                    "Income",
+                    "Spend"
+                ],
+                "type": "string"
+            },
+            "GetEInvoiceByCodeResponse": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "GetEInvoiceByCodeResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/GetEInvoiceByCodeResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "GetEInvoiceByOrderIdResponse": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "GetEInvoiceByOrderIdResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/GetEInvoiceByOrderIdResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "GetFundDetailResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "publicId": {
+                        "$ref": "#/components/schemas/Ulid"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "createdBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "code": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "amount": {
+                        "type": "number",
+                        "format": "double",
+                        "nullable": true
+                    },
+                    "fundBehaviorId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "note": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/FundStatus"
+                    },
+                    "paymentMethod": {
+                        "$ref": "#/components/schemas/PaymentMethod"
+                    },
+                    "fundBehavior": {
+                        "$ref": "#/components/schemas/FundBehaviorProjection"
+                    },
+                    "transactionDate": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "branchId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/FundType"
+                    },
+                    "referenceId": {
+                        "type": "integer",
+                        "format": "int64",
+                        "nullable": true
+                    },
+                    "metadata": {
+                        "nullable": true
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/UserDTO"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "GetFundDetailResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/GetFundDetailResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "GetPointCustomerResponse": {
+                "type": "object",
+                "properties": {
+                    "point": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "GetPointCustomerResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/GetPointCustomerResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListFundBehaviorResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "createdBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "name": {
+                        "nullable": true
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/FundType"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListFundBehaviorResponseIEnumerableApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ListFundBehaviorResponse"
+                        },
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListFundResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "publicId": {
+                        "$ref": "#/components/schemas/Ulid"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "createdBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "code": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "amount": {
+                        "type": "number",
+                        "format": "double",
+                        "nullable": true
+                    },
+                    "fundBehaviorId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "note": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/FundStatus"
+                    },
+                    "paymentMethod": {
+                        "$ref": "#/components/schemas/PaymentMethod"
+                    },
+                    "fundBehavior": {
+                        "$ref": "#/components/schemas/FundBehaviorProjection"
+                    },
+                    "transactionDate": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "branchId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/FundType"
+                    },
+                    "referenceId": {
+                        "type": "integer",
+                        "format": "int64",
+                        "nullable": true
+                    },
+                    "metadata": {
+                        "nullable": true
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/UserDTO"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListFundResponsePaginationResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ListFundResponse"
+                        },
+                        "nullable": true
+                    },
+                    "paging": {
+                        "$ref": "#/components/schemas/ListFundResponsePaging"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListFundResponsePaginationResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/ListFundResponsePaginationResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListFundResponsePaging": {
+                "type": "object",
+                "properties": {
+                    "currentPage": {
+                        "type": "integer",
+                        "format": "int32",
+                        "nullable": true
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalPage": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "hasNextPage": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "hasPreviousPage": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "before": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "after": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListTransactionResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "publicId": {
+                        "$ref": "#/components/schemas/Ulid"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "createdBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "customerId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "amount": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "transactionAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/TransactionType"
+                    },
+                    "metadata": {
+                        "nullable": true
+                    },
+                    "customer": {
+                        "$ref": "#/components/schemas/UserDTO"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListTransactionResponsePaginationResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ListTransactionResponse"
+                        },
+                        "nullable": true
+                    },
+                    "paging": {
+                        "$ref": "#/components/schemas/ListTransactionResponsePaging"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListTransactionResponsePaginationResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/ListTransactionResponsePaginationResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListTransactionResponsePaging": {
+                "type": "object",
+                "properties": {
+                    "currentPage": {
+                        "type": "integer",
+                        "format": "int32",
+                        "nullable": true
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalPage": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "hasNextPage": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "hasPreviousPage": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "before": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "after": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "PaymentMethod": {
+                "enum": [
+                    "Cash",
+                    "Card"
+                ],
+                "type": "string"
+            },
+            "PointCustomerResponse": {
+                "type": "object",
+                "properties": {
+                    "point": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "PointCustomerResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/PointCustomerResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "TransactionType": {
+                "enum": [
+                    "Point",
+                    "Money"
+                ],
+                "type": "string"
+            },
+            "Ulid": {
+                "type": "object",
+                "properties": {
+                    "random": {
+                        "type": "string",
+                        "format": "byte",
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "UpdateFundModel": {
+                "type": "object",
+                "properties": {
+                    "note": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/FundStatus"
+                    },
+                    "paymentMethod": {
+                        "$ref": "#/components/schemas/PaymentMethod"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "UserDTO": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "nullable": true
+                    },
+                    "displayName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "publicId": {
+                        "$ref": "#/components/schemas/Ulid"
+                    },
+                    "email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "customerGroup": {
+                        "$ref": "#/components/schemas/CustomerGroup"
+                    },
+                    "avatar": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "securitySchemes": {
+            "Bearer": {
+                "type": "http",
+                "description": "Please enter token",
+                "scheme": "Bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
+    "security": [
+        {
+            "Bearer": []
+        }
+    ]
+}

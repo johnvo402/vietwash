@@ -1,0 +1,391 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "NotificationService Documentation",
+        "description": "Well come to the NotificationService API",
+        "contact": {
+            "name": "Thanh Thu",
+            "email": "thanhthu040202@gmail.com"
+        },
+        "version": "v1"
+    },
+    "paths": {
+        "/Notification/api/CountNotify": {
+            "get": {
+                "tags": [
+                    "Notification Endpoint"
+                ],
+                "summary": "list Notify",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CountNotifyUnReadResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CountNotifyUnReadResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CountNotifyUnReadResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Notification/api/ListNotify": {
+            "get": {
+                "tags": [
+                    "Notification Endpoint"
+                ],
+                "summary": "list Notify",
+                "parameters": [
+                    {
+                        "name": "Page",
+                        "in": "query",
+                        "description": "The current page",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "PageSize",
+                        "in": "query",
+                        "description": "Maximum items that display per page",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "Before",
+                        "in": "query",
+                        "description": "Cursor pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "After",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Keyword",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Targets",
+                        "in": "query",
+                        "description": "Fields want to search for",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "Sort",
+                        "in": "query",
+                        "description": "example : Sort=Age:desc,Name:asc\r\ndefault is asc",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Filter",
+                        "in": "query",
+                        "schema": {}
+                    },
+                    {
+                        "name": "OriginFilters",
+                        "in": "query",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListNotificationResponsePaginationResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListNotificationResponsePaginationResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListNotificationResponsePaginationResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Notification/api/ReadAllNotify": {
+            "put": {
+                "tags": [
+                    "Notification Endpoint"
+                ],
+                "summary": "list Notify",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReadAllNotifyCommand"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReadAllNotifyCommand"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReadAllNotifyCommand"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/Notification/api/ReadOneNotify/{id}": {
+            "put": {
+                "tags": [
+                    "Notification Endpoint"
+                ],
+                "summary": "list Notify",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "CountNotifyUnReadResponse": {
+                "type": "object",
+                "properties": {
+                    "numberNotify": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "CountNotifyUnReadResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/CountNotifyUnReadResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListNotificationResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "publicId": {
+                        "$ref": "#/components/schemas/Ulid"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "createdBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "content": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "contentHtml": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "isRead": {
+                        "type": "boolean"
+                    },
+                    "data": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        },
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListNotificationResponsePaginationResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ListNotificationResponse"
+                        },
+                        "nullable": true
+                    },
+                    "paging": {
+                        "$ref": "#/components/schemas/ListNotificationResponsePaging"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListNotificationResponsePaginationResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/ListNotificationResponsePaginationResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListNotificationResponsePaging": {
+                "type": "object",
+                "properties": {
+                    "currentPage": {
+                        "type": "integer",
+                        "format": "int32",
+                        "nullable": true
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalPage": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "hasNextPage": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "hasPreviousPage": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "before": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "after": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ReadAllNotifyCommand": {
+                "type": "object",
+                "additionalProperties": false
+            },
+            "Ulid": {
+                "type": "object",
+                "properties": {
+                    "random": {
+                        "type": "string",
+                        "format": "byte",
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "securitySchemes": {
+            "Bearer": {
+                "type": "http",
+                "description": "Please enter token",
+                "scheme": "Bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
+    "security": [
+        {
+            "Bearer": []
+        }
+    ]
+}

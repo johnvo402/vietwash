@@ -1,0 +1,2382 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "AuthService Documentation",
+        "description": "Well come to the AuthService API",
+        "contact": {
+            "name": "Thanh Thu",
+            "email": "thanhthu040202@gmail.com"
+        },
+        "version": "v1"
+    },
+    "paths": {
+        "/Auth/api/Accounts/ChangePassword": {
+            "put": {
+                "tags": [
+                    "Accounts endpoint"
+                ],
+                "summary": "reset Account password",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChangeAccountPasswordCommand"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChangeAccountPasswordCommand"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChangeAccountPasswordCommand"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Auth/api/Accounts": {
+            "post": {
+                "tags": [
+                    "Accounts endpoint"
+                ],
+                "summary": "create Account",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateAccountCommand"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateAccountCommand"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateAccountCommand"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreateAccountResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreateAccountResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreateAccountResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "Accounts endpoint"
+                ],
+                "summary": "list Account",
+                "parameters": [
+                    {
+                        "name": "Page",
+                        "in": "query",
+                        "description": "The current page",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "PageSize",
+                        "in": "query",
+                        "description": "Maximum items that display per page",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "Before",
+                        "in": "query",
+                        "description": "Cursor pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "After",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Keyword",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Targets",
+                        "in": "query",
+                        "description": "Fields want to search for",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "Sort",
+                        "in": "query",
+                        "description": "example : Sort=Age:desc,Name:asc\r\ndefault is asc",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Filter",
+                        "in": "query",
+                        "schema": {}
+                    },
+                    {
+                        "name": "OriginFilters",
+                        "in": "query",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListAccountResponsePaginationResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListAccountResponsePaginationResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListAccountResponsePaginationResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Auth/api/Customers": {
+            "post": {
+                "tags": [
+                    "Customers endpoint"
+                ],
+                "summary": "Create customer",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateCustomerCommand"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateCustomerCommand"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateCustomerCommand"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreateCustomerResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreateCustomerResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreateCustomerResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "Customers endpoint"
+                ],
+                "summary": "list Customer",
+                "parameters": [
+                    {
+                        "name": "Page",
+                        "in": "query",
+                        "description": "The current page",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "PageSize",
+                        "in": "query",
+                        "description": "Maximum items that display per page",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "Before",
+                        "in": "query",
+                        "description": "Cursor pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "After",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Keyword",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Targets",
+                        "in": "query",
+                        "description": "Fields want to search for",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "Sort",
+                        "in": "query",
+                        "description": "example : Sort=Age:desc,Name:asc\r\ndefault is asc",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Filter",
+                        "in": "query",
+                        "schema": {}
+                    },
+                    {
+                        "name": "OriginFilters",
+                        "in": "query",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListCustomerResponsePaginationResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListCustomerResponsePaginationResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListCustomerResponsePaginationResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Auth/api/Accounts/CustomerLogin": {
+            "post": {
+                "tags": [
+                    "Accounts endpoint"
+                ],
+                "summary": "Logging in Account",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CustomerLoginCommand"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CustomerLoginCommand"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CustomerLoginCommand"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Auth/api/Accounts/CustomerLoginVerify": {
+            "post": {
+                "tags": [
+                    "Accounts endpoint"
+                ],
+                "summary": "Logging in Account Verify",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerifyOtpCommand"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerifyOtpCommand"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerifyOtpCommand"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerifyOtpResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerifyOtpResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerifyOtpResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Auth/api/Accounts/{id}": {
+            "delete": {
+                "tags": [
+                    "Accounts endpoint"
+                ],
+                "summary": "Delete Account",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "Accounts endpoint"
+                ],
+                "summary": "Detail Account",
+                "operationId": "Auth/api/AccountsDetailEndpoint",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetAccountDetailResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetAccountDetailResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetAccountDetailResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Accounts endpoint"
+                ],
+                "summary": "Update Account",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateAccount"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateAccount"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateAccount"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UpdateAccountResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UpdateAccountResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UpdateAccountResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Auth/api/Accounts/Profile": {
+            "get": {
+                "tags": [
+                    "Accounts endpoint"
+                ],
+                "summary": "Profile Account",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetAccountProfileResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetAccountProfileResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetAccountProfileResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Accounts endpoint"
+                ],
+                "summary": "Update Profile Account",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateAccountProfileCommand"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateAccountProfileCommand"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateAccountProfileCommand"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UpdateAccountProfileResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UpdateAccountProfileResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UpdateAccountProfileResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Auth/api/Customers/{id}": {
+            "get": {
+                "tags": [
+                    "Customers endpoint"
+                ],
+                "summary": "Detail Customer",
+                "operationId": "Auth/api/CustomersDetailEndpoint",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetCustomerDetailResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetCustomerDetailResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetCustomerDetailResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Customers endpoint"
+                ],
+                "summary": "Update Customer",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateCustomerModel"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateCustomerModel"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateCustomerModel"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Auth/api/Accounts/Login": {
+            "post": {
+                "tags": [
+                    "Accounts endpoint"
+                ],
+                "summary": "Logging in Account",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginCommand"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginCommand"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginCommand"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LoginResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LoginResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LoginResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Auth/api/Accounts/Logout": {
+            "post": {
+                "tags": [
+                    "Accounts endpoint"
+                ],
+                "summary": "Logout in Account",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LogoutResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LogoutResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LogoutResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Auth/api/Accounts/RefreshToken": {
+            "post": {
+                "tags": [
+                    "Accounts endpoint"
+                ],
+                "summary": "refresh token",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RefreshTokenCommand"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RefreshTokenCommand"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RefreshTokenCommand"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RefreshTokenResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RefreshTokenResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RefreshTokenResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Auth/api/Accounts/RequestOtp": {
+            "post": {
+                "tags": [
+                    "Accounts endpoint"
+                ],
+                "summary": "Logging in Account",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RequestOtpCommand"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RequestOtpCommand"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RequestOtpCommand"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Auth/api/Accounts/RequestResetPassowrd": {
+            "put": {
+                "tags": [
+                    "Accounts endpoint"
+                ],
+                "summary": "request reset Account password",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RequestResetAccountPasswordCommand"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RequestResetAccountPasswordCommand"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RequestResetAccountPasswordCommand"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/Auth/api/Accounts/ResetPassowrd": {
+            "put": {
+                "tags": [
+                    "Accounts endpoint"
+                ],
+                "summary": "reset Account password",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ResetAccountPasswordCommand"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ResetAccountPasswordCommand"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ResetAccountPasswordCommand"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/Auth/api/Media": {
+            "post": {
+                "tags": [
+                    "Media endpoint"
+                ],
+                "summary": "Upload Media",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "Files": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    },
+                                    "MediaType": {
+                                        "$ref": "#/components/schemas/MediaType"
+                                    }
+                                }
+                            },
+                            "encoding": {
+                                "Files": {
+                                    "style": "form"
+                                },
+                                "MediaType": {
+                                    "style": "form"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UploadMediaResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UploadMediaResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UploadMediaResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AccountContactProjection": {
+                "type": "object",
+                "properties": {
+                    "address": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "commune": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "district": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "province": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "communeCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "districtCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "provinceCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "street": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "AccountStatus": {
+                "enum": [
+                    "Active",
+                    "Inactive"
+                ],
+                "type": "string"
+            },
+            "ApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "BranchAccountModel": {
+                "type": "object",
+                "properties": {
+                    "branchId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "branchName": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "BranchAccountProjection": {
+                "type": "object",
+                "properties": {
+                    "accountId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "branchId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "branchName": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ChangeAccountPasswordCommand": {
+                "type": "object",
+                "properties": {
+                    "oldPassword": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "newPassword": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "CreateAccountCommand": {
+                "type": "object",
+                "properties": {
+                    "displayName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "birthDay": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "avtUrl": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "password": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "gender": {
+                        "$ref": "#/components/schemas/Gender"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/AccountStatus"
+                    },
+                    "role": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "branchAccounts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/BranchAccountModel"
+                        },
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "CreateAccountResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "publicId": {
+                        "$ref": "#/components/schemas/Ulid"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "createdBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "displayName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/AccountStatus"
+                    },
+                    "avtUrl": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "role": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "gender": {
+                        "$ref": "#/components/schemas/Gender"
+                    },
+                    "birthDay": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "accountContact": {
+                        "$ref": "#/components/schemas/AccountContactProjection"
+                    },
+                    "branchAccounts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/BranchAccountProjection"
+                        },
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "CreateAccountResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/CreateAccountResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "CreateCustomerCommand": {
+                "type": "object",
+                "properties": {
+                    "displayName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "gender": {
+                        "$ref": "#/components/schemas/Gender"
+                    },
+                    "accountContact": {
+                        "$ref": "#/components/schemas/AccountContactProjection"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "CreateCustomerResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "displayName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "CreateCustomerResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/CreateCustomerResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "CustomerGroup": {
+                "enum": [
+                    "Loyal",
+                    "Normal"
+                ],
+                "type": "string"
+            },
+            "CustomerLoginCommand": {
+                "type": "object",
+                "properties": {
+                    "phoneNumber": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Gender": {
+                "enum": [
+                    "Male",
+                    "Female",
+                    "Other"
+                ],
+                "type": "string"
+            },
+            "GetAccountDetailResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "publicId": {
+                        "$ref": "#/components/schemas/Ulid"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "createdBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "displayName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/AccountStatus"
+                    },
+                    "avtUrl": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "role": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "gender": {
+                        "$ref": "#/components/schemas/Gender"
+                    },
+                    "birthDay": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "accountContact": {
+                        "$ref": "#/components/schemas/AccountContactProjection"
+                    },
+                    "branchAccounts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/BranchAccountProjection"
+                        },
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "GetAccountDetailResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/GetAccountDetailResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "GetAccountProfileResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "publicId": {
+                        "$ref": "#/components/schemas/Ulid"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "createdBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "displayName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/AccountStatus"
+                    },
+                    "avtUrl": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "role": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "gender": {
+                        "$ref": "#/components/schemas/Gender"
+                    },
+                    "birthDay": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "accountContact": {
+                        "$ref": "#/components/schemas/AccountContactProjection"
+                    },
+                    "branchAccounts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/BranchAccountProjection"
+                        },
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "GetAccountProfileResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/GetAccountProfileResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "GetCustomerDetailResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "publicId": {
+                        "$ref": "#/components/schemas/Ulid"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "createdBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "displayName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/AccountStatus"
+                    },
+                    "avtUrl": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "role": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "gender": {
+                        "$ref": "#/components/schemas/Gender"
+                    },
+                    "birthDay": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "accountContact": {
+                        "$ref": "#/components/schemas/AccountContactProjection"
+                    },
+                    "branchAccounts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/BranchAccountProjection"
+                        },
+                        "nullable": true
+                    },
+                    "customerGroup": {
+                        "$ref": "#/components/schemas/CustomerGroup"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "GetCustomerDetailResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/GetCustomerDetailResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListAccountResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "publicId": {
+                        "$ref": "#/components/schemas/Ulid"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "createdBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "displayName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/AccountStatus"
+                    },
+                    "avtUrl": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "role": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListAccountResponsePaginationResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ListAccountResponse"
+                        },
+                        "nullable": true
+                    },
+                    "paging": {
+                        "$ref": "#/components/schemas/ListAccountResponsePaging"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListAccountResponsePaginationResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/ListAccountResponsePaginationResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListAccountResponsePaging": {
+                "type": "object",
+                "properties": {
+                    "currentPage": {
+                        "type": "integer",
+                        "format": "int32",
+                        "nullable": true
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalPage": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "hasNextPage": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "hasPreviousPage": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "before": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "after": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListCustomerResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "publicId": {
+                        "$ref": "#/components/schemas/Ulid"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "createdBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "displayName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "customerGroup": {
+                        "$ref": "#/components/schemas/CustomerGroup"
+                    },
+                    "avtUrl": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/AccountStatus"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListCustomerResponsePaginationResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ListCustomerResponse"
+                        },
+                        "nullable": true
+                    },
+                    "paging": {
+                        "$ref": "#/components/schemas/ListCustomerResponsePaging"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListCustomerResponsePaginationResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/ListCustomerResponsePaginationResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListCustomerResponsePaging": {
+                "type": "object",
+                "properties": {
+                    "currentPage": {
+                        "type": "integer",
+                        "format": "int32",
+                        "nullable": true
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalPage": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "hasNextPage": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "hasPreviousPage": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "before": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "after": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "LoginCommand": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "password": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "rememberMe": {
+                        "type": "boolean",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "LoginResponse": {
+                "type": "object",
+                "properties": {
+                    "tokenType": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "accessTokenExpiredIn": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "token": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "refresh": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "LoginResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/LoginResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "LogoutResponse": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "LogoutResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/LogoutResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "MediaType": {
+                "enum": [
+                    "Image",
+                    "File"
+                ],
+                "type": "string"
+            },
+            "OtpType": {
+                "enum": [
+                    "Phone",
+                    "Email"
+                ],
+                "type": "string"
+            },
+            "RefreshTokenCommand": {
+                "type": "object",
+                "properties": {
+                    "refreshToken": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "RefreshTokenResponse": {
+                "type": "object",
+                "properties": {
+                    "tokenType": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "accessTokenExpiredIn": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "token": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "refresh": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "RefreshTokenResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/RefreshTokenResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "RequestOtpCommand": {
+                "type": "object",
+                "properties": {
+                    "to": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "clientIp": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/OtpType"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "RequestResetAccountPasswordCommand": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ResetAccountPasswordCommand": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "accountId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "password": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Ulid": {
+                "type": "object",
+                "properties": {
+                    "random": {
+                        "type": "string",
+                        "format": "byte",
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "UpdateAccount": {
+                "type": "object",
+                "properties": {
+                    "displayName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "birthDay": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "avtUrl": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "gender": {
+                        "$ref": "#/components/schemas/Gender"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/AccountStatus"
+                    },
+                    "role": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "branchAccounts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/BranchAccountModel"
+                        },
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "UpdateAccountProfileCommand": {
+                "type": "object",
+                "properties": {
+                    "displayName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "birthDay": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "avtUrl": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "gender": {
+                        "$ref": "#/components/schemas/Gender"
+                    },
+                    "otpPhoneNumber": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "otpEmail": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "accountContact": {
+                        "$ref": "#/components/schemas/AccountContactProjection"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "UpdateAccountProfileResponse": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "UpdateAccountProfileResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/UpdateAccountProfileResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "UpdateAccountResponse": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "UpdateAccountResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/UpdateAccountResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "UpdateCustomerModel": {
+                "type": "object",
+                "properties": {
+                    "displayName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "gender": {
+                        "$ref": "#/components/schemas/Gender"
+                    },
+                    "accountContact": {
+                        "$ref": "#/components/schemas/AccountContactProjection"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/AccountStatus"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "UploadMediaResponse": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "UploadMediaResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/UploadMediaResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "VerifyOtpCommand": {
+                "type": "object",
+                "properties": {
+                    "phoneNumber": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "otp": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "VerifyOtpResponse": {
+                "type": "object",
+                "properties": {
+                    "tokenType": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "accessTokenExpiredIn": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "token": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "refresh": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "verified": {
+                        "type": "boolean"
+                    },
+                    "isNew": {
+                        "type": "boolean",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "VerifyOtpResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/VerifyOtpResponse"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "securitySchemes": {
+            "Bearer": {
+                "type": "http",
+                "description": "Please enter token",
+                "scheme": "Bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
+    "security": [
+        {
+            "Bearer": []
+        }
+    ]
+}

@@ -1,0 +1,222 @@
+import { useTranslations } from "next-intl";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { CategoryFormQuery } from "@/features/settings/setting-data/category-settings/components/category-form";
+import CategorySelect from "@/features/services/components/category-select";
+import TextEditor from "@/components/ui/text-editor";
+import { ActivationStatus } from "@/api/generated";
+import { formatNumberVN } from "@/utils/format";
+import { UseFormReturn } from "react-hook-form";
+import { FormValues, CategoryFormValues } from "./create-material-dialog";
+
+interface ProductFormFieldsProps {
+  form: UseFormReturn<FormValues>;
+  treeData: any;
+  parentOptions: any[];
+  isCreating: boolean;
+  createCategory: (data: CategoryFormValues) => Promise<void>;
+  categoryForm: UseFormReturn<CategoryFormValues>;
+  mutations: any;
+  categoryDialogOpen: boolean;
+  setCategoryDialogOpen: (open: boolean) => void;
+}
+
+export function ProductFormFields({
+  form,
+  treeData,
+  parentOptions,
+  isCreating,
+  createCategory,
+  categoryForm,
+  mutations,
+  categoryDialogOpen,
+  setCategoryDialogOpen,
+}: ProductFormFieldsProps) {
+  const t = useTranslations();
+
+  const handleCategorySubmit = async (formData: CategoryFormValues) => {
+    try {
+      await createCategory(formData);
+      categoryForm.reset();
+      setCategoryDialogOpen(false);
+    } catch (error) {
+      console.error("Error creating category:", error);
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="space-y-6">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                {t("dialog.name", {
+                  Entity: t("common.product").replace(/^./, (c) =>
+                    c.toUpperCase()
+                  ),
+                })}
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder={t("dialog.placeholder", {
+                    entity: t("common.product"),
+                  })}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="sku"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("product.sku")}</FormLabel>
+              <FormControl>
+                <Input placeholder={t("product.placeholderSKU")} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="categoryId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                {t("common.category").replace(/^./, (c) => c.toUpperCase())}
+              </FormLabel>
+              <div className="flex gap-2">
+                <CategorySelect
+                  treeData={treeData}
+                  value={field.value}
+                  onValueChange={(value) => field.onChange(Number(value))}
+                  placeholder={t("common.placeholderSelect", {
+                    entity: t("common.category"),
+                  })}
+                />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setCategoryDialogOpen(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+                {categoryDialogOpen && (
+                  <CategoryFormQuery
+                    isOpen={categoryDialogOpen}
+                    onClose={() => setCategoryDialogOpen(false)}
+                    onSubmit={handleCategorySubmit}
+                    initialData={undefined}
+                    mode={"create"}
+                    parentOptions={parentOptions}
+                    defaultParentId={null}
+                    isLoading={isCreating}
+                    error={mutations.create.error}
+                    isSuccess={mutations.create.isSuccess}
+                  />
+                )}
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="capitalPrice"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("product.capitalPrice")}</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  min="0"
+                  step="1"
+                  value={formatNumberVN(field.value)}
+                  placeholder="0.00"
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "");
+                    field.onChange(val);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="status"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel>{t("common.status.title")}</FormLabel>
+              <FormControl>
+                <RadioGroup
+                  onValueChange={(value) => field.onChange(value)}
+                  defaultValue={field.value.toString()}
+                  className="flex flex-col space-y-1"
+                >
+                  <FormItem className="flex items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value={ActivationStatus.Active} />
+                    </FormControl>
+                    <FormLabel className="font-normal text-green-500">
+                      {t("common.status.active")}
+                    </FormLabel>
+                  </FormItem>
+                  <FormItem className="flex items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value={ActivationStatus.Inactive} />
+                    </FormControl>
+                    <FormLabel className="font-normal text-destructive">
+                      {t("common.status.inactive")}
+                    </FormLabel>
+                  </FormItem>
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      <div className="space-y-6">
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("common.description")}</FormLabel>
+              <FormControl>
+                <TextEditor
+                  value={field.value}
+                  onChange={(value) => field.onChange(value)}
+                  className="w-full border rounded-[var(--radius)] focus-within:ring-2 focus-within:ring-ring min-h-[100px]"
+                  placeholder={t("common.placeholderDes", {
+                    entity: t("common.product"),
+                  })}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    </div>
+  );
+}

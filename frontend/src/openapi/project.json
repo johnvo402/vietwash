@@ -1,0 +1,609 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "ProjectService Documentation",
+        "description": "Well come to the ProjectService API",
+        "contact": {
+            "name": "Thanh Thu",
+            "email": "thanhthu040202@gmail.com"
+        },
+        "version": "v1"
+    },
+    "paths": {
+        "/Project/api/Branches": {
+            "post": {
+                "tags": [
+                    "BranchRoute endpoint"
+                ],
+                "summary": "Create Branch",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateBranchCommand"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateBranchCommand"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateBranchCommand"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "BranchRoute endpoint"
+                ],
+                "summary": "List Branch",
+                "parameters": [
+                    {
+                        "name": "Page",
+                        "in": "query",
+                        "description": "The current page",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "PageSize",
+                        "in": "query",
+                        "description": "Maximum items that display per page",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "Before",
+                        "in": "query",
+                        "description": "Cursor pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "After",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Keyword",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Targets",
+                        "in": "query",
+                        "description": "Fields want to search for",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "Sort",
+                        "in": "query",
+                        "description": "example : Sort=Age:desc,Name:asc\r\ndefault is asc",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Filter",
+                        "in": "query",
+                        "schema": {}
+                    },
+                    {
+                        "name": "OriginFilters",
+                        "in": "query",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListBranchResponsePaginationResponseApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListBranchResponsePaginationResponseApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListBranchResponsePaginationResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Project/api/Branches/{id}": {
+            "delete": {
+                "tags": [
+                    "BranchRoute endpoint"
+                ],
+                "summary": "Delete Branch",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "BranchRoute endpoint"
+                ],
+                "summary": "Update Branch",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BranchModel"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BranchModel"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BranchModel"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ActivationStatus": {
+                "enum": [
+                    "Active",
+                    "Inactive"
+                ],
+                "type": "string"
+            },
+            "ApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "BranchModel": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "code": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "main": {
+                        "type": "boolean"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/ActivationStatus"
+                    },
+                    "email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phoneCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "addressName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "communeName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "communeCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "districtName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "districtCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "provinceName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "provinceCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "street": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "CreateBranchCommand": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "code": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "main": {
+                        "type": "boolean"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/ActivationStatus"
+                    },
+                    "email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phoneCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "addressName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "communeName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "communeCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "districtName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "districtCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "provinceName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "provinceCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "street": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListBranchResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "publicId": {
+                        "$ref": "#/components/schemas/Ulid"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "createdBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedBy": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "code": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "main": {
+                        "type": "boolean"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/ActivationStatus"
+                    },
+                    "email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phoneCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "addressName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "communeName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "communeCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "districtName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "districtCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "provinceName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "provinceCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "street": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "slug": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListBranchResponsePaginationResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ListBranchResponse"
+                        },
+                        "nullable": true
+                    },
+                    "paging": {
+                        "$ref": "#/components/schemas/ListBranchResponsePaging"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListBranchResponsePaginationResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/ListBranchResponsePaginationResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "ListBranchResponsePaging": {
+                "type": "object",
+                "properties": {
+                    "currentPage": {
+                        "type": "integer",
+                        "format": "int32",
+                        "nullable": true
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalPage": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "hasNextPage": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "hasPreviousPage": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "before": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "after": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Ulid": {
+                "type": "object",
+                "properties": {
+                    "random": {
+                        "type": "string",
+                        "format": "byte",
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "securitySchemes": {
+            "Bearer": {
+                "type": "http",
+                "description": "Please enter token",
+                "scheme": "Bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
+    "security": [
+        {
+            "Bearer": []
+        }
+    ]
+}
