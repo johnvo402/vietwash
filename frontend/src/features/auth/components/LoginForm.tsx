@@ -10,7 +10,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/hooks/use-auth";
+import { isValidCredentials, useAuth } from "@/hooks/use-auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useTransition } from "react";
@@ -48,14 +48,21 @@ export default function LoginForm() {
     mutationFn: (data: UserFormValue) =>
       apiClient.authApiAccountsLoginPost(data),
     onSuccess: (data) => {
-      login({
+      const credentials = {
         accessTokenExpiredIn: data.data.results?.accessTokenExpiredIn,
         refresh: data.data.results?.refresh,
         token: data.data.results?.token,
-      });
+      };
+
+      if (!isValidCredentials(credentials)) {
+        toast.error("Login response did not contain valid credentials");
+        return;
+      }
+
+      login(credentials);
       toast("Login success");
     },
-    onError: (error: Error) => {
+    onError: () => {
       toast.error("Login failed");
     },
   });
@@ -101,9 +108,7 @@ export default function LoginForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                {t("user.password.title")}
-              </FormLabel>
+              <FormLabel>{t("user.password.title")}</FormLabel>
               <FormControl>
                 <PasswordInput
                   placeholder={t("user.placeholder", {

@@ -61,20 +61,20 @@ export const FundPageView = () => {
     parseAsArrayOf(parseAsStringEnum(Object.values(FundStatus))).withDefault([
       FundStatus.PendingConfirmation,
       FundStatus.Confirmed,
-    ])
+    ]),
   );
   const [dateFrom, setDateFrom] = useQueryState(
     "from",
-    parseAsIsoDateTime.withDefault(new Date())
+    parseAsIsoDateTime.withDefault(new Date()),
   );
   const [dateTo, setDateTo] = useQueryState(
     "to",
-    parseAsIsoDateTime.withDefault(new Date())
+    parseAsIsoDateTime.withDefault(new Date()),
   );
   const [time, setTime] = useQueryState("time", { defaultValue: "thisWeek" });
   const [behaviorId, setBehaviorId] = useQueryState(
     "behaviorId",
-    parseAsInteger.withDefault(0)
+    parseAsInteger.withDefault(0),
   );
   const [type, setType] = useQueryState("type", { defaultValue: "" });
 
@@ -106,10 +106,17 @@ export const FundPageView = () => {
     ) {
       isUpdatingRef.current = true;
       setDateRange(newDateRange as DateRange);
-      console.log("FundPageView: Updated dateRange:", newDateRange);
       isUpdatingRef.current = false;
     }
-  }, [dateFrom, dateTo, time]); // Removed dateRange from dependencies
+  }, [
+    dateFrom,
+    dateRange?.from,
+    dateRange?.time,
+    dateRange?.to,
+    dateTo,
+    setDateRange,
+    time,
+  ]);
 
   const { data: fundBehaviors = [] } = useQueryFundBehavior({
     queryKey: ["fundBehaviors"],
@@ -131,7 +138,7 @@ export const FundPageView = () => {
 
   const handleUpdateStatus = async (
     id: string,
-    status: FundStatus
+    status: FundStatus,
   ): Promise<void> => {
     try {
       await apiClient.financeApiFundsIdPut(id, { status });
@@ -265,7 +272,7 @@ export const FundPageView = () => {
                 setDateRange(undefined);
                 console.log(
                   "FundPageView: Reset dateRange to default:",
-                  defaultRange
+                  defaultRange,
                 );
               }
             } else {
@@ -299,11 +306,11 @@ export const FundPageView = () => {
             }
           }}
           statusFilter={statusOptions.filter((option) =>
-            statusFilter.includes(option.value as FundStatus)
+            statusFilter.includes(option.value as FundStatus),
           )}
           setStatusFilter={(options) => {
             const newStatusFilter = options.map(
-              (option) => option.value as FundStatus
+              (option) => option.value as FundStatus,
             );
             if (
               JSON.stringify(statusFilter) !== JSON.stringify(newStatusFilter)
@@ -311,7 +318,7 @@ export const FundPageView = () => {
               setStatusFilter(newStatusFilter);
               console.log(
                 "FundPageView: Updated statusFilter:",
-                newStatusFilter
+                newStatusFilter,
               );
             }
           }}

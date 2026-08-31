@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   Form,
@@ -76,10 +76,10 @@ export function UnitRelationsForm({
 
   // id-based UI states
   const [unitInputModes, setUnitInputModes] = useState<Record<string, boolean>>(
-    () => Object.fromEntries(unitFields.map((f, i) => [f.id, i !== 0]))
+    () => Object.fromEntries(unitFields.map((f, i) => [f.id, i !== 0])),
   );
   const [openRelations, setOpenRelations] = useState<Record<string, boolean>>(
-    () => (unitFields[0] ? { [unitFields[0].id]: true } : {})
+    () => (unitFields[0] ? { [unitFields[0].id]: true } : {}),
   );
 
   const addUnitRelation = useCallback(() => {
@@ -109,7 +109,7 @@ export function UnitRelationsForm({
         });
       }
     },
-    [form, removeUnit]
+    [form, removeUnit],
   );
 
   const createNewUnit = useCallback(
@@ -121,7 +121,7 @@ export function UnitRelationsForm({
         console.error("Error creating unit:", error);
       }
     },
-    [createUnit, setUnitDialogOpen]
+    [createUnit, setUnitDialogOpen],
   );
 
   const getAvailableUnits = useCallback(
@@ -129,16 +129,16 @@ export function UnitRelationsForm({
       const currentRelations = form.getValues("unitRelations");
       const selectedUnitNames = currentRelations
         .map((relation, index) =>
-          index !== currentIndex ? relation.name : null
+          index !== currentIndex ? relation.name : null,
         )
         .filter((name) => name !== null && name !== "");
       return (
         currentUnits?.filter(
-          (unit: any) => !selectedUnitNames.includes(unit?.name)
+          (unit: any) => !selectedUnitNames.includes(unit?.name),
         ) || []
       );
     },
-    [form, currentUnits]
+    [form, currentUnits],
   );
 
   const toggleUnitInputMode = useCallback(
@@ -148,7 +148,7 @@ export function UnitRelationsForm({
         shouldValidate: false,
       });
     },
-    [form]
+    [form],
   );
 
   const RelationCard = ({
@@ -169,7 +169,7 @@ export function UnitRelationsForm({
     let displayUnits = availableUnits;
     if (currentUnitNotAvailable && currentUnitName) {
       const currentUnit = currentUnits.find(
-        (unit) => unit.name === currentUnitName
+        (unit) => unit.name === currentUnitName,
       );
       if (currentUnit) displayUnits = [...(availableUnits || []), currentUnit];
     }
@@ -185,21 +185,18 @@ export function UnitRelationsForm({
     });
 
     // Calculate totalResourceCost using form.getValues instead of form.watch
-    const totalResourceCost = useMemo(() => {
-      const serviceResources =
-        form.getValues(`unitRelations.${originalIndex}.serviceResources`) || [];
-      return (
-        serviceResources.reduce((total, r) => {
-          const product = products.find((p) => p.id === r.productId);
-          if (!product) return total;
-          const unit = (product.unitRelations || []).find(
-            (u: any) => Number(u.id) === Number(r.unitProductId)
-          );
-          const capitalPrice = unit?.price ?? 0;
-          return total + capitalPrice * r.quantity;
-        }, 0) ?? 0
-      );
-    }, [form, originalIndex, products]); // Depend on form and originalIndex to recompute when needed
+    const serviceResources =
+      form.getValues(`unitRelations.${originalIndex}.serviceResources`) || [];
+    const totalResourceCost =
+      serviceResources.reduce((total, resource) => {
+        const product = products.find((item) => item.id === resource.productId);
+        if (!product) return total;
+
+        const unit = (product.unitRelations || []).find(
+          (item) => Number(item.id) === Number(resource.unitProductId),
+        );
+        return total + (unit?.price ?? 0) * resource.quantity;
+      }, 0) ?? 0;
 
     // Get unitPrice using form.getValues
     const unitPrice =
@@ -240,7 +237,7 @@ export function UnitRelationsForm({
                     <Select
                       onValueChange={(value) => {
                         const selectedUnit = currentUnits.find(
-                          (unit) => unit.name === value
+                          (unit) => unit.name === value,
                         );
                         if (selectedUnit) field.onChange(selectedUnit.name);
                       }}
@@ -346,7 +343,7 @@ export function UnitRelationsForm({
               control={form.control}
               name={`unitRelations.${originalIndex}.status`}
               disabled={form.getValues(
-                `unitRelations.${originalIndex}.baseUnit`
+                `unitRelations.${originalIndex}.baseUnit`,
               )}
               render={({ field }) => (
                 <FormItem className="space-y-3">
@@ -357,7 +354,7 @@ export function UnitRelationsForm({
                       value={field.value?.toString()}
                       className="flex flex-col space-y-1"
                       disabled={form.getValues(
-                        `unitRelations.${originalIndex}.baseUnit`
+                        `unitRelations.${originalIndex}.baseUnit`,
                       )}
                     >
                       <FormItem className="flex items-center space-x-3 space-y-0">

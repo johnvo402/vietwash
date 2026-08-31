@@ -8,7 +8,7 @@
 
 services:
   # nginx-api:
-  #   image: nginx:latest
+  #   image: nginx:1.31.4-alpine
   #   container_name: nginx
   #   ports:
   #     - "80:80"

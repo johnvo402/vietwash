@@ -12,6 +12,8 @@ on:
       - "src/ProjectService/**"
       - "src/NotificationService/**"
       - "src/Contracts/**"
+      - "src/Shared.Kernel/**"
+      - "Directory.Packages.props"
 
 jobs:
   deploy:
@@ -40,7 +42,7 @@ jobs:
 
           SERVICES=()
 
-          for DIR in src/ApiGateway src/AuthService src/EcommeceService src/FinanceService src/ProjectService; do
+          for DIR in src/ApiGateway src/AuthService src/EcommeceService src/FinanceService src/ProjectService src/NotificationService; do
             if echo "$CHANGED_FILES" | grep -q "^${DIR}/"; then
               case $DIR in
                 src/ApiGateway)
@@ -65,8 +67,8 @@ jobs:
             fi
           done
 
-          # Nếu Contracts bị thay đổi thì deploy tất cả
-          if echo "$CHANGED_FILES" | grep -q "^src/Contracts/"; then
+          # Shared code and central dependency changes affect every service.
+          if echo "$CHANGED_FILES" | grep -Eq "^(src/Contracts/|src/Shared\.Kernel/|Directory\.Packages\.props$)"; then
             SERVICES=(gateway auth ecommerce finance project notification)
           fi
 

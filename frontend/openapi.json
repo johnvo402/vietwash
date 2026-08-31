@@ -6,8 +6,8 @@
   },
   "servers": [
     {
-      "url": "https://server.ttexe.id.vn",
-      "description": "Local server"
+      "url": "http://localhost:5000",
+      "description": "VietWash API Gateway"
     }
   ],
   "paths": {

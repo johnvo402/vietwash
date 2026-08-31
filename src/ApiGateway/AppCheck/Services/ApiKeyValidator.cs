@@ -26,14 +26,11 @@ namespace ApiGateway.AppCheck.Services
             var apiKey = request.Headers["x-api-key"].FirstOrDefault();
             var platform = request.Headers["platform"].FirstOrDefault();
             var origin = request.Headers["origin"].FirstOrDefault();
-            Console.WriteLine($"[DEBUG] apiKey: {apiKey}");
-            Console.WriteLine($"[DEBUG] platform: {platform}");
             if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(platform))
                 return Task.FromResult(false);
 
             if (_detectionService.IsWeb())
             {
-                Console.WriteLine($"[DEBUG] is web");
                 if (apiKey != _apiSettings.Web?.ApiKey || platform != _apiSettings.Web?.Platform)
                     return Task.FromResult(false);
 
@@ -45,7 +42,6 @@ namespace ApiGateway.AppCheck.Services
             }
             else if (_detectionService.IsMobileOrTablet())
             {
-                Console.WriteLine($"[DEBUG] is mobile");
                 if (
                     apiKey != _apiSettings.Mobile?.ApiKey
                     || platform != _apiSettings.Mobile?.Platform
@@ -54,7 +50,6 @@ namespace ApiGateway.AppCheck.Services
             }
             else
             {
-                Console.WriteLine($"[DEBUG] not found");
                 return Task.FromResult(false);
             }
 

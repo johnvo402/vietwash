@@ -14,6 +14,41 @@ ENV_FILE ?= .env
 export .env file
 -include $(ENV_FILE)
 export
+
+.PHONY: all help migration update deploy publish test run status dev dev-build staging clean external down stop ssh backup restore sql sql_to_server frontend-install frontend-dev frontend-generate frontend-build frontend-check backend-restore backend-build backend-test backend-test-all check
+
+# Monorepo developer workflow
+frontend-install:
+	cd frontend && npm ci
+
+frontend-dev:
+	cd frontend && npm run dev
+
+frontend-generate:
+	cd frontend && npm run generate
+
+frontend-build: frontend-generate
+	cd frontend && npm run build:test
+
+frontend-check: frontend-install frontend-generate
+	cd frontend && npm run typecheck
+	cd frontend && npm run lint
+	cd frontend && npm run build:test
+
+backend-restore:
+	dotnet restore Micro.sln --configfile NuGet.Config
+
+backend-build: backend-restore
+	dotnet build Micro.sln --configuration Release --no-restore
+
+backend-test: backend-build
+	dotnet test tests/UnitTest/AuthService.Tests/AuthService.Tests.csproj --configuration Release --no-build --no-restore
+
+# Integration tests require the local PostgreSQL test infrastructure.
+backend-test-all: backend-build
+	dotnet test Micro.sln --configuration Release --no-build --no-restore
+
+check: backend-test frontend-check
 # Mục chính để chạy migration
 migration:
 	@echo "Running migration for database(s): $(NAME)"
@@ -62,18 +97,14 @@ stop:
 	docker compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml -f docker-compose.s3.yaml stop
 ssh:
 	ssh -p $(REMOTE_SERVER_PORT) $(REMOTE_SERVER_USER)@$(REMOTE_SERVER_IP)
-.PHONY: backup
 backup: 
 	@echo "Backup database..."
 	./scripts/pgdump.sh backup
-.PHONY: restore
 restore: 
 	./scripts/pgdump.sh restore
 
-.PHONY: sql
 sql:
 	./scripts/pgdump.sh sql
-.PHONY: sql_to_server
 sql_to_server:
 	./scripts/pgdump.sh sql_to_server
 # Mục mục tiêu mặc định
@@ -87,5 +118,12 @@ help:
 	@echo "  make update                    # Update database migration"
 	@echo "  make status                    # Check migration status"
 	@echo "  make dev                       # Start Docker containers for development"
+	@echo "  make frontend-install          # Install frontend dependencies"
+	@echo "  make frontend-dev              # Start the Next.js development server"
+	@echo "  make frontend-check            # Generate, typecheck, lint, and build frontend"
+	@echo "  make backend-build             # Build the .NET solution in Release mode"
+	@echo "  make backend-test              # Run backend unit tests"
+	@echo "  make backend-test-all          # Run all backend tests (requires PostgreSQL)"
+	@echo "  make check                     # Run the repository CI-equivalent checks"
 	@echo "  make clean                     # Stop Docker containers and remove volumes"
 	@echo "  make down                      # Stop Docker containers"

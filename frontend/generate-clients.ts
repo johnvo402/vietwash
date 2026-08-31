@@ -2,6 +2,11 @@ const fs = require("fs");
 const path = require("path");
 
 async function mergeOpenApiFiles(folderPath: string, outputPath: string) {
+  const serverUrl =
+    process.env.OPENAPI_SERVER_URL ??
+    process.env.NEXT_PUBLIC_API_URL ??
+    "http://localhost:5000";
+
   const merged = {
     openapi: "3.0.0",
     info: {
@@ -10,8 +15,8 @@ async function mergeOpenApiFiles(folderPath: string, outputPath: string) {
     },
     servers: [
       {
-        url: "https://server.ttexe.id.vn",
-        description: "Local server",
+        url: serverUrl,
+        description: "VietWash API Gateway",
       },
     ],
     paths: {},

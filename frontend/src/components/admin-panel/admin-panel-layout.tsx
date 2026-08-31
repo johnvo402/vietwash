@@ -13,6 +13,7 @@ import { Navbar } from "./navbar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { XBreadcrumb } from "../core/XBreadcrumb";
 import { usePageType } from "@/hooks/use-page-type";
+import { toUserProfile } from "@/types/user";
 
 export default function AdminPanelLayout({
   children,
@@ -30,8 +31,9 @@ export default function AdminPanelLayout({
     },
   });
   useEffect(() => {
-    if (me) {
-      updateUser(me.data.results);
+    const profile = toUserProfile(me?.data.results);
+    if (profile) {
+      updateUser(profile);
     }
   }, [me, updateUser]);
   const sidebar = useStore(useSidebar, (x) => x);
@@ -43,7 +45,7 @@ export default function AdminPanelLayout({
       <main
         className={cn(
           "min-h-[calc(100vh_-_56px)] bg-primary-foreground transition-[margin-left] ease-in-out duration-300",
-          !settings.disabled && (!getOpenState() ? "lg:ml-[90px]" : "lg:ml-72")
+          !settings.disabled && (!getOpenState() ? "lg:ml-[90px]" : "lg:ml-72"),
         )}
       >
         <Navbar />
@@ -57,7 +59,7 @@ export default function AdminPanelLayout({
       <footer
         className={cn(
           "transition-[margin-left] ease-in-out duration-300 h-[56px] fixed bottom-0",
-          !settings.disabled && (!getOpenState() ? "lg:ml-[90px]" : "lg:ml-72")
+          !settings.disabled && (!getOpenState() ? "lg:ml-[90px]" : "lg:ml-72"),
         )}
       >
         <Footer />

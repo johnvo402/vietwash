@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { toUserProfile } from "@/types/user";
 
 export default function CashierLayout({
   children,
@@ -19,15 +20,16 @@ export default function CashierLayout({
     },
   });
   useEffect(() => {
-    if (me) {
-      updateUser(me.data.results);
+    const profile = toUserProfile(me?.data.results);
+    if (profile) {
+      updateUser(profile);
     }
   }, [me, updateUser]);
   return (
     <>
       <main
         className={cn(
-          "min-h-[calc(100vh_-_56px)] bg-zinc-50 dark:bg-zinc-900 transition-[margin-left] ease-in-out duration-300"
+          "min-h-[calc(100vh_-_56px)] bg-zinc-50 dark:bg-zinc-900 transition-[margin-left] ease-in-out duration-300",
         )}
       >
         <Navbar />

@@ -23,6 +23,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
+    <!-- Shared integration-test infrastructure; the executable tests live in AuthService.Tests. -->
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 </Project>

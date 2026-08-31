@@ -1,6 +1,6 @@
 services:
   seq:
-    image: datalust/seq:latest
+    image: datalust/seq:2026.1.17114
     container_name: seq
     volumes:
       - ./seq:/data
@@ -11,7 +11,7 @@ services:
       - 5341:80
 
   collector:
-    image: otel/opentelemetry-collector:latest
+    image: otel/opentelemetry-collector:0.159.0
     container_name: collector
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
@@ -25,7 +25,7 @@ services:
 
   jaeger:
     container_name: jaeger
-    image: jaegertracing/jaeger:latest
+    image: jaegertracing/jaeger:2.20.0
     environment:
       - COLLECTOR_OTLP_ENABLED=true
     ports:

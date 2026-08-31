@@ -3,7 +3,7 @@
 cd "$(dirname "$0")/.." || exit 1
 
 if [ -n "$1" ]; then
-  NAME="$1"
+  NAME="$*"
 fi
 
 declare -A SERVICES=(

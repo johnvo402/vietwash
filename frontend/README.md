@@ -1,195 +1,75 @@
-# VietWash - Laundry Shop Management System
+# VietWash Web
 
-VietWash is a **Next.js 14** web application designed to streamline laundry shop operations. Leveraging the **App Router** for optimized routing and server-side rendering, it provides robust features for order management, customer tracking, financial reporting, service management, and supplier coordination. The project adopts a **micro-frontend** architecture for modularity and scalability, with **internationalization (i18n)** support for English and Vietnamese.
+The VietWash web application is the Next.js 14 frontend for the laundry management platform in this monorepo. It uses the App Router, TypeScript, React Query, Zustand, Tailwind CSS, next-intl, and an Axios client generated from the backend OpenAPI documents.
 
-## Website
+The codebase is a feature-based modular frontend. It is not an independently deployed micro-frontend system.
 
-The live application is available at: [https://vietwash.vercel.app](https://vietwash.vercel.app)
+## Local setup
 
-## Features
+Prerequisites:
 
-- **Order Management**: Create, view, and manage laundry orders with payment processing and receipt generation.
-- **Customer Management**: Track customer details and interactions.
-- **Service Management**: Manage laundry services, including creation, editing, and categorization.
-- **Financial Reporting**: Generate reports for customer revenue, orders, and services.
-- **Supplier Management**: Handle supplier details and interactions.
-- **User Management**: Manage user accounts with role-based access.
-- **Dashboard**: Visualize key metrics with charts (e.g., monthly revenue, top services).
-- **Internationalization**: Support for English (`en.ts`) and Vietnamese (`vi.ts`) languages.
-- **Micro-Frontend Architecture**: Modular components for scalability and maintainability.
+- Node.js 20 LTS or newer
+- npm
+- Java, used by OpenAPI Generator
 
-## Prerequisites
+Clone the monorepo and enter the frontend directory:
 
-Ensure the following are installed:
-
-- **Node.js**: v18 or higher (recommended for Next.js 14)
-- **npm** or **yarn**
-- **OpenAPI Generator CLI**: Install globally with `npm install -g @openapitools/openapi-generator-cli`
-
-## Installation
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/johnvo402/micro-frontend.git
-   cd micro-frontend
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-3. Generate API client and types:
-   ```bash
-   npm run generate-types
-   ```
-
-## Available Scripts
-
-In the project directory, you can run:
-
-- **`npm run dev`**  
-  Starts the development server at [http://localhost:3000](http://localhost:3000).
-
-- **`npm run build`**  
-  Generates the API client and builds the production version with Next.js 14 optimizations.
-
-- **`npm run build:test`**  
-  Builds the app without generating the API client, useful for testing.
-
-- **`npm run start`**  
-  Starts the production server with Next.js 14 optimizations.
-
-- **`npm run lint`**  
-  Runs ESLint for code quality checks.
-
-- **`npm run merged-api`**  
-  Merges API definitions using `generate-clients.ts`.
-
-- **`npm run generate`**  
-  Generates TypeScript Axios API client from `openapi.json` to `src/api/generated`.
-
-- **`npm run generate-types`**  
-  Runs `merged-api` and `generate` to update API client and types.
-
-- **`npm run test:record`**  
-  Runs the development server and Playwright codegen for test recording at [http://localhost:3000](http://localhost:3000).
-
-- **`npm run test:run`**  
-  Runs Playwright tests in headless mode.
-
-- **`npm run test:headed`**  
-  Runs Playwright tests in headed mode (with browser UI).
-
-- **`npm run test:report`**  
-  Displays the Playwright test report.
-
-## Project Structure
-
-The project uses Next.js 14's **App Router** and a micro-frontend architecture for modularity:
-
+```bash
+git clone https://github.com/johnvo402/vietwash.git
+cd vietwash/frontend
 ```
-micro-frontend
-├── messages/                    # Internationalization files (en.ts, vi.ts)
-├── public/                      # Static assets (images, SVGs, favicon, manifest)
-│   ├── demos/                  # Demo images
-│   ├── flag/                   # Flag icons (English, Vietnamese)
-│   ├── img/                    # General images
-│   ├── logo/                   # Favicon and app icons
-│   ├── manifest.json           # Web app manifest
-│   ├── sw.js                   # Service worker
-│   └── workbox-4754cb34.js     # Workbox for service worker
+
+Create local configuration and install dependencies:
+
+```bash
+cp .env.example .env.local
+npm ci
+npm run generate
+npm run dev
+```
+
+The development server runs at [http://localhost:3000](http://localhost:3000). By default, `.env.example` targets the API Gateway at `http://localhost:5000` and MinIO at `http://127.0.0.1:9000`.
+
+## Commands
+
+| Command                  | Purpose                                                         |
+| ------------------------ | --------------------------------------------------------------- |
+| `npm run dev`            | Start the development server                                    |
+| `npm run generate-types` | Merge service OpenAPI documents and regenerate the Axios client |
+| `npm run generate`       | Generate the Axios client from the existing `openapi.json`      |
+| `npm run typecheck`      | Run the TypeScript compiler without emitting files              |
+| `npm run lint`           | Run the Next.js ESLint configuration                            |
+| `npm run build`          | Generate the client and create a production build               |
+| `npm run build:test`     | Create a production build from an already generated client      |
+| `npm run test:run`       | Run the Playwright auth and feature projects                    |
+
+## Structure
+
+```text
+frontend/
+├── messages/              # English and Vietnamese translations
+├── public/                # Static assets and PWA icons
 ├── src/
-│   ├── api/                    # API client and configuration
-│   │   ├── generated/          # Auto-generated API client from OpenAPI
-│   │   ├── client.ts           # API client setup
-│   │   └── config.ts           # API configuration
-│   ├── app/                    # Next.js 14 App Router
-│   │   ├── (cashier)/         # Cashier module (orders, payments)
-│   │   ├── (manage)/          # Management module (dashboard, customers, etc.)
-│   │   ├── 403/               # Forbidden page
-│   │   ├── auth/login/        # Login page
-│   │   ├── fonts/             # Custom fonts (GeistMonoVF, GeistVF)
-│   │   ├── globals.scss       # Global styles
-│   │   ├── layout.tsx         # Root layout
-│   │   ├── loading.tsx        # Loading state
-│   │   └── page.tsx           # Home page
-│   ├── components/             # Reusable UI components
-│   │   ├── admin-panel/       # Admin panel UI (sidebar, navbar, etc.)
-│   │   ├── core/              # Core components (breadcrumb, date picker, etc.)
-│   │   ├── main/              # Main layout components
-│   │   ├── providers/         # Context providers (e.g., theme)
-│   │   ├── tree/              # Tree view components (filters, stats)
-│   │   └── ui/                # UI primitives (table, button, dialog, etc.)
-│   ├── compositions/           # Table filter compositions
-│   ├── constants/             # API constants
-│   ├── data/                  # Static data (e.g., order items)
-│   ├── features/              # Feature modules (auth, cashier, customer, etc.)
-│   ├── hooks/                 # Custom React hooks
-│   ├── i18n/                  # Internationalization utilities
-│   ├── lib/                   # Utility functions (crypto, filters, etc.)
-│   ├── openapi/               # OpenAPI specifications (auth, ecommerce, etc.)
-│   ├── providers/             # Query provider for data fetching
-│   ├── shared/                # Shared utilities (e.g., Excel export)
-│   ├── types/                 # TypeScript type definitions
-│   └── utils/                 # General utilities (date, query, router, etc.)
-├── tests/                      # Playwright test files
-├── .eslintrc.json             # ESLint configuration
-├── .gitignore                 # Git ignore file
-├── components.json            # Component configuration
-├── generate-clients.ts        # Script for merging API clients
-├── next.config.mjs            # Next.js configuration
-├── openapi.json               # OpenAPI specification
-├── openapitools.json          # OpenAPI tools configuration
-├── package.json               # Project dependencies and scripts
-├── playwright.config.ts       # Playwright configuration
-├── postcss.config.mjs         # PostCSS configuration
-├── tailwind.config.ts         # Tailwind CSS configuration
-├── tsconfig.json              # TypeScript configuration
-└── README.md                  # Project documentation
+│   ├── api/               # Axios setup and generated OpenAPI client
+│   ├── app/               # Next.js App Router routes and layouts
+│   ├── components/        # Shared UI and layout components
+│   ├── features/          # Business features grouped by domain
+│   ├── hooks/             # Shared React and Zustand hooks
+│   ├── openapi/           # Per-service OpenAPI documents
+│   └── types/             # Application types
+├── tests/                 # Playwright end-to-end tests
+├── generate-clients.ts    # OpenAPI merge script
+└── next.config.mjs        # Next.js, i18n, PWA, and image configuration
 ```
 
-## Technologies
+## Configuration and security
 
-- **Next.js 14**: React framework with App Router and server components.
-- **TypeScript**: Type-safe code for enhanced developer experience.
-- **Tailwind CSS**: Utility-first CSS framework for styling.
-- **Axios**: HTTP client for API requests.
-- **OpenAPI**: API client generation from `openapi.json`.
-- **React Query**: Data fetching and state management.
-- **i18n**: Internationalization with English and Vietnamese support.
-- **ESLint**: Code linting for quality and consistency.
-- **Playwright**: End-to-end testing framework.
-- **Vercel**: Deployment platform optimized for Next.js 14.
+All `NEXT_PUBLIC_*` variables are shipped to the browser and must be treated as public. `NEXT_PUBLIC_CLIENT_ID` is only a client identifier sent through the legacy `X-Api-Key` header for gateway compatibility; it is not authentication or authorization. JWT roles and permissions are the application security boundary.
 
-## Next.js 14 Features Utilized
+The current backend returns refresh tokens in JSON. The frontend therefore keeps credentials in tab-scoped `sessionStorage` for compatibility. Migrating refresh tokens to `HttpOnly`, `Secure`, `SameSite` cookies requires a coordinated backend change.
 
-- **App Router**: File-based routing in `src/app/`.
-- **Server Components**: Optimized server-side rendering for performance.
-- **TypeScript Support**: Enhanced type safety.
-- **Optimized Builds**: Faster builds and smaller bundle sizes.
-- **Dynamic Routes**: Used in modules like `orders/[publicId]` and `service/[id]`.
-- **Middleware**: Configured for authentication and request handling.
+## Testing
 
-## Deployment
+Playwright tests require a running backend and test credentials supplied as `E2E_EMAIL` and `E2E_PASSWORD`. The feature suite reuses the authenticated storage state created by the setup project.
 
-Deploy on **Vercel**, optimized for Next.js 14:
-
-1. Push the code to a GitHub repository.
-2. Connect the repository to Vercel via the Vercel dashboard.
-3. Configure environment variables (if any) in Vercel.
-4. Deploy the application with Vercel’s automatic scaling.
-
-## Contributing
-
-1. Fork the repository.
-2. Create a feature branch (`git checkout -b feature/YourFeature`).
-3. Commit your changes (`git commit -m "Add YourFeature"`).
-4. Push to the branch (`git push origin feature/YourFeature`).
-5. Open a Pull Request.
-
-## License
-
-This project is licensed under the MIT License (see `LICENSE` file).
+See the [root README](../README.md) for backend, infrastructure, architecture, and full-monorepo instructions.

@@ -11,31 +11,30 @@ const withPwa = withPWA({
   disable: process.env.NODE_ENV === "development",
 });
 
+const mediaUrl = process.env.NEXT_PUBLIC_MEDIA_URL;
+const remotePatterns = [
+  {
+    protocol: "http",
+    hostname: "127.0.0.1",
+    port: "9000",
+    pathname: "/**",
+  },
+];
+
+if (mediaUrl) {
+  const url = new URL(mediaUrl);
+  remotePatterns.push({
+    protocol: url.protocol.replace(":", ""),
+    hostname: url.hostname,
+    port: url.port,
+    pathname: `${url.pathname.replace(/\/$/, "")}/**`,
+  });
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // your existing config
-  webpack: (config) => {
-    config.snapshot = config.snapshot || {};
-    config.snapshot.managedPaths = [
-      /[\\/]node_modules[\\/](@next[\\/]swc.*|@parcel[\\/]watcher.*)/,
-    ];
-    return config;
-  },
   images: {
-    domains: ["cdn-kvweb.kiotviet.vn", "server.ttexe.id.vn", ""],
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "server.ttexe.id.vn",
-        pathname: "image/the-template-project/Images/**",
-      },
-      {
-        protocol: "http",
-        hostname: "127.0.0.1",
-        port: "9000",
-        pathname: "/the-template-project/Images/**",
-      },
-    ],
+    remotePatterns,
   },
   async headers() {
     return [
@@ -53,5 +52,4 @@ const nextConfig = {
   },
 };
 
-// Kết hợp tất cả plugin
 export default withPwa(withAnalyzer(withNextIntl(nextConfig)));
