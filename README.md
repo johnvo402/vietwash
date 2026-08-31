@@ -140,7 +140,7 @@ The default endpoints are the web application at `http://localhost:3000`, gatewa
 | `make frontend-dev`                 | Start Next.js in development mode                                 |
 | `make frontend-check`               | Generate the API client, typecheck, lint, and build               |
 | `make backend-build`                | Build the complete .NET solution in Release mode                  |
-| `make backend-test`                 | Run the backend unit suite                                        |
+| `make backend-test`                 | Run every pure unit-test project under `tests/UnitTest`           |
 | `make backend-test-all`             | Run all backend tests; PostgreSQL test infrastructure is required |
 | `make check`                        | Run the CI-equivalent backend and frontend checks                 |
 | `make dev SERVICE="database redis"` | Start selected local infrastructure                               |
@@ -153,7 +153,7 @@ dotnet test tests/UnitTest/AuthService.Tests/AuthService.Tests.csproj --configur
 dotnet test Micro.sln --configuration Release
 ```
 
-The full solution command includes integration tests and needs the PostgreSQL test database configured in `appsettings.Testing-Development.json`.
+`tests/UnitTest/AuthService.Tests/AuthService.Tests.csproj` is currently the only pure unit-test project. Backend CI discovers every project under `tests/UnitTest`; the full solution command also includes the database-dependent integration projects and needs PostgreSQL configured in `appsettings.Testing-Development.json`.
 
 Playwright tests need a running backend plus non-committed test credentials:
 
@@ -164,7 +164,7 @@ E2E_EMAIL=user@example.test E2E_PASSWORD=change-me npm run test:run
 
 ## CI/CD
 
-- Backend CI restores and builds `Micro.sln`, then runs the unit suite for backend changes.
+- Backend CI restores and builds `Micro.sln`, then discovers and runs every pure unit-test project under `tests/UnitTest`.
 - Frontend CI installs from `package-lock.json`, generates the API client, typechecks, lints, and creates a production build.
 - The deployment workflow detects each service independently, including Notification Service. Changes to Contracts, Shared Kernel, or central NuGet versions deploy all dependent services.
 
@@ -175,6 +175,7 @@ Deployment credentials are supplied through GitHub Actions secrets and environme
 - Values prefixed with `NEXT_PUBLIC_` are embedded in the browser bundle and must be treated as public.
 - Development keys in tracked configuration are local-only placeholders. Override every signing key, provider credential, database password, and storage credential outside Development.
 - Credentials removed from Git history should be considered exposed and rotated at the provider; deleting the current value does not erase earlier commits.
+- The reviewed frontend dependency-audit baseline and constrained findings are documented in [Frontend dependency audit](docs/frontend-dependency-audit.md).
 
 ## License
 

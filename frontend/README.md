@@ -68,6 +68,8 @@ All `NEXT_PUBLIC_*` variables are shipped to the browser and must be treated as 
 
 The current backend returns refresh tokens in JSON. The frontend therefore keeps credentials in tab-scoped `sessionStorage` for compatibility. Migrating refresh tokens to `HttpOnly`, `Secure`, `SameSite` cookies requires a coordinated backend change.
 
+Production CSP connection origins are derived from `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_MEDIA_URL`, and the optional `CSP_CONNECT_SRC` list. Use explicit `http` or `https` origins; local loopback origins are accepted only in Development. The matching `ws` or `wss` origin is added automatically for SignalR.
+
 ## Testing
 
 Playwright tests require a running backend and test credentials supplied as `E2E_EMAIL` and `E2E_PASSWORD`. The feature suite reuses the authenticated storage state created by the setup project.

@@ -15,18 +15,21 @@ on:
       - "src/Shared.Kernel/**"
       - "Directory.Packages.props"
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0 # Lấy full history để diff
 
       - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.4
+        uses: webfactory/ssh-agent@v0.10.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
@@ -89,8 +92,31 @@ jobs:
         if: steps.detect.outputs.skip != 'true'
         run: chmod +x ./scripts/deploy.sh
       - name: Add VPS to known hosts
+        if: steps.detect.outputs.skip != 'true'
+        env:
+          REMOTE_SERVER_IP: ${{ secrets.REMOTE_SERVER_IP }}
+          REMOTE_SERVER_PORT: ${{ secrets.REMOTE_SERVER_PORT }}
         run: |
-          ssh-keyscan -p ${{ secrets.REMOTE_SERVER_PORT }} ${{ secrets.REMOTE_SERVER_IP }} >> ~/.ssh/known_hosts
+          set -euo pipefail
+
+          if [[ -z "${REMOTE_SERVER_IP}" || -z "${REMOTE_SERVER_PORT}" ]]; then
+            echo "::error::The deployment SSH endpoint is not fully configured."
+            exit 1
+          fi
+
+          if ! [[ "${REMOTE_SERVER_PORT}" =~ ^[0-9]+$ ]] || (( REMOTE_SERVER_PORT < 1 || REMOTE_SERVER_PORT > 65535 )); then
+            echo "::error::The configured deployment SSH port is invalid."
+            exit 1
+          fi
+
+          host_keys="${RUNNER_TEMP}/deployment_known_hosts"
+          if ! timeout 15s ssh-keyscan -T 5 -p "${REMOTE_SERVER_PORT}" "${REMOTE_SERVER_IP}" > "${host_keys}" 2>/dev/null || [[ ! -s "${host_keys}" ]]; then
+            echo "::error::Unable to reach the configured deployment SSH endpoint or retrieve its host key."
+            exit 1
+          fi
+
+          install -m 700 -d "${HOME}/.ssh"
+          cat "${host_keys}" >> "${HOME}/.ssh/known_hosts"
 
       - name: Run deploy script
         if: steps.detect.outputs.skip != 'true'

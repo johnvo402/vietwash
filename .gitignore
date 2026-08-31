@@ -93,7 +93,8 @@ dump.rdb
 [Rr]eleasePublic/
 [Pp]ublish/
 .azure
-app/
+/app/publish/
+/src/*/app/publish/
 seq/
 .fake
 

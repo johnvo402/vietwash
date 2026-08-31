@@ -103,7 +103,12 @@ export function UserNav() {
   });
 
   const logoutHandler = async () => {
-    await apiClient.authApiAccountsLogoutPost();
+    try {
+      await apiClient.authApiAccountsLogoutPost();
+    } catch (error) {
+      console.warn("The server logout request failed; clearing the local session.", error);
+    }
+
     logout();
     router.replace(ROUTE_LOGIN);
   };

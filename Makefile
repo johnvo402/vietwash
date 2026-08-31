@@ -15,6 +15,9 @@ export .env file
 -include $(ENV_FILE)
 export
 
+rwildcard = $(foreach entry,$(wildcard $1*),$(if $(filter bin obj,$(notdir $(entry))),,$(call rwildcard,$(entry)/,$2) $(filter $(subst *,%,$2),$(entry))))
+UNIT_TEST_PROJECTS := $(sort $(call rwildcard,tests/UnitTest/,*.csproj))
+
 .PHONY: all help migration update deploy publish test run status dev dev-build staging clean external down stop ssh backup restore sql sql_to_server frontend-install frontend-dev frontend-generate frontend-build frontend-check backend-restore backend-build backend-test backend-test-all check
 
 # Monorepo developer workflow
@@ -42,7 +45,11 @@ backend-build: backend-restore
 	dotnet build Micro.sln --configuration Release --no-restore
 
 backend-test: backend-build
-	dotnet test tests/UnitTest/AuthService.Tests/AuthService.Tests.csproj --configuration Release --no-build --no-restore
+	@if [ -z "$(UNIT_TEST_PROJECTS)" ]; then echo "No pure unit test projects found under tests/UnitTest."; exit 1; fi
+	@set -e; for project in $(UNIT_TEST_PROJECTS); do \
+		echo "Running unit tests: $$project"; \
+		dotnet test "$$project" --configuration Release --no-build --no-restore; \
+	done
 
 # Integration tests require the local PostgreSQL test infrastructure.
 backend-test-all: backend-build
