@@ -49,7 +49,7 @@ See [System Architecture](docs/architecture.md) for the Mermaid topology, servic
 │   └── Shared.Kernel/                Shared domain and infrastructure primitives
 ├── tests/                            Backend unit and integration tests
 ├── docs/                             Maintained architecture documentation
-├── .github/workflows/                Backend, frontend, and deployment workflows
+├── .github/workflows/                Backend/frontend CI and image publishing workflows
 ├── docker-compose*.yaml              Application and supporting infrastructure
 ├── Directory.Packages.props          Central NuGet package versions
 ├── Makefile                          Monorepo developer commands
@@ -144,6 +144,9 @@ The default endpoints are the web application at `http://localhost:3000`, gatewa
 | `make backend-test-all`             | Run all backend tests; PostgreSQL test infrastructure is required |
 | `make check`                        | Run the CI-equivalent backend and frontend checks                 |
 | `make dev SERVICE="database redis"` | Start selected local infrastructure                               |
+| `make staging`                      | Pull and start the complete prebuilt staging stack                |
+| `make staging SERVICE="auth gateway"` | Pull and restart selected prebuilt staging services            |
+| `make deploy SERVICE=auth`          | Run the local staging-host pull/restart helper                    |
 | `make down`                         | Stop the local Compose stack without deleting volumes             |
 
 ## Testing
@@ -166,9 +169,43 @@ E2E_EMAIL=user@example.test E2E_PASSWORD=change-me npm run test:run
 
 - Backend CI restores and builds `Micro.sln`, then discovers and runs every pure unit-test project under `tests/UnitTest`.
 - Frontend CI installs from `package-lock.json`, generates the API client, typechecks, lints, and creates a production build.
-- The deployment workflow detects each service independently, including Notification Service. Changes to Contracts, Shared Kernel, or central NuGet versions deploy all dependent services.
+- `Publish Backend Images` publishes all six backend application images for one commit. Matrix jobs first push immutable `sha-<12-character-commit>` tags; only after every build succeeds are the matching manifests promoted to the mutable `dev` tags.
+- The workflow publishes images only. It does not SSH to a server or restart staging containers.
 
-Deployment credentials are supplied through GitHub Actions secrets and environment-specific ASP.NET Core configuration, never frontend `NEXT_PUBLIC_*` variables.
+```text
+push to dev
+     |
+     +--> Backend CI
+     |
+     `--> Publish Backend Images
+              |
+              +--> GHCR gateway
+              +--> GHCR auth
+              +--> GHCR ecommerce
+              +--> GHCR project
+              +--> GHCR finance
+              `--> GHCR notification
+
+staging host
+     |
+     +--> docker compose pull
+     `--> docker compose up -d --no-build
+```
+
+The backend images are `ghcr.io/johnvo402/vietwash-{gateway,auth,ecommerce,project,finance,notification}`. Both `gateway` and `gateway-2` use the same gateway image. The `dev` tag is the current staging candidate; immutable `sha-*` tags provide traceable rollback points. The frontend remains a separate deployment and the public application is currently hosted on Vercel.
+
+The staging host needs this repository's Compose files, an untracked `.env`, Docker, and Docker Compose. It does not need the .NET SDK and never builds backend images:
+
+```bash
+make staging
+make staging SERVICE="auth ecommerce gateway"
+IMAGE_TAG=sha-8c5ba35f6393 make staging
+IMAGE_TAG=sha-8c5ba35f6393 ./scripts/deploy.sh
+```
+
+For public GHCR packages, staging pulls without authentication. GitHub may create a package as private initially; either change each package's visibility to public in GitHub Packages, or log in once on the server with a read-only `read:packages` credential stored only on that server. Never add the credential to `.env` or Compose.
+
+GitHub Actions authenticates to GHCR with the repository-scoped `GITHUB_TOKEN`. Application credentials remain environment-specific ASP.NET Core configuration and must never use frontend `NEXT_PUBLIC_*` variables.
 
 ## Security notes
 

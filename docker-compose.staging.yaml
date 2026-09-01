@@ -1,89 +1,52 @@
-# yaml refs
-# x-refs:
-#   common_config: &common_config
-#     logging:
-#       driver: gelf
-#       options:
-#         gelf-address: "udp://localhost:12201"
-
 services:
-  # nginx-api:
-  #   image: nginx:1.31.4-alpine
-  #   container_name: nginx
-  #   ports:
-  #     - "80:80"
-  #   volumes:
-  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
-  #     - ./logs:/var/log/nginx
-  #   depends_on:
-  #     - gateway
-  #     - gateway-2
-
   auth:
-    # <<: *common_config
-    image: auth
+    image: ghcr.io/${GHCR_OWNER:-johnvo402}/vietwash-auth:${IMAGE_TAG:-dev}
+    pull_policy: always
     volumes:
       - ./logs:/logs
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
-    build:
-      context: .
-      dockerfile: ./src/AuthService/Dockerfile
+
   ecommerce:
-    # <<: *common_config
-    image: ecommerce
+    image: ghcr.io/${GHCR_OWNER:-johnvo402}/vietwash-ecommerce:${IMAGE_TAG:-dev}
+    pull_policy: always
     volumes:
       - ./logs:/logs
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
-    build:
-      context: .
-      dockerfile: ./src/EcommeceService/Dockerfile
+
   project:
-    # <<: *common_config
-    image: project
+    image: ghcr.io/${GHCR_OWNER:-johnvo402}/vietwash-project:${IMAGE_TAG:-dev}
+    pull_policy: always
     volumes:
       - ./logs:/logs
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
-    build:
-      context: .
-      dockerfile: ./src/ProjectService/Dockerfile
 
   gateway:
-    # <<: *common_config
-    image: gateway
+    image: ghcr.io/${GHCR_OWNER:-johnvo402}/vietwash-gateway:${IMAGE_TAG:-dev}
+    pull_policy: always
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
-    build:
-      context: .
-      dockerfile: ./src/ApiGateway/Dockerfile
+
   gateway-2:
-    # <<: *common_config
-    image: gateway-2
+    image: ghcr.io/${GHCR_OWNER:-johnvo402}/vietwash-gateway:${IMAGE_TAG:-dev}
+    pull_policy: always
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
-    build:
-      context: .
-      dockerfile: ./src/ApiGateway/Dockerfile
 
   finance:
-    # <<: *common_config
-    image: finance
+    image: ghcr.io/${GHCR_OWNER:-johnvo402}/vietwash-finance:${IMAGE_TAG:-dev}
+    pull_policy: always
     volumes:
       - ./logs:/logs
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
-    build:
-      context: .
-      dockerfile: ./src/FinanceService/Dockerfile
+
   notification:
-    # <<: *common_config
-    image: notification
+    image: ghcr.io/${GHCR_OWNER:-johnvo402}/vietwash-notification:${IMAGE_TAG:-dev}
+    pull_policy: always
     volumes:
       - ./logs:/logs
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
-    build:
-      context: .
-      dockerfile: ./src/NotificationService/Dockerfile

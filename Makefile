@@ -17,6 +17,7 @@ export
 
 rwildcard = $(foreach entry,$(wildcard $1*),$(if $(filter bin obj,$(notdir $(entry))),,$(call rwildcard,$(entry)/,$2) $(filter $(subst *,%,$2),$(entry))))
 UNIT_TEST_PROJECTS := $(sort $(call rwildcard,tests/UnitTest/,*.csproj))
+STAGING_COMPOSE := docker compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.staging.yaml
 
 .PHONY: all help migration update deploy publish test run status dev dev-build staging clean external down stop ssh backup restore sql sql_to_server frontend-install frontend-dev frontend-generate frontend-build frontend-check backend-restore backend-build backend-test backend-test-all check
 
@@ -65,7 +66,7 @@ migration:
 update:
 	./scripts/update-db.sh
 deploy:
-	./scripts/deploy.sh ${SERVICE}
+	./scripts/deploy.sh $(SERVICE)
 publish:
 	./scripts/publish.sh $(foreach db,$(NAME),$(db))
 test:
@@ -88,7 +89,8 @@ dev-build:
 	docker compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml up -d --build ${SERVICE}
 
 staging:
-	docker compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.staging.yaml up -d --build ${SERVICE}
+	$(STAGING_COMPOSE) pull $(SERVICE)
+	$(STAGING_COMPOSE) up -d --no-build $(SERVICE)
 # Mục để tắt Docker container và xóa volume
 clean:
 	@echo "Stopping Docker containers and removing volumes..."
@@ -125,6 +127,10 @@ help:
 	@echo "  make update                    # Update database migration"
 	@echo "  make status                    # Check migration status"
 	@echo "  make dev                       # Start Docker containers for development"
+	@echo "  make dev-build                 # Build and start local development containers"
+	@echo "  make staging                   # Pull and start all prebuilt staging images"
+	@echo "  make staging SERVICE=auth      # Pull and restart selected staging services"
+	@echo "  make deploy SERVICE=auth       # Run the local staging-host deployment helper"
 	@echo "  make frontend-install          # Install frontend dependencies"
 	@echo "  make frontend-dev              # Start the Next.js development server"
 	@echo "  make frontend-check            # Generate, typecheck, lint, and build frontend"
