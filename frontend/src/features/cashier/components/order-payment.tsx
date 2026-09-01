@@ -121,7 +121,7 @@ export const OrderPaymentSection = ({
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const [note, setNote] = useState<string>(initialNote || "");
-  const [points, setPoints] = useState<number>(point);
+  const [points, setPoints] = useState<number>(0);
   const [pointsError, setPointsError] = useState<string>("");
   const [showQRScanner, setShowQRScanner] = useState<boolean>(false);
   const t = useTranslations();
@@ -143,7 +143,7 @@ export const OrderPaymentSection = ({
     setVoucherCode(initialVoucherCode);
     setCustomer(customerInit || null);
     setNote(initialNote || "");
-    setPoints(point);
+    setPoints(0);
     setBookingDate(deliveryTime ? new Date(deliveryTime) : undefined);
     setPointsError("");
     const selectedTariff = tariffs.find((x) => x.id === tariffId);
@@ -381,7 +381,7 @@ export const OrderPaymentSection = ({
               value={formatNumberVN(points)}
               onChange={handlePointsChange}
               placeholder={t("cashier.enterPoints")}
-              disabled={!customer}
+              disabled
               min="0"
               max={pointData?.data.results?.point ?? 0}
               className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"

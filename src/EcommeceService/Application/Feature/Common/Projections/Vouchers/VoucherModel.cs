@@ -8,6 +8,7 @@ namespace Application.Feature.Common.Projections.Vouchers
         public string? Code { get; set; } = default!;
         public string Title { get; set; } = default!;
         public string ImgUrl { get; set; } = default!;
+        /// <summary>True for a fixed monetary discount; false for a percentage.</summary>
         public bool DiscountFixed { get; set; } = default!;
         public decimal DiscountValue { get; set; } = default!;
         public List<CustomerGroup> CustomerGroups { get; set; } = default!;

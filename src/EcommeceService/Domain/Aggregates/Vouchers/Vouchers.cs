@@ -15,6 +15,7 @@ namespace Domain.Aggregates.Vouchers
         public string Title { get; set; } = default!;
         public string? ImgUrl { get; set; }
         public string Barcode { get; set; } = default!;
+        /// <summary>True for a fixed monetary discount; false for a percentage.</summary>
         public bool DiscountFixed { get; set; }
         public decimal DiscountValue { get; set; }
         public int TotalQuantity { get; set; }
@@ -48,7 +49,7 @@ namespace Domain.Aggregates.Vouchers
             ImgUrl = imgUrl;
             Barcode = Guard.Against.NullOrWhiteSpace(barcode);
             DiscountFixed = discountFixed;
-            DiscountValue = Guard.Against.NegativeOrZero(discountValue);
+            DiscountValue = Guard.Against.Negative(discountValue);
             // TotalQuantity = Guard.Against.NegativeOrZero(totalQuantity);
             // UsedQuantity = Guard.Against.Negative(usedQuantity);
             StartAt = startAt;
@@ -88,7 +89,7 @@ namespace Domain.Aggregates.Vouchers
                 DiscountFixed = discountFixed.Value;
 
             if (discountValue.HasValue)
-                DiscountValue = Guard.Against.NegativeOrZero(discountValue.Value);
+                DiscountValue = Guard.Against.Negative(discountValue.Value);
 
             // if (totalQuantity.HasValue)
             //     TotalQuantity = Guard.Against.NegativeOrZero(totalQuantity.Value);

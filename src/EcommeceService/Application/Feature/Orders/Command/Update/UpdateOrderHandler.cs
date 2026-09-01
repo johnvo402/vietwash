@@ -1,5 +1,6 @@
 using Application.Common.Errors;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Feature.Orders.Common;
 using Contracts.ApiWrapper;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Orders;
@@ -17,50 +18,66 @@ namespace Application.Feature.Orders.Command.Update
             CancellationToken cancellationToken
         )
         {
-            Order? order = await unitOfWork
-                .DynamicReadOnlyRepository<Order>()
-                .FindByConditionAsync(
-                    new GetOrderByIdSpecification(request.OrderId),
-                    cancellationToken
-                );
-
-            if (order == null)
-            {
-                return Result.Failure(
-                    new NotFoundError(
-                        "Order not found",
-                        Messager
-                            .Create<Order>()
-                            .Message(MessageType.Found)
-                            .Negative()
-                            .BuildMessage()
-                    )
-                );
-            }
-            if (order.Status != OrderStatus.Pending)
-            {
-                return Result.Failure(
-                    new NotFoundError(
-                        "Order can't update",
-                        Messager
-                            .Create<Order>()
-                            .Message(MessageType.Valid)
-                            .Negative()
-                            .BuildMessage()
-                    )
-                );
-            }
-            order.FromUpdateModel(request.Model);
-
             try
             {
                 _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
+                Order? order = await unitOfWork
+                    .DynamicReadOnlyRepository<Order>()
+                    .FindByConditionAsync(
+                        new GetOrderByIdSpecification(request.OrderId),
+                        cancellationToken
+                    );
 
+                if (order is null)
+                {
+                    return await RollbackFailure(
+                        new NotFoundError(
+                            "Order not found.",
+                            Messager.Create<Order>().Message(MessageType.Found).Negative().Build()
+                        ),
+                        cancellationToken
+                    );
+                }
+
+                if (order.Status != OrderStatus.Pending)
+                {
+                    return await RollbackFailure(
+                        new BadRequestError(
+                            "Only pending orders can be updated.",
+                            Messager.Create<Order>().Message(MessageType.Valid).Negative().Build()
+                        ),
+                        cancellationToken
+                    );
+                }
+
+                Result<ResolvedOrderPricing> pricing = await OrderPricingResolver.ResolveAsync(
+                    unitOfWork,
+                    order.BranchId,
+                    request.Model.TariffId,
+                    request.Model.OrderItems,
+                    DateTimeOffset.UtcNow,
+                    cancellationToken
+                );
+                if (pricing.IsFailure)
+                {
+                    return await RollbackFailure(pricing.Error!, cancellationToken);
+                }
+
+                Result<OrderPriceSummary> totals = OrderPriceCalculator.Calculate(
+                    pricing.Value!.Items,
+                    order.DiscountFixed,
+                    order.DiscountValue,
+                    order.Vat
+                );
+                if (totals.IsFailure)
+                {
+                    return await RollbackFailure(totals.Error!, cancellationToken);
+                }
+
+                order.FromUpdateModel(request.Model, pricing.Value!, totals.Value!);
                 await unitOfWork.Repository<Order>().UpdateAsync(order);
-
                 await unitOfWork.SaveAsync(cancellationToken);
                 await unitOfWork.CommitAsync(cancellationToken);
-
                 return Result.Success();
             }
             catch
@@ -68,6 +85,15 @@ namespace Application.Feature.Orders.Command.Update
                 await unitOfWork.RollbackAsync(cancellationToken);
                 throw;
             }
+        }
+
+        private async Task<Result> RollbackFailure(
+            ErrorDetails error,
+            CancellationToken cancellationToken
+        )
+        {
+            await unitOfWork.RollbackAsync(cancellationToken);
+            return Result.Failure(error);
         }
     }
 }

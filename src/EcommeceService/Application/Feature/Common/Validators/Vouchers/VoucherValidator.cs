@@ -1,9 +1,7 @@
-﻿using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Feature.Common.Projections.Equipments;
 using Application.Feature.Common.Projections.Vouchers;
 using Contracts.Common.Messages;
-using Domain.Aggregates.Equipments;
 using Domain.Aggregates.Vouchers;
 using FluentValidation;
 
@@ -11,17 +9,7 @@ namespace Application.Feature.Common.Validators.Vouchers
 {
     public class VoucherValidator : AbstractValidator<VoucherModel>
     {
-        private readonly IUnitOfWork unitOfWork;
-        private readonly IActionAccessorService accessorService;
-
-        public VoucherValidator(IUnitOfWork unitOfWork, IActionAccessorService accessorService)
-        {
-            this.unitOfWork = unitOfWork;
-            this.accessorService = accessorService;
-            ApplyRules();
-        }
-
-        private void ApplyRules()
+        public VoucherValidator(IUnitOfWork _, IActionAccessorService __)
         {
             RuleFor(x => x.Title)
                 .NotEmpty()
@@ -46,7 +34,19 @@ namespace Application.Feature.Common.Validators.Vouchers
                 );
 
             RuleFor(x => x.DiscountValue)
-                .GreaterThan(0)
+                .GreaterThanOrEqualTo(0)
+                .WithState(x =>
+                    Messager
+                        .Create<Voucher>()
+                        .Property(x => x.DiscountValue)
+                        .Message(MessageType.GreaterThanEqual)
+                        .Negative()
+                        .Build()
+                );
+
+            RuleFor(x => x.DiscountValue)
+                .LessThanOrEqualTo(100)
+                .When(x => !x.DiscountFixed)
                 .WithState(x =>
                     Messager
                         .Create<Voucher>()

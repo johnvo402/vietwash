@@ -26,6 +26,7 @@ namespace Domain.Aggregates.Orders
         public int Vat { get; set; }
         public decimal VatAmount { get; set; }
         public decimal Total { get; set; } = default!;
+        /// <summary>True for a fixed monetary discount; false for a percentage.</summary>
         public bool DiscountFixed { get; set; } = default!;
         public PaymentMethod? PaymentMethod { get; set; }
         public decimal DiscountValue { get; set; } = default!;

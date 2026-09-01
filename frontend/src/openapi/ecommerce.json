@@ -5849,8 +5849,7 @@
                 "properties": {
                     "customerId": {
                         "type": "integer",
-                        "format": "int64",
-                        "nullable": true
+                        "format": "int64"
                     },
                     "branchId": {
                         "type": "integer",
@@ -5859,10 +5858,6 @@
                     "tariffId": {
                         "type": "integer",
                         "format": "int64"
-                    },
-                    "point": {
-                        "type": "number",
-                        "format": "double"
                     },
                     "voucherCode": {
                         "type": "string",
@@ -5877,17 +5872,10 @@
                         "format": "date-time",
                         "nullable": true
                     },
-                    "discountFixed": {
-                        "type": "boolean"
-                    },
-                    "discountValue": {
-                        "type": "number",
-                        "format": "double"
-                    },
                     "orderItems": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/OrderItemModel"
+                            "$ref": "#/components/schemas/OrderItemSelectionModel"
                         },
                         "nullable": true
                     }
@@ -10070,7 +10058,7 @@
                 },
                 "additionalProperties": false
             },
-            "OrderItemModel": {
+            "OrderItemSelectionModel": {
                 "type": "object",
                 "properties": {
                     "serviceId": {
@@ -10081,29 +10069,9 @@
                         "type": "integer",
                         "format": "int64"
                     },
-                    "price": {
-                        "type": "number",
-                        "format": "double"
-                    },
                     "quantity": {
                         "type": "integer",
                         "format": "int32"
-                    },
-                    "unitRelationName": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "processingTime": {
-                        "type": "number",
-                        "format": "double"
-                    },
-                    "serviceName": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "unitPrice": {
-                        "type": "number",
-                        "format": "double"
                     }
                 },
                 "additionalProperties": false
@@ -11254,10 +11222,6 @@
                         "type": "integer",
                         "format": "int64"
                     },
-                    "point": {
-                        "type": "number",
-                        "format": "double"
-                    },
                     "note": {
                         "type": "string",
                         "nullable": true
@@ -11270,7 +11234,7 @@
                     "orderItems": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/OrderItemModel"
+                            "$ref": "#/components/schemas/OrderItemSelectionModel"
                         },
                         "nullable": true
                     }

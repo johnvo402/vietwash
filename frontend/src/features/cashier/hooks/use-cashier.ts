@@ -142,8 +142,7 @@ export const useCashier = () => {
                 typeof savedState.tariffId === "number"
                   ? savedState.tariffId
                   : 0,
-              point:
-                typeof savedState.point === "number" ? savedState.point : 0,
+              point: 0,
               deliveryTime:
                 typeof savedState.deliveryTime === "string"
                   ? savedState.deliveryTime
@@ -616,7 +615,7 @@ export const useCashier = () => {
         ({
           orderId: order.orderId || null,
           tariffId: order.tariffId,
-          point: order.point,
+          point: 0,
           note: order.note,
           deliveryTime: order.deliveryTime,
           customer: order.customer,

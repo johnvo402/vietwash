@@ -1,21 +1,16 @@
 import { apiClient } from "@/api/client";
 import { useMutation } from "@tanstack/react-query";
 import { Order, ServiceItem } from "../types";
-import { OrderItemModel } from "@/api/generated/api";
+import { OrderItemSelectionModel } from "@/api/generated/api";
 
 export const useOrder = () => {
   const createOrder = useMutation({
     mutationFn: async (order: Order) => {
-      const items: OrderItemModel[] = order.orderItems.map(
+      const items: OrderItemSelectionModel[] = order.orderItems.map(
         (x: ServiceItem) => ({
           serviceId: x.id,
           quantity: x.quantity,
-          price: x.price,
           unitRelationId: x.unitRelationId,
-          unitRelationName: x.unitRelationName,
-          serviceName: x.name,
-          processingTime: x.processingTime || 0,
-          unitPrice: x.unitPrice || x.price,
         })
       );
 
@@ -26,7 +21,6 @@ export const useOrder = () => {
         note: order.note,
         orderItems: items,
         deliveryTime: order.deliveryTime?.toISOString(),
-        point: order.point,
         tariffId: order.tariffId || undefined,
       });
     },
@@ -34,23 +28,17 @@ export const useOrder = () => {
 
   const updateOrder = useMutation({
     mutationFn: async (order: Order) => {
-      const items: OrderItemModel[] = order.orderItems.map(
+      const items: OrderItemSelectionModel[] = order.orderItems.map(
         (x: ServiceItem) => ({
           serviceId: x.id,
           quantity: x.quantity,
-          price: x.price,
           unitRelationId: x.unitRelationId,
-          unitRelationName: x.unitRelationName,
-          serviceName: x.name,
-          processingTime: x.processingTime || 0,
-          unitPrice: x.unitPrice || x.price,
         })
       );
       return await apiClient.ecommerceApiOrdersIdPut(order.id!, {
         note: order.note,
         orderItems: items,
         deliveryTime: order.deliveryTime?.toISOString(),
-        point: order.point,
         tariffId: order.tariffId || undefined,
       });
     },

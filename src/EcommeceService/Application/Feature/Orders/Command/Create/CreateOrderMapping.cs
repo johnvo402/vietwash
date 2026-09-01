@@ -1,4 +1,4 @@
-﻿using Contracts.Extensions;
+using Application.Feature.Orders.Common;
 using Contracts.Utils;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
@@ -7,79 +7,51 @@ namespace Application.Feature.Orders.Command.Create
 {
     public static class CreateOrderMapping
     {
-        public static Order ToEntity(this CreateOrderCommand command, long staffId, int vat)
+        internal static Order ToEntity(
+            this CreateOrderCommand command,
+            long staffId,
+            int vat,
+            ResolvedOrderPricing pricing,
+            OrderPriceSummary totals,
+            VoucherRedemption? voucher
+        )
         {
-            string code = Generator.GenerateCode("OD", 6);
-            decimal amount = command.OrderItems.Sum(i => i.Price * i.Quantity);
-            decimal temptTotal = CalculationTotal(
-                amount,
-                command.DiscountFixed,
-                command.DiscountValue,
-                command.Point
-            );
-            decimal vatAmount = CalculateVatAmount(temptTotal, vat);
-            var response = new Order(
+            var order = new Order(
                 branchId: command.BranchId,
                 staffId: staffId,
-                voucherId: null,
-                voucherCode: command.VoucherCode,
+                voucherId: voucher?.VoucherId,
+                voucherCode: voucher?.Code,
                 vat: vat,
-                vatAmount: vatAmount,
-                code: code,
-                amount: amount,
-                total: temptTotal + vatAmount,
+                vatAmount: totals.VatAmount,
+                code: Generator.GenerateCode("OD", 6),
+                amount: totals.Amount,
+                total: totals.Total,
                 status: OrderStatus.Pending,
                 customerId: command.CustomerId,
-                discountFixed: command.DiscountFixed,
-                discountValue: command.DiscountValue,
+                discountFixed: voucher?.DiscountFixed ?? false,
+                discountValue: voucher?.DiscountValue ?? 0,
                 note: command.Note,
                 deliveryTime: command.DeliveryTime,
-                point: command.Point,
+                point: 0,
                 tariffId: command.TariffId
             );
 
-            response.OrderItems = command.OrderItems.ToListMapping(x => new OrderItem
-            {
-                ServiceId = x.ServiceId,
-                UnitRelationId = x.UnitRelationId,
-                Price = x.Price,
-                Quantity = x.Quantity,
-                UnitRelationName = x.UnitRelationName,
-                ProcessingTime = x.ProcessingTime,
-                ServiceName = x.ServiceName,
-                UnitPrice = x.UnitPrice,
-            });
-
-            return response;
+            order.OrderItems = pricing.Items.Select(ToOrderItem).ToList();
+            return order;
         }
 
-        private static decimal CalculationTotal(
-            decimal amount,
-            bool discountFixed,
-            decimal discountValue,
-            decimal? point = null
-        )
-        {
-            if (point.HasValue && point > 0)
+        private static OrderItem ToOrderItem(ResolvedOrderItem item) =>
+            new()
             {
-                amount -= point.Value * 10;
-            }
-            if (!discountFixed)
-            {
-                return amount - (amount * discountValue / 100);
-            }
-            else
-            {
-                return amount - discountValue;
-            }
-        }
-
-        private static decimal CalculateVatAmount(decimal amount, int vatPercent)
-        {
-            if (vatPercent <= 0)
-                return 0;
-            return amount * vatPercent / 100;
-        }
+                ServiceId = item.ServiceId,
+                UnitRelationId = item.UnitRelationId,
+                Price = item.Price,
+                Quantity = item.Quantity,
+                UnitRelationName = item.UnitRelationName,
+                ProcessingTime = item.ProcessingTime,
+                ServiceName = item.ServiceName,
+                UnitPrice = item.UnitPrice,
+            };
 
         public static CreateOrderResponse ToCreateOrderResponse(this Order order)
         {

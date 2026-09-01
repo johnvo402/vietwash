@@ -12,6 +12,6 @@ namespace Application.Feature.Orders.Command.Update
         public long OrderId { get; set; }
 
         [FromBody]
-        public UpdateOrderModel Model { get; set; }
+        public UpdateOrderModel Model { get; set; } = default!;
     }
 }

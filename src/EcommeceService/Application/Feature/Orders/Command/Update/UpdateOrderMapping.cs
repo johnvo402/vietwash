@@ -1,79 +1,45 @@
 using Application.Feature.Common.Projections.Orders;
+using Application.Feature.Orders.Common;
 using Domain.Aggregates.Orders;
 
 namespace Application.Feature.Orders.Command.Update
 {
     public static class UpdateOrderMapping
     {
-        public static void FromUpdateModel(this Order entity, UpdateOrderModel model)
+        internal static void FromUpdateModel(
+            this Order entity,
+            UpdateOrderModel model,
+            ResolvedOrderPricing pricing,
+            OrderPriceSummary totals
+        )
         {
-            decimal amount = model.OrderItems.Sum(i => i.Price * i.Quantity);
-            decimal temptTotal = CalculationTotal(
-                amount,
-                entity.DiscountFixed,
-                entity.DiscountValue,
-                model.Point
-            );
-            decimal vatAmount = CalculateVatAmount(temptTotal, entity.Vat);
-
             entity.Update(
-                amount: amount,
-                vatAmount: vatAmount,
-                total: temptTotal + vatAmount,
+                amount: totals.Amount,
+                vatAmount: totals.VatAmount,
+                total: totals.Total,
                 deliveryTime: model.DeliveryTime,
                 tariffId: model.TariffId,
                 note: model.Note,
-                point: model.Point
+                point: 0
             );
+
             entity.OrderItems.Clear();
-
-            if (model.OrderItems != null)
+            foreach (ResolvedOrderItem item in pricing.Items)
             {
-                foreach (var x in model.OrderItems)
-                {
-                    entity.OrderItems.Add(
-                        new OrderItem
-                        {
-                            ServiceId = x.ServiceId,
-                            UnitRelationId = x.UnitRelationId,
-                            Price = x.Price,
-                            Quantity = x.Quantity,
-                            UnitRelationName = x.UnitRelationName,
-                            ProcessingTime = x.ProcessingTime,
-                            ServiceName = x.ServiceName,
-                            UnitPrice = x.UnitPrice,
-                        }
-                    );
-                }
+                entity.OrderItems.Add(
+                    new OrderItem
+                    {
+                        ServiceId = item.ServiceId,
+                        UnitRelationId = item.UnitRelationId,
+                        Price = item.Price,
+                        Quantity = item.Quantity,
+                        UnitRelationName = item.UnitRelationName,
+                        ProcessingTime = item.ProcessingTime,
+                        ServiceName = item.ServiceName,
+                        UnitPrice = item.UnitPrice,
+                    }
+                );
             }
-        }
-
-        private static decimal CalculationTotal(
-            decimal amount,
-            bool discountFixed,
-            decimal discountValue,
-            decimal? point = null
-        )
-        {
-            if (point.HasValue && point > 0)
-            {
-                amount -= point.Value * 10;
-            }
-            if (!discountFixed)
-            {
-                return amount - (amount * discountValue / 100);
-            }
-            else
-            {
-                return amount - discountValue;
-            }
-        }
-
-        private static decimal CalculateVatAmount(decimal amount, int vatPercent)
-        {
-            if (vatPercent <= 0)
-                return 0;
-            return amount * vatPercent / 100;
         }
     }
 }

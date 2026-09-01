@@ -1,5 +1,12 @@
 ﻿namespace Application.Feature.Common.Projections.Orders
 {
+    public class OrderItemSelectionModel
+    {
+        public long ServiceId { get; set; }
+        public long UnitRelationId { get; set; }
+        public int Quantity { get; set; }
+    }
+
     public class OrderItemModel
     {
         public long ServiceId { get; set; }
