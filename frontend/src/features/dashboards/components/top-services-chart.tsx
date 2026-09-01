@@ -65,7 +65,7 @@ const TopServicesChartComponent = ({ data }: TopServicesChartProps) => {
           <Tooltip
             formatter={(value) => [
               `${formatPriceVN(Number(value))}`,
-              t("revenue.title"),
+              t("revenue.grossServiceRevenue"),
             ]}
             labelFormatter={(label) =>
               chartData.find((d) => d.service === label)?.fullServiceName ||

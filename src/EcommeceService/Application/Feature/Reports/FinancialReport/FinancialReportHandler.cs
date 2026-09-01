@@ -1,62 +1,66 @@
-﻿using Application.Common.Interfaces.UnitOfWorks;
-using Application.Feature.Reports.RevenueReport;
+using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.UnitOfWorks;
+using Application.Feature.Reports.Common;
 using Contracts.ApiWrapper;
-using Contracts.Dtos.Models;
-using Contracts.Dtos.Responses;
-using Contracts.Extensions.QueryExtensions;
+using Contracts.Application.Common.Exceptions;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Feature.Reports.FinancialReport
+namespace Application.Feature.Reports.FinancialReport;
+
+public class FinancialReportHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
+    : IRequestHandler<FinancialReportQuery, Result<FinancialReportResponse>>
 {
-    public class FinancialReportHandler(IUnitOfWork unitOfWork)
-        : IRequestHandler<FinancialReportQuery, Result<FinancialReportResponse>>
+    public async ValueTask<Result<FinancialReportResponse>> Handle(
+        FinancialReportQuery request,
+        CancellationToken cancellationToken
+    )
     {
-        public async ValueTask<Result<FinancialReportResponse>> Handle(
-            FinancialReportQuery request,
-            CancellationToken cancellationToken
-        )
-        {
-            var from = DateTimeOffset
-                .FromUnixTimeSeconds(request.From)
-                .ToOffset(TimeSpan.FromHours(0));
-            var to = DateTimeOffset.FromUnixTimeSeconds(request.To).ToOffset(TimeSpan.FromHours(0));
+        ReportBranchScopeResult branchScope = ReportBranchScope.Resolve(
+            currentUser.Session?.Branches,
+            request.BranchIds
+        );
+        if (branchScope.HasUnauthorizedBranch)
+            return Result<FinancialReportResponse>.Failure(new ForbiddenError(Message.FORBIDDEN));
 
-            var groupedOrders = await unitOfWork
-                .Repository<Order>()
-                .QueryAsync()
-                .Where(o =>
-                    o.CreatedAt >= from
-                    && o.CreatedAt <= to
-                    && request.BranchIds != null
-                    && request.BranchIds.Contains(o.BranchId)
-                )
-                .GroupBy(o => o.Status)
-                .Select(g => new
-                {
-                    Status = g.Key,
-                    TotalAmount = g.Sum(o => o.Amount),
-                    TotalDiscount = g.Sum(o => o.DiscountValue),
-                    TotalPoint = g.Sum(o => o.Point),
-                    Total = g.Sum(o => o.Total),
-                })
-                .ToListAsync(cancellationToken);
-
-            var completed = groupedOrders.FirstOrDefault(g => g.Status == OrderStatus.Completed);
-            var cancelled = groupedOrders.FirstOrDefault(g => g.Status == OrderStatus.Cancelled);
-
-            var report = new FinancialReportResponse
+        ReportUtcRange range = ReportTimeRange.ForUnixSeconds(request.From, request.To);
+        var completed = await unitOfWork
+            .Repository<Order>()
+            .QueryAsync()
+            .SelectCompletedRevenueRows(range, branchScope.BranchIds)
+            .GroupBy(_ => 1)
+            .Select(group => new
             {
-                TotalRevenue = completed?.TotalAmount ?? 0,
-                CancelValue = cancelled?.TotalAmount ?? 0,
-                TotalDiscount = completed?.TotalDiscount ?? 0,
-                TotalPoint = completed?.TotalPoint * 10 ?? 0,
-                TotalNetRevenue = completed?.Total ?? 0, //1 point=10đ
-            };
+                GrossAmount = group.Sum(row => row.GrossAmount),
+                DiscountAmount = group.Sum(row => row.DiscountAmount),
+                CollectedAmount = group.Sum(row => row.CollectedAmount),
+            })
+            .SingleOrDefaultAsync(cancellationToken);
 
-            return Result<FinancialReportResponse>.Success(report);
-        }
+        // Cancellation has no financial OrderDate. Keep the existing operational CreatedAt
+        // period for this separate informational metric; it never contributes to revenue.
+        decimal cancelledValue = await unitOfWork
+            .Repository<Order>()
+            .QueryAsync(order =>
+                order.Status == OrderStatus.Cancelled
+                && order.CreatedAt >= range.UtcStartInclusive
+                && order.CreatedAt < range.UtcEndExclusive
+                && branchScope.BranchIds.Contains(order.BranchId)
+            )
+            .SumAsync(order => order.Amount, cancellationToken);
+
+        return Result<FinancialReportResponse>.Success(
+            new FinancialReportResponse
+            {
+                TotalRevenue = completed?.GrossAmount ?? 0m,
+                CancelValue = cancelledValue,
+                TotalDiscount = completed?.DiscountAmount ?? 0m,
+                TotalPoint = 0m,
+                TotalNetRevenue = completed?.CollectedAmount ?? 0m,
+            }
+        );
     }
 }

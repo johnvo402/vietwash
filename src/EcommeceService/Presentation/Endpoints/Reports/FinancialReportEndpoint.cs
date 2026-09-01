@@ -1,5 +1,6 @@
 ﻿using Application.Feature.Reports.FinancialReport;
 using Ardalis.ApiEndpoints;
+using Application.Common.Auth;
 using Contracts.ApiWrapper; 
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -17,7 +18,7 @@ namespace Presentation.Endpoints.Reports
     {
         [HttpGet(Router.ReportRoute.FinancialReport)]
         [SwaggerOperation(Tags = [Router.ReportRoute.Tags], Summary = "Report financial")]
-        // [AuthorizeBy]
+        [AuthorizeBy]
         public override async Task<
             ActionResult<ApiResponse<FinancialReportResponse>>
         > HandleAsync(

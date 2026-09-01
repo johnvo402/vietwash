@@ -1,60 +1,65 @@
-﻿using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Feature.Reports.Common;
 using Application.Feature.Statistics.Queries.TopService;
 using Contracts.ApiWrapper;
-using Contracts.Dtos.Requests;
+using Contracts.Application.Common.Exceptions;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Orders;
-using Domain.Aggregates.Orders.Specifications;
+using Domain.Aggregates.Orders.Enums;
 using Mediator;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
-public class GetTopServiceHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
-    : IRequestHandler<GetTopServiceQuery, Result<IEnumerable<GetTopServiceResponse>>>
+public class GetTopServiceHandler(
+    IUnitOfWork unitOfWork,
+    ICurrentAccount currentUser,
+    IHttpContextAccessor httpContextAccessor
+) : IRequestHandler<GetTopServiceQuery, Result<IEnumerable<GetTopServiceResponse>>>
 {
     public async ValueTask<Result<IEnumerable<GetTopServiceResponse>>> Handle(
-        GetTopServiceQuery query,
+        GetTopServiceQuery request,
         CancellationToken cancellationToken
     )
     {
-        try
-        {
-            var listBranchUser = currentUser.Session!.Branches!.ToList();
-            var queryParamRequest = new QueryParamRequest();
-            var orderSpec = new GetOrderItemSpecification(
-                DateTime.Parse(query.From),
-                DateTime.Parse(query.To),
-                int.Parse(query.BranchId),
-                listBranchUser
+        if (
+            !long.TryParse(request.BranchId, out long branchId)
+            || !ReportBranchScope.IsAuthorized(currentUser.Session?.Branches, branchId)
+        )
+            return Result<IEnumerable<GetTopServiceResponse>>.Failure(
+                new ForbiddenError(Message.FORBIDDEN)
             );
 
-            var orders = await unitOfWork
-                .DynamicReadOnlyRepository<Order>()
-                .ListAsync(orderSpec, queryParamRequest, cancellationToken);
+        TimeZoneInfo timeZone = ReportTimeRange.ResolveTimeZone(
+            httpContextAccessor.HttpContext?.Request.Headers["Time-Zone"].ToString()
+        );
+        DateOnly fromDate = ReportTimeRange.ParseLocalDate(request.From, nameof(request.From));
+        DateOnly toDate = ReportTimeRange.ParseLocalDate(request.To, nameof(request.To));
+        ReportUtcRange range = ReportTimeRange.ForLocalDates(fromDate, toDate, timeZone);
 
-            if (!orders.Any())
-                return Result<IEnumerable<GetTopServiceResponse>>.Success(
-                    Enumerable.Empty<GetTopServiceResponse>()
-                );
+        List<GetTopServiceResponse> topServices = await unitOfWork
+            .Repository<Order>()
+            .QueryAsync(order =>
+                order.Status == OrderStatus.Completed
+                && order.BranchId == branchId
+                && order.OrderDate.HasValue
+                && order.OrderDate >= range.UtcStartInclusive
+                && order.OrderDate < range.UtcEndExclusive
+            )
+            .SelectMany(order => order.OrderItems)
+            .GroupBy(item => new { item.ServiceId, item.ServiceName })
+            .Select(group => new GetTopServiceResponse
+            {
+                ServiceId = group.Key.ServiceId.ToString(),
+                ServiceName = group.Key.ServiceName ?? "Unknown",
+                UsageCount = group.Sum(item => item.Quantity),
+                // Gross service-line revenue; order-level discounts are not allocated here.
+                TotalRevenue = group.Sum(item => item.Price * item.Quantity),
+            })
+            .OrderByDescending(service => service.TotalRevenue)
+            .Take(10)
+            .ToListAsync(cancellationToken);
 
-            // Aggregate and transform results
-            var topServices = orders
-                .SelectMany(o => o.OrderItems)
-                .GroupBy(oi => oi.ServiceId)
-                .Select(g => new GetTopServiceResponse
-                {
-                    ServiceId = g.Key.ToString(),
-                    ServiceName = g.First().ServiceName ?? "Unknown",
-                    UsageCount = g.Count(),
-                    TotalRevenue = g.Sum(oi => oi.Price * oi.Quantity),
-                })
-                .OrderByDescending(x => x.TotalRevenue)
-                .Take(10)
-                .ToList();
-
-            return Result<IEnumerable<GetTopServiceResponse>>.Success(topServices);
-        }
-        catch (Exception)
-        {
-            throw;
-        }
+        return Result<IEnumerable<GetTopServiceResponse>>.Success(topServices);
     }
 }

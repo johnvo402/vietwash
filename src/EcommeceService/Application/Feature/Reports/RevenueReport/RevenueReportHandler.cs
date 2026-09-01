@@ -1,16 +1,19 @@
-﻿using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.UnitOfWorks;
+using Application.Feature.Reports.Common;
 using Contracts.ApiWrapper;
+using Contracts.Application.Common.Exceptions;
+using Contracts.Common.Messages;
 using Contracts.Dtos.Models;
 using Contracts.Dtos.Responses;
 using Contracts.Extensions.QueryExtensions;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
 using Mediator;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Feature.Reports.RevenueReport;
 
-public class RevenueReportHandler(IUnitOfWork unitOfWork)
+public class RevenueReportHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
     : IRequestHandler<RevenueReportQuery, Result<PaginationResponse<RevenueReportResponse>>>
 {
     public async ValueTask<Result<PaginationResponse<RevenueReportResponse>>> Handle(
@@ -18,37 +21,57 @@ public class RevenueReportHandler(IUnitOfWork unitOfWork)
         CancellationToken cancellationToken
     )
     {
-        var from = DateTimeOffset.FromUnixTimeSeconds(request.From).ToOffset(TimeSpan.FromHours(7));
-        var to = DateTimeOffset.FromUnixTimeSeconds(request.To).ToOffset(TimeSpan.FromHours(7));
+        ReportBranchScopeResult branchScope = ReportBranchScope.Resolve(
+            currentUser.Session?.Branches,
+            request.BranchIds
+        );
+        if (branchScope.HasUnauthorizedBranch)
+            return Result<PaginationResponse<RevenueReportResponse>>.Failure(
+                new ForbiddenError(Message.FORBIDDEN)
+            );
 
-        var query = await unitOfWork
+        ReportUtcRange range = ReportTimeRange.ForUnixSeconds(request.From, request.To);
+        IQueryable<OrderRevenueRow> revenueRows = unitOfWork
             .Repository<Order>()
-            .QueryAsync(o =>
-                o.CreatedAt >= from
-                && o.CreatedAt <= to
-                && (o.Status == OrderStatus.Completed)
-                && request.BranchIds != null
-                && request.BranchIds.Contains(o.BranchId)
-            )
-            .GroupBy(o => new { o.CreatedAt.Date, o.BranchId })
-            .Select(g => new RevenueReportResponse
+            .QueryAsync()
+            .SelectCompletedRevenueRows(range, branchScope.BranchIds);
+
+        PaginationResponse<RevenueReportResponse> query = await revenueRows
+            // Unix report filters are absolute instants, so the response date is the UTC financial date.
+            .GroupBy(row => new { Date = row.FinancialDate.Date, row.BranchId })
+            .Select(group => new RevenueReportResponse
             {
-                Date = DateOnly.FromDateTime(g.Key.Date),
-                BranchId = g.Key.BranchId,
-                OrderQuantity = g.Count(),
-                CustomerQuantity = g.Select(x => x.CustomerId).Distinct().Count(),
-                TotalRevenue = g.Sum(x => x.Amount),
-                TotalDiscount = g.Sum(x => x.DiscountValue),
-                TotalNetRevenue = g.Sum(x => x.Total),
-                AverageRevenuePerOrder =
-                    g.Count() == 0 ? 0 : Math.Round(g.Sum(x => x.Amount) / g.Count(), 2),
-                AverageRevenuePerCustomer =
-                    g.Select(x => x.CustomerId).Distinct().Count() == 0
-                        ? 0
-                        : Math.Round(
-                            g.Sum(x => x.Amount) / g.Select(x => x.CustomerId).Distinct().Count(),
-                            2
-                        ),
+                Date = DateOnly.FromDateTime(group.Key.Date),
+                BranchId = group.Key.BranchId,
+                OrderQuantity = group.Count(),
+                // Guests are not treated as one registered customer.
+                CustomerQuantity = group
+                    .Where(row => row.CustomerId.HasValue)
+                    .Select(row => row.CustomerId)
+                    .Distinct()
+                    .Count(),
+                TotalRevenue = group.Sum(row => row.GrossAmount),
+                TotalDiscount = group.Sum(row => row.DiscountAmount),
+                TotalNetRevenue = group.Sum(row => row.CollectedAmount),
+                AverageRevenuePerOrder = Math.Round(
+                    group.Sum(row => row.CollectedAmount) / group.Count(),
+                    2
+                ),
+                AverageRevenuePerCustomer = group
+                        .Where(row => row.CustomerId.HasValue)
+                        .Select(row => row.CustomerId)
+                        .Distinct()
+                        .Count() == 0
+                    ? 0m
+                    : Math.Round(
+                        group.Sum(row => row.CollectedAmount)
+                            / group
+                                .Where(row => row.CustomerId.HasValue)
+                                .Select(row => row.CustomerId)
+                                .Distinct()
+                                .Count(),
+                        2
+                    ),
             })
             .Search(request.Keyword, request.Targets)
             .Sort($"TotalRevenue{OrderTerm.DELIMITER}{OrderTerm.DESC}")

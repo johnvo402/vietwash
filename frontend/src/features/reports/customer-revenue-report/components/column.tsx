@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl";
 
 // Giả định type mới
 type CustomerRevenueResult = {
-  customerId: number;
+  customerId: number | null;
   customerCode: string;
   phoneNumber: string;
   displayName: string;
@@ -71,7 +71,7 @@ export const useCustomerRevenueTable = () => {
     },
     {
       accessorKey: "revenue",
-      header: t("revenue.title"),
+      header: t("revenue.grossRevenue"),
       cell: ({ row }) => (
         <div className="text-right">
           {formatPriceVN(row.getValue("revenue"))}
@@ -92,10 +92,7 @@ export const useCustomerRevenueTable = () => {
       header: t("revenue.netRevenue"),
       cell: ({ row }) => (
         <div className="text-right font-medium text-green-700">
-          {formatPriceVN(
-            Number(row.getValue("revenue")) -
-              Number(row.getValue("cancelValue"))
-          )}
+          {formatPriceVN(row.getValue("netRevenue"))}
         </div>
       ),
     },

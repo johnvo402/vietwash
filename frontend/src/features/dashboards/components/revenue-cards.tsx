@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
+import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPriceVN } from "@/utils/format";
 import { GetDashboardCardResponse } from "@/api/generated";
@@ -42,8 +42,10 @@ export function RevenueCards({ data }: RevenueCardsProps) {
           </CardTitle>
           {yesterdayDiff > 0 ? (
             <ArrowUpIcon className="h-4 w-4 text-green-500" />
-          ) : (
+          ) : yesterdayDiff < 0 ? (
             <ArrowDownIcon className="h-4 w-4 text-red-500" />
+          ) : (
+            <MinusIcon className="h-4 w-4 text-muted-foreground" />
           )}
         </CardHeader>
         <CardContent>
@@ -51,9 +53,15 @@ export function RevenueCards({ data }: RevenueCardsProps) {
             {formatPriceVN(Math.abs(yesterdayDiff))}
           </div>
           <p
-            className={`text-xs ${yesterdayDiff > 0 ? "text-green-500" : "text-red-500"}`}
+            className={`text-xs ${
+              yesterdayDiff > 0
+                ? "text-green-500"
+                : yesterdayDiff < 0
+                  ? "text-red-500"
+                  : "text-muted-foreground"
+            }`}
           >
-            {yesterdayDiff > 0 ? "+" : "-"}
+            {yesterdayDiff > 0 ? "+" : yesterdayDiff < 0 ? "-" : ""}
             {Math.abs(yesterdayPercentage).toFixed(2)}% {t("revenue.from",{timePeriod: t("dateAndTime.yesterday")})}
           </p>
         </CardContent>
@@ -62,12 +70,14 @@ export function RevenueCards({ data }: RevenueCardsProps) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
-            {t("revenue.comparedTo",{timePeriod: t("dateAndTime.lastMonth")})}
+            {t("revenue.comparedTo",{timePeriod: t("revenue.samePeriodLastMonth")})}
           </CardTitle>
           {lastMonthDiff > 0 ? (
             <ArrowUpIcon className="h-4 w-4 text-green-500" />
-          ) : (
+          ) : lastMonthDiff < 0 ? (
             <ArrowDownIcon className="h-4 w-4 text-red-500" />
+          ) : (
+            <MinusIcon className="h-4 w-4 text-muted-foreground" />
           )}
         </CardHeader>
         <CardContent>
@@ -75,9 +85,15 @@ export function RevenueCards({ data }: RevenueCardsProps) {
             {formatPriceVN(Math.abs(lastMonthDiff))}
           </div>
           <p
-            className={`text-xs ${lastMonthDiff > 0 ? "text-green-500" : "text-red-500"}`}
+            className={`text-xs ${
+              lastMonthDiff > 0
+                ? "text-green-500"
+                : lastMonthDiff < 0
+                  ? "text-red-500"
+                  : "text-muted-foreground"
+            }`}
           >
-            {lastMonthDiff > 0 ? "+" : "-"}
+            {lastMonthDiff > 0 ? "+" : lastMonthDiff < 0 ? "-" : ""}
             {Math.abs(lastMonthPercentage).toFixed(2)}% {t("revenue.from",{timePeriod: t("revenue.samePeriodLastMonth")})}
           </p>
         </CardContent>

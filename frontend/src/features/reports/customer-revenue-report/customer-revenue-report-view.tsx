@@ -98,7 +98,7 @@ export default function CustomerRevenueView() {
         {
           start: { c: 6, r: 8 },
           end: { c: 6, r: 9 },
-          value: t("revenue.title"),
+          value: t("revenue.grossRevenue"),
           isCurrency: true,
         },
         {
@@ -124,25 +124,21 @@ export default function CustomerRevenueView() {
         orderCancelQuantity: row.orderCancelQuantity,
         revenue: row.revenue,
         cancelValue: row.cancelValue,
-        netRevenue: row.revenue - row.cancelValue,
+        netRevenue: row.netRevenue,
       }));
 
       // Chuẩn bị dữ liệu thống kê
       const statisticLabel = [
-        t("report.totalCustomers"),
+        t("report.totalRegisteredCustomers"),
         t("report.totalRevenue"),
         t("report.totalCancelValue"),
         t("report.totalNetRevenue"),
       ];
       const statisticValue: any[] = [
-        allData.length,
+        allData.filter((row: any) => row.customerId != null).length,
         allData.reduce((sum: number, row: any) => sum + row.revenue, 0),
         allData.reduce((sum: number, row: any) => sum + row.cancelValue, 0),
-        allData.reduce(
-          (sum: number, row: any) =>
-            sum + (row.revenue - Math.abs(row.cancelValue)),
-          0
-        ),
+        allData.reduce((sum: number, row: any) => sum + row.netRevenue, 0),
       ];
 
       // Tạo Excel builder

@@ -1,5 +1,6 @@
 ﻿using Application.Feature.Reports.ProductSupplierReport;
 using Ardalis.ApiEndpoints;
+using Application.Common.Auth;
 using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
 using Contracts.RouteResults;
@@ -17,7 +18,7 @@ namespace Presentation.Endpoints.Reports
     {
         [HttpGet(Router.ReportRoute.ProductSupplierReport)]
         [SwaggerOperation(Tags = [Router.ReportRoute.Tags], Summary = "Product supplier report")]
-        // [AuthorizeBy]
+        [AuthorizeBy]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<ProductSupplierReportResponse>>>
         > HandleAsync(

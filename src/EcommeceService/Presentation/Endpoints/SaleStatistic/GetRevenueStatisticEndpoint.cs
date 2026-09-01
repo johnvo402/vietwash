@@ -1,5 +1,6 @@
 ﻿using Application.Feature.Statistics.Queries.RevenueStatistic;
 using Ardalis.ApiEndpoints;
+using Application.Common.Auth;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Domain.Functions;
@@ -19,7 +20,7 @@ namespace Presentation.Endpoints.SaleStatistic
             Tags = [Routes.Router.SaleResultRoute.Tags],
             Summary = "Get revenue statistics by date"
         )]
-        // [AuthorizeBy(roles: "ADMIN, MANAGER")]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<
             ActionResult<ApiResponse<IEnumerable<GetRevenueStatistic>>>
         > HandleAsync(

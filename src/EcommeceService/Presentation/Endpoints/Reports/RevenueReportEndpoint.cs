@@ -1,5 +1,6 @@
 ﻿using Application.Feature.Reports.RevenueReport;
 using Ardalis.ApiEndpoints;
+using Application.Common.Auth;
 using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
 using Contracts.RouteResults;
@@ -17,7 +18,7 @@ namespace Presentation.Endpoints.Reports
     {
         [HttpGet(Router.ReportRoute.RevenueReport)]
         [SwaggerOperation(Tags = [Router.ReportRoute.Tags], Summary = "Report reveune")]
-        // [AuthorizeBy]
+        [AuthorizeBy]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<RevenueReportResponse>>>
         > HandleAsync(

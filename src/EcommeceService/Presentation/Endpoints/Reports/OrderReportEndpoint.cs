@@ -1,5 +1,6 @@
 using Application.Feature.Reports.OrderReport;
 using Ardalis.ApiEndpoints;
+using Application.Common.Auth;
 using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
 using Contracts.RouteResults;
@@ -18,7 +19,7 @@ namespace Presentation.Endpoints.Reports
     {
         [HttpGet(Router.ReportRoute.Order)]
         [SwaggerOperation(Tags = [Router.ReportRoute.Tags], Summary = "Report service order")]
-        // [AuthorizeBy]
+        [AuthorizeBy]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<OrderSummaryResult>>>
         > HandleAsync(

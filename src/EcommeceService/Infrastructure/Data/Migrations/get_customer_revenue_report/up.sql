@@ -23,17 +23,32 @@ AS $$
     WITH order_customer AS (
         SELECT 
             o.customer_id,
-            SUM(o.amount) AS revenue,
-            SUM(CASE WHEN o.status = 4 THEN o.amount ELSE 0 END) AS cancel_value,
-            SUM(o.total) AS net_revenue,
-            COUNT(CASE WHEN o.status = 3 THEN 1 END) AS order_sale_quantity,
-            COUNT(CASE WHEN o.status = 4 THEN 1 END) AS order_cancel_quantity
+            SUM(CASE WHEN o.status = 4 THEN o.amount ELSE 0 END) AS revenue,
+            SUM(CASE WHEN o.status = 5 THEN o.amount ELSE 0 END) AS cancel_value,
+            SUM(CASE WHEN o.status = 4 THEN o.total ELSE 0 END) AS net_revenue,
+            COUNT(CASE WHEN o.status = 4 THEN 1 END) AS order_sale_quantity,
+            COUNT(CASE WHEN o.status = 5 THEN 1 END) AS order_cancel_quantity
         FROM "order" o
         WHERE 
-            (_branch_ids IS NULL OR cardinality(_branch_ids) = 0 OR o.branch_id = ANY(_branch_ids))
-            AND (_from IS NULL OR o.delivery_time >= _from)
-            AND (_to IS NULL OR o.delivery_time <= _to)
-            AND (o.status = 3 OR o.status = 4)
+            _branch_ids IS NOT NULL
+            AND cardinality(_branch_ids) > 0
+            AND o.branch_id = ANY(_branch_ids)
+            AND (
+                (
+                    o.status = 4
+                    AND (_from IS NULL OR o.order_date >= _from)
+                    AND (_to IS NULL OR o.order_date < _to)
+                )
+                OR
+                (
+                    -- No authoritative CancelledAt exists. Preserve the report's
+                    -- existing operational delivery_time period for cancellation
+                    -- count/value, but never include it in earned revenue.
+                    o.status = 5
+                    AND (_from IS NULL OR o.delivery_time >= _from)
+                    AND (_to IS NULL OR o.delivery_time < _to)
+                )
+            )
         GROUP BY o.customer_id
     )
     SELECT 

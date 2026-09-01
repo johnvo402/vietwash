@@ -22,6 +22,20 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 
+const normalizeLocalDateISO = (date: Date) =>
+  new Date(
+    Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      date.getHours(),
+      date.getMinutes(),
+      date.getSeconds()
+    )
+  )
+    .toISOString()
+    .split(".")[0] + "Z";
+
 // Dynamically import chart components
 const MonthlyRevenueChart = dynamic(
   () =>
@@ -93,8 +107,8 @@ export default function StatisticsPage() {
   }>(() => {
     const now = new Date();
     return {
-      from: startOfMonth(now).toISOString().split(".")[0] + "Z",
-      to: endOfDay(now).toISOString().split(".")[0] + "Z",
+      from: normalizeLocalDateISO(startOfMonth(now)),
+      to: normalizeLocalDateISO(endOfDay(now)),
       range: { from: startOfMonth(now), to: endOfDay(now) },
       preset: "thisMonth",
     };
@@ -108,8 +122,8 @@ export default function StatisticsPage() {
   }>(() => {
     const now = new Date();
     return {
-      from: startOfMonth(now).toISOString().split(".")[0] + "Z",
-      to: endOfDay(now).toISOString().split(".")[0] + "Z",
+      from: normalizeLocalDateISO(startOfMonth(now)),
+      to: normalizeLocalDateISO(endOfDay(now)),
       range: { from: startOfMonth(now), to: endOfDay(now) },
       preset: "thisMonth",
     };
@@ -123,8 +137,8 @@ export default function StatisticsPage() {
   }>(() => {
     const now = new Date();
     return {
-      from: startOfMonth(now).toISOString().split(".")[0] + "Z",
-      to: endOfDay(now).toISOString().split(".")[0] + "Z",
+      from: normalizeLocalDateISO(startOfMonth(now)),
+      to: normalizeLocalDateISO(endOfDay(now)),
       range: { from: startOfMonth(now), to: endOfDay(now) },
       preset: "thisMonth",
     };
@@ -210,28 +224,14 @@ export default function StatisticsPage() {
       preset: string;
     }>
   ) => {
-    const normalizeISO = (date: Date) =>
-      new Date(
-        Date.UTC(
-          date.getFullYear(),
-          date.getMonth(),
-          date.getDate(),
-          date.getHours(),
-          date.getMinutes(),
-          date.getSeconds()
-        )
-      )
-        .toISOString()
-        .split(".")[0] + "Z";
-
     setRevenueDateRange((prev) => {
       const merged = {
         ...prev,
         ...newRange,
         from: newRange.range?.from
-          ? normalizeISO(newRange.range.from)
+          ? normalizeLocalDateISO(newRange.range.from)
           : prev.from,
-        to: newRange.range?.to ? normalizeISO(newRange.range.to) : prev.to,
+        to: newRange.range?.to ? normalizeLocalDateISO(newRange.range.to) : prev.to,
       };
 
       if (
@@ -255,28 +255,14 @@ export default function StatisticsPage() {
       preset: string;
     }>
   ) => {
-    const normalizeISO = (date: Date) =>
-      new Date(
-        Date.UTC(
-          date.getFullYear(),
-          date.getMonth(),
-          date.getDate(),
-          date.getHours(),
-          date.getMinutes(),
-          date.getSeconds()
-        )
-      )
-        .toISOString()
-        .split(".")[0] + "Z";
-
     setTopServicesDateRange((prev) => {
       const merged = {
         ...prev,
         ...newRange,
         from: newRange.range?.from
-          ? normalizeISO(newRange.range.from)
+          ? normalizeLocalDateISO(newRange.range.from)
           : prev.from,
-        to: newRange.range?.to ? normalizeISO(newRange.range.to) : prev.to,
+        to: newRange.range?.to ? normalizeLocalDateISO(newRange.range.to) : prev.to,
       };
 
       if (
@@ -300,28 +286,14 @@ export default function StatisticsPage() {
       preset: string;
     }>
   ) => {
-    const normalizeISO = (date: Date) =>
-      new Date(
-        Date.UTC(
-          date.getFullYear(),
-          date.getMonth(),
-          date.getDate(),
-          date.getHours(),
-          date.getMinutes(),
-          date.getSeconds()
-        )
-      )
-        .toISOString()
-        .split(".")[0] + "Z";
-
     setPieChartDateRange((prev) => {
       const merged = {
         ...prev,
         ...newRange,
         from: newRange.range?.from
-          ? normalizeISO(newRange.range.from)
+          ? normalizeLocalDateISO(newRange.range.from)
           : prev.from,
-        to: newRange.range?.to ? normalizeISO(newRange.range.to) : prev.to,
+        to: newRange.range?.to ? normalizeLocalDateISO(newRange.range.to) : prev.to,
       };
 
       if (

@@ -1,5 +1,9 @@
-﻿using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.UnitOfWorks;
+using Application.Feature.Reports.Common;
 using Contracts.ApiWrapper;
+using Contracts.Application.Common.Exceptions;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
 using Domain.Functions;
@@ -11,6 +15,7 @@ namespace Application.Feature.Statistics.Queries.RevenueStatistic;
 
 public class GetRevenueStatisticHandler(
     IUnitOfWork unitOfWork,
+    ICurrentAccount currentUser,
     IHttpContextAccessor httpContextAccessor
 ) : IRequestHandler<GetRevenueStatisticQuery, Result<IEnumerable<GetRevenueStatistic>>>
 {
@@ -19,61 +24,46 @@ public class GetRevenueStatisticHandler(
         CancellationToken cancellationToken
     )
     {
-        // 1. Lấy timezone từ header request (mặc định UTC nếu không có)
-        var tzId = httpContextAccessor.HttpContext?.Request.Headers["Time-Zone"].ToString();
-        TimeZoneInfo tz;
-        try
-        {
-            tz = !string.IsNullOrEmpty(tzId)
-                ? TimeZoneInfo.FindSystemTimeZoneById(tzId)
-                : TimeZoneInfo.Utc;
-        }
-        catch (TimeZoneNotFoundException)
-        {
-            tz = TimeZoneInfo.Utc;
-        }
+        if (
+            !long.TryParse(request.BranchId, out long branchId)
+            || !ReportBranchScope.IsAuthorized(currentUser.Session?.Branches, branchId)
+        )
+            return Result<IEnumerable<GetRevenueStatistic>>.Failure(
+                new ForbiddenError(Message.FORBIDDEN)
+            );
 
-        // 2. Parse input date (theo timezone)
-        var startDate = DateTime.Parse(request.From);
-        var endDate = DateTime.Parse(request.To);
+        TimeZoneInfo timeZone = ReportTimeRange.ResolveTimeZone(
+            httpContextAccessor.HttpContext?.Request.Headers["Time-Zone"].ToString()
+        );
+        DateOnly fromDate = ReportTimeRange.ParseLocalDate(request.From, nameof(request.From));
+        DateOnly toDate = ReportTimeRange.ParseLocalDate(request.To, nameof(request.To));
+        ReportUtcRange range = ReportTimeRange.ForLocalDates(fromDate, toDate, timeZone);
 
-        var branchId = long.TryParse(request.BranchId, out var bId) ? bId : (long?)null;
-
-        // 3. Query doanh thu -> convert sang timezone trước khi lấy Date
-        var orders = await unitOfWork
+        var completedOrders = await unitOfWork
             .Repository<Order>()
-            .QueryAsync(o =>
-                o.Status == OrderStatus.Completed
-                && (!branchId.HasValue || o.BranchId == branchId.Value)
-                && o.OrderDate >= startDate
-                && o.OrderDate <= endDate
+            .QueryAsync(order =>
+                order.Status == OrderStatus.Completed
+                && order.BranchId == branchId
+                && order.OrderDate.HasValue
+                && order.OrderDate >= range.UtcStartInclusive
+                && order.OrderDate < range.UtcEndExclusive
             )
-            .ToListAsync(cancellationToken); // <- async load dữ liệu
+            .Select(order => new { FinancialDate = order.OrderDate!.Value, order.Total })
+            .ToListAsync(cancellationToken);
 
-        var revenueByDate = orders
-            .GroupBy(o =>
-            {
-                if (!o.OrderDate.HasValue)
-                    return DateTime.MinValue;
-                var localTime = TimeZoneInfo.ConvertTimeFromUtc(o.OrderDate.Value.UtcDateTime, tz);
-                return localTime.Date;
-            })
-            .ToDictionary(g => DateOnly.FromDateTime(g.Key), g => g.Sum(o => o.Amount));
+        Dictionary<DateOnly, decimal> revenueByDate = completedOrders
+            .GroupBy(order =>
+                DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(order.FinancialDate, timeZone).DateTime)
+            )
+            .ToDictionary(group => group.Key, group => group.Sum(order => order.Total));
 
-        // 4. Generate danh sách ngày đầy đủ (theo timezone)
-        var totalDays = (endDate.Date - startDate.Date).Days + 1;
-        var allDates = Enumerable
-            .Range(0, totalDays)
-            .Select(offset => DateOnly.FromDateTime(startDate.AddDays(offset)));
-
-        // 5. Merge kết quả
-        var result = allDates
+        List<GetRevenueStatistic> result = ReportTimeRange
+            .EnumerateLocalDates(fromDate, toDate)
             .Select(date => new GetRevenueStatistic
             {
                 RevenueDate = date,
-                TotalRevenue = revenueByDate.TryGetValue(date, out var total) ? total : 0,
+                TotalRevenue = revenueByDate.GetValueOrDefault(date),
             })
-            .OrderBy(x => x.RevenueDate)
             .ToList();
 
         return Result<IEnumerable<GetRevenueStatistic>>.Success(result);

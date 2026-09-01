@@ -23,6 +23,10 @@
       <Link>Resources\Translations\Message.vi.resx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\..\..\src\EcommeceService\Infrastructure\Data\Migrations\get_customer_revenue_report\up.sql">
+      <Link>Data\Migrations\get_customer_revenue_report\up.sql</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\EcommeceService\Application\Application.csproj" />

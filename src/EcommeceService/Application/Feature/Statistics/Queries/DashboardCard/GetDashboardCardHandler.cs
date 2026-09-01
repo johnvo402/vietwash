@@ -1,96 +1,94 @@
-﻿using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Feature.Reports.Common;
 using Application.Feature.Statistics.Queries.RevenueStatistic;
 using Application.Feature.Statistics.Queries.SaleResult;
 using Contracts.ApiWrapper;
+using Contracts.Application.Common.Exceptions;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
 using Mediator;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
-public class GetDashboardCardHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
-    : IRequestHandler<GetDashboardCardQuery, Result<GetDashboardCardResponse>>
+public class GetDashboardCardHandler(
+    IUnitOfWork unitOfWork,
+    ICurrentAccount currentUser,
+    IHttpContextAccessor httpContextAccessor,
+    TimeProvider timeProvider
+) : IRequestHandler<GetDashboardCardQuery, Result<GetDashboardCardResponse>>
 {
     public async ValueTask<Result<GetDashboardCardResponse>> Handle(
         GetDashboardCardQuery request,
         CancellationToken cancellationToken
     )
     {
-        var listBranchUser = currentUser.Session!.Branches!.Select(b => b.ToString()).ToList();
+        if (!ReportBranchScope.IsAuthorized(currentUser.Session?.Branches, request.BranchId))
+            return Result<GetDashboardCardResponse>.Failure(new ForbiddenError(Message.FORBIDDEN));
 
-        var today = DateTimeOffset.UtcNow.Date;
-        var yesterday = today.AddDays(-1);
-        var lastMonth = today.AddMonths(-1);
+        TimeZoneInfo timeZone = ReportTimeRange.ResolveTimeZone(
+            httpContextAccessor.HttpContext?.Request.Headers["Time-Zone"].ToString()
+        );
+        DateOnly today = DateOnly.FromDateTime(
+            TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), timeZone).DateTime
+        );
 
-        var repo = unitOfWork.Repository<Order>();
+        ReportUtcRange todayRange = ReportTimeRange.ForLocalDay(today, timeZone);
+        ReportUtcRange yesterdayRange = ReportTimeRange.ForLocalDay(today.AddDays(-1), timeZone);
+        ReportUtcRange sameDayLastMonthRange = ReportTimeRange.ForLocalDay(
+            today.AddMonths(-1),
+            timeZone
+        );
 
-        // Orders hôm nay
-        var completedTodayOrders = await repo.QueryAsync(o =>
-                listBranchUser.Contains(o.BranchId.ToString())
-                && o.BranchId == request.BranchId
-                && o.OrderDate != null
-                && o.Status == OrderStatus.Completed
-                && o.OrderDate.Value >= today
-                && o.OrderDate.Value < today.AddDays(1)
+        IQueryable<Order> completedOrders = unitOfWork
+            .Repository<Order>()
+            .QueryAsync(order =>
+                order.BranchId == request.BranchId
+                && order.Status == OrderStatus.Completed
+                && order.OrderDate.HasValue
+            );
+
+        var todaySummary = await completedOrders
+            .Where(order =>
+                order.OrderDate >= todayRange.UtcStartInclusive
+                && order.OrderDate < todayRange.UtcEndExclusive
             )
-            .ToListAsync(cancellationToken);
+            .GroupBy(_ => 1)
+            .Select(group => new { Count = group.Count(), Revenue = group.Sum(order => order.Total) })
+            .SingleOrDefaultAsync(cancellationToken);
 
-        if (!completedTodayOrders.Any())
-        {
-            return Result<GetDashboardCardResponse>.Success();
-        }
-
-        int numberOrder = completedTodayOrders.Count;
-        decimal revenue = completedTodayOrders.Sum(o => o.Amount);
-        decimal netRevenue = revenue;
-
-        // Orders hôm qua
-        decimal revenueYesterday = await repo.QueryAsync(o =>
-                (listBranchUser.Contains(o.BranchId.ToString()) || o.BranchId == request.BranchId)
-                && o.OrderDate != null
-                && o.Status == OrderStatus.Completed
-                && o.OrderDate.Value >= yesterday
-                && o.OrderDate.Value < today
+        decimal revenue = todaySummary?.Revenue ?? 0m;
+        decimal revenueYesterday = await completedOrders
+            .Where(order =>
+                order.OrderDate >= yesterdayRange.UtcStartInclusive
+                && order.OrderDate < yesterdayRange.UtcEndExclusive
             )
-            .SumAsync(o => o.Amount, cancellationToken);
-
-        // Orders tháng trước
-        decimal revenueLastMonth = await repo.QueryAsync(o =>
-                (listBranchUser.Contains(o.BranchId.ToString()) || o.BranchId == request.BranchId)
-                && o.OrderDate != null
-                && o.Status == OrderStatus.Completed
-                && o.OrderDate.Value.Month == lastMonth.Month
-                && o.OrderDate.Value.Year == lastMonth.Year
+            .SumAsync(order => order.Total, cancellationToken);
+        decimal revenueSameDayLastMonth = await completedOrders
+            .Where(order =>
+                order.OrderDate >= sameDayLastMonthRange.UtcStartInclusive
+                && order.OrderDate < sameDayLastMonthRange.UtcEndExclusive
             )
-            .SumAsync(o => o.Amount, cancellationToken);
+            .SumAsync(order => order.Total, cancellationToken);
 
         return Result<GetDashboardCardResponse>.Success(
             new GetDashboardCardResponse
             {
-                NumberOrder = numberOrder,
+                NumberOrder = todaySummary?.Count ?? 0,
                 Revenue = revenue,
-                NetRevenue = netRevenue,
+                // Retained for API compatibility. Both fields mean collected revenue.
+                NetRevenue = revenue,
                 RevenueYesterday = revenueYesterday,
-                RevenueLastMonth = revenueLastMonth,
-                PercentageChangeDay = CalculatePercentageChange(
-                    (float)revenue,
-                    (float)revenueYesterday
-                ),
-                PercentageChangeMonth = CalculatePercentageChange(
-                    (float)revenue,
-                    (float)revenueLastMonth
-                ),
+                RevenueLastMonth = revenueSameDayLastMonth,
+                PercentageChangeDay = (float)
+                    OrderRevenuePolicy.CalculatePercentageChange(revenue, revenueYesterday),
+                PercentageChangeMonth = (float)
+                    OrderRevenuePolicy.CalculatePercentageChange(
+                        revenue,
+                        revenueSameDayLastMonth
+                    ),
             }
         );
-    }
-
-    private float CalculatePercentageChange(float today, float last)
-    {
-        if (last == 0)
-        {
-            return today == 0 ? 0 : 100;
-        }
-
-        return ((today - last) / last) * 100;
     }
 }

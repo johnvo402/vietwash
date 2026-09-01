@@ -1,68 +1,55 @@
-﻿using Application.Common.Interfaces.Services;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Feature.Reports.Common;
 using Contracts.ApiWrapper;
-using Contracts.Dtos.Requests;
 using Domain.Aggregates.Orders;
-using Domain.Aggregates.Orders.Specifications;
+using Domain.Aggregates.Orders.Enums;
 using Mediator;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
-namespace Application.Feature.Statistics.Queries.BranchNetRevenue
+namespace Application.Feature.Statistics.Queries.BranchNetRevenue;
+
+public class GetNetRevenueBranchHandler(
+    IUnitOfWork unitOfWork,
+    ICurrentAccount currentUser,
+    IHttpContextAccessor httpContextAccessor
+) : IRequestHandler<GetNetRevenueBranchQuery, Result<IEnumerable<GetNetRevenueBranchResponse>>>
 {
-    public class GetNetRevenueBranchHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
-        : IRequestHandler<
-            GetNetRevenueBranchQuery,
-            Result<IEnumerable<GetNetRevenueBranchResponse>>
-        >
+    public async ValueTask<Result<IEnumerable<GetNetRevenueBranchResponse>>> Handle(
+        GetNetRevenueBranchQuery request,
+        CancellationToken cancellationToken
+    )
     {
-        public async ValueTask<Result<IEnumerable<GetNetRevenueBranchResponse>>> Handle(
-            GetNetRevenueBranchQuery request,
-            CancellationToken cancellationToken
-        )
-        {
-            var queryParamRequest = new QueryParamRequest();
-            var listBranchUser = currentUser.Session!.Branches!.ToList();
+        ReportBranchScopeResult branchScope = ReportBranchScope.Resolve(
+            currentUser.Session?.Branches,
+            null
+        );
+        TimeZoneInfo timeZone = ReportTimeRange.ResolveTimeZone(
+            httpContextAccessor.HttpContext?.Request.Headers["Time-Zone"].ToString()
+        );
+        DateOnly fromDate = ReportTimeRange.ParseLocalDate(request.From, nameof(request.From));
+        DateOnly toDate = ReportTimeRange.ParseLocalDate(request.To, nameof(request.To));
+        ReportUtcRange range = ReportTimeRange.ForLocalDates(fromDate, toDate, timeZone);
 
-            var orders = await unitOfWork
-                .DynamicReadOnlyRepository<Order>()
-                .ListAsync(
-                    new ListOrderSpecification(request.From, request.To, null, listBranchUser),
-                    queryParamRequest,
-                    cancellationToken
-                );
-
-            var revenueByBranch = new Dictionary<long, GetNetRevenueBranchResponse>();
-
-            foreach (var order in orders)
+        List<GetNetRevenueBranchResponse> revenueByBranch = await unitOfWork
+            .Repository<Order>()
+            .QueryAsync()
+            .SelectCompletedRevenueRows(range, branchScope.BranchIds)
+            .GroupBy(row => row.BranchId)
+            .Select(group => new GetNetRevenueBranchResponse
             {
-                // Giả sử Amount là doanh thu cần tính
-                var netRevenue = order.Total;
+                BranchId = group.Key,
+                TotalNetRevenue = group.Sum(row => row.CollectedAmount),
+            })
+            .ToListAsync(cancellationToken);
 
-                if (revenueByBranch.TryGetValue(order.BranchId, out var existBranch))
-                {
-                    existBranch.TotalNetRevenue += netRevenue;
-                }
-                else
-                {
-                    revenueByBranch[order.BranchId] = new GetNetRevenueBranchResponse
-                    {
-                        BranchId = order.BranchId,
-                        TotalNetRevenue = netRevenue,
-                    };
-                }
-            }
+        decimal totalRevenue = revenueByBranch.Sum(branch => branch.TotalNetRevenue);
+        if (totalRevenue > 0m)
+            foreach (GetNetRevenueBranchResponse branch in revenueByBranch)
+                branch.Percentage = (float)
+                    Math.Round(branch.TotalNetRevenue / totalRevenue * 100m, 2);
 
-            var totalRevenue = revenueByBranch.Values.Sum(x => x.TotalNetRevenue);
-            if (totalRevenue > 0)
-            {
-                foreach (var branch in revenueByBranch.Values)
-                {
-                    branch.Percentage = (float)
-                        Math.Round((branch.TotalNetRevenue / totalRevenue) * 100, 2);
-                }
-            }
-
-            return Result<IEnumerable<GetNetRevenueBranchResponse>>.Success(revenueByBranch.Values);
-        }
+        return Result<IEnumerable<GetNetRevenueBranchResponse>>.Success(revenueByBranch);
     }
 }

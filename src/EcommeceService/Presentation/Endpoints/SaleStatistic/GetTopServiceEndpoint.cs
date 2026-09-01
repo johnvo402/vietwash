@@ -19,7 +19,7 @@ namespace Presentation.Endpoints.SaleStatistic
             Tags = [Presentation.Routes.Router.SaleResultRoute.Tags],
             Summary = "Top Service"
         )]
-        //[AuthorizeBy(roles: "ADMIN, MANAGER")]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<
             ActionResult<ApiResponse<IEnumerable<GetTopServiceResponse>>>
         > HandleAsync(

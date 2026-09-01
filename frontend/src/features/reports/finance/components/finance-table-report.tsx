@@ -78,11 +78,10 @@ export default function ReportFinanceTable({
   // Safely calculate values with fallback
   const discountAndPoint =
     (revenue?.totalDiscount ?? 0) + (revenue?.totalPoint ?? 0);
-  const totalReduction = discountAndPoint + (revenue?.cancelValue ?? 0);
+  const totalReduction = discountAndPoint;
   const totalExpenses =
     (expense?.totalStockExport ?? 0) - (expense?.totalStockImport ?? 0);
-  const totalNetRevenue =
-    (revenue?.totalRevenue ?? 0) - (totalReduction ?? 0);
+  const totalNetRevenue = revenue?.totalNetRevenue ?? 0;
   const profit =
     (totalNetRevenue ?? 0) +
     (expense?.totalOtherIncome ?? 0) +
@@ -103,50 +102,55 @@ export default function ReportFinanceTable({
     {
       id: "2.1",
       description: t("report.invoiceDiscount"),
-      amount: formatPriceVN(discountAndPoint),
+      amount: formatPriceVN(revenue?.totalDiscount),
       isChild: true,
     },
     {
       id: "2.2",
-      description: t("report.refundAmount"),
-      amount: formatPriceVN(revenue?.cancelValue),
+      description: t("report.pointDiscount"),
+      amount: formatPriceVN(revenue?.totalPoint),
       isChild: true,
     },
     {
       id: "3",
-      description: t("report.finalRevenue", { part: "(1 - 2)" }),
+      description: t("report.finalRevenue", { part: "" }),
       amount: formatPriceVN(totalNetRevenue),
     },
     {
       id: "4",
-      description: t("report.imExInventorty", { part: "(4.2 - 4.1)" }),
+      description: t("report.cancelledOrderValue"),
+      amount: formatPriceVN(revenue?.cancelValue),
+    },
+    {
+      id: "5",
+      description: t("report.imExInventorty", { part: "(5.2 - 5.1)" }),
       amount: formatPriceVN(totalExpenses),
     },
     {
-      id: "4.1",
+      id: "5.1",
       description: t("report.stockImport"),
       amount: formatPriceVN(expense?.totalStockImport),
       isChild: true,
     },
     {
-      id: "4.2",
+      id: "5.2",
       description: t("report.stockExport"),
       amount: formatPriceVN(expense?.totalStockExport),
       isChild: true,
     },
     {
-      id: "5",
+      id: "6",
       description: t("report.incomeOther"),
       amount: formatPriceVN(expense?.totalOtherIncome),
     },
     {
-      id: "6",
+      id: "7",
       description: t("report.spendOther"),
       amount: formatPriceVN(expense?.totalOtherSpend),
     },
     {
-      id: "7",
-      description: t("report.profit", { part: "(3 + 4 + 5 - 6)" }),
+      id: "8",
+      description: t("report.profit", { part: "(3 + 5 + 6 - 7)" }),
       amount: formatPriceVN(profit),
     },
   ];
