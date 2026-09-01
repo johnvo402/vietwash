@@ -35,6 +35,11 @@ export function usePayment({ onPaymentSuccess, onClose }: UsePaymentProps) {
 
         setBarcode(scannedCode);
         setOrder(result);
+        if (result.status !== OrderStatus.Processed) {
+          setMessage("");
+          return;
+        }
+        setMessage("");
         setPaymentStep("paymentMethod");
       } catch (error) {
         console.error("Lỗi khi lấy đơn dịch vụ:", error);
@@ -46,6 +51,10 @@ export function usePayment({ onPaymentSuccess, onClose }: UsePaymentProps) {
 
   const handlePaymentMethod = useCallback(
     async (method: "cash" | "card") => {
+      if (order?.status !== OrderStatus.Processed) {
+        setMessage(t("order.notProcessed"));
+        return;
+      }
       setPaymentMethod(method);
       if (method === "cash") {
         await apiClient.ecommerceApiOrdersUpdateStatusidPut(
@@ -57,11 +66,14 @@ export function usePayment({ onPaymentSuccess, onClose }: UsePaymentProps) {
         onClose?.();
       }
     },
-    [order?.id, t, onPaymentSuccess, onClose]
+    [order?.id, order?.status, t, onPaymentSuccess, onClose]
   );
 
   const handleGetPaymentLink = useCallback(async () => {
-    if (!order) return;
+    if (!order || order.status !== OrderStatus.Processed) {
+      setMessage(t("order.notProcessed"));
+      return;
+    }
 
     setIsCreatingLink(true);
     try {

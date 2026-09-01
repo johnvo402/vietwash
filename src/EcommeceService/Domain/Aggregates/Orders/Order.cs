@@ -58,8 +58,6 @@ namespace Domain.Aggregates.Orders
                     return true;
                 case EInvoiceEvent:
                     return true;
-                case UseEquipmentOrder:
-                    return true;
                 default:
                     return false;
             }
@@ -140,90 +138,103 @@ namespace Domain.Aggregates.Orders
                 TariffId = tariffId;
         }
 
-        public void EmitVoucherUsageEvent(decimal discountApply, long voucherId)
+        public OrderTransitionResult EvaluateTransition(
+            OrderStatus target,
+            Enums.PaymentMethod? paymentMethod,
+            int equipmentCount
+        )
         {
-            if (CustomerId.HasValue)
+            if (Status == target)
+                return OrderTransitionResult.Idempotent;
+
+            if (!OrderLifecycle.CanTransition(Status, target))
+                return OrderTransitionResult.InvalidTransition;
+
+            if (target == OrderStatus.Completed)
             {
-                Emit(
-                    new VoucherUsageEvent
-                    {
-                        VoucherId = voucherId,
-                        CustomerId = CustomerId.Value,
-                        BranchId = BranchId,
-                        OrderId = Id,
-                        DiscountApply = discountApply,
-                    }
-                );
+                if (!paymentMethod.HasValue || !Enum.IsDefined(paymentMethod.Value))
+                    return OrderTransitionResult.PaymentMethodRequired;
             }
+            else if (paymentMethod.HasValue)
+                return OrderTransitionResult.PaymentMethodNotAllowed;
+
+            if (target == OrderStatus.InProgress && equipmentCount == 0)
+                return OrderTransitionResult.EquipmentRequired;
+
+            if (target != OrderStatus.InProgress && equipmentCount != 0)
+                return OrderTransitionResult.EquipmentNotAllowed;
+
+            return OrderTransitionResult.Applied;
         }
 
-        public void UpdateStatus(OrderStatus status, List<OrderEquipment>? orderEquipment = null)
+        public OrderTransitionResult TransitionTo(
+            OrderStatus target,
+            Enums.PaymentMethod? paymentMethod = null,
+            IReadOnlyCollection<OrderEquipment>? orderEquipments = null,
+            DateTimeOffset? transitionedAt = null
+        )
         {
-            if (Status != status)
+            int equipmentCount = orderEquipments?.Count ?? OrderEquipments.Count;
+            OrderTransitionResult validation = EvaluateTransition(
+                target,
+                paymentMethod,
+                equipmentCount
+            );
+            if (validation != OrderTransitionResult.Applied)
+                return validation;
+
+            if (target == OrderStatus.InProgress && orderEquipments is not null)
+                foreach (OrderEquipment equipment in orderEquipments!)
+                    OrderEquipments.Add(equipment);
+
+            if (target == OrderStatus.Completed)
             {
-                Emit(new UpdateStatusOrderEvent() { Order = this });
+                PaymentMethod = paymentMethod!.Value;
+                OrderDate = transitionedAt ?? DateTimeOffset.UtcNow;
             }
-            switch (status)
+
+            Status = target;
+            Emit(new UpdateStatusOrderEvent { Order = this });
+
+            if (target == OrderStatus.Completed)
             {
-                case OrderStatus.Completed:
-                    Status = OrderStatus.Completed;
-                    OrderDate = DateTimeOffset.UtcNow;
-                    Emit(new EInvoiceEvent() { Order = this });
-                    Emit(
-                        new CreateFundEvent()
+                Emit(new EInvoiceEvent { Order = this });
+                Emit(
+                    new CreateFundEvent
+                    {
+                        TypeId = "income",
+                        ReferenceId = Id,
+                        Amount = Total,
+                        PaymentMethod = PaymentMethod!.Value,
+                        TransactionAt = OrderDate!.Value,
+                        BranchId = BranchId,
+                        ObjectId = CustomerId,
+                        BehaviorId = 1,
+                        Metadata = new Dictionary<string, object>
                         {
-                            TypeId = "income",
-                            ReferenceId = Id,
-                            Amount = Total,
-                            PaymentMethod = PaymentMethod ?? Enums.PaymentMethod.Cash,
-                            TransactionAt = (DateTimeOffset)OrderDate,
+                            ["code"] = Code,
+                            ["publicId"] = PublicId.ToString(),
+                            ["type"] = FundEventType.Order,
+                        },
+                        Point = Point,
+                        FundEventType = FundEventType.Order,
+                    }
+                );
+
+                if (VoucherId.HasValue && CustomerId.HasValue)
+                    Emit(
+                        new VoucherUsageEvent
+                        {
+                            VoucherId = VoucherId.Value,
+                            CustomerId = CustomerId.Value,
                             BranchId = BranchId,
-                            ObjectId = CustomerId,
-                            BehaviorId = 1,
-                            Metadata = new Dictionary<string, object>
-                            {
-                                ["code"] = Code,
-                                ["publicId"] = PublicId.ToString(),
-                                ["type"] = FundEventType.Order,
-                            },
-                            Point = Point,
-                            FundEventType = FundEventType.Order,
+                            OrderId = Id,
+                            DiscountApply = DiscountValue,
                         }
                     );
-
-                    break;
-                // case OrderStatus.Cancelled:
-
-                //     if (Status == OrderStatus.Completed)
-                //     {
-                //         Emit(
-                //             new CreateFundEvent()
-                //             {
-                //                 TypeId = "Spend",
-                //                 ReferenceId = Id,
-                //                 Amount = Total,
-                //                 PaymentMethod = PaymentMethod ?? Enums.PaymentMethod.Cash,
-                //                 BranchId = BranchId,
-                //                 ObjectId = CustomerId,
-                //                 BehaviorId = 2,
-                //                 Metadata = new Dictionary<string, object>
-                //                 {
-                //                     ["code"] = Code,
-                //                     ["publicId"] = PublicId.ToString(),
-                //                     ["type"] = FundEventType.Order,
-                //                 },
-                //                 Point = Point,
-                //                 TransactionAt = DateTimeOffset.UtcNow,
-                //                 FundEventType = FundEventType.Order,
-                //             }
-                //         );
-                //     }
-                //     Status = OrderStatus.Cancelled;
-                //     break;
-                default:
-                    Status = status;
-                    break;
             }
+
+            return OrderTransitionResult.Applied;
         }
     }
 }

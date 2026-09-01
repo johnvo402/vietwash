@@ -10026,16 +10026,12 @@
                 },
                 "additionalProperties": false
             },
-            "OrderEquipmentModel": {
+            "OrderEquipmentSelectionModel": {
                 "type": "object",
                 "properties": {
                     "equipmentId": {
                         "type": "integer",
                         "format": "int64"
-                    },
-                    "equipmentName": {
-                        "type": "string",
-                        "nullable": true
                     }
                 },
                 "additionalProperties": false
@@ -10283,7 +10279,7 @@
                     "orderEquipments": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/OrderEquipmentModel"
+                            "$ref": "#/components/schemas/OrderEquipmentSelectionModel"
                         },
                         "nullable": true
                     }

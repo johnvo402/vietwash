@@ -29,6 +29,7 @@ import {
   ROUTE_CASHIER_ORDERS_DETAIL,
   ROUTE_ORDERS_DETAIL,
 } from "@/types/router-type";
+import { OrderStatus } from "@/api/generated/api";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -107,11 +108,9 @@ export function PaymentModal({
     if (!order?.status) return null;
 
     const status = order.status.toLowerCase();
-    const isProcessedOrBelow = ["pending", "confirmed", "processing"].includes(
-      status
-    );
+    const isProcessed = status === OrderStatus.Processed.toLowerCase();
     const isCompleted = status === "completed";
-    const isCanceled = status === "canceled";
+    const isCanceled = status === OrderStatus.Cancelled.toLowerCase();
 
     const handleViewDetails = () => {
       pushRouter({
@@ -124,7 +123,7 @@ export function PaymentModal({
       });
     };
 
-    if (isProcessedOrBelow) {
+    if (!isProcessed && !isCompleted && !isCanceled) {
       return (
         <>
           <p className="text-yellow-600">{t("order.notProcessed")}</p>

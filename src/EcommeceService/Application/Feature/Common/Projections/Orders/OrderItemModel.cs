@@ -19,10 +19,8 @@
         public decimal UnitPrice { get; set; }
     }
 
-    public class OrderEquipmentModel
+    public class OrderEquipmentSelectionModel
     {
         public long EquipmentId { get; set; }
-
-        public string EquipmentName { get; set; } = default!;
     }
 }

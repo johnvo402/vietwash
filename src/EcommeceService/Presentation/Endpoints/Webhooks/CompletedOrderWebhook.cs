@@ -23,26 +23,39 @@ namespace Presentation.Endpoints.Webhooks
             CancellationToken cancellationToken = default
         )
         {
-            WebhookData data = payOS.verifyPaymentWebhookData(request);
-            if (data.code == "00")
+            WebhookData data;
+            try
             {
-                if (data.orderCode == 123)
-                {
-                    return Ok();
-                }
-                var requestSend = new UpdateStatusCommand
-                {
-                    OrderId = data.orderCode.ToString(),
-                    Model = new()
-                    {
-                        Status = OrderStatus.Completed,
-                        PaymentMethod = PaymentMethod.Card,
-                    },
-                };
-                var response = await sender.Send(requestSend, cancellationToken);
-                return response.ToActionResult();
+                data = payOS.verifyPaymentWebhookData(request);
             }
-            return BadRequest();
+            catch
+            {
+                return BadRequest();
+            }
+
+            if (!request.success || request.code != "00" || data.code != "00" || data.amount <= 0)
+                return BadRequest();
+
+            if (
+                data.orderCode == 123
+                && data.amount == 3000
+                && data.description == "VQRIO123"
+                && data.reference == "TF230204212323"
+            )
+                return Ok();
+
+            var requestSend = new UpdateStatusCommand
+            {
+                OrderId = data.orderCode.ToString(),
+                ExpectedPaymentAmount = data.amount,
+                Model = new()
+                {
+                    Status = OrderStatus.Completed,
+                    PaymentMethod = PaymentMethod.Card,
+                },
+            };
+            var response = await sender.Send(requestSend, cancellationToken);
+            return response.ToActionResult();
         }
     }
 }

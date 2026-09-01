@@ -19,7 +19,7 @@ namespace Domain.Aggregates.Vouchers
             VoucherId = Guard.Against.NegativeOrZero(voucherId, nameof(voucherId));
             CustomerId = Guard.Against.NegativeOrZero(customerId, nameof(customerId));
             OrderId = Guard.Against.NegativeOrZero(orderId, nameof(orderId));
-            DiscountApply = Guard.Against.NegativeOrZero(discountApply, nameof(discountApply));
+            DiscountApply = Guard.Against.Negative(discountApply, nameof(discountApply));
         }
 
     }

@@ -1648,9 +1648,9 @@ public class DbInitializer
 
                     if (item != null)
                     {
-                        item.UpdateStatus(OrderStatus.InProgress);
-                        item.UpdateStatus(OrderStatus.Processed);
-                        item.UpdateStatus(OrderStatus.Completed);
+                        item.TransitionTo(OrderStatus.InProgress);
+                        item.TransitionTo(OrderStatus.Processed);
+                        item.TransitionTo(OrderStatus.Completed, PaymentMethod.Cash);
                     }
                     index++;
                 }

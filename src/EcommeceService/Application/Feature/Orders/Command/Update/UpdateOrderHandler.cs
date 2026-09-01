@@ -39,7 +39,7 @@ namespace Application.Feature.Orders.Command.Update
                     );
                 }
 
-                if (order.Status != OrderStatus.Pending)
+                if (!OrderLifecycle.CanEditDetails(order.Status))
                 {
                     return await RollbackFailure(
                         new BadRequestError(

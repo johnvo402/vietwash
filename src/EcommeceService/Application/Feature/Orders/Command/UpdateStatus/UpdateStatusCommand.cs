@@ -4,6 +4,7 @@ using Contracts.Routers;
 using Domain.Aggregates.Orders.Enums;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Serialization;
 
 namespace Application.Feature.Orders.Command.UpdateStatus
 {
@@ -13,6 +14,9 @@ namespace Application.Feature.Orders.Command.UpdateStatus
         public string OrderId { get; set; } = string.Empty;
 
         [FromBody]
-        public OrderUpdateStatus Model { get; set; }
+        public OrderUpdateStatus Model { get; set; } = default!;
+
+        [JsonIgnore]
+        public int? ExpectedPaymentAmount { get; set; }
     }
 }

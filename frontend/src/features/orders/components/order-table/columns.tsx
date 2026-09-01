@@ -145,7 +145,7 @@ export const useOrder = ({
       apiClient.ecommerceApiOrdersUpdateStatusidPut(id, {
         status,
         paymentMethod,
-        orderEquipments: equipments,
+        orderEquipments: equipments?.map(({ equipmentId }) => ({ equipmentId })),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
