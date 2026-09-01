@@ -1,7 +1,10 @@
 using Application.Common.Errors;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Feature.Orders.Common;
 using Application.Feature.Orders.Queries.GetLinkPayment;
 using Contracts.ApiWrapper;
+using Contracts.Application.Common.Exceptions;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Equipments;
 using Domain.Aggregates.Equipments.Enums;
@@ -13,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Feature.Orders.Command.UpdateStatus;
 
-public class UpdateStatusHandler(IUnitOfWork unitOfWork)
+public class UpdateStatusHandler(IUnitOfWork unitOfWork, ICurrentAccount currentAccount)
     : IRequestHandler<UpdateStatusCommand, Result>
 {
     public async ValueTask<Result> Handle(
@@ -38,6 +41,17 @@ public class UpdateStatusHandler(IUnitOfWork unitOfWork)
                         "Order not found",
                         Messager.Create<Order>().Message(MessageType.Found).Negative().BuildMessage()
                     ),
+                    cancellationToken
+                );
+
+            if (
+                !request.IsVerifiedPayOsWebhook
+                && !OrderBranchAccess
+                    .FromSession(currentAccount.Session?.Branches)
+                    .IsAuthorized(order.BranchId)
+            )
+                return await RollbackFailure(
+                    new ForbiddenError(Message.FORBIDDEN),
                     cancellationToken
                 );
 

@@ -91,7 +91,7 @@ public static class DependencyInjection
         services.AddOptions<EmailSettings>().Bind(configuration.GetSection(nameof(EmailSettings)));
         services
             .AddAmazonS3(configuration)
-            .AddSingleton<ICurrentAccount, CurrentUserService>()
+            .AddCurrentAccount()
             .AddSingleton(typeof(IMediaUpdateService), typeof(MediaUpdateService))
             .AddTransient<MailService>()
             .Scan(scan =>

@@ -7,10 +7,7 @@ public class UserMiddleware(RequestDelegate next)
 {
     public async Task Invoke(HttpContext context, ICurrentAccount currentUser)
     {
-        if (context.User?.Identity?.IsAuthenticated == true)
-        {
-            currentUser.SetClaimPrinciple(context.User);
-        }
+        await currentUser.SetClaimPrinciple(context.User);
 
         currentUser.SetClientIp(context);
 

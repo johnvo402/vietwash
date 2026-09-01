@@ -17,37 +17,29 @@ public class CurrentUserService(IServiceProvider serviceProvider) : ICurrentAcco
 
     public UserAuth? Session { get; private set; }
 
-    private ClaimsPrincipal user = null!;
     private readonly IServiceProvider serviceProvider = serviceProvider;
 
     public async Task SetClaimPrinciple(ClaimsPrincipal user)
     {
-        this.user = user;
+        Id = null;
+        Session = null;
+
         if (user?.Identity?.IsAuthenticated != true)
             return;
-        string? id = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (!string.IsNullOrWhiteSpace(id))
-        {
-            Id = long.Parse(id);
+        string? idClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!long.TryParse(idClaim, out long id) || id <= 0)
+            return;
 
-            using var scope = serviceProvider.CreateScope();
-            IRedisCacheService cache =
-                scope.ServiceProvider.GetRequiredService<IRedisCacheService>();
-            var account = await cache.Database.StringGetAsync(id);
-            if (account.HasValue)
-            {
-                var result = SerializerExtension.Deserialize<UserAuth>(account!);
-                Session = result.Object;
-            }
-            else
-            {
-                Session = null;
-            }
-        }
-        else
+        Id = id;
+
+        using var scope = serviceProvider.CreateScope();
+        IRedisCacheService cache = scope.ServiceProvider.GetRequiredService<IRedisCacheService>();
+        var account = await cache.Database.StringGetAsync(idClaim);
+        if (account.HasValue)
         {
-            Id = null;
+            var result = SerializerExtension.Deserialize<UserAuth>(account!);
+            Session = result.Object;
         }
     }
 

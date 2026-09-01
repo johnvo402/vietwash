@@ -1,18 +1,24 @@
 using Application.Common.Errors;
+using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Feature.Orders.Common;
 using Contracts.ApiWrapper;
+using Contracts.Application.Common.Exceptions;
 using Contracts.Common.Messages;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Specifications;
 using Mediator;
-using Net.payOS;
 using Net.payOS.Errors;
 using Net.payOS.Types;
 
 namespace Application.Feature.Orders.Queries.GetLinkPayment
 {
-    public class GetLinkPaymentHandler(PayOS payOS, IUnitOfWork unitOfWork)
+    public class GetLinkPaymentHandler(
+        IOrderPaymentLinkClient paymentClient,
+        IUnitOfWork unitOfWork,
+        ICurrentAccount currentAccount
+    )
         : IRequestHandler<GetLinkPaymentQuery, Result<CreatePaymentResult>>
     {
         public async ValueTask<Result<CreatePaymentResult>> Handle(
@@ -40,6 +46,15 @@ namespace Application.Feature.Orders.Queries.GetLinkPayment
                     )
                 );
             }
+            if (
+                !OrderBranchAccess
+                    .FromSession(currentAccount.Session?.Branches)
+                    .IsAuthorized(order.BranchId)
+            )
+                return Result<CreatePaymentResult>.Failure(
+                    new ForbiddenError(Message.FORBIDDEN)
+                );
+
             if (order.Status != OrderStatus.Processed)
                 return Result<CreatePaymentResult>.Failure(
                     new BadRequestError(
@@ -82,11 +97,12 @@ namespace Application.Feature.Orders.Queries.GetLinkPayment
             CreatePaymentResult response;
             try
             {
-                response = await payOS.createPaymentLink(paymentLinkRequest);
+                response = await paymentClient.CreatePaymentLinkAsync(paymentLinkRequest);
             }
             catch (PayOSError)
             {
-                PaymentLinkInformation existing = await payOS.getPaymentLinkInformation(order.Id);
+                PaymentLinkInformation existing =
+                    await paymentClient.GetPaymentLinkInformationAsync(order.Id);
                 response = new CreatePaymentResult(
                     bin: string.Empty,
                     accountNumber: string.Empty,

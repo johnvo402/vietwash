@@ -1,3 +1,4 @@
+using Application.Feature.Orders.Queries.GetLinkPayment;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Net.payOS;
@@ -23,6 +24,7 @@ namespace Infrastructure.Services.PayOs
                 );
 
                 services.AddSingleton(payOS);
+                services.AddSingleton<IOrderPaymentLinkClient, OrderPaymentLinkClient>();
             }
 
             return services;

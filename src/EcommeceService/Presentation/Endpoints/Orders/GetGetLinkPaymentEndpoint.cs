@@ -18,7 +18,7 @@ namespace Presentation.Endpoints.Orders
     {
         [HttpGet(Router.OrderRoute.GetLinkPayment, Name = Router.OrderRoute.GetLinkPayment)]
         [SwaggerOperation(Tags = [Router.OrderRoute.Tags], Summary = "Get link payment")]
-        // [AuthorizeBy]
+        [AuthorizeBy]
         public override async Task<ActionResult<ApiResponse<CreatePaymentResult>>> HandleAsync(
             GetLinkPaymentQuery request,
             CancellationToken cancellationToken = default

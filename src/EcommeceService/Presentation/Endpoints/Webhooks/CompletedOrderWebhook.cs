@@ -44,16 +44,15 @@ namespace Presentation.Endpoints.Webhooks
             )
                 return Ok();
 
-            var requestSend = new UpdateStatusCommand
-            {
-                OrderId = data.orderCode.ToString(),
-                ExpectedPaymentAmount = data.amount,
-                Model = new()
+            UpdateStatusCommand requestSend = UpdateStatusCommand.FromVerifiedPayOsWebhook(
+                data.orderCode,
+                data.amount,
+                new()
                 {
                     Status = OrderStatus.Completed,
                     PaymentMethod = PaymentMethod.Card,
-                },
-            };
+                }
+            );
             var response = await sender.Send(requestSend, cancellationToken);
             return response.ToActionResult();
         }

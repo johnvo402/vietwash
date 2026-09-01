@@ -89,7 +89,7 @@ public static class DependencyInjection
 
         services
             .AddAmazonS3(configuration)
-            .AddSingleton<ICurrentAccount, CurrentUserService>()
+            .AddCurrentAccount()
             .AddSingleton(typeof(IMediaUpdateService), typeof(MediaUpdateService))
             .Scan(scan =>
                 scan.FromCallingAssembly()

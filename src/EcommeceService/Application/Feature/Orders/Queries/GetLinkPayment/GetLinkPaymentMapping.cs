@@ -11,6 +11,7 @@ namespace Application.Feature.Orders.Queries.GetLinkPayment
             order => new OrderPayment
             {
                 Id = order.Id,
+                BranchId = order.BranchId,
                 Code = order.Code,
                 Amount = order.Total,
                 Status = order.Status,
@@ -29,6 +30,7 @@ namespace Application.Feature.Orders.Queries.GetLinkPayment
     public class OrderPayment
     {
         public long Id { get; set; }
+        public long BranchId { get; set; }
         public string Code { get; set; } = string.Empty;
         public decimal Amount { get; set; }
         public OrderStatus Status { get; set; }
