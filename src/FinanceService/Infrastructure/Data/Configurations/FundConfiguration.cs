@@ -19,6 +19,10 @@ namespace Infrastructure.Data.Configurations
                 .OnDelete(DeleteBehavior.NoAction);
 
             builder.Property(x => x.Metadata).HasColumnType("jsonb");
+            builder
+                .HasIndex(x => x.SourceEventId)
+                .IsUnique()
+                .HasFilter("source_event_id IS NOT NULL");
         }
     }
 }

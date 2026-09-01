@@ -1,14 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Features.Transactions;
 using Contracts.ApiWrapper;
 using Domain.Aggregates.Funds;
-using Domain.Aggregates.Funds.Enums;
 using Mediator;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Transactions.Queries.GetPointCustomer
 {
@@ -20,11 +14,11 @@ namespace Application.Features.Transactions.Queries.GetPointCustomer
             CancellationToken cancellationToken
         )
         {
-            var point = await unitOfWork
-                .Repository<Transaction>()
-                .QueryAsync()
-                .Where(x => x.CustomerId == request.CustomerId && x.Type == TransactionType.Point)
-                .SumAsync(x => x.Amount, cancellationToken);
+            var point = await PointLedger.GetBalanceAsync(
+                unitOfWork.Repository<Transaction>().QueryAsync(),
+                request.CustomerId,
+                cancellationToken
+            );
 
             return Result<GetPointCustomerResponse>.Success(
                 new GetPointCustomerResponse { Point = point }

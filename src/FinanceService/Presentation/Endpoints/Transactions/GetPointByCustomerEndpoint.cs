@@ -19,7 +19,7 @@ namespace Presentation.Endpoints.Transactions
     {
         [HttpGet(Router.TransactionRoute.GetPointByCustomerId)]
         [SwaggerOperation(Tags = [Router.TransactionRoute.Tags], Summary = "Transaction")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<ActionResult<ApiResponse<GetPointCustomerResponse>>> HandleAsync(
             GetPointCustomerQuery query,
             CancellationToken cancellationToken = default

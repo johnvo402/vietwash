@@ -20,6 +20,7 @@ namespace Domain.Aggregates.Funds
         public PaymentMethod PaymentMethod { get; private set; } = default!;
         public long? ReferenceId { get; set; }
         public long BranchId { get; set; }
+        public Guid? SourceEventId { get; private set; }
         public FundBehavior FundBehavior { get; set; } = default!; // navigation
         public User User { get; set; } = default!; // navigation
         public object? Metadata { get; set; }
@@ -37,7 +38,8 @@ namespace Domain.Aggregates.Funds
             PaymentMethod paymentMethod,
             long? referenceId,
             long branchId,
-            object? metadata
+            object? metadata,
+            Guid? sourceEventId = null
         )
         {
             Code = Guard.Against.NullOrWhiteSpace(code);
@@ -50,6 +52,7 @@ namespace Domain.Aggregates.Funds
             PaymentMethod = Guard.Against.Null(paymentMethod);
             ReferenceId = referenceId;
             BranchId = branchId;
+            SourceEventId = sourceEventId;
 
             Note = note;
             TransactionDate = transactionDate;
