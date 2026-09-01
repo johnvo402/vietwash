@@ -16,6 +16,7 @@ namespace Domain.Aggregates.Inventories
         public InventoryType Type { get; set; }
         public string? Note { get; set; }
         public string? CancelReason { get; set; }
+        public long? SourceOrderId { get; set; }
 
         public ICollection<EquipmentSupplying> EquipmentSupplyings { get; set; } = [];
         public ICollection<ProductSupplying> ProductSupplyings { get; set; } = [];
@@ -60,6 +61,29 @@ namespace Domain.Aggregates.Inventories
             BranchId = branchId;
             Note = note;
         }
+
+        public static InventoryDocument CreateOrderMaterialExport(
+            string code,
+            decimal amount,
+            long branchId,
+            long sourceOrderId,
+            DateTimeOffset transactionAt,
+            string note
+        ) =>
+            new()
+            {
+                Code = Guard.Against.NullOrWhiteSpace(code, nameof(code)),
+                Amount = Guard.Against.Negative(amount, nameof(amount)),
+                BranchId = Guard.Against.NegativeOrZero(branchId, nameof(branchId)),
+                SourceOrderId = Guard.Against.NegativeOrZero(
+                    sourceOrderId,
+                    nameof(sourceOrderId)
+                ),
+                TransactionAt = transactionAt,
+                Note = note,
+                Type = InventoryType.Export,
+                Status = InventoryStatus.Completed,
+            };
 
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {

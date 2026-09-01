@@ -1,4 +1,5 @@
 ﻿using Domain.Aggregates.Inventories;
+using Domain.Aggregates.Orders;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data.Configurations
@@ -13,6 +14,15 @@ namespace Infrastructure.Data.Configurations
             builder.HasIndex(x => x.Id);
             builder.Property(x => x.Amount).HasColumnType("numeric");
             builder.Property(x => x.Code).HasColumnType("citext");
+            builder
+                .HasOne<Order>()
+                .WithMany()
+                .HasForeignKey(x => x.SourceOrderId)
+                .OnDelete(DeleteBehavior.Restrict);
+            builder
+                .HasIndex(x => x.SourceOrderId)
+                .IsUnique()
+                .HasFilter("source_order_id IS NOT NULL");
         }
     }
 }

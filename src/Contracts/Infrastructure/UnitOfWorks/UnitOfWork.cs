@@ -177,6 +177,12 @@ public class UnitOfWork(
     public int ExecuteSqlCommand(string sql, params object[] parameters) =>
         dbContext.DatabaseFacade.ExecuteSqlRaw(sql, parameters);
 
+    public Task<int> ExecuteSqlCommandAsync(
+        string sql,
+        object[] parameters,
+        CancellationToken cancellationToken = default
+    ) => dbContext.DatabaseFacade.ExecuteSqlRawAsync(sql, parameters, cancellationToken);
+
     public async Task SaveAsync(CancellationToken cancellationToken = default) =>
         await dbContext.SaveChangesAsync(cancellationToken);
 

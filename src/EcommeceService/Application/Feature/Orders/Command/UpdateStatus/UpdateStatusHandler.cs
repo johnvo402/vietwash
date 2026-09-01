@@ -159,6 +159,23 @@ public class UpdateStatusHandler(IUnitOfWork unitOfWork)
                         );
             }
 
+            if (equipmentAction == EquipmentLifecycleAction.Claim)
+            {
+                OrderMaterialConsumptionResult materialResult =
+                    await OrderMaterialConsumption.ConsumeAsync(
+                        unitOfWork,
+                        order,
+                        cancellationToken
+                    );
+                if (!materialResult.IsSuccess)
+                    return await RollbackFailure(
+                        CreateBadRequest(
+                            materialResult.ErrorMessage ?? "Material consumption failed."
+                        ),
+                        cancellationToken
+                    );
+            }
+
             OrderTransitionResult applied = order.TransitionTo(
                 target,
                 request.Model.PaymentMethod,

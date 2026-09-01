@@ -40,6 +40,12 @@ public interface IUnitOfWork : IDisposable
 
     int ExecuteSqlCommand(string sql, params object[] parameters);
 
+    Task<int> ExecuteSqlCommandAsync(
+        string sql,
+        object[] parameters,
+        CancellationToken cancellationToken = default
+    );
+
     Task SaveAsync(CancellationToken cancellationToken = default);
     public IQueryable<TEntity> CallPostgreSqlFunction<TEntity>(
         string functionName,

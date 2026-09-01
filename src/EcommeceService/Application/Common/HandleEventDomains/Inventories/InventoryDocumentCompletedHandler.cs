@@ -58,6 +58,9 @@ public sealed class InventoryDocumentCompletedHandler
             return;
         }
 
+        if (!InventoryDocumentCompletionPolicy.ShouldRunExternalSideEffects(document))
+            return;
+
         var newEquipments = new List<Equipment>();
 
         // Process supplyings and create consolidated fund events by supplier
@@ -255,4 +258,10 @@ public sealed class InventoryDocumentCompletedHandler
             throw;
         }
     }
+}
+
+public static class InventoryDocumentCompletionPolicy
+{
+    public static bool ShouldRunExternalSideEffects(InventoryDocument document) =>
+        !document.SourceOrderId.HasValue;
 }
