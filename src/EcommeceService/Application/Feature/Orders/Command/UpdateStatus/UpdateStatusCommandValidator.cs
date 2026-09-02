@@ -1,3 +1,4 @@
+using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
 using FluentValidation;
 
@@ -24,6 +25,22 @@ public class UpdateStatusCommandValidator : AbstractValidator<UpdateStatusComman
                 RuleFor(x => x.Model.PaymentMethod)
                     .Null()
                     .When(x => x.Model.Status != OrderStatus.Completed);
+                RuleFor(x => x.Model.CancellationReason)
+                    .Must(reason =>
+                    {
+                        int length = reason?.Trim().Length ?? 0;
+                        return length
+                            is >= OrderCancellation.MinimumReasonLength
+                                and <= OrderCancellation.MaximumReasonLength;
+                    })
+                    .WithMessage(
+                        $"Cancellation reason must contain between {OrderCancellation.MinimumReasonLength} and {OrderCancellation.MaximumReasonLength} characters."
+                    )
+                    .When(x => x.Model.Status == OrderStatus.Cancelled);
+                RuleFor(x => x.Model.CancellationReason)
+                    .Must(string.IsNullOrWhiteSpace)
+                    .WithMessage("Cancellation reason is only allowed when cancelling an order.")
+                    .When(x => x.Model.Status != OrderStatus.Cancelled);
                 RuleFor(x => x.Model.OrderEquipments)
                     .Must(items =>
                         items is null

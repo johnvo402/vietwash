@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(TheDbContext))]
-    partial class TheDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260901213330_AddOrderCancellationAudit")]
+    partial class AddOrderCancellationAudit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -23,15 +26,13 @@ namespace Infrastructure.Data.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "citext");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Domain.Aggregates.Equipments.Equipment", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Equipments.Equipment",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
-                    b.Property<long>("BranchId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("branch_id");
+                    b.Property<long>("BranchId").HasColumnType("bigint").HasColumnName("branch_id");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -51,9 +52,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<string>("Image")
-                        .HasColumnType("text")
-                        .HasColumnName("image");
+                    b.Property<string>("Image").HasColumnType("text").HasColumnName("image");
 
                     b.Property<DateTimeOffset?>("LastMaintenanceOrRepairDate")
                         .HasColumnType("timestamp with time zone")
@@ -68,18 +67,14 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("next_maintenance_date");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("numeric")
-                        .HasColumnName("price");
+                    b.Property<decimal>("Price").HasColumnType("numeric").HasColumnName("price");
 
                     b.Property<string>("PublicId")
                         .IsRequired()
                         .HasColumnType("character varying(26)")
                         .HasColumnName("public_id");
 
-                    b.Property<byte>("Status")
-                        .HasColumnType("smallint")
-                        .HasColumnName("status");
+                    b.Property<byte>("Status").HasColumnType("smallint").HasColumnName("status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -89,28 +84,23 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.Property<bool>("Using")
-                        .HasColumnType("boolean")
-                        .HasColumnName("using");
+                    b.Property<bool>("Using").HasColumnType("boolean").HasColumnName("using");
 
-                    b.Property<long>("Version")
-                        .HasColumnType("bigint")
-                        .HasColumnName("version");
+                    b.Property<long>("Version").HasColumnType("bigint").HasColumnName("version");
 
-                    b.HasKey("Id")
-                        .HasName("pk_equipment");
+                    b.HasKey("Id").HasName("pk_equipment");
 
-                    b.HasIndex("Code")
-                        .HasDatabaseName("ix_equipment_code");
+                    b.HasIndex("Code").HasDatabaseName("ix_equipment_code");
 
                     b.ToTable("equipment", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Equipments.EquipmentActivity", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Equipments.EquipmentActivity",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -138,17 +128,13 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("character varying(26)")
                         .HasColumnName("public_id");
 
-                    b.Property<long>("StaffId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("staff_id");
+                    b.Property<long>("StaffId").HasColumnType("bigint").HasColumnName("staff_id");
 
                     b.Property<decimal>("TotalCost")
                         .HasColumnType("numeric")
                         .HasColumnName("total_cost");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer")
-                        .HasColumnName("type");
+                    b.Property<int>("Type").HasColumnType("integer").HasColumnName("type");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -158,27 +144,23 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.HasKey("Id")
-                        .HasName("pk_equipment_activity");
+                    b.HasKey("Id").HasName("pk_equipment_activity");
 
-                    b.HasIndex("EquipmentId")
-                        .HasDatabaseName("ix_equipment_activity_equipment_id");
+                    b.HasIndex("EquipmentId").HasDatabaseName("ix_equipment_activity_equipment_id");
 
-                    b.HasIndex("StaffId")
-                        .HasDatabaseName("ix_equipment_activity_staff_id");
+                    b.HasIndex("StaffId").HasDatabaseName("ix_equipment_activity_staff_id");
 
                     b.ToTable("equipment_activity", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Equipments.EquipmentActivityDetail", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Equipments.EquipmentActivityDetail",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric")
-                        .HasColumnName("amount");
+                    b.Property<decimal>("Amount").HasColumnType("numeric").HasColumnName("amount");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -198,36 +180,30 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("character varying(26)")
                         .HasColumnName("public_id");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer")
-                        .HasColumnName("quantity");
+                    b.Property<int>("Quantity").HasColumnType("integer").HasColumnName("quantity");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("numeric")
                         .HasColumnName("unit_price");
 
-                    b.HasKey("Id")
-                        .HasName("pk_equipment_activity_detail");
+                    b.HasKey("Id").HasName("pk_equipment_activity_detail");
 
                     b.HasIndex("EquipmentActivityId")
                         .HasDatabaseName("ix_equipment_activity_detail_equipment_activity_id");
 
                     b.ToTable("equipment_activity_detail", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Feedbacks.Feedback", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Feedbacks.Feedback",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
-                    b.Property<long>("BranchId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("branch_id");
+                    b.Property<long>("BranchId").HasColumnType("bigint").HasColumnName("branch_id");
 
-                    b.Property<string>("Comment")
-                        .HasColumnType("text")
-                        .HasColumnName("comment");
+                    b.Property<string>("Comment").HasColumnType("text").HasColumnName("comment");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -238,17 +214,13 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
-                    b.Property<bool>("Disable")
-                        .HasColumnType("boolean")
-                        .HasColumnName("disable");
+                    b.Property<bool>("Disable").HasColumnType("boolean").HasColumnName("disable");
 
                     b.Property<long?>("ParentId")
                         .HasColumnType("bigint")
                         .HasColumnName("parent_id");
 
-                    b.Property<int?>("Rating")
-                        .HasColumnType("integer")
-                        .HasColumnName("rating");
+                    b.Property<int?>("Rating").HasColumnType("integer").HasColumnName("rating");
 
                     b.Property<long>("ServiceId")
                         .HasColumnType("bigint")
@@ -262,33 +234,27 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("user_id");
+                    b.Property<long>("UserId").HasColumnType("bigint").HasColumnName("user_id");
 
-                    b.HasKey("Id")
-                        .HasName("pk_feedback");
+                    b.HasKey("Id").HasName("pk_feedback");
 
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_feedback_id");
+                    b.HasIndex("Id").HasDatabaseName("ix_feedback_id");
 
-                    b.HasIndex("ParentId")
-                        .HasDatabaseName("ix_feedback_parent_id");
+                    b.HasIndex("ParentId").HasDatabaseName("ix_feedback_parent_id");
 
-                    b.HasIndex("ServiceId")
-                        .HasDatabaseName("ix_feedback_service_id");
+                    b.HasIndex("ServiceId").HasDatabaseName("ix_feedback_service_id");
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_feedback_user_id");
+                    b.HasIndex("UserId").HasDatabaseName("ix_feedback_user_id");
 
                     b.ToTable("feedback", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Feedbacks.FeedbackReaction", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Feedbacks.FeedbackReaction",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -302,28 +268,25 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("feedback_id");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer")
-                        .HasColumnName("type");
+                    b.Property<int>("Type").HasColumnType("integer").HasColumnName("type");
 
-                    b.HasKey("Id")
-                        .HasName("pk_feedback_reaction");
+                    b.HasKey("Id").HasName("pk_feedback_reaction");
 
-                    b.HasIndex("FeedbackId")
-                        .HasDatabaseName("ix_feedback_reaction_feedback_id");
+                    b.HasIndex("FeedbackId").HasDatabaseName("ix_feedback_reaction_feedback_id");
 
                     b.HasIndex("CustomerId", "FeedbackId")
                         .IsUnique()
                         .HasDatabaseName("ix_feedback_reaction_customer_id_feedback_id");
 
                     b.ToTable("feedback_reaction", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Inventories.EquipmentSupplying", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Inventories.EquipmentSupplying",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -334,9 +297,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("Image")
-                        .HasColumnType("text")
-                        .HasColumnName("image");
+                    b.Property<string>("Image").HasColumnType("text").HasColumnName("image");
 
                     b.Property<long>("InventoryDocumentId")
                         .HasColumnType("bigint")
@@ -347,39 +308,32 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("name");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("numeric")
-                        .HasColumnName("price");
+                    b.Property<decimal>("Price").HasColumnType("numeric").HasColumnName("price");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer")
-                        .HasColumnName("quantity");
+                    b.Property<int>("Quantity").HasColumnType("integer").HasColumnName("quantity");
 
                     b.Property<long>("SupplierId")
                         .HasColumnType("bigint")
                         .HasColumnName("supplier_id");
 
-                    b.HasKey("Id")
-                        .HasName("pk_equipment_supplying");
+                    b.HasKey("Id").HasName("pk_equipment_supplying");
 
                     b.HasIndex("InventoryDocumentId")
                         .HasDatabaseName("ix_equipment_supplying_inventory_document_id");
 
-                    b.HasIndex("SupplierId")
-                        .HasDatabaseName("ix_equipment_supplying_supplier_id");
+                    b.HasIndex("SupplierId").HasDatabaseName("ix_equipment_supplying_supplier_id");
 
                     b.ToTable("equipment_supplying", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Inventories.InventoryDocument", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Inventories.InventoryDocument",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric")
-                        .HasColumnName("amount");
+                    b.Property<decimal>("Amount").HasColumnType("numeric").HasColumnName("amount");
 
                     b.Property<long?>("BranchId")
                         .HasColumnType("bigint")
@@ -403,9 +357,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
-                    b.Property<string>("Note")
-                        .HasColumnType("text")
-                        .HasColumnName("note");
+                    b.Property<string>("Note").HasColumnType("text").HasColumnName("note");
 
                     b.Property<string>("PublicId")
                         .IsRequired()
@@ -416,17 +368,13 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("source_order_id");
 
-                    b.Property<short>("Status")
-                        .HasColumnType("smallint")
-                        .HasColumnName("status");
+                    b.Property<short>("Status").HasColumnType("smallint").HasColumnName("status");
 
                     b.Property<DateTimeOffset?>("TransactionAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("transaction_at");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer")
-                        .HasColumnName("type");
+                    b.Property<int>("Type").HasColumnType("integer").HasColumnName("type");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -436,15 +384,11 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.Property<long>("Version")
-                        .HasColumnType("bigint")
-                        .HasColumnName("version");
+                    b.Property<long>("Version").HasColumnType("bigint").HasColumnName("version");
 
-                    b.HasKey("Id")
-                        .HasName("pk_inventory_document");
+                    b.HasKey("Id").HasName("pk_inventory_document");
 
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_inventory_document_id");
+                    b.HasIndex("Id").HasDatabaseName("ix_inventory_document_id");
 
                     b.HasIndex("SourceOrderId")
                         .IsUnique()
@@ -452,13 +396,14 @@ namespace Infrastructure.Data.Migrations
                         .HasFilter("source_order_id IS NOT NULL");
 
                     b.ToTable("inventory_document", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Inventories.InventoryRequest", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Inventories.InventoryRequest",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
                     b.Property<string>("CancelReason")
                         .HasColumnType("text")
@@ -491,9 +436,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("request_at");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
+                    b.Property<int>("Status").HasColumnType("integer").HasColumnName("status");
 
                     b.Property<long?>("SupplierId")
                         .HasColumnType("bigint")
@@ -503,9 +446,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("to_branch_id");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer")
-                        .HasColumnName("type");
+                    b.Property<int>("Type").HasColumnType("integer").HasColumnName("type");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -515,24 +456,21 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.Property<long>("Version")
-                        .HasColumnType("bigint")
-                        .HasColumnName("version");
+                    b.Property<long>("Version").HasColumnType("bigint").HasColumnName("version");
 
-                    b.HasKey("Id")
-                        .HasName("pk_inventory_request");
+                    b.HasKey("Id").HasName("pk_inventory_request");
 
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_inventory_request_id");
+                    b.HasIndex("Id").HasDatabaseName("ix_inventory_request_id");
 
                     b.ToTable("inventory_request", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Inventories.InventorySupplierReceipt", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Inventories.InventorySupplierReceipt",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -551,8 +489,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("supplier_id");
 
-                    b.HasKey("Id")
-                        .HasName("pk_inventory_supplier_receipt");
+                    b.HasKey("Id").HasName("pk_inventory_supplier_receipt");
 
                     b.HasIndex("InventoryDocumentId")
                         .HasDatabaseName("ix_inventory_supplier_receipt_inventory_document_id");
@@ -561,13 +498,14 @@ namespace Infrastructure.Data.Migrations
                         .HasDatabaseName("ix_inventory_supplier_receipt_supplier_id");
 
                     b.ToTable("inventory_supplier_receipt", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Inventories.ProductSupplying", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Inventories.ProductSupplying",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -577,9 +515,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("inventory_document_id");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("numeric")
-                        .HasColumnName("price");
+                    b.Property<decimal>("Price").HasColumnType("numeric").HasColumnName("price");
 
                     b.Property<long>("ProductId")
                         .HasColumnType("bigint")
@@ -597,40 +533,33 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("unit_relation_id");
 
-                    b.HasKey("Id")
-                        .HasName("pk_product_supplying");
+                    b.HasKey("Id").HasName("pk_product_supplying");
 
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_product_supplying_id");
+                    b.HasIndex("Id").HasDatabaseName("ix_product_supplying_id");
 
                     b.HasIndex("InventoryDocumentId")
                         .HasDatabaseName("ix_product_supplying_inventory_document_id");
 
-                    b.HasIndex("ProductId")
-                        .HasDatabaseName("ix_product_supplying_product_id");
+                    b.HasIndex("ProductId").HasDatabaseName("ix_product_supplying_product_id");
 
-                    b.HasIndex("SupplierId")
-                        .HasDatabaseName("ix_product_supplying_supplier_id");
+                    b.HasIndex("SupplierId").HasDatabaseName("ix_product_supplying_supplier_id");
 
                     b.HasIndex("UnitRelationId")
                         .HasDatabaseName("ix_product_supplying_unit_relation_id");
 
                     b.ToTable("product_supplying", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Orders.Order", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Orders.Order",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric")
-                        .HasColumnName("amount");
+                    b.Property<decimal>("Amount").HasColumnType("numeric").HasColumnName("amount");
 
-                    b.Property<long>("BranchId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("branch_id");
+                    b.Property<long>("BranchId").HasColumnType("bigint").HasColumnName("branch_id");
 
                     b.Property<string>("CancellationReason")
                         .HasMaxLength(500)
@@ -692,30 +621,22 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("payment_method");
 
-                    b.Property<decimal>("Point")
-                        .HasColumnType("numeric")
-                        .HasColumnName("point");
+                    b.Property<decimal>("Point").HasColumnType("numeric").HasColumnName("point");
 
                     b.Property<string>("PublicId")
                         .IsRequired()
                         .HasColumnType("character varying(26)")
                         .HasColumnName("public_id");
 
-                    b.Property<long>("StaffId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("staff_id");
+                    b.Property<long>("StaffId").HasColumnType("bigint").HasColumnName("staff_id");
 
-                    b.Property<byte>("Status")
-                        .HasColumnType("smallint")
-                        .HasColumnName("status");
+                    b.Property<byte>("Status").HasColumnType("smallint").HasColumnName("status");
 
                     b.Property<long?>("TariffId")
                         .HasColumnType("bigint")
                         .HasColumnName("tariff_id");
 
-                    b.Property<decimal>("Total")
-                        .HasColumnType("numeric")
-                        .HasColumnName("total");
+                    b.Property<decimal>("Total").HasColumnType("numeric").HasColumnName("total");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -725,17 +646,13 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.Property<int>("Vat")
-                        .HasColumnType("integer")
-                        .HasColumnName("vat");
+                    b.Property<int>("Vat").HasColumnType("integer").HasColumnName("vat");
 
                     b.Property<decimal>("VatAmount")
                         .HasColumnType("numeric")
                         .HasColumnName("vat_amount");
 
-                    b.Property<long>("Version")
-                        .HasColumnType("bigint")
-                        .HasColumnName("version");
+                    b.Property<long>("Version").HasColumnType("bigint").HasColumnName("version");
 
                     b.Property<string>("VoucherCode")
                         .HasColumnType("text")
@@ -745,32 +662,27 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("voucher_id");
 
-                    b.HasKey("Id")
-                        .HasName("pk_order");
+                    b.HasKey("Id").HasName("pk_order");
 
-                    b.HasIndex("Code")
-                        .HasDatabaseName("ix_order_code");
+                    b.HasIndex("Code").HasDatabaseName("ix_order_code");
 
-                    b.HasIndex("CustomerId")
-                        .HasDatabaseName("ix_order_customer_id");
+                    b.HasIndex("CustomerId").HasDatabaseName("ix_order_customer_id");
 
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_order_id");
+                    b.HasIndex("Id").HasDatabaseName("ix_order_id");
 
-                    b.HasIndex("StaffId")
-                        .HasDatabaseName("ix_order_staff_id");
+                    b.HasIndex("StaffId").HasDatabaseName("ix_order_staff_id");
 
-                    b.HasIndex("TariffId")
-                        .HasDatabaseName("ix_order_tariff_id");
+                    b.HasIndex("TariffId").HasDatabaseName("ix_order_tariff_id");
 
                     b.ToTable("order", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Orders.OrderEquipment", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Orders.OrderEquipment",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -785,50 +697,39 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("equipment_name");
 
-                    b.Property<long>("OrderId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("order_id");
+                    b.Property<long>("OrderId").HasColumnType("bigint").HasColumnName("order_id");
 
-                    b.HasKey("Id")
-                        .HasName("pk_order_equipment");
+                    b.HasKey("Id").HasName("pk_order_equipment");
 
-                    b.HasIndex("EquipmentId")
-                        .HasDatabaseName("ix_order_equipment_equipment_id");
+                    b.HasIndex("EquipmentId").HasDatabaseName("ix_order_equipment_equipment_id");
 
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_order_equipment_id");
+                    b.HasIndex("Id").HasDatabaseName("ix_order_equipment_id");
 
-                    b.HasIndex("OrderId")
-                        .HasDatabaseName("ix_order_equipment_order_id");
+                    b.HasIndex("OrderId").HasDatabaseName("ix_order_equipment_order_id");
 
                     b.ToTable("order_equipment", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Orders.OrderItem", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Orders.OrderItem",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<long>("OrderId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("order_id");
+                    b.Property<long>("OrderId").HasColumnType("bigint").HasColumnName("order_id");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("numeric")
-                        .HasColumnName("price");
+                    b.Property<decimal>("Price").HasColumnType("numeric").HasColumnName("price");
 
                     b.Property<decimal>("ProcessingTime")
                         .HasColumnType("numeric")
                         .HasColumnName("processing_time");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer")
-                        .HasColumnName("quantity");
+                    b.Property<int>("Quantity").HasColumnType("integer").HasColumnName("quantity");
 
                     b.Property<long>("ServiceId")
                         .HasColumnType("bigint")
@@ -850,33 +751,27 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("unit_relation_name");
 
-                    b.HasKey("Id")
-                        .HasName("pk_order_item");
+                    b.HasKey("Id").HasName("pk_order_item");
 
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_order_item_id");
+                    b.HasIndex("Id").HasDatabaseName("ix_order_item_id");
 
-                    b.HasIndex("OrderId")
-                        .HasDatabaseName("ix_order_item_order_id");
+                    b.HasIndex("OrderId").HasDatabaseName("ix_order_item_order_id");
 
-                    b.HasIndex("ServiceId")
-                        .HasDatabaseName("ix_order_item_service_id");
+                    b.HasIndex("ServiceId").HasDatabaseName("ix_order_item_service_id");
 
-                    b.HasIndex("UnitRelationId")
-                        .HasDatabaseName("ix_order_item_unit_relation_id");
+                    b.HasIndex("UnitRelationId").HasDatabaseName("ix_order_item_unit_relation_id");
 
                     b.ToTable("order_item", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Products.BranchProduct", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Products.BranchProduct",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
-                    b.Property<long>("BranchId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("branch_id");
+                    b.Property<long>("BranchId").HasColumnType("bigint").HasColumnName("branch_id");
 
                     b.Property<decimal>("CapitalPrice")
                         .HasColumnType("numeric")
@@ -899,13 +794,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<bool>("Disable")
-                        .HasColumnType("boolean")
-                        .HasColumnName("disable");
+                    b.Property<bool>("Disable").HasColumnType("boolean").HasColumnName("disable");
 
-                    b.Property<string>("Image")
-                        .HasColumnType("text")
-                        .HasColumnName("image");
+                    b.Property<string>("Image").HasColumnType("text").HasColumnName("image");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -917,13 +808,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("character varying(26)")
                         .HasColumnName("public_id");
 
-                    b.Property<string>("Sku")
-                        .HasColumnType("text")
-                        .HasColumnName("sku");
+                    b.Property<string>("Sku").HasColumnType("text").HasColumnName("sku");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
+                    b.Property<int>("Status").HasColumnType("integer").HasColumnName("status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -933,27 +820,23 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.Property<long>("Version")
-                        .HasColumnType("bigint")
-                        .HasColumnName("version");
+                    b.Property<long>("Version").HasColumnType("bigint").HasColumnName("version");
 
-                    b.HasKey("Id")
-                        .HasName("pk_branch_product");
+                    b.HasKey("Id").HasName("pk_branch_product");
 
-                    b.HasIndex("CategoryId")
-                        .HasDatabaseName("ix_branch_product_category_id");
+                    b.HasIndex("CategoryId").HasDatabaseName("ix_branch_product_category_id");
 
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_branch_product_id");
+                    b.HasIndex("Id").HasDatabaseName("ix_branch_product_id");
 
                     b.ToTable("branch_product", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Services.Category", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Services.Category",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -989,9 +872,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("path");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
+                    b.Property<int>("Status").HasColumnType("integer").HasColumnName("status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1001,24 +882,21 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.HasKey("Id")
-                        .HasName("pk_category");
+                    b.HasKey("Id").HasName("pk_category");
 
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_category_id");
+                    b.HasIndex("Id").HasDatabaseName("ix_category_id");
 
                     b.ToTable("category", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Services.Service", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Services.Service",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
-                    b.Property<long>("BranchId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("branch_id");
+                    b.Property<long>("BranchId").HasColumnType("bigint").HasColumnName("branch_id");
 
                     b.Property<long>("CategoryId")
                         .HasColumnType("bigint")
@@ -1037,13 +915,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<bool>("Disable")
-                        .HasColumnType("boolean")
-                        .HasColumnName("disable");
+                    b.Property<bool>("Disable").HasColumnType("boolean").HasColumnName("disable");
 
-                    b.Property<string>("Image")
-                        .HasColumnType("text")
-                        .HasColumnName("image");
+                    b.Property<string>("Image").HasColumnType("text").HasColumnName("image");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1055,13 +929,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("character varying(26)")
                         .HasColumnName("public_id");
 
-                    b.Property<string>("Slug")
-                        .HasColumnType("text")
-                        .HasColumnName("slug");
+                    b.Property<string>("Slug").HasColumnType("text").HasColumnName("slug");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
+                    b.Property<int>("Status").HasColumnType("integer").HasColumnName("status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1071,27 +941,23 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.Property<long>("Version")
-                        .HasColumnType("bigint")
-                        .HasColumnName("version");
+                    b.Property<long>("Version").HasColumnType("bigint").HasColumnName("version");
 
-                    b.HasKey("Id")
-                        .HasName("pk_service");
+                    b.HasKey("Id").HasName("pk_service");
 
-                    b.HasIndex("CategoryId")
-                        .HasDatabaseName("ix_service_category_id");
+                    b.HasIndex("CategoryId").HasDatabaseName("ix_service_category_id");
 
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_service_id");
+                    b.HasIndex("Id").HasDatabaseName("ix_service_id");
 
                     b.ToTable("service", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Services.ServiceResource", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Services.ServiceResource",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1113,14 +979,11 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("unit_relation_id");
 
-                    b.HasKey("Id")
-                        .HasName("pk_service_resource");
+                    b.HasKey("Id").HasName("pk_service_resource");
 
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_service_resource_id");
+                    b.HasIndex("Id").HasDatabaseName("ix_service_resource_id");
 
-                    b.HasIndex("ProductId")
-                        .HasDatabaseName("ix_service_resource_product_id");
+                    b.HasIndex("ProductId").HasDatabaseName("ix_service_resource_product_id");
 
                     b.HasIndex("UnitProductId")
                         .HasDatabaseName("ix_service_resource_unit_product_id");
@@ -1129,13 +992,14 @@ namespace Infrastructure.Data.Migrations
                         .HasDatabaseName("ix_service_resource_unit_relation_id");
 
                     b.ToTable("service_resource", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Services.Unit", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Services.Unit",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1151,9 +1015,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("citext")
                         .HasColumnName("name");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
+                    b.Property<int>("Status").HasColumnType("integer").HasColumnName("status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1163,20 +1025,19 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.HasKey("Id")
-                        .HasName("pk_unit");
+                    b.HasKey("Id").HasName("pk_unit");
 
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_unit_id");
+                    b.HasIndex("Id").HasDatabaseName("ix_unit_id");
 
                     b.ToTable("unit", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Services.UnitRelation", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Services.UnitRelation",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
                     b.Property<bool>("BaseUnit")
                         .HasColumnType("boolean")
@@ -1195,18 +1056,14 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
-                    b.Property<int>("Multiple")
-                        .HasColumnType("integer")
-                        .HasColumnName("multiple");
+                    b.Property<int>("Multiple").HasColumnType("integer").HasColumnName("multiple");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("numeric")
-                        .HasColumnName("price");
+                    b.Property<decimal>("Price").HasColumnType("numeric").HasColumnName("price");
 
                     b.Property<decimal>("ProcessingTime")
                         .HasColumnType("numeric")
@@ -1221,13 +1078,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("service_id");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
+                    b.Property<int>("Status").HasColumnType("integer").HasColumnName("status");
 
-                    b.Property<long?>("UnitId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("unit_id");
+                    b.Property<long?>("UnitId").HasColumnType("bigint").HasColumnName("unit_id");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1237,29 +1090,26 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.HasKey("Id")
-                        .HasName("pk_unit_relation");
+                    b.HasKey("Id").HasName("pk_unit_relation");
 
                     b.HasIndex("BranchProductId")
                         .HasDatabaseName("ix_unit_relation_branch_product_id");
 
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_unit_relation_id");
+                    b.HasIndex("Id").HasDatabaseName("ix_unit_relation_id");
 
-                    b.HasIndex("ServiceId")
-                        .HasDatabaseName("ix_unit_relation_service_id");
+                    b.HasIndex("ServiceId").HasDatabaseName("ix_unit_relation_service_id");
 
-                    b.HasIndex("UnitId")
-                        .HasDatabaseName("ix_unit_relation_unit_id");
+                    b.HasIndex("UnitId").HasDatabaseName("ix_unit_relation_unit_id");
 
                     b.ToTable("unit_relation", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Suppliers.Supplier", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Suppliers.Supplier",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
                     b.Property<string>("Address")
                         .IsRequired()
@@ -1285,9 +1135,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<bool>("Disable")
-                        .HasColumnType("boolean")
-                        .HasColumnName("disable");
+                    b.Property<bool>("Disable").HasColumnType("boolean").HasColumnName("disable");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -1309,9 +1157,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("character varying(26)")
                         .HasColumnName("public_id");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
+                    b.Property<int>("Status").HasColumnType("integer").HasColumnName("status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1321,24 +1167,21 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.Property<long>("Version")
-                        .HasColumnType("bigint")
-                        .HasColumnName("version");
+                    b.Property<long>("Version").HasColumnType("bigint").HasColumnName("version");
 
-                    b.HasKey("Id")
-                        .HasName("pk_supplier");
+                    b.HasKey("Id").HasName("pk_supplier");
 
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_supplier_id");
+                    b.HasIndex("Id").HasDatabaseName("ix_supplier_id");
 
                     b.ToTable("supplier", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Tariffs.ServicePriceTariffHistory", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Tariffs.ServicePriceTariffHistory",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1349,17 +1192,13 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("numeric")
-                        .HasColumnName("price");
+                    b.Property<decimal>("Price").HasColumnType("numeric").HasColumnName("price");
 
                     b.Property<long>("ServiceId")
                         .HasColumnType("bigint")
                         .HasColumnName("service_id");
 
-                    b.Property<long>("TariffId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("tariff_id");
+                    b.Property<long>("TariffId").HasColumnType("bigint").HasColumnName("tariff_id");
 
                     b.Property<long>("UnitRelationId")
                         .HasColumnType("bigint")
@@ -1373,24 +1212,26 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.HasKey("Id")
-                        .HasName("pk_service_price_tariff_history");
+                    b.HasKey("Id").HasName("pk_service_price_tariff_history");
 
                     b.HasIndex("ServiceId")
                         .HasDatabaseName("ix_service_price_tariff_history_service_id");
 
                     b.HasIndex("TariffId", "ServiceId", "UnitRelationId")
                         .IsUnique()
-                        .HasDatabaseName("ix_service_price_tariff_history_tariff_id_service_id_unit_rela");
+                        .HasDatabaseName(
+                            "ix_service_price_tariff_history_tariff_id_service_id_unit_rela"
+                        );
 
                     b.ToTable("service_price_tariff_history", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Tariffs.ServiceTariff", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Tariffs.ServiceTariff",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1401,17 +1242,13 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("numeric")
-                        .HasColumnName("price");
+                    b.Property<decimal>("Price").HasColumnType("numeric").HasColumnName("price");
 
                     b.Property<long>("ServiceId")
                         .HasColumnType("bigint")
                         .HasColumnName("service_id");
 
-                    b.Property<long>("TariffId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("tariff_id");
+                    b.Property<long>("TariffId").HasColumnType("bigint").HasColumnName("tariff_id");
 
                     b.Property<long>("UnitRelationId")
                         .HasColumnType("bigint")
@@ -1425,11 +1262,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.HasKey("Id")
-                        .HasName("pk_service_tariff");
+                    b.HasKey("Id").HasName("pk_service_tariff");
 
-                    b.HasIndex("ServiceId")
-                        .HasDatabaseName("ix_service_tariff_service_id");
+                    b.HasIndex("ServiceId").HasDatabaseName("ix_service_tariff_service_id");
 
                     b.HasIndex("UnitRelationId")
                         .HasDatabaseName("ix_service_tariff_unit_relation_id");
@@ -1439,17 +1274,16 @@ namespace Infrastructure.Data.Migrations
                         .HasDatabaseName("ix_service_tariff_tariff_id_service_id_unit_relation_id");
 
                     b.ToTable("service_tariff", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Tariffs.Tariff", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Tariffs.Tariff",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
-                    b.Property<long>("BranchId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("branch_id");
+                    b.Property<long>("BranchId").HasColumnType("bigint").HasColumnName("branch_id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1460,9 +1294,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
-                    b.Property<bool>("Disable")
-                        .HasColumnType("boolean")
-                        .HasColumnName("disable");
+                    b.Property<bool>("Disable").HasColumnType("boolean").HasColumnName("disable");
 
                     b.Property<DateTimeOffset?>("EndAt")
                         .HasColumnType("timestamp with time zone")
@@ -1482,9 +1314,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("start_at");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
+                    b.Property<int>("Status").HasColumnType("integer").HasColumnName("status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1494,28 +1324,23 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.Property<long>("Version")
-                        .HasColumnType("bigint")
-                        .HasColumnName("version");
+                    b.Property<long>("Version").HasColumnType("bigint").HasColumnName("version");
 
-                    b.HasKey("Id")
-                        .HasName("pk_tariff");
+                    b.HasKey("Id").HasName("pk_tariff");
 
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_tariff_id");
+                    b.HasIndex("Id").HasDatabaseName("ix_tariff_id");
 
                     b.ToTable("tariff", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Users.BranchUser", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Users.BranchUser",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
-                    b.Property<long>("BranchId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("branch_id");
+                    b.Property<long>("BranchId").HasColumnType("bigint").HasColumnName("branch_id");
 
                     b.Property<string>("BranchName")
                         .HasColumnType("text")
@@ -1538,28 +1363,23 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("user_id");
+                    b.Property<long>("UserId").HasColumnType("bigint").HasColumnName("user_id");
 
-                    b.HasKey("Id")
-                        .HasName("pk_branch_user");
+                    b.HasKey("Id").HasName("pk_branch_user");
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_branch_user_user_id");
+                    b.HasIndex("UserId").HasDatabaseName("ix_branch_user_user_id");
 
                     b.ToTable("branch_user", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Users.User",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
-                    b.Property<string>("AvtUrl")
-                        .HasColumnType("text")
-                        .HasColumnName("avt_url");
+                    b.Property<string>("AvtUrl").HasColumnType("text").HasColumnName("avt_url");
 
                     b.Property<DateOnly?>("BirthDay")
                         .HasColumnType("date")
@@ -1583,22 +1403,16 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("customer_group");
 
-                    b.Property<bool>("Disabled")
-                        .HasColumnType("boolean")
-                        .HasColumnName("disabled");
+                    b.Property<bool>("Disabled").HasColumnType("boolean").HasColumnName("disabled");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("display_name");
 
-                    b.Property<string>("Email")
-                        .HasColumnType("citext")
-                        .HasColumnName("email");
+                    b.Property<string>("Email").HasColumnType("citext").HasColumnName("email");
 
-                    b.Property<int?>("Gender")
-                        .HasColumnType("integer")
-                        .HasColumnName("gender");
+                    b.Property<int?>("Gender").HasColumnType("integer").HasColumnName("gender");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
@@ -1615,9 +1429,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("role");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
+                    b.Property<int>("Status").HasColumnType("integer").HasColumnName("status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1627,24 +1439,21 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
-                    b.HasKey("Id")
-                        .HasName("pk_user");
+                    b.HasKey("Id").HasName("pk_user");
 
-                    b.HasIndex("Email")
-                        .IsUnique()
-                        .HasDatabaseName("ix_user_email");
+                    b.HasIndex("Email").IsUnique().HasDatabaseName("ix_user_email");
 
-                    b.HasIndex("Id")
-                        .HasDatabaseName("ix_user_id");
+                    b.HasIndex("Id").HasDatabaseName("ix_user_id");
 
                     b.ToTable("user", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Vouchers.Voucher", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Vouchers.Voucher",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
                     b.Property<string>("Barcode")
                         .IsRequired()
@@ -1681,9 +1490,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("end_at");
 
-                    b.Property<string>("ImgUrl")
-                        .HasColumnType("text")
-                        .HasColumnName("img_url");
+                    b.Property<string>("ImgUrl").HasColumnType("text").HasColumnName("img_url");
 
                     b.Property<string>("PublicId")
                         .IsRequired()
@@ -1694,9 +1501,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("start_at");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
+                    b.Property<int>("Status").HasColumnType("integer").HasColumnName("status");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -1719,24 +1524,21 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("used_quantity");
 
-                    b.Property<long>("Version")
-                        .HasColumnType("bigint")
-                        .HasColumnName("version");
+                    b.Property<long>("Version").HasColumnType("bigint").HasColumnName("version");
 
-                    b.HasKey("Id")
-                        .HasName("pk_voucher");
+                    b.HasKey("Id").HasName("pk_voucher");
 
-                    b.HasIndex("Code")
-                        .HasDatabaseName("ix_voucher_code");
+                    b.HasIndex("Code").HasDatabaseName("ix_voucher_code");
 
                     b.ToTable("voucher", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Vouchers.VoucherCustomer", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Vouchers.VoucherCustomer",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1746,31 +1548,27 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("customer_id");
 
-                    b.Property<bool>("IsUsed")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_used");
+                    b.Property<bool>("IsUsed").HasColumnType("boolean").HasColumnName("is_used");
 
                     b.Property<long>("VoucherId")
                         .HasColumnType("bigint")
                         .HasColumnName("voucher_id");
 
-                    b.HasKey("Id")
-                        .HasName("pk_voucher_customer");
+                    b.HasKey("Id").HasName("pk_voucher_customer");
 
-                    b.HasIndex("CustomerId")
-                        .HasDatabaseName("ix_voucher_customer_customer_id");
+                    b.HasIndex("CustomerId").HasDatabaseName("ix_voucher_customer_customer_id");
 
-                    b.HasIndex("VoucherId")
-                        .HasDatabaseName("ix_voucher_customer_voucher_id");
+                    b.HasIndex("VoucherId").HasDatabaseName("ix_voucher_customer_voucher_id");
 
                     b.ToTable("voucher_customer", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Vouchers.VoucherUsage", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Vouchers.VoucherUsage",
+                b =>
                 {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                    b.Property<long>("Id").HasColumnType("bigint").HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1789,9 +1587,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("discount_apply");
 
-                    b.Property<long>("OrderId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("order_id");
+                    b.Property<long>("OrderId").HasColumnType("bigint").HasColumnName("order_id");
 
                     b.Property<string>("PublicId")
                         .IsRequired()
@@ -1810,27 +1606,23 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("voucher_id");
 
-                    b.HasKey("Id")
-                        .HasName("pk_voucher_usage");
+                    b.HasKey("Id").HasName("pk_voucher_usage");
 
-                    b.HasIndex("CustomerId")
-                        .HasDatabaseName("ix_voucher_usage_customer_id");
+                    b.HasIndex("CustomerId").HasDatabaseName("ix_voucher_usage_customer_id");
 
-                    b.HasIndex("OrderId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_voucher_usage_order_id");
+                    b.HasIndex("OrderId").IsUnique().HasDatabaseName("ix_voucher_usage_order_id");
 
-                    b.HasIndex("VoucherId")
-                        .HasDatabaseName("ix_voucher_usage_voucher_id");
+                    b.HasIndex("VoucherId").HasDatabaseName("ix_voucher_usage_voucher_id");
 
                     b.ToTable("voucher_usage", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Functions.CustomerRevenueResult", b =>
+            modelBuilder.Entity(
+                "Domain.Functions.CustomerRevenueResult",
+                b =>
                 {
-                    b.Property<string>("AvtUrl")
-                        .HasColumnType("text")
-                        .HasColumnName("avt_url");
+                    b.Property<string>("AvtUrl").HasColumnType("text").HasColumnName("avt_url");
 
                     b.Property<decimal>("CancelValue")
                         .HasColumnType("numeric")
@@ -1871,9 +1663,12 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("customer_revenue_result", (string)null);
 
                     b.ToView(null, (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Functions.GetRevenueStatistic", b =>
+            modelBuilder.Entity(
+                "Domain.Functions.GetRevenueStatistic",
+                b =>
                 {
                     b.Property<DateOnly>("RevenueDate")
                         .HasColumnType("date")
@@ -1884,17 +1679,16 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnName("total_revenue");
 
                     b.ToTable("get_revenue_statistic", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Functions.OrderSummaryResult", b =>
+            modelBuilder.Entity(
+                "Domain.Functions.OrderSummaryResult",
+                b =>
                 {
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric")
-                        .HasColumnName("amount");
+                    b.Property<decimal>("Amount").HasColumnType("numeric").HasColumnName("amount");
 
-                    b.Property<long>("BranchId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("branch_id");
+                    b.Property<long>("BranchId").HasColumnType("bigint").HasColumnName("branch_id");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -1909,9 +1703,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("order_date");
 
-                    b.Property<long>("OrderId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("order_id");
+                    b.Property<long>("OrderId").HasColumnType("bigint").HasColumnName("order_id");
 
                     b.Property<int>("OrderItemCount")
                         .HasColumnType("integer")
@@ -1923,9 +1715,12 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnName("public_id");
 
                     b.ToTable("order_summary_result", (string)null);
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Equipments.EquipmentActivity", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Equipments.EquipmentActivity",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Equipments.Equipment", "Equipment")
                         .WithMany("EquipmentActivities")
@@ -1944,21 +1739,29 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Equipment");
 
                     b.Navigation("Staff");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Equipments.EquipmentActivityDetail", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Equipments.EquipmentActivityDetail",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Equipments.EquipmentActivity", "EquipmentActivity")
                         .WithMany("ActivityDetails")
                         .HasForeignKey("EquipmentActivityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_equipment_activity_detail_equipment_activity_equipment_acti");
+                        .HasConstraintName(
+                            "fk_equipment_activity_detail_equipment_activity_equipment_acti"
+                        );
 
                     b.Navigation("EquipmentActivity");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Feedbacks.Feedback", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Feedbacks.Feedback",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Feedbacks.Feedback", "Parent")
                         .WithMany("Replies")
@@ -1984,9 +1787,12 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Service");
 
                     b.Navigation("User");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Feedbacks.FeedbackReaction", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Feedbacks.FeedbackReaction",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Users.User", "Customer")
                         .WithMany()
@@ -2005,16 +1811,21 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Customer");
 
                     b.Navigation("Feedback");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Inventories.EquipmentSupplying", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Inventories.EquipmentSupplying",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Inventories.InventoryDocument", "InventoryDocument")
                         .WithMany("EquipmentSupplyings")
                         .HasForeignKey("InventoryDocumentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_equipment_supplying_inventory_document_inventory_document_id");
+                        .HasConstraintName(
+                            "fk_equipment_supplying_inventory_document_inventory_document_id"
+                        );
 
                     b.HasOne("Domain.Aggregates.Suppliers.Supplier", "Supplier")
                         .WithMany("EquipmentSupplyings")
@@ -2026,25 +1837,33 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("InventoryDocument");
 
                     b.Navigation("Supplier");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Inventories.InventoryDocument", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Inventories.InventoryDocument",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Orders.Order", null)
                         .WithMany()
                         .HasForeignKey("SourceOrderId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_inventory_document_order_source_order_id");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Inventories.InventorySupplierReceipt", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Inventories.InventorySupplierReceipt",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Inventories.InventoryDocument", "InventoryDocument")
                         .WithMany("InventorySupplierReceipts")
                         .HasForeignKey("InventoryDocumentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_inventory_supplier_receipt_inventory_document_inventory_doc");
+                        .HasConstraintName(
+                            "fk_inventory_supplier_receipt_inventory_document_inventory_doc"
+                        );
 
                     b.HasOne("Domain.Aggregates.Suppliers.Supplier", "Supplier")
                         .WithMany()
@@ -2056,16 +1875,21 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("InventoryDocument");
 
                     b.Navigation("Supplier");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Inventories.ProductSupplying", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Inventories.ProductSupplying",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Inventories.InventoryDocument", "InventoryDocument")
                         .WithMany("ProductSupplyings")
                         .HasForeignKey("InventoryDocumentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_product_supplying_inventory_document_inventory_document_id");
+                        .HasConstraintName(
+                            "fk_product_supplying_inventory_document_inventory_document_id"
+                        );
 
                     b.HasOne("Domain.Aggregates.Products.BranchProduct", "Product")
                         .WithMany("ProductSupplyings")
@@ -2093,9 +1917,12 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Supplier");
 
                     b.Navigation("UnitRelation");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Orders.Order", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Orders.Order",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Users.User", "Customer")
                         .WithMany()
@@ -2119,9 +1946,12 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Staff");
 
                     b.Navigation("Tariff");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Orders.OrderEquipment", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Orders.OrderEquipment",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Equipments.Equipment", "Equipment")
                         .WithMany("OrderEquipments")
@@ -2140,9 +1970,12 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Equipment");
 
                     b.Navigation("Order");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Orders.OrderItem", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Orders.OrderItem",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Orders.Order", "Order")
                         .WithMany("OrderItems")
@@ -2170,9 +2003,12 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Service");
 
                     b.Navigation("UnitRelation");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Products.BranchProduct", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Products.BranchProduct",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Services.Category", "Category")
                         .WithMany()
@@ -2182,9 +2018,12 @@ namespace Infrastructure.Data.Migrations
                         .HasConstraintName("fk_branch_product_category_category_id");
 
                     b.Navigation("Category");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Services.Service", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Services.Service",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Services.Category", "Category")
                         .WithMany("Services")
@@ -2194,9 +2033,12 @@ namespace Infrastructure.Data.Migrations
                         .HasConstraintName("fk_service_category_category_id");
 
                     b.Navigation("Category");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Services.ServiceResource", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Services.ServiceResource",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Products.BranchProduct", "BranchProduct")
                         .WithMany()
@@ -2224,9 +2066,12 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("UnitProduct");
 
                     b.Navigation("UnitRelation");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Services.UnitRelation", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Services.UnitRelation",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Products.BranchProduct", "BranchProduct")
                         .WithMany("UnitRelations")
@@ -2249,9 +2094,12 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Service");
 
                     b.Navigation("Unit");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Tariffs.ServicePriceTariffHistory", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Tariffs.ServicePriceTariffHistory",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Services.Service", "Service")
                         .WithMany("ServicePriceTariffHistories")
@@ -2270,9 +2118,12 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Service");
 
                     b.Navigation("Tariff");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Tariffs.ServiceTariff", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Tariffs.ServiceTariff",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Services.Service", "Service")
                         .WithMany("ServiceTariffs")
@@ -2300,9 +2151,12 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Tariff");
 
                     b.Navigation("UnitRelation");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Users.BranchUser", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Users.BranchUser",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Users.User", null)
                         .WithMany("BranchUsers")
@@ -2310,9 +2164,12 @@ namespace Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_branch_user_user_user_id");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Vouchers.VoucherCustomer", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Vouchers.VoucherCustomer",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Users.User", "Customer")
                         .WithMany()
@@ -2331,9 +2188,12 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Customer");
 
                     b.Navigation("Voucher");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Vouchers.VoucherUsage", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Vouchers.VoucherUsage",
+                b =>
                 {
                     b.HasOne("Domain.Aggregates.Users.User", null)
                         .WithMany()
@@ -2357,58 +2217,82 @@ namespace Infrastructure.Data.Migrations
                         .HasConstraintName("fk_voucher_usage_voucher_voucher_id");
 
                     b.Navigation("Order");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Equipments.Equipment", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Equipments.Equipment",
+                b =>
                 {
                     b.Navigation("EquipmentActivities");
 
                     b.Navigation("OrderEquipments");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Equipments.EquipmentActivity", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Equipments.EquipmentActivity",
+                b =>
                 {
                     b.Navigation("ActivityDetails");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Feedbacks.Feedback", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Feedbacks.Feedback",
+                b =>
                 {
                     b.Navigation("Reactions");
 
                     b.Navigation("Replies");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Inventories.InventoryDocument", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Inventories.InventoryDocument",
+                b =>
                 {
                     b.Navigation("EquipmentSupplyings");
 
                     b.Navigation("InventorySupplierReceipts");
 
                     b.Navigation("ProductSupplyings");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Orders.Order", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Orders.Order",
+                b =>
                 {
                     b.Navigation("OrderEquipments");
 
                     b.Navigation("OrderItems");
 
                     b.Navigation("VoucherUsage");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Products.BranchProduct", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Products.BranchProduct",
+                b =>
                 {
                     b.Navigation("ProductSupplyings");
 
                     b.Navigation("UnitRelations");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Services.Category", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Services.Category",
+                b =>
                 {
                     b.Navigation("Services");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Services.Service", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Services.Service",
+                b =>
                 {
                     b.Navigation("OrderItems");
 
@@ -2417,9 +2301,12 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("ServiceTariffs");
 
                     b.Navigation("UnitRelations");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Services.UnitRelation", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Services.UnitRelation",
+                b =>
                 {
                     b.Navigation("AsUnitProduct");
 
@@ -2428,31 +2315,44 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("OrderItems");
 
                     b.Navigation("ProductSupplyings");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Suppliers.Supplier", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Suppliers.Supplier",
+                b =>
                 {
                     b.Navigation("EquipmentSupplyings");
 
                     b.Navigation("ProductSupplyings");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Tariffs.Tariff", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Tariffs.Tariff",
+                b =>
                 {
                     b.Navigation("ServicePriceTariffHistories");
 
                     b.Navigation("ServiceTariffs");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Users.User",
+                b =>
                 {
                     b.Navigation("BranchUsers");
-                });
+                }
+            );
 
-            modelBuilder.Entity("Domain.Aggregates.Vouchers.Voucher", b =>
+            modelBuilder.Entity(
+                "Domain.Aggregates.Vouchers.Voucher",
+                b =>
                 {
                     b.Navigation("VoucherCustomers");
-                });
+                }
+            );
 #pragma warning restore 612, 618
         }
     }

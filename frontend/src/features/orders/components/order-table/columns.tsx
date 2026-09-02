@@ -22,16 +22,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { formatPriceVN } from "@/utils/format";
 import { apiClient } from "@/api/client";
 import { usePushRouter } from "@/utils/router-utli";
@@ -49,6 +39,7 @@ import {
 import { PaymentMethodSelect } from "../PaymentMethodSelect";
 import { usePageType } from "@/hooks/use-page-type";
 import { OrderEquipment } from "@/features/cashier/types";
+import { CancelOrderDialog } from "../cancel-order-dialog";
 
 export const useOrder = ({
   onEdit,
@@ -136,19 +127,33 @@ export const useOrder = ({
       status,
       paymentMethod,
       equipments,
+      cancellationReason,
     }: {
       id: string;
       status: OrderStatus;
       paymentMethod?: PaymentMethod;
       equipments?: OrderEquipment[];
+      cancellationReason?: string;
     }) =>
       apiClient.ecommerceApiOrdersUpdateStatusidPut(id, {
         status,
         paymentMethod,
-        orderEquipments: equipments?.map(({ equipmentId }) => ({ equipmentId })),
+        cancellationReason,
+        orderEquipments: equipments?.map(({ equipmentId }) => ({
+          equipmentId,
+        })),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+    },
+    onError: (_error, variables) => {
+      alert(
+        t(
+          variables.status === OrderStatus.Cancelled
+            ? "order.errorCancellingOrder"
+            : "order.updateOrderStatusFailed",
+        ),
+      );
     },
   });
 
@@ -175,22 +180,21 @@ export const useOrder = ({
     setIsCancelDialogOpen(true);
   };
 
-  const confirmCancelOrder = () => {
+  const confirmCancelOrder = async (cancellationReason: string) => {
     if (orderToCancel) {
-      updateStatus.mutate({
+      await updateStatus.mutateAsync({
         id: orderToCancel.id,
         status: OrderStatus.Cancelled,
+        cancellationReason,
       });
     }
-    setIsCancelDialogOpen(false);
-    setOrderToCancel(null);
   };
 
   const handleChangeStatus = (
     orderId: string,
     newStatus: OrderStatus,
     code: string,
-    currentStatus: OrderStatus
+    currentStatus: OrderStatus,
   ) => {
     if (newStatus === OrderStatus.Completed) {
       handleCompleteOrder(orderId, code);
@@ -332,7 +336,7 @@ export const useOrder = ({
                             order.id!.toString(),
                             status,
                             order.code!,
-                            order.status!
+                            order.status!,
                           )
                         }
                         className={textColor + " " + bgColor}
@@ -346,36 +350,6 @@ export const useOrder = ({
                 })}
               </DropdownMenuContent>
             </DropdownMenu>
-
-            {/* Cancel Dialog */}
-            <AlertDialog
-              open={isCancelDialogOpen}
-              onOpenChange={setIsCancelDialogOpen}
-            >
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    {t("common.deleteConfirm.title", {
-                      entity: t("order.title"),
-                    })}
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {t("common.deleteConfirm.description", {
-                      entity: t("order.title"),
-                      entityName: orderToCancel?.code,
-                    })}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel onClick={() => setOrderToCancel(null)}>
-                    {t("common.deleteConfirm.cancel")}
-                  </AlertDialogCancel>
-                  <AlertDialogAction onClick={confirmCancelOrder}>
-                    {t("common.deleteConfirm.confirm")}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
 
             {/* Payment Dialog */}
             {isPaymentDialogOpen && (
@@ -519,5 +493,17 @@ export const useOrder = ({
     columns,
     columnOrderServices,
     columnOrderCustomer,
+    cancelOrderDialog: (
+      <CancelOrderDialog
+        open={isCancelDialogOpen}
+        onOpenChange={(open) => {
+          setIsCancelDialogOpen(open);
+          if (!open) setOrderToCancel(null);
+        }}
+        orderCode={orderToCancel?.code}
+        onConfirm={confirmCancelOrder}
+        isPending={updateStatus.isPending}
+      />
+    ),
   };
 };

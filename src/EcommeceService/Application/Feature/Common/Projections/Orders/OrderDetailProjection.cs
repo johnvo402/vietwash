@@ -13,6 +13,9 @@ namespace Application.Feature.Common.Projections.Orders
         public string? Note { get; set; }
         public long? StaffId { get; set; }
         public PaymentMethod? PaymentMethod { get; set; }
+        public DateTimeOffset? CancelledAt { get; set; }
+        public long? CancelledBy { get; set; }
+        public string? CancellationReason { get; set; }
         public string? QrCode { get; set; }
         public string? VoucherCode { get; set; }
         public int Vat { get; set; }
@@ -47,6 +50,9 @@ namespace Application.Feature.Common.Projections.Orders
             BranchId = order.BranchId;
             QrCode = order.CodeConfirm;
             PaymentMethod = order.PaymentMethod;
+            CancelledAt = order.CancelledAt;
+            CancelledBy = order.CancelledBy;
+            CancellationReason = order.CancellationReason;
             VoucherCode = order.VoucherCode;
             Point = order.Point;
             TariffId = order.TariffId;

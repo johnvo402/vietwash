@@ -358,7 +358,8 @@ const en = {
       totalDiscount: "Discount Amount",
       totalNetRevenue: "Collected Revenue",
       averageRevenuePerOrder: "Average Collected Revenue per Order",
-      averageRevenuePerCustomer: "Average Collected Revenue per Registered Customer",
+      averageRevenuePerCustomer:
+        "Average Collected Revenue per Registered Customer",
     },
     totalCustomers: "Total Customers",
     totalRegisteredCustomers: "Total Registered Customers",
@@ -563,6 +564,8 @@ const en = {
     expectedDelivery: "Expected Delivery",
     updateOrderStatusFailed:
       "Sorry, updating order status failed. Please try again later",
+    errorCancellingOrder:
+      "The order could not be cancelled. Check its payment status and try again.",
     alertUpdateCondition: "Only pending orders can be canceled",
     customerName: "Customer Name",
     customerPhone: "Phone Number",
@@ -605,6 +608,16 @@ const en = {
     canceled: "Order has been canceled",
     orderItems: "Order items",
     equipmentItems: "Order equipments",
+    cancelOrderTitle: "Cancel order",
+    cancelOrderDescription:
+      "Cancel order {code}? The reason will be saved in the order audit.",
+    cancellationReason: "Cancellation reason",
+    cancellationReasonPlaceholder: "Describe why this order is being cancelled",
+    cancellationReasonRequired: "A cancellation reason is required",
+    cancellationReasonLength: "Use between {min} and {max} characters",
+    cancelOrderConfirm: "Cancel order",
+    cancelledAt: "Cancelled at",
+    cancelledBy: "Cancelled by account",
   },
   service: {
     numberOfServices: "Number of Services",

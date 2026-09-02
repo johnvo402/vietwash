@@ -40,14 +40,15 @@ public class FinancialReportHandler(IUnitOfWork unitOfWork, ICurrentAccount curr
             })
             .SingleOrDefaultAsync(cancellationToken);
 
-        // Cancellation has no financial OrderDate. Keep the existing operational CreatedAt
-        // period for this separate informational metric; it never contributes to revenue.
+        // Cancellation is an informational metric keyed by its authoritative audit time.
+        // It remains separate from completed-order earned revenue.
         decimal cancelledValue = await unitOfWork
             .Repository<Order>()
             .QueryAsync(order =>
                 order.Status == OrderStatus.Cancelled
-                && order.CreatedAt >= range.UtcStartInclusive
-                && order.CreatedAt < range.UtcEndExclusive
+                && order.CancelledAt.HasValue
+                && order.CancelledAt.Value >= range.UtcStartInclusive
+                && order.CancelledAt.Value < range.UtcEndExclusive
                 && branchScope.BranchIds.Contains(order.BranchId)
             )
             .SumAsync(order => order.Amount, cancellationToken);

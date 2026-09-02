@@ -6,6 +6,7 @@ namespace Application.Feature.Common.Projections.Orders
     {
         public OrderStatus? Status { get; set; }
         public PaymentMethod? PaymentMethod { get; set; }
+        public string? CancellationReason { get; set; }
         public List<OrderEquipmentSelectionModel>? OrderEquipments { get; set; } = [];
     }
 

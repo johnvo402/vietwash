@@ -13,15 +13,7 @@ namespace EcommerceService.Tests;
 
 public class OrderLifecycleTests
 {
-    private static readonly DateTimeOffset CompletedAt = new(
-        2026,
-        9,
-        1,
-        12,
-        0,
-        0,
-        TimeSpan.Zero
-    );
+    private static readonly DateTimeOffset CompletedAt = new(2026, 9, 1, 12, 0, 0, TimeSpan.Zero);
 
     public static IEnumerable<object[]> StatusPairs()
     {
@@ -48,13 +40,132 @@ public class OrderLifecycleTests
     public void Domain_AppliesEveryAllowedTransition(OrderStatus current, OrderStatus target)
     {
         Order order = CreateOrder(current);
-        IReadOnlyCollection<OrderEquipment>? equipments = target == OrderStatus.InProgress
-            ? [new OrderEquipment { EquipmentId = 1, EquipmentName = "Washer" }]
-            : null;
+        IReadOnlyCollection<OrderEquipment>? equipments =
+            target == OrderStatus.InProgress
+                ? [new OrderEquipment { EquipmentId = 1, EquipmentName = "Washer" }]
+                : null;
         PaymentMethod? payment = target == OrderStatus.Completed ? PaymentMethod.Cash : null;
+        OrderCancellation? cancellation = target == OrderStatus.Cancelled ? Cancellation() : null;
 
-        Assert.Equal(OrderTransitionResult.Applied, order.TransitionTo(target, payment, equipments));
+        Assert.Equal(
+            OrderTransitionResult.Applied,
+            order.TransitionTo(target, payment, equipments, cancellation: cancellation)
+        );
         Assert.Equal(target, order.Status);
+    }
+
+    [Fact]
+    public void CancellingOrder_RequiresAuthoritativeCancellationMetadata()
+    {
+        Order order = CreateOrder(OrderStatus.Pending);
+
+        Assert.Equal(
+            OrderTransitionResult.CancellationRequired,
+            order.TransitionTo(OrderStatus.Cancelled)
+        );
+        Assert.Equal(OrderStatus.Pending, order.Status);
+        Assert.Null(order.CancelledAt);
+        Assert.Null(order.CancelledBy);
+        Assert.Null(order.CancellationReason);
+    }
+
+    [Theory]
+    [InlineData(OrderStatus.Pending)]
+    [InlineData(OrderStatus.InProgress)]
+    [InlineData(OrderStatus.Processed)]
+    public void Cancellation_RecordsTrimmedReasonAccountAndServerTime(OrderStatus status)
+    {
+        Order order = CreateOrder(status, customerId: 7, voucherId: 8);
+        OrderCancellation cancellation = OrderCancellation.Create(
+            CompletedAt,
+            99,
+            "  Customer requested cancellation  "
+        );
+
+        Assert.Equal(
+            OrderTransitionResult.Applied,
+            order.TransitionTo(OrderStatus.Cancelled, cancellation: cancellation)
+        );
+
+        Assert.Equal(OrderStatus.Cancelled, order.Status);
+        Assert.Equal(CompletedAt, order.CancelledAt);
+        Assert.Equal(99, order.CancelledBy);
+        Assert.Equal("Customer requested cancellation", order.CancellationReason);
+        Assert.Single(order.UncommittedEvents.OfType<UpdateStatusOrderEvent>());
+        Assert.Empty(order.UncommittedEvents.OfType<CreateFundEvent>());
+        Assert.Empty(order.UncommittedEvents.OfType<EInvoiceEvent>());
+        Assert.Empty(order.UncommittedEvents.OfType<VoucherUsageEvent>());
+    }
+
+    [Fact]
+    public void DuplicateCancellation_CannotOverwriteTheFirstAudit()
+    {
+        Order order = CreateOrder(OrderStatus.Pending);
+        OrderCancellation original = Cancellation();
+        _ = order.TransitionTo(OrderStatus.Cancelled, cancellation: original);
+        int eventCount = order.UncommittedEvents.Count;
+
+        OrderCancellation retry = OrderCancellation.Create(
+            CompletedAt.AddHours(1),
+            100,
+            "Different retry reason"
+        );
+        Assert.Equal(
+            OrderTransitionResult.Idempotent,
+            order.TransitionTo(OrderStatus.Cancelled, cancellation: retry)
+        );
+
+        Assert.Equal(original.CancelledAt, order.CancelledAt);
+        Assert.Equal(original.CancelledBy, order.CancelledBy);
+        Assert.Equal(original.Reason, order.CancellationReason);
+        Assert.Equal(eventCount, order.UncommittedEvents.Count);
+    }
+
+    [Fact]
+    public void CancellationAndVerifiedCompletion_ExactlyOneTerminalTransitionCanWin()
+    {
+        Order cancellationWins = CreateOrder(OrderStatus.Processed);
+
+        Assert.Equal(
+            OrderTransitionResult.Applied,
+            cancellationWins.TransitionTo(OrderStatus.Cancelled, cancellation: Cancellation())
+        );
+        Assert.Equal(
+            OrderTransitionResult.InvalidTransition,
+            cancellationWins.TransitionTo(OrderStatus.Completed, PaymentMethod.Card)
+        );
+        Assert.Equal(OrderStatus.Cancelled, cancellationWins.Status);
+        Assert.Empty(cancellationWins.UncommittedEvents.OfType<CreateFundEvent>());
+        Assert.Empty(cancellationWins.UncommittedEvents.OfType<EInvoiceEvent>());
+
+        Order completionWins = CreateOrder(OrderStatus.Processed);
+
+        Assert.Equal(
+            OrderTransitionResult.Applied,
+            completionWins.TransitionTo(OrderStatus.Completed, PaymentMethod.Card)
+        );
+        Assert.Equal(
+            OrderTransitionResult.InvalidTransition,
+            completionWins.TransitionTo(OrderStatus.Cancelled, cancellation: Cancellation())
+        );
+        Assert.Equal(OrderStatus.Completed, completionWins.Status);
+        Assert.Single(completionWins.UncommittedEvents.OfType<CreateFundEvent>());
+        Assert.Single(completionWins.UncommittedEvents.OfType<EInvoiceEvent>());
+    }
+
+    [Fact]
+    public void CancelledOrder_RejectsLaterVerifiedCompletionWithoutFinancialEvents()
+    {
+        Order order = CreateOrder(OrderStatus.Processed);
+        _ = order.TransitionTo(OrderStatus.Cancelled, cancellation: Cancellation());
+        _ = order.DequeueUncommittedEvents();
+
+        Assert.Equal(
+            OrderTransitionResult.InvalidTransition,
+            order.TransitionTo(OrderStatus.Completed, PaymentMethod.Card)
+        );
+        Assert.Equal(OrderStatus.Cancelled, order.Status);
+        Assert.Empty(order.UncommittedEvents);
     }
 
     [Theory]
@@ -67,10 +178,7 @@ public class OrderLifecycleTests
     [InlineData(OrderStatus.Cancelled, OrderStatus.InProgress)]
     [InlineData(OrderStatus.Cancelled, OrderStatus.Processed)]
     [InlineData(OrderStatus.Cancelled, OrderStatus.Completed)]
-    public void Domain_RejectsSkippedAndTerminalTransitions(
-        OrderStatus current,
-        OrderStatus target
-    )
+    public void Domain_RejectsSkippedAndTerminalTransitions(OrderStatus current, OrderStatus target)
     {
         Order order = CreateOrder(current);
 
@@ -119,11 +227,7 @@ public class OrderLifecycleTests
     public void StartingOrder_PersistsAuthoritativeEquipmentSnapshot()
     {
         Order order = CreateOrder(OrderStatus.Pending);
-        var equipment = new OrderEquipment
-        {
-            EquipmentId = 42,
-            EquipmentName = "DB Washer Name",
-        };
+        var equipment = new OrderEquipment { EquipmentId = 42, EquipmentName = "DB Washer Name" };
 
         Assert.Equal(
             OrderTransitionResult.Applied,
@@ -351,17 +455,61 @@ public class OrderLifecycleTests
             Model = new OrderUpdateStatus
             {
                 Status = OrderStatus.InProgress,
-                OrderEquipments =
-                [
-                    new() { EquipmentId = 5 },
-                    new() { EquipmentId = 5 },
-                ],
+                OrderEquipments = [new() { EquipmentId = 5 }, new() { EquipmentId = 5 }],
             },
         };
 
         Assert.False(validator.Validate(missingPayment).IsValid);
         Assert.False(validator.Validate(unexpectedPayment).IsValid);
         Assert.False(validator.Validate(duplicateEquipment).IsValid);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("  ")]
+    [InlineData("ab")]
+    public void UpdateStatusValidator_CancellationRequiresAValidTrimmedReason(string? reason)
+    {
+        var validator = new UpdateStatusCommandValidator();
+        var command = new UpdateStatusCommand
+        {
+            OrderId = "1",
+            Model = new OrderUpdateStatus
+            {
+                Status = OrderStatus.Cancelled,
+                CancellationReason = reason,
+            },
+        };
+
+        Assert.False(validator.Validate(command).IsValid);
+    }
+
+    [Fact]
+    public void UpdateStatusValidator_AcceptsBoundaryReasonAndRejectsReasonForOtherStatus()
+    {
+        var validator = new UpdateStatusCommandValidator();
+        var cancellation = new UpdateStatusCommand
+        {
+            OrderId = "1",
+            Model = new OrderUpdateStatus
+            {
+                Status = OrderStatus.Cancelled,
+                CancellationReason = "  abc  ",
+            },
+        };
+        var nonCancellation = new UpdateStatusCommand
+        {
+            OrderId = "1",
+            Model = new OrderUpdateStatus
+            {
+                Status = OrderStatus.Processed,
+                CancellationReason = "Not allowed",
+            },
+        };
+
+        Assert.True(validator.Validate(cancellation).IsValid);
+        Assert.False(validator.Validate(nonCancellation).IsValid);
     }
 
     [Theory]
@@ -408,12 +556,18 @@ public class OrderLifecycleTests
     private static bool ExpectedTransition(OrderStatus current, OrderStatus target) =>
         current == target
         || (current, target)
-            is (OrderStatus.Pending, OrderStatus.InProgress)
-                or (OrderStatus.Pending, OrderStatus.Cancelled)
-                or (OrderStatus.InProgress, OrderStatus.Processed)
-                or (OrderStatus.InProgress, OrderStatus.Cancelled)
-                or (OrderStatus.Processed, OrderStatus.Completed)
-                or (OrderStatus.Processed, OrderStatus.Cancelled);
+            is
+                (OrderStatus.Pending, OrderStatus.InProgress)
+                or
+                (OrderStatus.Pending, OrderStatus.Cancelled)
+                or
+                (OrderStatus.InProgress, OrderStatus.Processed)
+                or
+                (OrderStatus.InProgress, OrderStatus.Cancelled)
+                or
+                (OrderStatus.Processed, OrderStatus.Completed)
+                or
+                (OrderStatus.Processed, OrderStatus.Cancelled);
 
     private static Order CreateOrder(
         OrderStatus status,
@@ -430,4 +584,7 @@ public class OrderLifecycleTests
             customerId: customerId,
             voucherId: voucherId
         );
+
+    private static OrderCancellation Cancellation() =>
+        OrderCancellation.Create(CompletedAt, 99, "Customer requested cancellation");
 }

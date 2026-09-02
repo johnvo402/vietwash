@@ -46,7 +46,7 @@ export default function OrderView() {
   const [searchTermEquipment, setSearchTermEquipment] = useState("");
   const branchId = useMemo(
     () => branchActive?.branchId?.toString() ?? "",
-    [branchActive]
+    [branchActive],
   );
   const {
     search,
@@ -62,7 +62,7 @@ export default function OrderView() {
     setViewMode,
   } = useOrderFilters();
   const cashier = useCashier();
-  const { columns } = useOrder({
+  const { columns, cancelOrderDialog } = useOrder({
     onEdit(id) {
       handleEdit(id);
     },
@@ -94,7 +94,7 @@ export default function OrderView() {
                 item.unitRelationId !== undefined &&
                 item.price !== undefined &&
                 item.quantity !== undefined &&
-                item.unitPrice !== undefined
+                item.unitPrice !== undefined,
             )
             .map((item) => ({
               serviceId: item.serviceId!,
@@ -148,7 +148,7 @@ export default function OrderView() {
 
   const handlePaymentSuccess = (method: "cash" | "card") => {
     alert(
-      t(method === "cash" ? "order.cashConfirmed" : "order.paymentSuccess")
+      t(method === "cash" ? "order.cashConfirmed" : "order.paymentSuccess"),
     );
     refetch();
   };
@@ -168,7 +168,9 @@ export default function OrderView() {
       apiClient.ecommerceApiOrdersUpdateStatusidPut(id, {
         status,
         paymentMethod,
-        orderEquipments: equipments?.map(({ equipmentId }) => ({ equipmentId })),
+        orderEquipments: equipments?.map(({ equipmentId }) => ({
+          equipmentId,
+        })),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
@@ -269,6 +271,7 @@ export default function OrderView() {
         onClose={() => setIsPaymentOpen(false)}
         onPaymentSuccess={handlePaymentSuccess}
       />
+      {cancelOrderDialog}
       <Dialog
         open={isEquipmentDialogOpen}
         onOpenChange={onDialogEquipmentClosed}
@@ -284,7 +287,7 @@ export default function OrderView() {
                     <Input
                       type="text"
                       placeholder={t(
-                        "equipment.equipmentList.searchPlaceholder"
+                        "equipment.equipmentList.searchPlaceholder",
                       )}
                       value={searchTermEquipment}
                       onChange={(e) => setSearchTermEquipment(e.target.value)}

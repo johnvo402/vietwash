@@ -399,7 +399,8 @@ const vi = {
   dashboard: {
     saleOverview: "Tổng quan bán hàng",
     saleDescription: "Số liệu bán hàng trong khoảng thời gian đã chọn",
-    revenueDescription: "Xu hướng doanh thu thực thu trong khoảng thời gian đã chọn",
+    revenueDescription:
+      "Xu hướng doanh thu thực thu trong khoảng thời gian đã chọn",
     branchRevenueDistribution: "Phân bổ doanh thu chi nhánh",
     branchRevenueDescription:
       "Doanh thu thực thu theo chi nhánh trong khoảng thời gian đã chọn",
@@ -572,6 +573,8 @@ const vi = {
     expectedDelivery: "Giao hàng dự kiến",
     updateOrderStatusFailed:
       "Xin lỗi, cập nhật trạng thái đơn dịch vụ thất bại. Vui lòng thử lại sau",
+    errorCancellingOrder:
+      "Không thể hủy đơn. Vui lòng kiểm tra trạng thái thanh toán và thử lại.",
     alertUpdateCondition: "Chỉ các đơn dịch vụ đang chờ mới có thể bị hủy",
     customerName: "Tên khách hàng",
     customerPhone: "Số điện thoại",
@@ -615,6 +618,16 @@ const vi = {
     canceled: "Dịch vụ đã bị hủy",
     orderItems: "Dịch vụ",
     equipmentItems: "Thiết bị dùng",
+    cancelOrderTitle: "Hủy đơn giặt",
+    cancelOrderDescription:
+      "Hủy đơn {code}? Lý do sẽ được lưu trong thông tin kiểm toán của đơn.",
+    cancellationReason: "Lý do hủy",
+    cancellationReasonPlaceholder: "Mô tả lý do hủy đơn này",
+    cancellationReasonRequired: "Bắt buộc nhập lý do hủy",
+    cancellationReasonLength: "Nhập từ {min} đến {max} ký tự",
+    cancelOrderConfirm: "Hủy đơn",
+    cancelledAt: "Hủy lúc",
+    cancelledBy: "Tài khoản thực hiện",
   },
   service: {
     numberOfServices: "Số lượng dịch vụ",

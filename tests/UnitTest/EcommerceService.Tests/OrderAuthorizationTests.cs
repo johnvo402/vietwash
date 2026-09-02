@@ -26,6 +26,7 @@ using Domain.Aggregates.Inventories;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Users;
+using Domain.Aggregates.Vouchers;
 using Mediator;
 using Moq;
 using Net.payOS.Types;
@@ -76,10 +77,7 @@ public class OrderAuthorizationTests
         Mock<IAsyncRepository<User>> users = new(MockBehavior.Strict);
         users
             .Setup(x =>
-                x.AnyAsync(
-                    It.IsAny<Expression<Func<User, bool>>>(),
-                    It.IsAny<CancellationToken>()
-                )
+                x.AnyAsync(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>())
             )
             .ReturnsAsync(false);
         Mock<IUnitOfWork> unitOfWork = new(MockBehavior.Strict);
@@ -95,10 +93,7 @@ public class OrderAuthorizationTests
         Assert.NotEqual(403, result.Error?.Status);
         users.Verify(
             x =>
-                x.AnyAsync(
-                    It.IsAny<Expression<Func<User, bool>>>(),
-                    It.IsAny<CancellationToken>()
-                ),
+                x.AnyAsync(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>()),
             Times.Once
         );
     }
@@ -294,6 +289,42 @@ public class OrderAuthorizationTests
     }
 
     [Fact]
+    public async Task UpdateStatus_UnauthorizedCancellationPerformsZeroSideEffects()
+    {
+        Order order = OrderAtBranch(2, OrderStatus.Processed);
+        (Mock<IUnitOfWork> unitOfWork, _) = TransactionalOrderUnitOfWork(order);
+        Mock<IOrderPaymentLinkClient> paymentClient = new(MockBehavior.Strict);
+        UpdateStatusHandler handler = new(
+            unitOfWork.Object,
+            CurrentAccount(["1"]),
+            paymentClient.Object
+        );
+
+        Result result = await handler.Handle(
+            new UpdateStatusCommand
+            {
+                OrderId = "20",
+                Model = new OrderUpdateStatus
+                {
+                    Status = OrderStatus.Cancelled,
+                    CancellationReason = "Unauthorized cancellation",
+                },
+            },
+            default
+        );
+
+        AssertForbidden(result.Error);
+        Assert.Equal(OrderStatus.Processed, order.Status);
+        Assert.Null(order.CancelledAt);
+        Assert.Empty(order.UncommittedEvents);
+        paymentClient.VerifyNoOtherCalls();
+        unitOfWork.Verify(x => x.Repository<Order>(It.IsAny<bool>()), Times.Never);
+        unitOfWork.Verify(x => x.Repository<Equipment>(It.IsAny<bool>()), Times.Never);
+        unitOfWork.Verify(x => x.Repository<VoucherUsage>(It.IsAny<bool>()), Times.Never);
+        unitOfWork.Verify(x => x.Repository<VoucherCustomer>(It.IsAny<bool>()), Times.Never);
+    }
+
+    [Fact]
     public async Task PaymentLink_UnauthorizedBranchNeverInvokesPayOsClient()
     {
         Mock<IOrderPaymentLinkClient> paymentClient = new(MockBehavior.Strict);
@@ -335,10 +366,7 @@ public class OrderAuthorizationTests
 
         Assert.True(result.IsSuccess);
         Assert.Same(payment, result.Value);
-        paymentClient.Verify(
-            x => x.CreatePaymentLinkAsync(It.IsAny<PaymentData>()),
-            Times.Once
-        );
+        paymentClient.Verify(x => x.CreatePaymentLinkAsync(It.IsAny<PaymentData>()), Times.Once);
     }
 
     [Fact]
@@ -371,9 +399,7 @@ public class OrderAuthorizationTests
             )
             .ReturnsAsync(new PaginationResponse<ListOrderResponse>([], 0, 1, 100));
         Mock<IUnitOfWork> unitOfWork = new(MockBehavior.Strict);
-        unitOfWork
-            .Setup(x => x.DynamicReadOnlyRepository<Order>(false))
-            .Returns(orders.Object);
+        unitOfWork.Setup(x => x.DynamicReadOnlyRepository<Order>(false)).Returns(orders.Object);
         ListOrderHandler handler = new(unitOfWork.Object, CurrentAccount(["1"]));
 
         Result<PaginationResponse<ListOrderResponse>> result = await handler.Handle(
@@ -419,7 +445,9 @@ public class OrderAuthorizationTests
                 && candidate.DeclaringType == typeof(CompletedOrderWebhook)
         );
         PropertyInfo amountProperty = Assert.IsAssignableFrom<PropertyInfo>(
-            typeof(UpdateStatusCommand).GetProperty(nameof(UpdateStatusCommand.ExpectedPaymentAmount))
+            typeof(UpdateStatusCommand).GetProperty(
+                nameof(UpdateStatusCommand.ExpectedPaymentAmount)
+            )
         );
         PropertyInfo markerProperty = Assert.IsAssignableFrom<PropertyInfo>(
             typeof(UpdateStatusCommand).GetProperty(
@@ -445,8 +473,10 @@ public class OrderAuthorizationTests
             Mock.Of<IQrGenerator>()
         );
 
-    private static (Mock<IUnitOfWork>, Mock<IDynamicSpecificationRepository<Order>>)
-        BranchLookupUnitOfWork(long branchId)
+    private static (
+        Mock<IUnitOfWork>,
+        Mock<IDynamicSpecificationRepository<Order>>
+    ) BranchLookupUnitOfWork(long branchId)
     {
         Mock<IAsyncRepository<Order>> orders = new(MockBehavior.Strict);
         orders
@@ -461,14 +491,14 @@ public class OrderAuthorizationTests
         Mock<IDynamicSpecificationRepository<Order>> details = new(MockBehavior.Strict);
         Mock<IUnitOfWork> unitOfWork = new(MockBehavior.Strict);
         unitOfWork.Setup(x => x.Repository<Order>(false)).Returns(orders.Object);
-        unitOfWork
-            .Setup(x => x.DynamicReadOnlyRepository<Order>(false))
-            .Returns(details.Object);
+        unitOfWork.Setup(x => x.DynamicReadOnlyRepository<Order>(false)).Returns(details.Object);
         return (unitOfWork, details);
     }
 
-    private static (Mock<IUnitOfWork>, Mock<IDynamicSpecificationRepository<Order>>)
-        TransactionalOrderUnitOfWork(Order order, bool commitExpected = false)
+    private static (
+        Mock<IUnitOfWork>,
+        Mock<IDynamicSpecificationRepository<Order>>
+    ) TransactionalOrderUnitOfWork(Order order, bool commitExpected = false)
     {
         Mock<DbTransaction> transaction = new();
         Mock<IDynamicSpecificationRepository<Order>> orders = new(MockBehavior.Strict);
@@ -484,9 +514,7 @@ public class OrderAuthorizationTests
         unitOfWork
             .Setup(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(transaction.Object);
-        unitOfWork
-            .Setup(x => x.DynamicReadOnlyRepository<Order>(false))
-            .Returns(orders.Object);
+        unitOfWork.Setup(x => x.DynamicReadOnlyRepository<Order>(false)).Returns(orders.Object);
         if (commitExpected)
             unitOfWork
                 .Setup(x => x.CommitAsync(It.IsAny<CancellationToken>()))
@@ -520,14 +548,17 @@ public class OrderAuthorizationTests
                     Status = OrderStatus.Processed,
                     Items =
                     [
-                        new OrderPaymentItem { Name = "Wash", Quantity = 1, Amount = 100 },
+                        new OrderPaymentItem
+                        {
+                            Name = "Wash",
+                            Quantity = 1,
+                            Amount = 100,
+                        },
                     ],
                 }
             );
         Mock<IUnitOfWork> unitOfWork = new(MockBehavior.Strict);
-        unitOfWork
-            .Setup(x => x.DynamicReadOnlyRepository<Order>(false))
-            .Returns(orders.Object);
+        unitOfWork.Setup(x => x.DynamicReadOnlyRepository<Order>(false)).Returns(orders.Object);
         return unitOfWork;
     }
 
@@ -538,7 +569,12 @@ public class OrderAuthorizationTests
         new StubCurrentAccount
         {
             Id = 99,
-            Session = new UserAuth { Id = 99, Role = "STAFF", Branches = branches },
+            Session = new UserAuth
+            {
+                Id = 99,
+                Role = "STAFF",
+                Branches = branches,
+            },
         };
 
     private static CreatePaymentResult PaymentResult() =>

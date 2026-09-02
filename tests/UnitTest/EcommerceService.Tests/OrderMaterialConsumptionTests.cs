@@ -10,15 +10,7 @@ namespace EcommerceService.Tests;
 
 public class OrderMaterialConsumptionTests
 {
-    private static readonly DateTimeOffset TransactionAt = new(
-        2026,
-        9,
-        1,
-        12,
-        0,
-        0,
-        TimeSpan.Zero
-    );
+    private static readonly DateTimeOffset TransactionAt = new(2026, 9, 1, 12, 0, 0, TimeSpan.Zero);
 
     [Fact]
     public void ServiceWithoutResources_CreatesNeitherRequirementNorExport()
@@ -130,7 +122,10 @@ public class OrderMaterialConsumptionTests
         OrderMaterialResolution resolution = Resolve(
             [
                 ValidInput(resourceQuantity: 2m),
-                ValidInput(resourceQuantity: 3m) with { MaterialUnitId = 301 },
+                ValidInput(resourceQuantity: 3m) with
+                {
+                    MaterialUnitId = 301,
+                },
             ]
         );
 
@@ -353,25 +348,16 @@ public class OrderMaterialConsumptionTests
             TransactionAt
         )!;
 
-        Assert.False(
-            InventoryDocumentCompletionPolicy.ShouldRunExternalSideEffects(export)
-        );
+        Assert.False(InventoryDocumentCompletionPolicy.ShouldRunExternalSideEffects(export));
         Assert.All(export.ProductSupplyings, x => Assert.Null(x.SupplierId));
     }
 
     [Fact]
     public void ManualInventoryDocument_KeepsExistingCompletionSideEffects()
     {
-        var document = new InventoryDocument(
-            "NK000001",
-            10,
-            InventoryType.Import,
-            10
-        );
+        var document = new InventoryDocument("NK000001", 10, InventoryType.Import, 10);
 
-        Assert.True(
-            InventoryDocumentCompletionPolicy.ShouldRunExternalSideEffects(document)
-        );
+        Assert.True(InventoryDocumentCompletionPolicy.ShouldRunExternalSideEffects(document));
     }
 
     [Fact]
@@ -469,7 +455,14 @@ public class OrderMaterialConsumptionTests
     {
         Order order = CreateOrder(OrderStatus.InProgress);
 
-        OrderTransitionResult result = order.TransitionTo(OrderStatus.Cancelled);
+        OrderTransitionResult result = order.TransitionTo(
+            OrderStatus.Cancelled,
+            cancellation: OrderCancellation.Create(
+                DateTimeOffset.UtcNow,
+                99,
+                "Materials already consumed"
+            )
+        );
 
         Assert.Equal(OrderTransitionResult.Applied, result);
         Assert.DoesNotContain(
@@ -508,14 +501,7 @@ public class OrderMaterialConsumptionTests
         );
 
     private static Order CreateOrder(OrderStatus status = OrderStatus.Pending) =>
-        new(
-            branchId: 10,
-            staffId: 20,
-            code: "OD000100",
-            amount: 100,
-            total: 100,
-            status: status
-        )
+        new(branchId: 10, staffId: 20, code: "OD000100", amount: 100, total: 100, status: status)
         {
             Id = 100,
         };

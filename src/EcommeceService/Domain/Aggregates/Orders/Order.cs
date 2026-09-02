@@ -26,6 +26,7 @@ namespace Domain.Aggregates.Orders
         public int Vat { get; set; }
         public decimal VatAmount { get; set; }
         public decimal Total { get; set; } = default!;
+
         /// <summary>True for a fixed monetary discount; false for a percentage.</summary>
         public bool DiscountFixed { get; set; } = default!;
         public PaymentMethod? PaymentMethod { get; set; }
@@ -34,6 +35,9 @@ namespace Domain.Aggregates.Orders
         public string Note { get; set; } = default!;
         public OrderStatus Status { get; set; } = default!;
         public DateTimeOffset? OrderDate { get; set; }
+        public DateTimeOffset? CancelledAt { get; private set; }
+        public long? CancelledBy { get; private set; }
+        public string? CancellationReason { get; private set; }
         public DateTimeOffset DeliveryTime { get; set; } = default!;
         public User? Staff { get; set; }
         public User? Customer { get; set; }
@@ -141,7 +145,8 @@ namespace Domain.Aggregates.Orders
         public OrderTransitionResult EvaluateTransition(
             OrderStatus target,
             Enums.PaymentMethod? paymentMethod,
-            int equipmentCount
+            int equipmentCount,
+            OrderCancellation? cancellation = null
         )
         {
             if (Status == target)
@@ -164,6 +169,12 @@ namespace Domain.Aggregates.Orders
             if (target != OrderStatus.InProgress && equipmentCount != 0)
                 return OrderTransitionResult.EquipmentNotAllowed;
 
+            if (target == OrderStatus.Cancelled && cancellation is null)
+                return OrderTransitionResult.CancellationRequired;
+
+            if (target != OrderStatus.Cancelled && cancellation is not null)
+                return OrderTransitionResult.CancellationNotAllowed;
+
             return OrderTransitionResult.Applied;
         }
 
@@ -171,14 +182,16 @@ namespace Domain.Aggregates.Orders
             OrderStatus target,
             Enums.PaymentMethod? paymentMethod = null,
             IReadOnlyCollection<OrderEquipment>? orderEquipments = null,
-            DateTimeOffset? transitionedAt = null
+            DateTimeOffset? transitionedAt = null,
+            OrderCancellation? cancellation = null
         )
         {
             int equipmentCount = orderEquipments?.Count ?? OrderEquipments.Count;
             OrderTransitionResult validation = EvaluateTransition(
                 target,
                 paymentMethod,
-                equipmentCount
+                equipmentCount,
+                cancellation
             );
             if (validation != OrderTransitionResult.Applied)
                 return validation;
@@ -191,6 +204,13 @@ namespace Domain.Aggregates.Orders
             {
                 PaymentMethod = paymentMethod!.Value;
                 OrderDate = transitionedAt ?? DateTimeOffset.UtcNow;
+            }
+
+            if (target == OrderStatus.Cancelled)
+            {
+                CancelledAt = cancellation!.CancelledAt;
+                CancelledBy = cancellation.CancelledBy;
+                CancellationReason = cancellation.Reason;
             }
 
             Status = target;

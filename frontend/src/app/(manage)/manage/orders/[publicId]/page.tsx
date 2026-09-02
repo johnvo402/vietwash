@@ -45,7 +45,7 @@ export default function OrderDetailPage({ params }: OrderDetailProps) {
   const { mutateAsync: getReceipt } = useMutation({
     mutationFn: async () => {
       const response = await apiClient.financeApiEInvoiceGetByOrderIdOrderIdGet(
-        id!
+        id!,
       );
       return response.data.results?.url ?? "";
     },
@@ -74,9 +74,16 @@ export default function OrderDetailPage({ params }: OrderDetailProps) {
 
   // Mutation để hủy đơn dịch vụ
   const cancelOrderMutation = useMutation({
-    mutationFn: (id: string) =>
+    mutationFn: ({
+      id,
+      cancellationReason,
+    }: {
+      id: string;
+      cancellationReason: string;
+    }) =>
       apiClient.ecommerceApiOrdersUpdateStatusidPut(id, {
         status: OrderStatus.Cancelled,
+        cancellationReason,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["order", id] });
@@ -84,19 +91,21 @@ export default function OrderDetailPage({ params }: OrderDetailProps) {
     },
     onError: (error) => {
       console.error("Failed to cancel order:", error);
-      alert("Failed to cancel order. Please try again.");
     },
   });
 
   const handleChangeStatus = async (
     orderId: string,
-    newStatus: OrderStatus
+    newStatus: OrderStatus,
   ) => {
     await updateStatusMutation.mutate({ id: orderId, status: newStatus });
   };
 
-  const handleCancelOrder = async (orderId: string) => {
-    await cancelOrderMutation.mutate(orderId);
+  const handleCancelOrder = async (
+    orderId: string,
+    cancellationReason: string,
+  ) => {
+    await cancelOrderMutation.mutateAsync({ id: orderId, cancellationReason });
   };
 
   if (isLoading) {

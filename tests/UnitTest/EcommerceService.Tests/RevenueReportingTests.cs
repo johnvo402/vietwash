@@ -6,15 +6,7 @@ namespace EcommerceService.Tests;
 
 public class RevenueReportingTests
 {
-    private static readonly DateTimeOffset RangeStart = new(
-        2026,
-        9,
-        1,
-        0,
-        0,
-        0,
-        TimeSpan.Zero
-    );
+    private static readonly DateTimeOffset RangeStart = new(2026, 9, 1, 0, 0, 0, TimeSpan.Zero);
     private static readonly ReportUtcRange Range = new(RangeStart, RangeStart.AddDays(1));
 
     [Theory]
@@ -72,11 +64,7 @@ public class RevenueReportingTests
         decimal current,
         decimal previous,
         decimal expected
-    ) =>
-        Assert.Equal(
-            expected,
-            OrderRevenuePolicy.CalculatePercentageChange(current, previous)
-        );
+    ) => Assert.Equal(expected, OrderRevenuePolicy.CalculatePercentageChange(current, previous));
 
     [Fact]
     public void BranchScope_RejectsUnauthorizedSingleBranch()
@@ -127,8 +115,14 @@ public class RevenueReportingTests
 
         ReportUtcRange range = ReportTimeRange.ForLocalDay(new DateOnly(2026, 9, 2), timeZone);
 
-        Assert.Equal(new DateTimeOffset(2026, 9, 1, 17, 0, 0, TimeSpan.Zero), range.UtcStartInclusive);
-        Assert.Equal(new DateTimeOffset(2026, 9, 2, 17, 0, 0, TimeSpan.Zero), range.UtcEndExclusive);
+        Assert.Equal(
+            new DateTimeOffset(2026, 9, 1, 17, 0, 0, TimeSpan.Zero),
+            range.UtcStartInclusive
+        );
+        Assert.Equal(
+            new DateTimeOffset(2026, 9, 2, 17, 0, 0, TimeSpan.Zero),
+            range.UtcEndExclusive
+        );
     }
 
     [Fact]
@@ -161,10 +155,7 @@ public class RevenueReportingTests
     [Fact]
     public void LocalDateParser_PreservesRequestedCalendarDate()
     {
-        DateOnly date = ReportTimeRange.ParseLocalDate(
-            "2026-09-02T23:59:59.000Z",
-            "from"
-        );
+        DateOnly date = ReportTimeRange.ParseLocalDate("2026-09-02T23:59:59.000Z", "from");
 
         Assert.Equal(new DateOnly(2026, 9, 2), date);
     }
@@ -272,7 +263,10 @@ public class RevenueReportingTests
             CreateItem(serviceId: 2, price: 400m, quantity: 1),
         ];
 
-        ServiceRevenueLineRow[] lines = new[] { order }.AsQueryable().SelectServiceRevenueLines().ToArray();
+        ServiceRevenueLineRow[] lines = new[] { order }
+            .AsQueryable()
+            .SelectServiceRevenueLines()
+            .ToArray();
 
         Assert.Equal(60m, lines.Single(line => line.ServiceId == 1).DiscountAmount);
         Assert.Equal(40m, lines.Single(line => line.ServiceId == 2).DiscountAmount);
@@ -306,7 +300,8 @@ public class RevenueReportingTests
         Order completed = CreateOrder(OrderStatus.Completed, 1, 100m, 90m, RangeStart);
         Order cancelled = CreateOrder(OrderStatus.Cancelled, 1, 500m, 500m, RangeStart);
 
-        decimal revenue = SelectRevenue([completed, cancelled], [1]).Sum(row => row.CollectedAmount);
+        decimal revenue = SelectRevenue([completed, cancelled], [1])
+            .Sum(row => row.CollectedAmount);
         decimal cancellationValue = new[] { completed, cancelled }
             .Where(order => order.Status == OrderStatus.Cancelled)
             .Sum(order => order.Amount);
@@ -345,6 +340,17 @@ public class RevenueReportingTests
     }
 
     [Fact]
+    public void CustomerRevenueSql_UsesCancelledAtForCancellationMetrics()
+    {
+        string sql = CustomerRevenueSql();
+
+        Assert.Contains("o.cancelled_at IS NOT NULL", sql);
+        Assert.Contains("o.cancelled_at >= _from", sql);
+        Assert.Contains("o.cancelled_at < _to", sql);
+        Assert.DoesNotContain("o.delivery_time >= _from", sql);
+    }
+
+    [Fact]
     public void SharedCompletedOrders_ReconcileAcrossRevenueViews()
     {
         Order[] fixture =
@@ -359,8 +365,10 @@ public class RevenueReportingTests
 
         OrderRevenueRow[] rows = SelectRevenue(fixture, [1]);
         decimal dashboard = rows.Sum(row => row.CollectedAmount);
-        decimal revenueStatistic = rows.GroupBy(row => row.FinancialDate.Date).Sum(group => group.Sum(row => row.CollectedAmount));
-        decimal branchRevenue = rows.GroupBy(row => row.BranchId).Sum(group => group.Sum(row => row.CollectedAmount));
+        decimal revenueStatistic = rows.GroupBy(row => row.FinancialDate.Date)
+            .Sum(group => group.Sum(row => row.CollectedAmount));
+        decimal branchRevenue = rows.GroupBy(row => row.BranchId)
+            .Sum(group => group.Sum(row => row.CollectedAmount));
         decimal revenueReport = rows.Sum(row => row.CollectedAmount);
         decimal financialReport = rows.Sum(row => row.CollectedAmount);
 
@@ -419,7 +427,7 @@ public class RevenueReportingTests
                 AppContext.BaseDirectory,
                 "Data",
                 "Migrations",
-                "get_customer_revenue_report",
+                "get_customer_revenue_report_v2",
                 "up.sql"
             )
         );

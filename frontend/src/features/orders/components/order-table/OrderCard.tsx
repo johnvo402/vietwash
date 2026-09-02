@@ -18,16 +18,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogFooter,
-} from "@/components/ui/alert-dialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { forwardRef, useState } from "react";
 import { CustomerGroup, ListOrderResponse, OrderStatus } from "@/api/generated";
@@ -49,6 +39,7 @@ import {
 import { GetCustomerGroup, GetStatusBadge } from "../../order-utils/order-util";
 import { useTranslations } from "next-intl";
 import { usePageType } from "@/hooks/use-page-type";
+import { CancelOrderDialog } from "../cancel-order-dialog";
 
 // Định nghĩa các trạng thái đơn dịch vụ cho giao diện
 const statusOrder = ["pending", "handling", "handled", "completed"];
@@ -128,8 +119,19 @@ export const OrderCard = forwardRef<HTMLDivElement, OrderCardProps>(
 
     // Mutation để cập nhật trạng thái đơn dịch vụ
     const updateStatus = useMutation({
-      mutationFn: ({ id, status }: { id: string; status: OrderStatus }) =>
-        apiClient.ecommerceApiOrdersUpdateStatusidPut(id, { status }),
+      mutationFn: ({
+        id,
+        status,
+        cancellationReason,
+      }: {
+        id: string;
+        status: OrderStatus;
+        cancellationReason?: string;
+      }) =>
+        apiClient.ecommerceApiOrdersUpdateStatusidPut(id, {
+          status,
+          cancellationReason,
+        }),
       onSuccess: (data) => {
         queryClient.invalidateQueries({
           queryKey: ["orders"],
@@ -141,7 +143,7 @@ export const OrderCard = forwardRef<HTMLDivElement, OrderCardProps>(
               t("common.status.title").slice(1),
           }) +
             t("order.title") +
-            "!"
+            "!",
         );
       },
       onError: (error) => {
@@ -157,15 +159,14 @@ export const OrderCard = forwardRef<HTMLDivElement, OrderCardProps>(
     };
 
     // Hàm xác nhận hủy đơn dịch vụ
-    const confirmCancelOrder = () => {
+    const confirmCancelOrder = async (cancellationReason: string) => {
       if (orderToCancel) {
-        updateStatus.mutate({
+        await updateStatus.mutateAsync({
           id: orderToCancel.id,
           status: OrderStatus.Cancelled,
+          cancellationReason,
         });
       }
-      setIsCancelDialogOpen(false);
-      setOrderToCancel(null);
     };
 
     // Hàm thay đổi trạng thái đơn dịch vụ
@@ -274,7 +275,7 @@ export const OrderCard = forwardRef<HTMLDivElement, OrderCardProps>(
                 {order.createdAt
                   ? format(
                       new Date(order.createdAt ?? new Date()),
-                      "dd/MM/yyyy"
+                      "dd/MM/yyyy",
                     )
                   : "--"}
               </span>
@@ -300,7 +301,7 @@ export const OrderCard = forwardRef<HTMLDivElement, OrderCardProps>(
               <span>
                 {GetCustomerGroup(
                   t,
-                  order.customer?.customerGroup || CustomerGroup.Normal
+                  order.customer?.customerGroup || CustomerGroup.Normal,
                 )}
               </span>
             </div>
@@ -333,38 +334,19 @@ export const OrderCard = forwardRef<HTMLDivElement, OrderCardProps>(
           </div>
         </CardContent>
         <CardFooter className="pt-2"></CardFooter>
-        {/* AlertDialog để xác nhận hủy đơn dịch vụ */}
-        <AlertDialog
+        <CancelOrderDialog
           open={isCancelDialogOpen}
-          onOpenChange={setIsCancelDialogOpen}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                {t("common.deleteConfirm.title", {
-                  entity: t("order.title"),
-                })}
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                {t("common.deleteConfirm.description", {
-                  entity: t("order.title"),
-                  entityName: orderToCancel?.code,
-                })}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setOrderToCancel(null)}>
-                {t("common.deleteConfirm.cancel")}
-              </AlertDialogCancel>
-              <AlertDialogAction onClick={confirmCancelOrder}>
-                {t("common.deleteConfirm.confirm")}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+          onOpenChange={(open) => {
+            setIsCancelDialogOpen(open);
+            if (!open) setOrderToCancel(null);
+          }}
+          orderCode={orderToCancel?.code}
+          onConfirm={confirmCancelOrder}
+          isPending={updateStatus.isPending}
+        />
       </Card>
     );
-  }
+  },
 );
 
 OrderCard.displayName = "OrderCard";

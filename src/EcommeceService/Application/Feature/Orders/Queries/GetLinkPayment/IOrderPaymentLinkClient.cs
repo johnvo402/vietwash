@@ -7,4 +7,6 @@ public interface IOrderPaymentLinkClient
     Task<CreatePaymentResult> CreatePaymentLinkAsync(PaymentData paymentData);
 
     Task<PaymentLinkInformation> GetPaymentLinkInformationAsync(long orderId);
+
+    Task<PaymentLinkInformation> CancelPaymentLinkAsync(long orderId, string cancellationReason);
 }

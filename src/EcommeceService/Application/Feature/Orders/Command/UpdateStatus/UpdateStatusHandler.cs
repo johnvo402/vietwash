@@ -11,14 +11,24 @@ using Domain.Aggregates.Equipments.Enums;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Specifications;
+using Domain.Aggregates.Vouchers;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace Application.Feature.Orders.Command.UpdateStatus;
 
-public class UpdateStatusHandler(IUnitOfWork unitOfWork, ICurrentAccount currentAccount)
-    : IRequestHandler<UpdateStatusCommand, Result>
+public class UpdateStatusHandler(
+    IUnitOfWork unitOfWork,
+    ICurrentAccount currentAccount,
+    IOrderPaymentLinkClient? paymentClient = null,
+    TimeProvider? timeProvider = null,
+    ILogger? logger = null
+) : IRequestHandler<UpdateStatusCommand, Result>
 {
+    private readonly TimeProvider _timeProvider = timeProvider ?? TimeProvider.System;
+    private readonly ILogger _logger = logger ?? Log.Logger;
+
     public async ValueTask<Result> Handle(
         UpdateStatusCommand request,
         CancellationToken cancellationToken
@@ -39,7 +49,11 @@ public class UpdateStatusHandler(IUnitOfWork unitOfWork, ICurrentAccount current
                 return await RollbackFailure(
                     new NotFoundError(
                         "Order not found",
-                        Messager.Create<Order>().Message(MessageType.Found).Negative().BuildMessage()
+                        Messager
+                            .Create<Order>()
+                            .Message(MessageType.Found)
+                            .Negative()
+                            .BuildMessage()
                     ),
                     cancellationToken
                 );
@@ -67,12 +81,50 @@ public class UpdateStatusHandler(IUnitOfWork unitOfWork, ICurrentAccount current
                     );
             }
 
+            OrderCancellation? cancellation = null;
+            if (target == OrderStatus.Cancelled)
+            {
+                if (currentAccount.Id is not long cancelledBy || cancelledBy <= 0)
+                    return await RollbackFailure(
+                        new UnauthorizedError(Message.UNAUTHORIZED),
+                        cancellationToken
+                    );
+
+                string cancellationReason =
+                    request.Model.CancellationReason?.Trim() ?? string.Empty;
+                if (
+                    cancellationReason.Length
+                    is < OrderCancellation.MinimumReasonLength
+                        or > OrderCancellation.MaximumReasonLength
+                )
+                    return await RollbackFailure(
+                        CreateBadRequest(
+                            $"Cancellation reason must contain between {OrderCancellation.MinimumReasonLength} and {OrderCancellation.MaximumReasonLength} characters."
+                        ),
+                        cancellationToken
+                    );
+
+                cancellation = OrderCancellation.Create(
+                    _timeProvider.GetUtcNow(),
+                    cancelledBy,
+                    cancellationReason
+                );
+            }
+            else if (!string.IsNullOrWhiteSpace(request.Model.CancellationReason))
+                return await RollbackFailure(
+                    CreateBadRequest(
+                        "Cancellation reason is only allowed when cancelling an order."
+                    ),
+                    cancellationToken
+                );
+
             long[] requestedEquipmentIds =
                 request.Model.OrderEquipments?.Select(x => x.EquipmentId).ToArray() ?? [];
             OrderTransitionResult evaluation = order.EvaluateTransition(
                 target,
                 request.Model.PaymentMethod,
-                requestedEquipmentIds.Length
+                requestedEquipmentIds.Length,
+                cancellation
             );
             if (evaluation == OrderTransitionResult.Idempotent)
             {
@@ -86,21 +138,23 @@ public class UpdateStatusHandler(IUnitOfWork unitOfWork, ICurrentAccount current
                 );
 
             OrderStatus previousStatus = order.Status;
+            OrderCancellationResourcePlan cancellationPlan = OrderCancellationResourcePolicy.Create(
+                previousStatus,
+                target,
+                order.CustomerId,
+                order.VoucherId
+            );
             IReadOnlyList<OrderEquipment> resolvedEquipments = [];
-            EquipmentLifecycleAction equipmentAction =
-                EquipmentSelectionPolicy.GetLifecycleAction(previousStatus, target);
+            EquipmentLifecycleAction equipmentAction = EquipmentSelectionPolicy.GetLifecycleAction(
+                previousStatus,
+                target
+            );
             if (equipmentAction == EquipmentLifecycleAction.Claim)
             {
                 List<EquipmentSnapshot> candidates = await unitOfWork
                     .Repository<Equipment>()
                     .QueryAsync(x => requestedEquipmentIds.Contains(x.Id))
-                    .Select(x => new EquipmentSnapshot(
-                        x.Id,
-                        x.Name,
-                        x.BranchId,
-                        x.Status,
-                        x.Using
-                    ))
+                    .Select(x => new EquipmentSnapshot(x.Id, x.Name, x.BranchId, x.Status, x.Using))
                     .ToListAsync(cancellationToken);
                 EquipmentSelectionResult equipmentResult = EquipmentSelectionPolicy.Resolve(
                     order.BranchId,
@@ -136,6 +190,70 @@ public class UpdateStatusHandler(IUnitOfWork unitOfWork, ICurrentAccount current
                 return persistedStatus == target
                     ? Result.Success()
                     : Failure("Order status changed concurrently.");
+            }
+
+            if (cancellationPlan.IsCancellation)
+            {
+                bool hasVoucherUsage = await unitOfWork
+                    .Repository<VoucherUsage>()
+                    .AnyAsync(x => x.OrderId == order.Id, cancellationToken);
+                if (hasVoucherUsage)
+                    return await RollbackFailure(
+                        CreateBadRequest(
+                            "Order cancellation invariant violated: completed voucher usage already exists."
+                        ),
+                        cancellationToken
+                    );
+
+                if (cancellationPlan.RequiresPayOsCoordination)
+                {
+                    if (paymentClient is null)
+                        return await RollbackFailure(
+                            CreateBadRequest(
+                                "The payment provider is unavailable. This processed order cannot be cancelled safely."
+                            ),
+                            cancellationToken
+                        );
+
+                    ProcessedOrderPaymentCancellationResult paymentCancellation =
+                        await ProcessedOrderPaymentCancellation.EnsureSafeAsync(
+                            paymentClient,
+                            order.Id,
+                            cancellation!.Reason,
+                            _logger
+                        );
+                    if (!paymentCancellation.IsSafe)
+                        return await RollbackFailure(
+                            CreateBadRequest(
+                                paymentCancellation.ErrorMessage
+                                    ?? "The payment link could not be cancelled safely."
+                            ),
+                            cancellationToken
+                        );
+                }
+
+                if (cancellationPlan.ShouldReleaseVoucher)
+                {
+                    long voucherId =
+                        order.VoucherId
+                        ?? throw new InvalidOperationException(
+                            "Voucher release was planned without a voucher id."
+                        );
+                    long customerId =
+                        order.CustomerId
+                        ?? throw new InvalidOperationException(
+                            "Voucher release was planned without a customer id."
+                        );
+                    _ = await unitOfWork
+                        .Repository<VoucherCustomer>()
+                        .QueryAsync(x =>
+                            x.VoucherId == voucherId && x.CustomerId == customerId && x.IsUsed
+                        )
+                        .ExecuteUpdateAsync(
+                            setters => setters.SetProperty(x => x.IsUsed, false),
+                            cancellationToken
+                        );
+                }
             }
 
             if (equipmentAction == EquipmentLifecycleAction.Claim)
@@ -193,7 +311,8 @@ public class UpdateStatusHandler(IUnitOfWork unitOfWork, ICurrentAccount current
             OrderTransitionResult applied = order.TransitionTo(
                 target,
                 request.Model.PaymentMethod,
-                resolvedEquipments
+                resolvedEquipments,
+                cancellation: cancellation
             );
             if (applied != OrderTransitionResult.Applied)
                 throw new InvalidOperationException(
@@ -223,10 +342,7 @@ public class UpdateStatusHandler(IUnitOfWork unitOfWork, ICurrentAccount current
     private static Result Failure(string message) => Result.Failure(CreateBadRequest(message));
 
     private static BadRequestError CreateBadRequest(string message) =>
-        new(
-            message,
-            Messager.Create<Order>().Message(MessageType.Valid).Negative().BuildMessage()
-        );
+        new(message, Messager.Create<Order>().Message(MessageType.Valid).Negative().BuildMessage());
 
     private static string GetTransitionError(OrderTransitionResult result) =>
         result switch
@@ -240,6 +356,10 @@ public class UpdateStatusHandler(IUnitOfWork unitOfWork, ICurrentAccount current
                 "At least one equipment is required to start an order.",
             OrderTransitionResult.EquipmentNotAllowed =>
                 "Equipment can only be selected when starting an order.",
+            OrderTransitionResult.CancellationRequired =>
+                "Cancellation metadata is required to cancel an order.",
+            OrderTransitionResult.CancellationNotAllowed =>
+                "Cancellation metadata is only allowed when cancelling an order.",
             _ => "Order status transition is invalid.",
         };
 }

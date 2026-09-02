@@ -44,16 +44,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogFooter,
-} from "@/components/ui/alert-dialog";
-import {
   CustomerGroup,
   GetOrderDetailResponse,
   OrderStatus,
@@ -68,6 +58,7 @@ import { Order } from "@/features/cashier/types";
 import Image from "next/image";
 import { PaymentModal } from "../payment-model";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CancelOrderDialog } from "../cancel-order-dialog";
 
 // Valid status transitions and configurations (unchanged)
 const validTransitions: Partial<Record<OrderStatus, OrderStatus[]>> = {
@@ -128,7 +119,7 @@ interface OrderDetailProps {
   order?: GetOrderDetailResponse;
   onBack: () => void;
   onStatusChange: (orderId: string, newStatus: OrderStatus) => Promise<void>;
-  onCancel: (orderId: string) => Promise<void>;
+  onCancel: (orderId: string, cancellationReason: string) => Promise<void>;
   getReceipt: () => Promise<void>;
   refetch: () => void;
 }
@@ -160,11 +151,11 @@ export function OrderDetail({
   const handlePaymentSuccess = useCallback(
     (method: "cash" | "card") => {
       alert(
-        t(method === "cash" ? "order.cashConfirmed" : "order.paymentSuccess")
+        t(method === "cash" ? "order.cashConfirmed" : "order.paymentSuccess"),
       );
       refetch();
     },
-    [t, refetch]
+    [t, refetch],
   );
 
   // Memoize receipt handler
@@ -190,12 +181,12 @@ export function OrderDetail({
         setStatus(newStatus);
       } catch (error) {
         console.error("Error updating status:", error);
-        alert(t("order.errorUpdatingStatus"));
+        alert(t("order.updateOrderStatusFailed"));
       } finally {
         setIsUpdating(false);
       }
     },
-    [order?.id, onStatusChange, t]
+    [order?.id, onStatusChange, t],
   );
 
   // Memoize cancel handler
@@ -203,20 +194,23 @@ export function OrderDetail({
     setIsCancelDialogOpen(true);
   }, []);
 
-  const confirmCancelOrder = useCallback(async () => {
-    if (!order?.id) return;
-    setIsUpdating(true);
-    try {
-      await onCancel(order.id.toString());
-      setStatus("Cancelled");
-    } catch (error) {
-      console.error("Error cancelling order:", error);
-      alert(t("order.errorCancellingOrder"));
-    } finally {
-      setIsUpdating(false);
-      setIsCancelDialogOpen(false);
-    }
-  }, [order?.id, onCancel, t]);
+  const confirmCancelOrder = useCallback(
+    async (cancellationReason: string) => {
+      if (!order?.id) return;
+      setIsUpdating(true);
+      try {
+        await onCancel(order.id.toString(), cancellationReason);
+        setStatus("Cancelled");
+      } catch (error) {
+        console.error("Error cancelling order:", error);
+        alert(t("order.errorCancellingOrder"));
+        throw error;
+      } finally {
+        setIsUpdating(false);
+      }
+    },
+    [order?.id, onCancel, t],
+  );
 
   // Memoize print ticket handler
   const handlePrintTicket = useCallback(async () => {
@@ -251,13 +245,13 @@ export function OrderDetail({
       };
       return methods[method] || t("common.status.unknown");
     },
-    [t]
+    [t],
   );
 
   // Memoize order items for table
   const orderItems = useMemo(
     () => order?.orderItems || [],
-    [order?.orderItems]
+    [order?.orderItems],
   );
 
   // Early return if no order
@@ -363,36 +357,39 @@ export function OrderDetail({
                       <div className="flex items-center gap-2">
                         {React.createElement(
                           statusConfig[nextStatus]?.icon || Clock,
-                          { className: "w-4 h-4" }
+                          { className: "w-4 h-4" },
                         )}
                         {t(
                           "common.status." +
-                            (statusConfig[nextStatus]?.label || nextStatus)
+                            (statusConfig[nextStatus]?.label || nextStatus),
                         )}
                       </div>
                     </SelectItem>
-                  )
+                  ),
                 )}
               </SelectContent>
             </Select>
-            <Button
-              variant="destructive"
-              onClick={handleCancel}
-              disabled={status === "Cancelled" || isUpdating}
-              className="w-full sm:w-auto"
-            >
-              {isUpdating ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {t("common.status.handling")}...
-                </>
-              ) : (
-                <>
-                  <XCircle className="w-4 h-4 mr-2" />
-                  {t("common.cancel")}
-                </>
+            {status !== OrderStatus.Completed &&
+              status !== OrderStatus.Cancelled && (
+                <Button
+                  variant="destructive"
+                  onClick={handleCancel}
+                  disabled={isUpdating}
+                  className="w-full sm:w-auto"
+                >
+                  {isUpdating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      {t("common.status.handling")}...
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="w-4 h-4 mr-2" />
+                      {t("common.cancel")}
+                    </>
+                  )}
+                </Button>
               )}
-            </Button>
           </div>
         </div>
       </div>
@@ -418,7 +415,7 @@ export function OrderDetail({
                     {order.customer?.displayName ?? "--"}
                     {GetCustomerGroup(
                       t,
-                      order.customer?.customerGroup ?? CustomerGroup.Normal
+                      order.customer?.customerGroup ?? CustomerGroup.Normal,
                     )}
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -457,7 +454,7 @@ export function OrderDetail({
                         {order.createdAt
                           ? format(
                               new Date(order.createdAt),
-                              "dd/MM/yyyy HH:mm"
+                              "dd/MM/yyyy HH:mm",
                             )
                           : "--"}
                       </div>
@@ -473,12 +470,49 @@ export function OrderDetail({
                         {order.orderDate
                           ? format(
                               new Date(order.orderDate),
-                              "dd/MM/yyyy HH:mm"
+                              "dd/MM/yyyy HH:mm",
                             )
                           : "--"}
                       </div>
                     </div>
                   </div>
+                  {order.status === OrderStatus.Cancelled && (
+                    <div className="space-y-3 rounded-lg border border-red-200 bg-red-50 p-3">
+                      <div className="flex items-start gap-3">
+                        <XCircle
+                          className="mt-0.5 h-4 w-4 shrink-0 text-red-600"
+                          aria-hidden="true"
+                        />
+                        <div>
+                          <div className="text-sm font-medium text-red-900">
+                            {t("order.cancellationReason")}
+                          </div>
+                          <div className="whitespace-pre-wrap break-words text-sm text-red-800">
+                            {order.cancellationReason ?? "--"}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid gap-2 pl-7 text-sm text-red-800 sm:grid-cols-2">
+                        <div>
+                          <span className="font-medium">
+                            {t("order.cancelledAt")}:
+                          </span>{" "}
+                          {order.cancelledAt
+                            ? format(
+                                new Date(order.cancelledAt),
+                                "dd/MM/yyyy HH:mm",
+                              )
+                            : "--"}
+                        </div>
+                        <div>
+                          <span className="font-medium">
+                            {t("order.cancelledBy")}:
+                          </span>{" "}
+                          {order.cancelledBy ?? "--"}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               <Separator />
@@ -581,7 +615,7 @@ export function OrderDetail({
                             </TableCell>
                             <TableCell className="text-right">
                               {formatPriceVN(
-                                (item.unitPrice ?? 0) * (item.quantity ?? 1)
+                                (item.unitPrice ?? 0) * (item.quantity ?? 1),
                               )}
                             </TableCell>
                           </TableRow>
@@ -677,7 +711,7 @@ export function OrderDetail({
                         amount: order.amount ?? 0,
                         discountFixed: order.discountFixed ?? false,
                         discountValue: order.discountValue ?? 0,
-                      })
+                      }),
                     )}
                   </span>
                 </div>
@@ -724,44 +758,13 @@ export function OrderDetail({
         </Card>
       </div>
 
-      <AlertDialog
+      <CancelOrderDialog
         open={isCancelDialogOpen}
         onOpenChange={setIsCancelDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-red-500" />
-              {t("common.deleteConfirm.title", { entity: t("order.title") })}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("common.deleteConfirm.description", {
-                entity: t("order.title"),
-                entityName: `<strong>#${order.code}</strong>`,
-              })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isUpdating}>
-              {t("common.deleteConfirm.cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmCancelOrder}
-              disabled={isUpdating}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              {isUpdating ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {t("common.status.cancelling")}...
-                </>
-              ) : (
-                t("common.deleteConfirm.confirm")
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        orderCode={order.code}
+        onConfirm={confirmCancelOrder}
+        isPending={isUpdating}
+      />
 
       {isPaymentOpen && (
         <PaymentModal

@@ -10879,6 +10879,20 @@
             "format": "date-time",
             "nullable": true
           },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancelledBy": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "cancellationReason": {
+            "type": "string",
+            "nullable": true
+          },
           "code": {
             "type": "string",
             "nullable": true
@@ -13855,6 +13869,10 @@
           },
           "paymentMethod": {
             "$ref": "#/components/schemas/PaymentMethod"
+          },
+          "cancellationReason": {
+            "type": "string",
+            "nullable": true
           },
           "orderEquipments": {
             "type": "array",

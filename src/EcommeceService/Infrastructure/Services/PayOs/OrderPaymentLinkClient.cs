@@ -11,4 +11,9 @@ public sealed class OrderPaymentLinkClient(PayOS payOS) : IOrderPaymentLinkClien
 
     public Task<PaymentLinkInformation> GetPaymentLinkInformationAsync(long orderId) =>
         payOS.getPaymentLinkInformation(orderId);
+
+    public Task<PaymentLinkInformation> CancelPaymentLinkAsync(
+        long orderId,
+        string cancellationReason
+    ) => payOS.cancelPaymentLink(orderId, cancellationReason);
 }

@@ -15,6 +15,9 @@ namespace Infrastructure.Data.Configurations
             builder.Property(x => x.Amount).HasColumnType("numeric");
             builder.Property(x => x.Total).HasColumnType("numeric");
             builder.Property(x => x.DiscountValue).HasColumnType("numeric");
+            builder
+                .Property(x => x.CancellationReason)
+                .HasMaxLength(OrderCancellation.MaximumReasonLength);
             builder.HasIndex(x => x.CustomerId);
             builder.HasOne(x => x.Customer).WithMany().HasForeignKey(x => x.CustomerId);
             builder.HasOne(x => x.Staff).WithMany().HasForeignKey(x => x.StaffId);
