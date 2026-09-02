@@ -38,6 +38,11 @@ public class UpdateStatusHandler(
             return Failure("OrderId invalid");
         if (request.Model?.Status is not OrderStatus target)
             return Failure("Status invalid");
+        if (
+            !request.IsVerifiedPayOsWebhook
+            && !OrderActorAccess.IsStaffSide(currentAccount.Session?.Role)
+        )
+            return Result.Failure(new ForbiddenError(Message.FORBIDDEN));
 
         try
         {
@@ -60,9 +65,11 @@ public class UpdateStatusHandler(
 
             if (
                 !request.IsVerifiedPayOsWebhook
-                && !OrderBranchAccess
-                    .FromSession(currentAccount.Session?.Branches)
-                    .IsAuthorized(order.BranchId)
+                && !OrderActorAccess.CanOperateOrder(
+                    currentAccount.Session?.Role,
+                    currentAccount.Session?.Branches,
+                    order.BranchId
+                )
             )
                 return await RollbackFailure(
                     new ForbiddenError(Message.FORBIDDEN),

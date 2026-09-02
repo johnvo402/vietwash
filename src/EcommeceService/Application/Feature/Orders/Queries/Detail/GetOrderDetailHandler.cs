@@ -19,24 +19,32 @@ public class GetOrderDetailHandler(IUnitOfWork unitOfWork, ICurrentAccount curre
         CancellationToken cancellationToken
     )
     {
+        string? role = currentAccount.Session?.Role;
+        if (!OrderActorAccess.IsCustomer(role) && !OrderActorAccess.IsStaffSide(role))
+            return Result<GetOrderDetailResponse>.Failure(new ForbiddenError(Message.FORBIDDEN));
+
         OrderBranchReference? orderBranch = await unitOfWork
             .Repository<Order>()
             .FindByConditionAsync(
                 x => x.Id == request.OrderId,
-                x => new OrderBranchReference(x.BranchId),
+                x => new OrderBranchReference(x.BranchId, x.CustomerId),
                 cancellationToken
             );
         if (orderBranch is null)
             return NotFound();
 
-        if (
-            !OrderBranchAccess
-                .FromSession(currentAccount.Session?.Branches)
-                .IsAuthorized(orderBranch.BranchId)
-        )
-            return Result<GetOrderDetailResponse>.Failure(
-                new ForbiddenError(Message.FORBIDDEN)
-            );
+        bool canRead = OrderActorAccess.CanReadOrder(
+            role,
+            currentAccount.Id,
+            currentAccount.Session?.Branches,
+            orderBranch.CustomerId,
+            orderBranch.BranchId
+        );
+        if (!canRead && OrderActorAccess.IsCustomer(role))
+            return NotFound();
+
+        if (!canRead)
+            return Result<GetOrderDetailResponse>.Failure(new ForbiddenError(Message.FORBIDDEN));
 
         GetOrderDetailResponse? order = await unitOfWork
             .DynamicReadOnlyRepository<Order>()
@@ -46,9 +54,7 @@ public class GetOrderDetailHandler(IUnitOfWork unitOfWork, ICurrentAccount curre
                 cancellationToken
             );
 
-        return order is null
-            ? NotFound()
-            : Result<GetOrderDetailResponse>.Success(order);
+        return order is null ? NotFound() : Result<GetOrderDetailResponse>.Success(order);
     }
 
     private static Result<GetOrderDetailResponse> NotFound() =>

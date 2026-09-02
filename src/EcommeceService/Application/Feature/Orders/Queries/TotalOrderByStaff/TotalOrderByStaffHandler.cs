@@ -2,6 +2,8 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Orders.Common;
 using Contracts.ApiWrapper;
+using Contracts.Application.Common.Exceptions;
+using Contracts.Common.Messages;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
 using Mediator;
@@ -17,6 +19,9 @@ public class TotalOrderByStaffHandler(IUnitOfWork unitOfWork, ICurrentAccount cu
         CancellationToken cancellationToken
     )
     {
+        if (!OrderActorAccess.IsStaffSide(currentAccount.Session?.Role))
+            return Result<TotalOrderByStaffResponse>.Failure(new ForbiddenError(Message.FORBIDDEN));
+
         IReadOnlyList<long> branchIds = OrderBranchAccess
             .FromSession(currentAccount.Session?.Branches)
             .BranchIds;

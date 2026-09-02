@@ -16,16 +16,18 @@ public class ListOrderSpecification : Specification<Order>
         long? serviceId = null
     )
     {
-        Expression<Func<Order, bool>> criteria = x => branchIds.Contains(x.BranchId);
+        Expression<Func<Order, bool>> criteria = customerId.HasValue
+            ? x => x.CustomerId == customerId.Value
+            : x => branchIds.Contains(x.BranchId);
 
-        if (DateTime.TryParse(from, out DateTime fromDate) && DateTime.TryParse(to, out DateTime toDate))
+        if (
+            DateTime.TryParse(from, out DateTime fromDate)
+            && DateTime.TryParse(to, out DateTime toDate)
+        )
             criteria = criteria.And(x => x.OrderDate >= fromDate && x.OrderDate < toDate);
 
         if (branchId.HasValue)
             criteria = criteria.And(x => x.BranchId == branchId.Value);
-
-        if (customerId is not null)
-            criteria = criteria.And(x => x.CustomerId == customerId);
 
         if (serviceId is not null)
             criteria = criteria.And(x => x.OrderItems.Any(oi => oi.ServiceId == serviceId));

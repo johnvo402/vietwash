@@ -9,7 +9,6 @@ using Contracts.Common.QueryStringProcessing;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Specifications;
-using Infrastructure.Constants;
 using Mediator;
 
 namespace Application.Feature.Orders.Queries.List;
@@ -22,10 +21,24 @@ public class ListOrderHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUse
         CancellationToken cancellationToken
     )
     {
-        Result<PaginationResponse<ListOrderResponse>>? validation =
-            query.Validate<ListOrderQuery, ListOrderResponse>();
+        Result<PaginationResponse<ListOrderResponse>>? validation = query.Validate<
+            ListOrderQuery,
+            ListOrderResponse
+        >();
         if (validation is not null)
             return validation;
+
+        string? role = currentUser.Session?.Role;
+        bool isCustomer = OrderActorAccess.IsCustomer(role);
+        if (!isCustomer && !OrderActorAccess.IsStaffSide(role))
+            return Result<PaginationResponse<ListOrderResponse>>.Failure(
+                new ForbiddenError(Message.FORBIDDEN)
+            );
+
+        if (isCustomer && currentUser.Id is not > 0)
+            return Result<PaginationResponse<ListOrderResponse>>.Failure(
+                new ForbiddenError(Message.FORBIDDEN)
+            );
 
         OrderBranchAccess branchAccess = OrderBranchAccess.FromSession(
             currentUser.Session?.Branches
@@ -33,29 +46,28 @@ public class ListOrderHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUse
         long? requestedBranchId = null;
         if (!string.IsNullOrWhiteSpace(query.BranchId))
         {
-            if (
-                !long.TryParse(query.BranchId, out long parsedBranchId)
-                || parsedBranchId <= 0
-            )
+            if (!long.TryParse(query.BranchId, out long parsedBranchId) || parsedBranchId <= 0)
             {
                 return Result<PaginationResponse<ListOrderResponse>>.Failure(
                     new BadRequestError(
                         "BranchId invalid",
-                        Messager.Create<Order>().Message(MessageType.Valid).Negative().BuildMessage()
+                        Messager
+                            .Create<Order>()
+                            .Message(MessageType.Valid)
+                            .Negative()
+                            .BuildMessage()
                     )
                 );
             }
 
             requestedBranchId = parsedBranchId;
-            if (!branchAccess.IsAuthorized(parsedBranchId))
+            if (!isCustomer && !branchAccess.IsAuthorized(parsedBranchId))
                 return Result<PaginationResponse<ListOrderResponse>>.Failure(
                     new ForbiddenError(Message.FORBIDDEN)
                 );
         }
 
-        long? customerId = currentUser.Session?.Role == ROLE.CUSTOMER
-            ? currentUser.Id
-            : null;
+        long? customerId = isCustomer ? currentUser.Id : null;
         PaginationResponse<ListOrderResponse> response = await unitOfWork
             .DynamicReadOnlyRepository<Order>(false)
             .PagedListAsync(

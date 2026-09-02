@@ -4,8 +4,8 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Orders.Common;
 using Contracts.ApiWrapper;
-using Contracts.Application.Common.Interfaces.Services.Encryptions;
 using Contracts.Application.Common.Exceptions;
+using Contracts.Application.Common.Interfaces.Services.Encryptions;
 using Contracts.Common.Messages;
 using Contracts.Infrastructure.Common;
 using Domain.Aggregates.Enums;
@@ -32,14 +32,15 @@ namespace Application.Feature.Orders.Command.Create
             CancellationToken cancellationToken
         )
         {
-            OrderBranchAccess branchAccess = OrderBranchAccess.FromSession(
-                currentAccount.Session?.Branches
-            );
-            if (!branchAccess.IsAuthorized(request.BranchId))
+            if (
+                !OrderActorAccess.CanOperateOrder(
+                    currentAccount.Session?.Role,
+                    currentAccount.Session?.Branches,
+                    request.BranchId
+                )
+            )
             {
-                return Result<CreateOrderResponse>.Failure(
-                    new ForbiddenError(Message.FORBIDDEN)
-                );
+                return Result<CreateOrderResponse>.Failure(new ForbiddenError(Message.FORBIDDEN));
             }
 
             bool customerExists = await unitOfWork

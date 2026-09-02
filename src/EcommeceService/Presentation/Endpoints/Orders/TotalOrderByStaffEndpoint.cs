@@ -17,7 +17,7 @@ namespace Presentation.Endpoints.Orders
     {
         [HttpGet(Router.OrderRoute.GetByStaff)]
         [SwaggerOperation(Tags = [Router.OrderRoute.Tags], Summary = "get total Order")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<
             ActionResult<ApiResponse<TotalOrderByStaffResponse>>
         > HandleAsync(TotalOrderByStaffQuery request, CancellationToken cancellationToken = default)

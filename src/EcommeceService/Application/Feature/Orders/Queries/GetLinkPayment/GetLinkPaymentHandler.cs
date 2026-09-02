@@ -30,6 +30,9 @@ public class GetLinkPaymentHandler(
         CancellationToken cancellationToken
     )
     {
+        if (!OrderActorAccess.IsStaffSide(currentAccount.Session?.Role))
+            return Failure(new ForbiddenError(Message.FORBIDDEN));
+
         OrderPayment? order = await unitOfWork
             .DynamicReadOnlyRepository<Order>()
             .FindByConditionAsync(
@@ -46,9 +49,11 @@ public class GetLinkPaymentHandler(
             );
 
         if (
-            !OrderBranchAccess
-                .FromSession(currentAccount.Session?.Branches)
-                .IsAuthorized(order.BranchId)
+            !OrderActorAccess.CanOperateOrder(
+                currentAccount.Session?.Role,
+                currentAccount.Session?.Branches,
+                order.BranchId
+            )
         )
             return Failure(new ForbiddenError(Message.FORBIDDEN));
 

@@ -23,21 +23,28 @@ public class GetOrderDetailByCodeHandler(
         CancellationToken cancellationToken
     )
     {
+        if (!OrderActorAccess.IsStaffSide(currentAccount.Session?.Role))
+            return Result<GetOrderDetailByCodeResponse>.Failure(
+                new ForbiddenError(Message.FORBIDDEN)
+            );
+
         string code = encryption.Decrypt(request.Code);
         OrderBranchReference? orderBranch = await unitOfWork
             .Repository<Order>()
             .FindByConditionAsync(
                 x => x.Code == code,
-                x => new OrderBranchReference(x.BranchId),
+                x => new OrderBranchReference(x.BranchId, x.CustomerId),
                 cancellationToken
             );
         if (orderBranch is null)
             return NotFound();
 
         if (
-            !OrderBranchAccess
-                .FromSession(currentAccount.Session?.Branches)
-                .IsAuthorized(orderBranch.BranchId)
+            !OrderActorAccess.CanOperateOrder(
+                currentAccount.Session?.Role,
+                currentAccount.Session?.Branches,
+                orderBranch.BranchId
+            )
         )
             return Result<GetOrderDetailByCodeResponse>.Failure(
                 new ForbiddenError(Message.FORBIDDEN)
@@ -51,9 +58,7 @@ public class GetOrderDetailByCodeHandler(
                 cancellationToken
             );
 
-        return order is null
-            ? NotFound()
-            : Result<GetOrderDetailByCodeResponse>.Success(order);
+        return order is null ? NotFound() : Result<GetOrderDetailByCodeResponse>.Success(order);
     }
 
     private static Result<GetOrderDetailByCodeResponse> NotFound() =>

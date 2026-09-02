@@ -55,14 +55,15 @@ namespace Application.Features.Accounts.Commands.VerifyOtpLoginCustomer
                     cancellationToken
                 );
 
-            bool isNew = user == null || !user.Verified;
+            bool isNewAccount = user is null;
+            bool requiresSynchronization = user is null || !user.Verified;
 
             using var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken);
+            bool committed = false;
             try
             {
-                if (isNew && user == null)
+                if (isNewAccount)
                 {
-                    // Create new account
                     user = new Account(
                         request.PhoneNumber,
                         null,
@@ -72,12 +73,16 @@ namespace Application.Features.Accounts.Commands.VerifyOtpLoginCustomer
                         Generator.GenerateAccountCode(ROLE.CUSTOMER)
                     );
 
+                    user.VerifiedCustomer();
+                    user.CreateAccount();
                     user = await _unitOfWork
                         .Repository<Account>()
                         .AddAsync(user, cancellationToken);
                 }
-                else if (isNew && user != null)
+                else if (requiresSynchronization)
                 {
+                    user!.VerifiedCustomer();
+                    user.CreateAccount();
                     await _unitOfWork.Repository<Account>().UpdateAsync(user);
                 }
 
@@ -127,19 +132,20 @@ namespace Application.Features.Accounts.Commands.VerifyOtpLoginCustomer
                 };
 
                 var result = SerializerExtension.Serialize(userAuth);
+                await _unitOfWork.SaveAsync(cancellationToken);
+                await _unitOfWork.CommitAsync(cancellationToken);
+                committed = true;
+
                 await _securityService.AddSessionUserAsync(
                     user.Id.ToString(),
                     result.StringJson,
                     refreshExpireTime - DateTime.UtcNow
                 );
 
-                await _unitOfWork.SaveAsync(cancellationToken);
-                await _unitOfWork.CommitAsync(cancellationToken);
-
                 return Result<VerifyOtpResponse>.Success(
                     new VerifyOtpResponse
                     {
-                        IsNew = isNew,
+                        IsNew = isNewAccount,
                         Verified = true,
                         Token = accessToken,
                         Refresh = refreshToken,
@@ -152,7 +158,8 @@ namespace Application.Features.Accounts.Commands.VerifyOtpLoginCustomer
             }
             catch (Exception)
             {
-                await _unitOfWork.RollbackAsync(cancellationToken);
+                if (!committed)
+                    await _unitOfWork.RollbackAsync(cancellationToken);
                 throw;
             }
         }

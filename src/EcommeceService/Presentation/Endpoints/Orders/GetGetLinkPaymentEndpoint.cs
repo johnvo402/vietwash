@@ -21,7 +21,7 @@ namespace Presentation.Endpoints.Orders
             Tags = [Router.OrderRoute.Tags],
             Summary = "Create or reuse an order payment link"
         )]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<ActionResult<ApiResponse<CreatePaymentResult>>> HandleAsync(
             [FromRoute] GetLinkPaymentQuery request,
             CancellationToken cancellationToken = default

@@ -19,7 +19,7 @@ namespace Presentation.Endpoints.Orders
     {
         [HttpPost(Router.OrderRoute.Orders)]
         [SwaggerOperation(Tags = [Router.OrderRoute.Tags], Summary = "Create a new order")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<ActionResult<ApiResponse<CreateOrderResponse>>> HandleAsync(
             [FromBody] CreateOrderCommand request,
             CancellationToken cancellationToken = default

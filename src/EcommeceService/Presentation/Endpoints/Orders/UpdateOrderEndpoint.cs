@@ -15,7 +15,7 @@ namespace Presentation.Endpoints.Orders
     {
         [HttpPut(Router.OrderRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.OrderRoute.Tags], Summary = "Update order")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             UpdateOrderCommand request,
             CancellationToken cancellationToken = default

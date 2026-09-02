@@ -1,3 +1,5 @@
+using Infrastructure.Constants;
+
 namespace Application.Feature.Orders.Common;
 
 public sealed class OrderBranchAccess
@@ -28,4 +30,35 @@ public sealed class OrderBranchAccess
         branchId > 0 && authorizedBranchIds.Contains(branchId);
 }
 
-public sealed record OrderBranchReference(long BranchId);
+public static class OrderActorAccess
+{
+    public static bool IsCustomer(string? role) => role == ROLE.CUSTOMER;
+
+    public static bool IsStaffSide(string? role) =>
+        role is ROLE.ADMIN or ROLE.MANAGER or ROLE.STAFF;
+
+    public static bool CanReadOrder(
+        string? role,
+        long? currentAccountId,
+        IEnumerable<string>? sessionBranches,
+        long? orderCustomerId,
+        long orderBranchId
+    )
+    {
+        if (IsCustomer(role))
+            return currentAccountId is > 0 && orderCustomerId == currentAccountId;
+
+        return IsStaffSide(role)
+            && OrderBranchAccess.FromSession(sessionBranches).IsAuthorized(orderBranchId);
+    }
+
+    public static bool CanOperateOrder(
+        string? role,
+        IEnumerable<string>? sessionBranches,
+        long orderBranchId
+    ) =>
+        IsStaffSide(role)
+        && OrderBranchAccess.FromSession(sessionBranches).IsAuthorized(orderBranchId);
+}
+
+public sealed record OrderBranchReference(long BranchId, long? CustomerId = null);

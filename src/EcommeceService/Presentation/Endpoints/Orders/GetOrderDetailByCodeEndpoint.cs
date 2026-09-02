@@ -17,7 +17,7 @@ namespace Presentation.Endpoints.Orders
     {
         [HttpPost(Router.OrderRoute.GetByCode, Name = Router.OrderRoute.GetByCode)]
         [SwaggerOperation(Tags = [Router.OrderRoute.Tags], Summary = "DetailByCode Order")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<
             ActionResult<ApiResponse<GetOrderDetailByCodeResponse>>
         > HandleAsync(

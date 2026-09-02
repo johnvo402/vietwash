@@ -20,6 +20,9 @@ namespace Application.Feature.Orders.Command.Update
             CancellationToken cancellationToken
         )
         {
+            if (!OrderActorAccess.IsStaffSide(currentAccount.Session?.Role))
+                return Result.Failure(new ForbiddenError(Message.FORBIDDEN));
+
             try
             {
                 _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
@@ -41,10 +44,13 @@ namespace Application.Feature.Orders.Command.Update
                     );
                 }
 
-                OrderBranchAccess branchAccess = OrderBranchAccess.FromSession(
-                    currentAccount.Session?.Branches
-                );
-                if (!branchAccess.IsAuthorized(order.BranchId))
+                if (
+                    !OrderActorAccess.CanOperateOrder(
+                        currentAccount.Session?.Role,
+                        currentAccount.Session?.Branches,
+                        order.BranchId
+                    )
+                )
                 {
                     return await RollbackFailure(
                         new ForbiddenError(Message.FORBIDDEN),

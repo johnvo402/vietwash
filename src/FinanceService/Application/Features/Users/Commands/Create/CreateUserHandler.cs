@@ -1,15 +1,18 @@
-using System.Data.Common;
-using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Dtos.Responses;
 using Domain.Aggregates.Users;
 using Mediator;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Application.Features.Users.Commands.Create;
 
 public class CreateUserHandler(IUnitOfWork unitOfWork)
     : IRequestHandler<CreateUserCommand, PubSubResponse<CreateUserCommand>>
 {
+    public const string UserPrimaryKeyConstraint = "pk_user";
+
     public async ValueTask<PubSubResponse<CreateUserCommand>> Handle(
         CreateUserCommand command,
         CancellationToken cancellationToken
@@ -17,29 +20,26 @@ public class CreateUserHandler(IUnitOfWork unitOfWork)
     {
         User mappingUser = command.Payload!.ToUser();
 
-        string? userAvatar = null;
         try
         {
-            DbTransaction transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
+            IAsyncRepository<User> users = unitOfWork.Repository<User>();
+            if (await users.AnyAsync(user => user.Id == mappingUser.Id, cancellationToken))
+                return Success(command);
 
-            User user = await unitOfWork
-                .Repository<User>()
-                .AddAsync(mappingUser, cancellationToken);
-            userAvatar = user.AvtUrl;
+            _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
+
+            _ = await users.AddAsync(mappingUser, cancellationToken);
 
             await unitOfWork.SaveAsync(cancellationToken);
 
             await unitOfWork.CommitAsync(cancellationToken);
 
-            return new PubSubResponse<CreateUserCommand>
-            {
-                Error = null,
-                ErrorType = null,
-                IsSuccess = true,
-                ResponseData = command,
-                LastAttemptTime = DateTime.UtcNow,
-                PayloadId = command.PayloadId,
-            };
+            return Success(command);
+        }
+        catch (DbUpdateException ex) when (IsDuplicateUserPrimaryKey(ex))
+        {
+            await unitOfWork.RollbackAsync(cancellationToken);
+            return Success(command);
         }
         catch (Exception ex)
         {
@@ -55,4 +55,24 @@ public class CreateUserHandler(IUnitOfWork unitOfWork)
             };
         }
     }
+
+    public static bool IsDuplicateUserPrimaryKey(DbUpdateException exception) =>
+        exception.InnerException
+            is PostgresException
+            {
+                SqlState: PostgresErrorCodes.UniqueViolation,
+                TableName: "user",
+                ConstraintName: UserPrimaryKeyConstraint,
+            };
+
+    private static PubSubResponse<CreateUserCommand> Success(CreateUserCommand command) =>
+        new()
+        {
+            Error = null,
+            ErrorType = null,
+            IsSuccess = true,
+            ResponseData = command,
+            LastAttemptTime = DateTimeOffset.UtcNow,
+            PayloadId = command.PayloadId,
+        };
 }
