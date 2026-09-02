@@ -69,6 +69,17 @@ public class UpdateStatusHandler(
                     cancellationToken
                 );
 
+            if (
+                !request.IsVerifiedPayOsWebhook
+                && order.Status == OrderStatus.Processed
+                && target == OrderStatus.Completed
+                && request.Model.PaymentMethod == PaymentMethod.Card
+            )
+                return await RollbackFailure(
+                    CreateBadRequest("Card payments must be completed through PayOS."),
+                    cancellationToken
+                );
+
             if (request.ExpectedPaymentAmount.HasValue)
             {
                 if (

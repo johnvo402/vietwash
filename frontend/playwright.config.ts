@@ -1,5 +1,7 @@
 import { defineConfig } from "@playwright/test";
 
+const port = Number(process.env.PLAYWRIGHT_PORT ?? "3000");
+
 export default defineConfig({
   testDir: "./tests",
   timeout: 60 * 1000,
@@ -9,7 +11,7 @@ export default defineConfig({
   fullyParallel: true,
   retries: 0,
   use: {
-    baseURL: "http://localhost:3000", // URL gốc, dùng page.goto('/') là vào trang chủ
+    baseURL: `http://localhost:${port}`, // URL gốc, dùng page.goto('/') là vào trang chủ
     headless: true, // Bật false nếu muốn debug với trình duyệt hiển thị
     screenshot: "only-on-failure", // Tự chụp ảnh nếu test fail
     video: "retain-on-failure", // Lưu video nếu test fail
@@ -32,12 +34,20 @@ export default defineConfig({
       },
       dependencies: ["setup"],
     },
+    {
+      name: "public",
+      testMatch: /public\/.*\.spec\.ts/,
+      use: {
+        // Public return-page tests mock the generated API origin from openapi.json.
+        bypassCSP: true,
+      },
+    },
   ],
 
   // Playwright sẽ tự chạy `npm run dev` nếu chưa có server
   webServer: {
-    command: "npm run dev", // Lệnh để khởi chạy Next.js
-    port: 3000,
+    command: `npm run dev -- --port ${port}`, // Lệnh để khởi chạy Next.js
+    port,
     reuseExistingServer: !process.env.CI, // Tái sử dụng server nếu đang test local
     timeout: 60 * 1000, // Cho server tối đa 60 giây để khởi động
   },

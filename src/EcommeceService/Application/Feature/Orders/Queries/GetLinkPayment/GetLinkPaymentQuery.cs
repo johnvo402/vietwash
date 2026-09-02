@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Contracts.ApiWrapper;
 using Contracts.Routers;
 using Mediator;
@@ -14,8 +10,5 @@ namespace Application.Feature.Orders.Queries.GetLinkPayment
     {
         [FromRoute(Name = RouterBase.Id)]
         public long OrderId { get; set; }
-
-        [FromQuery]
-        public string ReturnUrl { get; set; }
     }
 }

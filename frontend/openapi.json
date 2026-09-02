@@ -4156,13 +4156,13 @@
         }
       }
     },
-    "/Ecommerce/api/Orders/GetLinkPayment{id}": {
-      "get": {
+    "/Ecommerce/api/Orders/{id}/payment-link": {
+      "post": {
         "tags": [
           "Client"
         ],
-        "summary": "Get link payment",
-        "operationId": "Ecommerce/api/Orders/GetLinkPayment{id}",
+        "summary": "Create or reuse an order payment link",
+        "operationId": "CreateOrReuseOrderPaymentLink",
         "parameters": [
           {
             "name": "id",
@@ -4171,13 +4171,6 @@
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
-          },
-          {
-            "name": "ReturnUrl",
-            "in": "query",
-            "schema": {
-              "type": "string"
             }
           }
         ],

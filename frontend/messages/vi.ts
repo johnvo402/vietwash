@@ -609,6 +609,29 @@ const vi = {
     processPayment: "Xử lý thanh toán",
     closePayment: "Đóng thanh toán",
     creatingLink: "Đang tạo link thanh toán...",
+    processingPayment: "Đang xử lý thanh toán...",
+    payOsReceived: "Đã nhận thanh toán. Đang xác nhận đơn...",
+    payOsWaiting: "Thanh toán đang được xử lý",
+    payOsConfirming:
+      "Hệ thống đang chờ webhook PayOS xác nhận với máy chủ. Bạn có thể giữ trang này mở.",
+    payOsConfirmed: "Thanh toán đã được xác nhận",
+    payOsConfirmedDescription:
+      "Đơn dịch vụ đã hoàn thành và được ghi nhận thanh toán bằng thẻ.",
+    payOsCancelled: "Thanh toán trực tuyến đã bị hủy",
+    payOsCancelledDescription:
+      "Đơn dịch vụ không bị hủy và vẫn ở trạng thái đã xử lý. Nhân viên có thể thu tiền mặt hoặc hủy đơn riêng với lý do.",
+    payOsTimeout:
+      "PayOS đã phản hồi nhưng máy chủ chưa xác nhận đơn trong thời gian chờ. Vui lòng thử kiểm tra lại; không cần thanh toán lần nữa.",
+    payOsCheckFailed: "Chưa thể kiểm tra trạng thái đơn",
+    payOsCheckFailedDescription:
+      "Kết nối tới máy chủ gặp lỗi. Vui lòng thử lại hoặc mở danh sách đơn để kiểm tra.",
+    payOsInvalidReturn: "Thông tin trả về không hợp lệ",
+    payOsInvalidReturnDescription:
+      "Trang này không thể xác định giao dịch PayOS. Trạng thái đơn chưa được thay đổi.",
+    payOsOrder: "Đơn #{orderCode}",
+    payOsRetry: "Kiểm tra lại",
+    payOsBackToOrders: "Quay lại danh sách đơn",
+    payOsReference: "Mã tham chiếu PayOS",
     paymentWaitMessage:
       "Sau khi thanh toán thành công, vui lòng đợi 5-10s để hệ thống cập nhật.",
     backToPayment: "Quay lại trang thanh toán",

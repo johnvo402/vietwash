@@ -167,7 +167,7 @@ public static class PayOsErrorPolicy
 {
     // payOS 1.0.9 exposes the provider response code but not the HTTP status.
     // Code 231 is the provider's specific "payment request not found" response.
-    public const string PaymentLinkNotFoundCode = "231";
+    public const string PaymentLinkNotFoundCode = PayOsOrderPolicy.PaymentLinkNotFoundCode;
 
     public static bool IsPaymentLinkNotFound(PayOSError error) =>
         string.Equals(error.Code, PaymentLinkNotFoundCode, StringComparison.Ordinal);

@@ -289,6 +289,33 @@ public class OrderAuthorizationTests
     }
 
     [Fact]
+    public async Task UpdateStatus_AuthorizedStaffCannotCompleteCardPaymentDirectly()
+    {
+        Order order = OrderAtBranch(1, OrderStatus.Processed);
+        (Mock<IUnitOfWork> unitOfWork, _) = TransactionalOrderUnitOfWork(order);
+        UpdateStatusHandler handler = new(unitOfWork.Object, CurrentAccount(["1"]));
+
+        Result result = await handler.Handle(
+            new UpdateStatusCommand
+            {
+                OrderId = "10",
+                Model = new OrderUpdateStatus
+                {
+                    Status = OrderStatus.Completed,
+                    PaymentMethod = PaymentMethod.Card,
+                },
+            },
+            default
+        );
+
+        Assert.True(result.IsFailure);
+        Assert.Equal("Card payments must be completed through PayOS.", result.Error?.Title);
+        Assert.Equal(OrderStatus.Processed, order.Status);
+        Assert.Empty(order.UncommittedEvents);
+        unitOfWork.Verify(x => x.Repository<Order>(It.IsAny<bool>()), Times.Never);
+    }
+
+    [Fact]
     public async Task UpdateStatus_UnauthorizedCancellationPerformsZeroSideEffects()
     {
         Order order = OrderAtBranch(2, OrderStatus.Processed);
@@ -336,7 +363,7 @@ public class OrderAuthorizationTests
         );
 
         Result<CreatePaymentResult> result = await handler.Handle(
-            new GetLinkPaymentQuery { OrderId = 20, ReturnUrl = "https://return.test" },
+            new GetLinkPaymentQuery { OrderId = 20 },
             default
         );
 
@@ -350,17 +377,26 @@ public class OrderAuthorizationTests
         CreatePaymentResult payment = PaymentResult();
         Mock<IOrderPaymentLinkClient> paymentClient = new(MockBehavior.Strict);
         paymentClient
+            .Setup(x => x.GetPaymentLinkInformationAsync(10))
+            .ThrowsAsync(
+                new Net.payOS.Errors.PayOSError(
+                    PayOsOrderPolicy.PaymentLinkNotFoundCode,
+                    "Not found"
+                )
+            );
+        paymentClient
             .Setup(x => x.CreatePaymentLinkAsync(It.IsAny<PaymentData>()))
             .ReturnsAsync(payment);
         Mock<IUnitOfWork> unitOfWork = PaymentOrderUnitOfWork(branchId: 1);
         GetLinkPaymentHandler handler = new(
             paymentClient.Object,
             unitOfWork.Object,
-            CurrentAccount(["1"])
+            CurrentAccount(["1"]),
+            EnabledPaymentSettings()
         );
 
         Result<CreatePaymentResult> result = await handler.Handle(
-            new GetLinkPaymentQuery { OrderId = 10, ReturnUrl = "https://return.test" },
+            new GetLinkPaymentQuery { OrderId = 10 },
             default
         );
 
@@ -590,6 +626,14 @@ public class OrderAuthorizationTests
             expiredAt: null,
             checkoutUrl: "https://pay.test",
             qrCode: string.Empty
+        );
+
+    private static IOrderPaymentSettings EnabledPaymentSettings() =>
+        Mock.Of<IOrderPaymentSettings>(settings =>
+            settings.IsEnabled
+            && settings.ReturnUrl == "https://app.test/payment/payos-return"
+            && settings.CancelUrl == "https://app.test/payment/payos-return"
+            && settings.WebhookUrl == "https://api.test/Webhook/api/CompletedOrder"
         );
 
     private static void AssertForbidden(ErrorDetails? error)

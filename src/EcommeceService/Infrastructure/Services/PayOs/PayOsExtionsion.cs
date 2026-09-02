@@ -1,30 +1,51 @@
 using Application.Feature.Orders.Queries.GetLinkPayment;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Net.payOS;
 
 namespace Infrastructure.Services.PayOs
 {
     public static class PayOsExtension
     {
-        public static IServiceCollection AddPayOs(this IServiceCollection services, IConfiguration config)
+        public static IServiceCollection AddPayOs(
+            this IServiceCollection services,
+            IConfiguration config
+        )
         {
-            // Đăng ký cấu hình
-            services.Configure<PayOsSetting>(config.GetSection(nameof(PayOsSetting)));
+            IConfigurationSection section = config.GetSection(nameof(PayOsSetting));
+            PayOsSetting payOsSetting = section.Get<PayOsSetting>() ?? new PayOsSetting();
+            IReadOnlyList<string> errors = PayOsSettingValidator.GetErrors(payOsSetting);
+            if (errors.Count != 0)
+                throw new OptionsValidationException(
+                    nameof(PayOsSetting),
+                    typeof(PayOsSetting),
+                    errors
+                );
 
-            // Bind và validate 1 lần
-            var payOsSetting = config.GetSection(nameof(PayOsSetting)).Get<PayOsSetting>();
+            services.Configure<PayOsSetting>(section);
+            services.AddSingleton(payOsSetting);
+            services.AddSingleton<IOrderPaymentSettings>(payOsSetting);
 
-            if (payOsSetting?.IsEnabled == true)
+            if (payOsSetting.IsEnabled)
             {
                 var payOS = new PayOS(
-                    payOsSetting.ClientId,
-                    payOsSetting.ApiKey,
-                    payOsSetting.ChecksumKey
+                    payOsSetting.ClientId!,
+                    payOsSetting.ApiKey!,
+                    payOsSetting.ChecksumKey!
                 );
 
                 services.AddSingleton(payOS);
                 services.AddSingleton<IOrderPaymentLinkClient, OrderPaymentLinkClient>();
+                services.AddSingleton<IOrderPaymentWebhookVerifier, PayOsWebhookVerifier>();
+            }
+            else
+            {
+                services.AddSingleton<IOrderPaymentLinkClient, UnavailableOrderPaymentLinkClient>();
+                services.AddSingleton<
+                    IOrderPaymentWebhookVerifier,
+                    UnavailablePayOsWebhookVerifier
+                >();
             }
 
             return services;

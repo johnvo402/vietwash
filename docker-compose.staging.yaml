@@ -14,6 +14,13 @@ services:
       - ./logs:/logs
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
+      - PayOsSetting__IsEnabled=${PayOsSetting__IsEnabled:-false}
+      - PayOsSetting__ClientId=${PayOsSetting__ClientId:-}
+      - PayOsSetting__ApiKey=${PayOsSetting__ApiKey:-}
+      - PayOsSetting__ChecksumKey=${PayOsSetting__ChecksumKey:-}
+      - PayOsSetting__ReturnUrl=${PayOsSetting__ReturnUrl:-}
+      - PayOsSetting__CancelUrl=${PayOsSetting__CancelUrl:-}
+      - PayOsSetting__WebhookUrl=${PayOsSetting__WebhookUrl:-}
 
   project:
     image: ghcr.io/${GHCR_OWNER:-johnvo402}/vietwash-project:${IMAGE_TAG:-dev}

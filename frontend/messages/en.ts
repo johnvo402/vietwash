@@ -599,6 +599,29 @@ const en = {
     processPayment: "Process Payment",
     closePayment: "Close Payment",
     creatingLink: "Creating payment link...",
+    processingPayment: "Processing payment...",
+    payOsReceived: "Payment received. Confirming order…",
+    payOsWaiting: "Payment is being processed",
+    payOsConfirming:
+      "The system is waiting for the PayOS webhook to confirm with the server. You can keep this page open.",
+    payOsConfirmed: "Payment confirmed",
+    payOsConfirmedDescription:
+      "The order is completed and recorded as a card payment.",
+    payOsCancelled: "Online payment cancelled",
+    payOsCancelledDescription:
+      "The business order was not cancelled and remains processed. Staff can collect cash or cancel the order separately with a reason.",
+    payOsTimeout:
+      "PayOS responded, but the server has not confirmed the order within the wait period. Check again; do not pay a second time.",
+    payOsCheckFailed: "Could not check the order status",
+    payOsCheckFailedDescription:
+      "The server connection failed. Try again or open the order list to check it.",
+    payOsInvalidReturn: "Invalid return information",
+    payOsInvalidReturnDescription:
+      "This page cannot identify the PayOS transaction. The order status has not been changed.",
+    payOsOrder: "Order #{orderCode}",
+    payOsRetry: "Check again",
+    payOsBackToOrders: "Back to orders",
+    payOsReference: "PayOS reference",
     paymentWaitMessage:
       "After successful payment, please wait 5-10s for the system to update.",
     backToPayment: "Back to Payment Page",

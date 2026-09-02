@@ -78,10 +78,10 @@ namespace Presentation.Routes
             public const string GetByCode =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(GetByCode)}";
             public const string GetLinkPayment =
-                $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(GetLinkPayment)}"
+                $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/"
                 + "{"
                 + RouterBase.Id
-                + "}";
+                + "}/payment-link";
             public const string UpdateStatus =
                 $"{Ecommerce}/{RouterBase.prefix}{nameof(Orders)}/{nameof(UpdateStatus)}"
                 + "{"

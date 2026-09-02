@@ -10,3 +10,22 @@ public interface IOrderPaymentLinkClient
 
     Task<PaymentLinkInformation> CancelPaymentLinkAsync(long orderId, string cancellationReason);
 }
+
+public interface IOrderPaymentSettings
+{
+    bool IsEnabled { get; }
+
+    string? ReturnUrl { get; }
+
+    string? CancelUrl { get; }
+
+    string? WebhookUrl { get; }
+}
+
+public interface IOrderPaymentWebhookVerifier
+{
+    WebhookData Verify(WebhookType request);
+}
+
+public sealed class PayOsUnavailableException()
+    : InvalidOperationException("PayOS payment is not configured.");

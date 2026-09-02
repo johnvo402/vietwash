@@ -2,6 +2,8 @@ namespace Application.Feature.Orders.Queries.GetLinkPayment;
 
 public static class PayOsOrderPolicy
 {
+    public const string PaymentLinkNotFoundCode = "231";
+
     public static long GetOrderCode(long orderId)
     {
         if (orderId <= 0)
@@ -27,4 +29,35 @@ public static class PayOsOrderPolicy
         amount = decimal.ToInt32(total);
         return true;
     }
+
+    public static string GetDescription(string? orderCode, long orderId)
+    {
+        string normalized = new(
+            (orderCode ?? string.Empty)
+                .ToUpperInvariant()
+                .Where(character => character is >= 'A' and <= 'Z' or >= '0' and <= '9')
+                .Take(22)
+                .ToArray()
+        );
+        return $"VW {(normalized.Length == 0 ? orderId.ToString() : normalized)}";
+    }
+
+    public static OrderPaymentLinkState GetState(string? providerState) =>
+        providerState?.Trim().ToUpperInvariant() switch
+        {
+            "PENDING" => OrderPaymentLinkState.Pending,
+            "PROCESSING" => OrderPaymentLinkState.Processing,
+            "PAID" => OrderPaymentLinkState.Paid,
+            "CANCELLED" => OrderPaymentLinkState.Cancelled,
+            _ => OrderPaymentLinkState.Unknown,
+        };
+}
+
+public enum OrderPaymentLinkState
+{
+    Pending,
+    Processing,
+    Paid,
+    Cancelled,
+    Unknown,
 }

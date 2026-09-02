@@ -16,11 +16,14 @@ namespace Presentation.Endpoints.Orders
             ApiResponse<CreatePaymentResult>
         >
     {
-        [HttpGet(Router.OrderRoute.GetLinkPayment, Name = Router.OrderRoute.GetLinkPayment)]
-        [SwaggerOperation(Tags = [Router.OrderRoute.Tags], Summary = "Get link payment")]
+        [HttpPost(Router.OrderRoute.GetLinkPayment, Name = "CreateOrReuseOrderPaymentLink")]
+        [SwaggerOperation(
+            Tags = [Router.OrderRoute.Tags],
+            Summary = "Create or reuse an order payment link"
+        )]
         [AuthorizeBy]
         public override async Task<ActionResult<ApiResponse<CreatePaymentResult>>> HandleAsync(
-            GetLinkPaymentQuery request,
+            [FromRoute] GetLinkPaymentQuery request,
             CancellationToken cancellationToken = default
         )
         {

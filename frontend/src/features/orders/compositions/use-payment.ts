@@ -1,8 +1,11 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { apiClient } from "@/api/client";
 import { GetOrderDetailByCodeResponse, OrderStatus } from "@/api/generated/api";
-import { usePushRouter } from "@/utils/router-utli";
+import {
+  getPaymentErrorMessage,
+  redirectToPayOsCheckout,
+} from "../payments/payos";
 interface UsePaymentProps {
   onPaymentSuccess?: (method: "cash" | "card") => void;
   onClose?: () => void;
@@ -10,16 +13,13 @@ interface UsePaymentProps {
 
 export function usePayment({ onPaymentSuccess, onClose }: UsePaymentProps) {
   const t = useTranslations();
-  const router = usePushRouter(); // dùng để redirect
   const [paymentStep, setPaymentStep] = useState<"barcode" | "paymentMethod">(
-    "barcode"
-  );
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "card" | null>(
-    null
+    "barcode",
   );
   const [barcode, setBarcode] = useState<string | null>(null);
   const [order, setOrder] = useState<GetOrderDetailByCodeResponse | null>(null);
   const [isCreatingLink, setIsCreatingLink] = useState(false);
+  const [isCompletingCash, setIsCompletingCash] = useState(false);
   const [message, setMessage] = useState<string>("");
 
   const handleBarcodeScan = useCallback(
@@ -46,28 +46,33 @@ export function usePayment({ onPaymentSuccess, onClose }: UsePaymentProps) {
         setMessage(error instanceof Error ? error.message : t("common.error"));
       }
     },
-    [t]
+    [t],
   );
 
-  const handlePaymentMethod = useCallback(
-    async (method: "cash" | "card") => {
-      if (order?.status !== OrderStatus.Processed) {
-        setMessage(t("order.notProcessed"));
-        return;
-      }
-      setPaymentMethod(method);
-      if (method === "cash") {
-        await apiClient.ecommerceApiOrdersUpdateStatusidPut(
-          order?.id?.toString()!,
-          { status: OrderStatus.Completed, paymentMethod: "Cash" }
-        );
-        setMessage(t("order.cashConfirmed"));
-        onPaymentSuccess?.("cash");
-        onClose?.();
-      }
-    },
-    [order?.id, order?.status, t, onPaymentSuccess, onClose]
-  );
+  const handleCashPayment = useCallback(async () => {
+    if (order?.status !== OrderStatus.Processed) {
+      setMessage(t("order.notProcessed"));
+      return;
+    }
+
+    setIsCompletingCash(true);
+    try {
+      await apiClient.ecommerceApiOrdersUpdateStatusidPut(
+        order.id!.toString(),
+        {
+          status: OrderStatus.Completed,
+          paymentMethod: "Cash",
+        },
+      );
+      setMessage(t("order.cashConfirmed"));
+      onPaymentSuccess?.("cash");
+      onClose?.();
+    } catch (error) {
+      setMessage(getPaymentErrorMessage(error, t("common.error")));
+    } finally {
+      setIsCompletingCash(false);
+    }
+  }, [order?.id, order?.status, t, onPaymentSuccess, onClose]);
 
   const handleGetPaymentLink = useCallback(async () => {
     if (!order || order.status !== OrderStatus.Processed) {
@@ -77,26 +82,14 @@ export function usePayment({ onPaymentSuccess, onClose }: UsePaymentProps) {
 
     setIsCreatingLink(true);
     try {
-      const result = await apiClient.ecommerceApiOrdersGetLinkPaymentid(
-        order.id!,
-        window.location.href
-      );
-
-      if (result.data.status != 200) {
-        throw new Error(t("common.error"));
-      }
-      const data = result.data.results;
-      router.pushRouter({
-        router: data!.checkoutUrl!,
-        redirect: "current",
-      });
-      setIsCreatingLink(false);
+      await redirectToPayOsCheckout(order.id!);
     } catch (error) {
       console.error("Lỗi khi tạo link thanh toán:", error);
-      setMessage(t("common.error"));
+      setMessage(getPaymentErrorMessage(error, t("common.error")));
+    } finally {
       setIsCreatingLink(false);
     }
-  }, [order, router, t]);
+  }, [order, t]);
 
   const handleClosePayOS = useCallback(() => {
     setPaymentStep("barcode");
@@ -107,7 +100,6 @@ export function usePayment({ onPaymentSuccess, onClose }: UsePaymentProps) {
     setMessage("");
     setPaymentStep("barcode");
     setBarcode(null);
-    setPaymentMethod(null);
     setOrder(null);
   }, []);
 
@@ -115,11 +107,11 @@ export function usePayment({ onPaymentSuccess, onClose }: UsePaymentProps) {
     paymentStep,
     barcode,
     order,
-    paymentMethod,
     isCreatingLink,
+    isCompletingCash,
     message,
     handleBarcodeScan,
-    handlePaymentMethod,
+    handleCashPayment,
     handleGetPaymentLink,
     handleClosePayOS,
     resetState,

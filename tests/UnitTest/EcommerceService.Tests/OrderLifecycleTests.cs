@@ -274,7 +274,7 @@ public class OrderLifecycleTests
     }
 
     [Fact]
-    public void DuplicateCompletion_IsIdempotentAndDoesNotEmitSideEffectsTwice()
+    public void DuplicateVerifiedWebhookCompletion_DoesNotDuplicateFinancialSideEffects()
     {
         Order order = CreateOrder(OrderStatus.Processed, customerId: 7, voucherId: 8);
         _ = order.TransitionTo(OrderStatus.Completed, PaymentMethod.Card);
@@ -288,6 +288,11 @@ public class OrderLifecycleTests
         Assert.Single(order.UncommittedEvents.OfType<CreateFundEvent>());
         Assert.Single(order.UncommittedEvents.OfType<EInvoiceEvent>());
         Assert.Single(order.UncommittedEvents.OfType<VoucherUsageEvent>());
+        Assert.Single(order.UncommittedEvents.OfType<UpdateStatusOrderEvent>());
+        Assert.Equal(
+            order.Point,
+            Assert.Single(order.UncommittedEvents.OfType<CreateFundEvent>()).Point
+        );
     }
 
     [Fact]

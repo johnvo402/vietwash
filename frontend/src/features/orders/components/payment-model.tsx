@@ -20,6 +20,7 @@ import {
   ShoppingCartIcon,
   StickyNoteIcon,
   User,
+  Loader2,
 } from "lucide-react";
 import { formatPriceVN } from "@/utils/format";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -58,8 +59,10 @@ export function PaymentModal({
     setOrder,
     message,
     handleBarcodeScan,
-    handlePaymentMethod,
+    handleCashPayment,
     handleGetPaymentLink,
+    isCreatingLink,
+    isCompletingCash,
     resetState,
   } = usePayment({ onPaymentSuccess, onClose });
 
@@ -87,19 +90,24 @@ export function PaymentModal({
         {t("order.selectPaymentMethod")}
       </p>
       <Button
-        onClick={() => handlePaymentMethod("cash")}
+        onClick={handleCashPayment}
+        disabled={isCompletingCash || isCreatingLink}
         className={`w-full ${isMobile ? "text-sm py-2" : "text-base"} bg-green-600 hover:bg-green-700`}
       >
-        {t("order.cash")}
+        {isCompletingCash && (
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+        )}
+        {isCompletingCash ? t("order.processingPayment") : t("order.cash")}
       </Button>
       <Button
-        onClick={() => {
-          handlePaymentMethod("card");
-          handleGetPaymentLink();
-        }}
+        onClick={handleGetPaymentLink}
+        disabled={isCreatingLink || isCompletingCash}
         className={`w-full ${isMobile ? "text-sm py-2" : "text-base"} bg-blue-600 hover:bg-blue-700`}
       >
-        {t("order.card")}
+        {isCreatingLink && (
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+        )}
+        {isCreatingLink ? t("order.creatingLink") : t("order.card")}
       </Button>
     </div>
   );
@@ -185,7 +193,7 @@ export function PaymentModal({
             <div
               className={`p-4 text-center font-medium ${isMobile ? "text-sm" : "text-base"}`}
             >
-              {message && <p>{message}</p>}
+              {message && <p role="alert">{message}</p>}
               {getOrderStatusMessage()}
               {message && (
                 <Button
@@ -303,7 +311,7 @@ function PaymentInfo({ order }: { order: Order }) {
                     className="w-fit"
                   >
                     {t(
-                      `user.customer.customerGroup.${order.customer.customerGroup.toLowerCase()}`
+                      `user.customer.customerGroup.${order.customer.customerGroup.toLowerCase()}`,
                     )}
                   </Badge>
                 </div>

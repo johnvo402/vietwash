@@ -40,6 +40,10 @@ import { PaymentMethodSelect } from "../PaymentMethodSelect";
 import { usePageType } from "@/hooks/use-page-type";
 import { OrderEquipment } from "@/features/cashier/types";
 import { CancelOrderDialog } from "../cancel-order-dialog";
+import {
+  getPaymentErrorMessage,
+  redirectToPayOsCheckout,
+} from "../../payments/payos";
 
 export const useOrder = ({
   onEdit,
@@ -163,16 +167,23 @@ export const useOrder = ({
     setIsPaymentDialogOpen(true);
   };
 
-  const confirmCompleteOrder = (paymentMethod: PaymentMethod) => {
-    if (orderToComplete) {
-      updateStatus.mutate({
-        id: orderToComplete.id,
-        status: OrderStatus.Completed,
-        paymentMethod,
-      });
+  const confirmCompleteOrder = async (paymentMethod: PaymentMethod) => {
+    if (!orderToComplete) return;
+
+    try {
+      if (paymentMethod === PaymentMethod.Card) {
+        await redirectToPayOsCheckout(Number(orderToComplete.id));
+      } else {
+        await updateStatus.mutateAsync({
+          id: orderToComplete.id,
+          status: OrderStatus.Completed,
+          paymentMethod: PaymentMethod.Cash,
+        });
+      }
+      setOrderToComplete(null);
+    } catch (error) {
+      throw new Error(getPaymentErrorMessage(error, t("common.error")));
     }
-    setIsPaymentDialogOpen(false);
-    setOrderToComplete(null);
   };
 
   const handleCancelOrder = (orderId: string, code: string) => {
@@ -356,7 +367,10 @@ export const useOrder = ({
               <PaymentMethodSelect
                 isOpen={isPaymentDialogOpen}
                 onSubmit={confirmCompleteOrder}
-                onClose={() => setIsPaymentDialogOpen(false)}
+                onClose={() => {
+                  setIsPaymentDialogOpen(false);
+                  setOrderToComplete(null);
+                }}
               />
             )}
 

@@ -13,8 +13,8 @@
     "generate": "rimraf src/api/generated && openapi-generator-cli generate -i ./openapi.json -g typescript-axios -o src/api/generated",
     "generate-types": "npm run merged-api && npm run generate",
     "test:record": "concurrently -k -n \"NEXT,GEN\" -c \"blue,green\" \"next dev\" \"npx wait-on http://localhost:3000 && npx playwright codegen http://localhost:3000\"",
-    "test:run": "playwright test --project=auth --project=feature-tests",
-    "test:headed": "playwright test --project=auth --project=feature-tests --headed",
+    "test:run": "playwright test --project=auth --project=feature-tests --project=public",
+    "test:headed": "playwright test --project=auth --project=feature-tests --project=public --headed",
     "test:report": "playwright show-report"
   },
   "dependencies": {
