@@ -66,10 +66,10 @@ export default function CustomDateTime({
   const [calendarDate, setCalendarDate] = useState<Date>(date ?? now);
   const [hours, setHours] = useState<string>(date ? format(date, "HH") : "00");
   const [minutes, setMinutes] = useState<string>(
-    date ? format(date, "mm") : "00"
+    date ? format(date, "mm") : "00",
   );
   const [seconds, setSeconds] = useState<string>(
-    date ? format(date, "ss") : "00"
+    date ? format(date, "ss") : "00",
   );
 
   const currentYear = new Date().getFullYear();
@@ -83,28 +83,28 @@ export default function CustomDateTime({
     startOfDay(date).getTime() === startOfDay(now).getTime();
 
   const hoursOptions = Array.from({ length: 24 }, (_, i) =>
-    i.toString().padStart(2, "0")
+    i.toString().padStart(2, "0"),
   ).filter((h) =>
-    dateTime && isToday(dateTime) ? parseInt(h) >= now.getHours() : true
+    dateTime && isToday(dateTime) ? parseInt(h) >= now.getHours() : true,
   );
 
   const minutesOptions = Array.from({ length: 60 }, (_, i) =>
-    i.toString().padStart(2, "0")
+    i.toString().padStart(2, "0"),
   ).filter((m) =>
     dateTime && isToday(dateTime) && parseInt(hours) === now.getHours()
       ? parseInt(m) >= now.getMinutes()
-      : true
+      : true,
   );
 
   const secondsOptions = Array.from({ length: 60 }, (_, i) =>
-    i.toString().padStart(2, "0")
+    i.toString().padStart(2, "0"),
   ).filter((s) =>
     dateTime &&
     isToday(dateTime) &&
     parseInt(hours) === now.getHours() &&
     parseInt(minutes) === now.getMinutes()
       ? parseInt(s) >= now.getSeconds()
-      : true
+      : true,
   );
 
   useEffect(() => {
@@ -112,11 +112,17 @@ export default function CustomDateTime({
       setDateTime(date);
       setCalendarDate(date);
       setInputValue(
-        format(date, showSeconds ? "dd/MM/yyyy HH:mm:ss" : "dd/MM/yyyy HH:mm")
+        format(date, showSeconds ? "dd/MM/yyyy HH:mm:ss" : "dd/MM/yyyy HH:mm"),
       );
       setHours(format(date, "HH"));
       setMinutes(format(date, "mm"));
       setSeconds(format(date, "ss"));
+    } else {
+      setDateTime(null);
+      setInputValue("");
+      setHours("00");
+      setMinutes("00");
+      setSeconds("00");
     }
   }, [date, showSeconds]);
 
@@ -139,7 +145,7 @@ export default function CustomDateTime({
     if (isBefore(newDateTime, now)) {
       setDateTime(now);
       setInputValue(
-        format(now, showSeconds ? "dd/MM/yyyy HH:mm:ss" : "dd/MM/yyyy HH:mm")
+        format(now, showSeconds ? "dd/MM/yyyy HH:mm:ss" : "dd/MM/yyyy HH:mm"),
       );
       setHours(format(now, "HH"));
       setMinutes(format(now, "mm"));
@@ -153,8 +159,8 @@ export default function CustomDateTime({
     setInputValue(
       format(
         newDateTime,
-        showSeconds ? "dd/MM/yyyy HH:mm:ss" : "dd/MM/yyyy HH:mm"
-      )
+        showSeconds ? "dd/MM/yyyy HH:mm:ss" : "dd/MM/yyyy HH:mm",
+      ),
     );
     if (onChange) onChange(newDateTime);
   };
@@ -168,7 +174,7 @@ export default function CustomDateTime({
 
   const handleTimeChange = (
     type: "hours" | "minutes" | "seconds",
-    value: string
+    value: string,
   ) => {
     if (type === "hours") setHours(value);
     if (type === "minutes") setMinutes(value);
@@ -183,8 +189,8 @@ export default function CustomDateTime({
       setInputValue(
         format(
           newDateTime,
-          showSeconds ? "dd/MM/yyyy HH:mm:ss" : "dd/MM/yyyy HH:mm"
-        )
+          showSeconds ? "dd/MM/yyyy HH:mm:ss" : "dd/MM/yyyy HH:mm",
+        ),
       );
       if (onChange) onChange(newDateTime);
       return;
@@ -198,7 +204,7 @@ export default function CustomDateTime({
     if (isBefore(newDateTime, now)) {
       setDateTime(now);
       setInputValue(
-        format(now, showSeconds ? "dd/MM/yyyy HH:mm:ss" : "dd/MM/yyyy HH:mm")
+        format(now, showSeconds ? "dd/MM/yyyy HH:mm:ss" : "dd/MM/yyyy HH:mm"),
       );
       setHours(format(now, "HH"));
       setMinutes(format(now, "mm"));
@@ -210,8 +216,8 @@ export default function CustomDateTime({
       setInputValue(
         format(
           newDateTime,
-          showSeconds ? "dd/MM/yyyy HH:mm:ss" : "dd/MM/yyyy HH:mm"
-        )
+          showSeconds ? "dd/MM/yyyy HH:mm:ss" : "dd/MM/yyyy HH:mm",
+        ),
       );
       if (onChange) onChange(newDateTime);
     }
@@ -242,8 +248,8 @@ export default function CustomDateTime({
           setInputValue(
             format(
               now,
-              showSeconds ? "dd/MM/yyyy HH:mm:ss" : "dd/MM/yyyy HH:mm"
-            )
+              showSeconds ? "dd/MM/yyyy HH:mm:ss" : "dd/MM/yyyy HH:mm",
+            ),
           );
           setHours(format(now, "HH"));
           setMinutes(format(now, "mm"));
@@ -297,7 +303,7 @@ export default function CustomDateTime({
     setMinutes(format(now, "mm"));
     setSeconds(format(now, "ss"));
     setInputValue(
-      format(now, showSeconds ? "dd/MM/yyyy HH:mm:ss" : "dd/MM/yyyy HH:mm")
+      format(now, showSeconds ? "dd/MM/yyyy HH:mm:ss" : "dd/MM/yyyy HH:mm"),
     );
     if (onChange) onChange(now);
   };

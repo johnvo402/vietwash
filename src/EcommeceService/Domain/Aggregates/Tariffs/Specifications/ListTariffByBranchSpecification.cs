@@ -12,6 +12,7 @@ namespace Domain.Aggregates.Tariffs.Specifications
             Query
                 .Where(tariff =>
                     tariff.BranchId == branchId
+                    && !tariff.Disable
                     && tariff.Status == ActivationStatus.Active
                     && (tariff.StartAt == null || tariff.StartAt <= currentTime)
                     && (tariff.EndAt == null || tariff.EndAt >= currentTime)

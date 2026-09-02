@@ -15,6 +15,7 @@ import React from "react";
 import { Option } from "@/types/props";
 
 interface ComboboxProps {
+  ariaLabel?: string;
   options: Option[];
   value: string;
   onChange: (value: string) => void;
@@ -26,6 +27,7 @@ interface ComboboxProps {
 }
 
 export const Combobox: React.FC<ComboboxProps> = ({
+  ariaLabel,
   options,
   value,
   onChange,
@@ -46,6 +48,7 @@ export const Combobox: React.FC<ComboboxProps> = ({
         <Button
           variant="outline"
           role="combobox"
+          aria-label={ariaLabel}
           aria-expanded={open}
           className="w-full justify-between"
           disabled={disabled || loading}
@@ -75,7 +78,7 @@ export const Combobox: React.FC<ComboboxProps> = ({
                   <Check
                     className={cn(
                       "ml-auto h-4 w-4",
-                      value === option.value ? "opacity-100" : "opacity-0"
+                      value === option.value ? "opacity-100" : "opacity-0",
                     )}
                   />
                 </CommandItem>

@@ -10,6 +10,67 @@
         "version": "v1"
     },
     "paths": {
+        "/Ecommerce/api/Orders/preview": {
+            "post": {
+                "tags": [
+                    "OrderRoute endpoint"
+                ],
+                "summary": "Preview order pricing without side effects",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PreviewOrderQuery"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PreviewOrderResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/Ecommerce/api/Users/{id}": {
+            "get": {
+                "tags": [
+                    "UserRoute endpoint"
+                ],
+                "summary": "Find an active synchronized customer",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetCustomerResponseApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/Ecommerce/api/BranchProductCardInv": {
             "get": {
                 "tags": [
@@ -5442,6 +5503,172 @@
     },
     "components": {
         "schemas": {
+            "PreviewOrderQuery": {
+                "type": "object",
+                "properties": {
+                    "customerId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "branchId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "tariffId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "voucherCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "orderItems": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OrderItemSelectionModel"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            },
+            "PreviewOrderResponse": {
+                "type": "object",
+                "properties": {
+                    "amount": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "discountAmount": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "discountFixed": {
+                        "type": "boolean"
+                    },
+                    "discountValue": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "netBeforeVat": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "vatPercent": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "vatAmount": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "total": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "orderItems": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PreviewOrderLine"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            },
+            "PreviewOrderLine": {
+                "type": "object",
+                "properties": {
+                    "serviceId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "serviceName": {
+                        "type": "string"
+                    },
+                    "unitRelationId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "unitRelationName": {
+                        "type": "string"
+                    },
+                    "unitPrice": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "quantity": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "lineAmount": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "GetCustomerResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "displayName": {
+                        "type": "string"
+                    },
+                    "phoneNumber": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "customerGroup": {
+                        "$ref": "#/components/schemas/CustomerGroup"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/ActivationStatus"
+                    },
+                    "role": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "PreviewOrderResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/PreviewOrderResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "GetCustomerResponseApiResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "results": {
+                        "$ref": "#/components/schemas/GetCustomerResponse"
+                    }
+                },
+                "additionalProperties": false
+            },
             "ActivationStatus": {
                 "enum": [
                     "Active",
@@ -5878,6 +6105,7 @@
             "CreateOrderResponse": {
                 "type": "object",
                 "properties": {
+                    "discountAmount": { "type": "number", "format": "double", "readOnly": true },
                     "id": {
                         "type": "integer",
                         "format": "int64"

@@ -20,9 +20,7 @@ import {
   Plus,
   QrCode,
   Save,
-  Search,
 } from "lucide-react";
-import { formatNumberVN, formatPriceVN, parseNumberVN } from "@/utils/format";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Label } from "@/components/ui/label";
@@ -31,313 +29,128 @@ import { Combobox } from "@/components/ui/combobox";
 import { Customer } from "@/utils/customer-indexedDb";
 import { PriceItem } from "@/utils/tariff-db";
 import CustomDateTime from "./booking-receipt-date";
-import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/api/client";
 import { toast } from "react-toastify";
 import { QRScanner } from "@/components/qr-scanner";
+import type { PreviewOrderResponse } from "@/api/generated";
+import { PricingSummary } from "./pricing-summary";
 
 interface OrderPaymentProps {
-  total: number;
-  amount: number;
-  discountValue: number;
-  discountFixed: boolean;
+  preview?: PreviewOrderResponse;
+  calculating: boolean;
+  previewError: boolean;
+  previewErrorMessage?: string;
+  retryPreview: () => void;
   voucherCode: string;
   disable: boolean;
   isProcessing: boolean;
-  handleProcessOrder: (value: {
-    discountValue: number;
-    discountFixed: boolean;
-    voucherCode?: string;
-    bookingDate?: Date;
-  }) => void;
-  handlePrint?: () => void;
-  printDisabled?: boolean;
-  handleApplyVoucher: (
-    voucherCode: string,
-    tabId: string
-  ) => Promise<{
-    discountValue: number;
-    discountFixed: boolean;
-    message: string;
-  }>;
+  handleProcessOrder: () => void;
+  handlePrint: () => void;
+  printDisabled: boolean;
+  handleApplyVoucher: (code: string, tabId: string) => void;
   activeTab: string;
-  voucherDisabled?: boolean;
   customers: Customer[];
   tariffs: PriceItem[];
   tariffId: number;
-  onSetTariff: (data: number | null) => void;
-  note?: string;
-  onSetNote: (note: string | null) => void;
+  onSetTariff: (id: number) => void;
+  note: string;
+  onSetNote: (note: string) => void;
   customerInit: Customer | null;
   onSelect: (customer: Customer | null) => void;
-  openCreate?: () => void;
-  point: number;
-  handleUpdatePoints: (
-    points: number,
-    tabId: string,
-    maxPoints: number
-  ) => void;
-  deliveryTime: string | null;
-  isEdit?: boolean;
+  openCreate: () => void;
+  deliveryTime: string;
+  onSetDeliveryTime: (date: Date | undefined) => void;
+  customerPending: boolean;
+  isEdit: boolean;
 }
 
-export const OrderPaymentSection = ({
-  total,
-  amount,
-  discountValue,
-  discountFixed,
-  voucherCode: initialVoucherCode,
-  disable,
-  isProcessing,
-  handleProcessOrder,
-  handlePrint,
-  printDisabled = false,
-  voucherDisabled = true,
-  handleApplyVoucher,
-  activeTab,
-  customers,
-  tariffs,
-  tariffId,
-  onSetTariff,
-  note: initialNote,
-  onSetNote,
-  customerInit,
-  onSelect,
-  openCreate,
-  point,
-  handleUpdatePoints,
-  deliveryTime,
-  isEdit = false,
-}: OrderPaymentProps) => {
-  const [voucherCode, setVoucherCode] = useState<string>(initialVoucherCode);
-  const [bookingDate, setBookingDate] = useState<Date | undefined>(
-    deliveryTime ? new Date(deliveryTime) : undefined
-  );
-  const [voucherMessage, setVoucherMessage] = useState<string>("");
-  const [customer, setCustomer] = useState<Customer | null>(
-    customerInit || null
-  );
-  const [tariff, setTariff] = useState<PriceItem | null>(null);
-  const [searchTerm, setSearchTerm] = useState<string>("");
-
-  const [note, setNote] = useState<string>(initialNote || "");
-  const [points, setPoints] = useState<number>(0);
-  const [pointsError, setPointsError] = useState<string>("");
-  const [showQRScanner, setShowQRScanner] = useState<boolean>(false);
+export function OrderPaymentSection(props: OrderPaymentProps) {
   const t = useTranslations();
-
-  const discountAmount = discountFixed
-    ? discountValue
-    : amount * (discountValue / 100);
-  const pointsDeduction = points * 10;
-  const { data: pointData, refetch } = useQuery({
-    queryKey: ["customerPoint", customer?.id],
-    queryFn: async () =>
-      await apiClient.financeApiTransactionGetPointByCustomerIdIdGet(
-        customer?.id!
-      ),
-    enabled: !!customer?.id,
-  });
-
+  const [voucherCode, setVoucherCode] = useState(props.voucherCode);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const customer = props.customerInit;
+  const tariff = props.tariffs.find((row) => row.id === props.tariffId);
   useEffect(() => {
-    setVoucherCode(initialVoucherCode);
-    setCustomer(customerInit || null);
-    setNote(initialNote || "");
-    setPoints(0);
-    setBookingDate(deliveryTime ? new Date(deliveryTime) : undefined);
-    setPointsError("");
-    const selectedTariff = tariffs.find((x) => x.id === tariffId);
-    if (selectedTariff) setTariff(selectedTariff);
-    if (voucherDisabled) {
-      setVoucherMessage("");
-      setVoucherCode("");
-    }
-    refetch();
-  }, [
-    initialVoucherCode,
-    customerInit,
-    initialNote,
-    tariffId,
-    tariffs,
-    voucherDisabled,
-    refetch,
-    point,
-    deliveryTime,
-  ]);
-
-  const handleDateChange = (date: Date | undefined) => {
-    setBookingDate(date);
-  };
-
-  const handleApplyVoucherClick = async () => {
-    if (!voucherCode) {
-      setVoucherMessage(t("cashier.enterVoucherCode"));
-      return;
-    }
-    const result = await handleApplyVoucher(voucherCode, activeTab);
-    setVoucherMessage(result.message);
-  };
-
-  const handleSubmit = () => {
-    if (!bookingDate) {
-      toast.error(t("cashier.pleaseSelectPickupTime"));
-      return;
-    }
-    handleProcessOrder({
-      discountValue,
-      discountFixed,
-      bookingDate,
-      voucherCode,
-    });
-  };
-
-  const handleSelectCustomer = (data: Customer | null) => {
-    const updatedCustomer = data ? { ...data, note } : null;
-    setCustomer(updatedCustomer);
-    onSelect(updatedCustomer);
-    setPoints(0);
-    setPointsError("");
-    handleUpdatePoints(0, activeTab, pointData?.data.results?.point ?? 0);
-  };
-
-  const handleSelectTariff = (id: string | null) => {
-    const selectedTariff = tariffs.find((x) => x.id.toString() === id);
-    if (selectedTariff) {
-      setTariff(selectedTariff);
-      onSetTariff(Number(id));
-    }
-  };
-
-  const handleNoteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newNote = e.target.value;
-    setNote(newNote);
-    onSetNote(newNote);
-  };
-
-  const handlePointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const parsedPoints = parseNumberVN(e.target.value);
-    if (isNaN(parsedPoints)) {
-      setPointsError(t("cashier.pointsMustBeNonNegative"));
-      return;
-    }
-    if (parsedPoints < 0) {
-      setPointsError(t("cashier.pointsMustBeNonNegative"));
-      return;
-    }
-    if (parsedPoints > (pointData?.data.results?.point ?? 0)) {
-      setPointsError(t("cashier.pointsExceedAvailable"));
-      return;
-    }
-    setPointsError("");
-    setPoints(parsedPoints);
-    handleUpdatePoints(
-      parsedPoints,
-      activeTab,
-      pointData?.data.results?.point ?? 0
-    );
-  };
-
-  const handleQRScanSuccess = (scannedCode: string) => {
-    setVoucherCode(scannedCode);
-    setVoucherMessage("");
+    setVoucherCode(props.voucherCode);
     setShowQRScanner(false);
-    handleApplyVoucherClick();
+  }, [props.voucherCode, props.activeTab]);
+  const applyVoucher = (code: string) => {
+    setVoucherCode(code);
+    props.handleApplyVoucher(code, props.activeTab);
   };
-
-  const handleQRStop = () => {
-    setShowQRScanner(false);
-  };
-
-  const getTariffOptions = () => {
-    return (
-      tariffs?.map((tariff: PriceItem) => ({
-        value: tariff.id.toString(),
-        label: tariff.name || t("common.unknown"),
-      })) || []
-    );
-  };
-
   return (
-    <>
-      <Card className="bg-background shadow-md rounded-lg">
-        <CardHeader>
-          <CardTitle className="text-xl font-bold text-gray-800">
-            {t("cashier.orderInformation")}
-          </CardTitle>
-        </CardHeader>
+    <Card className="bg-background shadow-md rounded-lg">
+      <CardHeader>
+        <CardTitle className="text-xl font-bold">
+          {t("cashier.orderInformation")}
+        </CardTitle>
+      </CardHeader>
+      <fieldset disabled={props.isProcessing} className="min-w-0">
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">
+              <Label htmlFor="customer-select">
                 {t("user.customerInformation")}
               </Label>
-              <div className="flex items-center gap-2">
-                <Select
-                  value={customer?.id.toString() || undefined}
-                  disabled={isEdit}
-                  onValueChange={(value) => {
-                    if (value === "create") {
-                      openCreate?.();
-                    } else {
-                      const selectedCustomer = customers.find(
-                        (c) => c.id === Number(value)
-                      );
-                      handleSelectCustomer(selectedCustomer || null);
-                    }
-                  }}
-                >
-                  <SelectTrigger id="customer-select" className="flex-1">
-                    <SelectValue
-                      placeholder={t("common.placeholderSelect", {
-                        entity: t("common.customer"),
-                      })}
-                    />
-                  </SelectTrigger>
-                  <SelectContent onCloseAutoFocus={() => setSearchTerm("")}>
-                    <input
-                      type="text"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder={t("cashier.customerPlaceholder")}
-                      className="w-full p-2 border-b focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {customers
-                      .filter(
-                        (c) =>
-                          c.displayName
-                            ?.toLowerCase()
-                            .includes(searchTerm.toLowerCase()) ||
-                          c.phoneNumber
-                            ?.toLowerCase()
-                            .includes(searchTerm.toLowerCase())
+              <Select
+                value={customer?.id.toString() ?? ""}
+                disabled={props.isEdit || props.customerPending}
+                onValueChange={(value) =>
+                  value === "create"
+                    ? props.openCreate()
+                    : props.onSelect(
+                        props.customers.find(
+                          (row) => row.id === Number(value),
+                        ) ?? null,
                       )
-                      .map((c) => (
-                        <SelectItem key={c.id} value={c.id.toString()}>
-                          {c.displayName} -{" "}
-                          {c.phoneNumber || t("common.noPhone")}
-                        </SelectItem>
-                      ))}
-                    <SelectItem
-                      value="create"
-                      className="text-primary font-medium flex items-center justify-center w-full gap-2"
-                    >
-                      <Plus className="h-6 w-6" />
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="tariff" className="text-sm font-medium">
-                {t("common.tariff")}
-              </Label>
-              <Combobox
-                options={getTariffOptions()}
-                value={
-                  tariff?.id.toString() || tariffs[0]?.id?.toString() || ""
                 }
-                onChange={(value) => handleSelectTariff(value)}
+              >
+                <SelectTrigger id="customer-select">
+                  <SelectValue
+                    placeholder={t("common.placeholderSelect", {
+                      entity: t("common.customer"),
+                    })}
+                  />
+                </SelectTrigger>
+                <SelectContent onCloseAutoFocus={() => setSearchTerm("")}>
+                  <Input
+                    aria-label={t("cashier.customerPlaceholder")}
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                    placeholder={t("cashier.customerPlaceholder")}
+                  />
+                  {props.customers
+                    .filter((row) =>
+                      `${row.displayName} ${row.phoneNumber}`
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase()),
+                    )
+                    .map((row) => (
+                      <SelectItem key={row.id} value={row.id.toString()}>
+                        {row.displayName} - {row.phoneNumber}
+                      </SelectItem>
+                    ))}
+                  <SelectItem value="create">
+                    <span className="flex items-center gap-2">
+                      <Plus className="h-4 w-4" aria-hidden="true" />
+                      {t("common.create")}
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>{t("common.tariff")}</Label>
+              <Combobox
+                ariaLabel={t("common.tariff")}
+                options={props.tariffs.map((row) => ({
+                  value: String(row.id),
+                  label: row.name,
+                }))}
+                value={tariff ? String(tariff.id) : ""}
+                onChange={(id) => {
+                  if (id) props.onSetTariff(Number(id));
+                }}
                 placeholder={t("common.entitySelectPlaceholder", {
                   entity: t("common.tariff"),
                 })}
@@ -345,191 +158,133 @@ export const OrderPaymentSection = ({
                   entity: t("common.tariff"),
                 })}
                 emptyMessage={t("common.noOptions")}
-                disabled={!tariffs.length}
+                disabled={!props.tariffs.length || props.isProcessing}
               />
             </div>
-            {customer && (
-              <div className="text-primary font-medium">
-                {t("cashier.point")}
-                {formatNumberVN(pointData?.data.results?.point ?? 0)}
-              </div>
-            )}
           </div>
-
+          {props.customerPending && (
+            <div role="status" className="space-y-2 text-sm">
+              <p>{t("cashier.customerSyncPending")}</p>
+              <Button variant="outline" onClick={props.openCreate}>
+                {t("cashier.retryCustomerSync")}
+              </Button>
+            </div>
+          )}
           <div>
-            <Label htmlFor="customer-note" className="text-sm font-medium">
-              {t("common.note")}
-            </Label>
+            <Label htmlFor="customer-note">{t("common.note")}</Label>
             <Input
               id="customer-note"
-              value={note}
-              onChange={handleNoteChange}
-              placeholder={t("dialog.placeholder", {
-                entity: t("common.note").toLowerCase(),
-              })}
-              className="mt-1 w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={props.note}
+              onChange={(event) => props.onSetNote(event.target.value)}
             />
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="points-input" className="text-sm font-medium">
-              {t("cashier.usePoints")}
-            </Label>
-            <Input
-              id="points-input"
-              type="text"
-              value={formatNumberVN(points)}
-              onChange={handlePointsChange}
-              placeholder={t("cashier.enterPoints")}
-              disabled
-              min="0"
-              max={pointData?.data.results?.point ?? 0}
-              className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            {pointsError && (
-              <p className="text-sm text-red-600">{pointsError}</p>
-            )}
-          </div>
-
           <CustomDateTime
-            onChange={handleDateChange}
+            onChange={props.onSetDeliveryTime}
             showSeconds
-            date={bookingDate}
+            date={props.deliveryTime ? new Date(props.deliveryTime) : undefined}
             placeholder={t("cashier.selectPickupTime")}
           />
-
           <div className="space-y-2">
+            <Label htmlFor="voucher-code">
+              {t("cashier.enterVoucherCode")}
+            </Label>
             <div className="flex items-center gap-2">
               <Input
-                type="text"
-                disabled={voucherDisabled || isEdit}
+                id="voucher-code"
+                disabled={!customer || props.isEdit}
                 value={voucherCode}
-                onChange={(e) => {
-                  setVoucherCode(e.target.value);
-                  setVoucherMessage("");
-                }}
-                placeholder={t("cashier.enterVoucherCode")}
-                className="flex-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={(event) => setVoucherCode(event.target.value)}
               />
               <Button
                 variant="outline"
+                aria-label={t("cashier.enterVoucherCode")}
+                disabled={!customer || props.isEdit}
                 onClick={() => setShowQRScanner(!showQRScanner)}
-                disabled={voucherDisabled || isEdit}
-                className="px-4 py-2"
               >
                 <QrCode className="h-4 w-4" />
               </Button>
               <Button
                 variant="outline"
-                onClick={handleApplyVoucherClick}
-                disabled={voucherDisabled || isEdit}
-                className="px-4 py-2"
+                disabled={!customer || props.isEdit}
+                onClick={() => applyVoucher(voucherCode)}
               >
                 {t("common.apply")}
               </Button>
             </div>
             {showQRScanner && (
               <QRScanner
-                onScanSuccess={handleQRScanSuccess}
+                onScanSuccess={(code) => {
+                  applyVoucher(code);
+                  setShowQRScanner(false);
+                }}
                 onScanError={(error) => toast.error(error)}
-                onStop={handleQRStop}
-                className="mt-4"
-                autoStart={true}
+                onStop={() => setShowQRScanner(false)}
+                autoStart
               />
-            )}
-            {voucherMessage && (
-              <p
-                className={`text-sm ${
-                  discountValue > 0 ? "text-green-600" : "text-red-600"
-                }`}
-              >
-                {voucherMessage}
-              </p>
             )}
           </div>
         </CardContent>
-        <CardFooter className="sticky bottom-0 z-10 p-6 bg-background border-t border-secondary">
-          <div className="space-y-6 flex items-center flex-col w-full">
-            <div className="space-y-2 w-full">
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-gray-700">
-                  {t("table.accessorKey.amount")}:
-                </span>
-                <span className="text-lg font-bold text-gray-900">
-                  {formatPriceVN(amount)}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-gray-700">
-                  {t("order.discount")}:
-                </span>
-                <span className="text-lg font-bold text-gray-900">
-                  {formatPriceVN(discountAmount)}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-gray-700">
-                  {t("cashier.pointsDeduction")}:
-                </span>
-                <span className="text-lg font-bold text-gray-900">
-                  {formatPriceVN(pointsDeduction)}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-gray-700">
-                  {t("VAT 10%")}:
-                </span>
-                <span className="text-lg font-bold text-gray-900">
-                  {formatPriceVN(
-                    (amount - discountAmount - pointsDeduction) * 0.1
-                  )}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-gray-700">
-                  {t("table.accessorKey.total")}:
-                </span>
-                <span className="text-lg font-bold text-gray-900">
-                  {formatPriceVN(total)}
-                </span>
-              </div>
-            </div>
-
+        <CardFooter className="p-6 bg-background border-t border-secondary">
+          <div className="space-y-4 w-full">
+            {props.isEdit ? (
+              <p className="text-sm text-muted-foreground">
+                {t("cashier.editPricingOnSave")}
+              </p>
+            ) : (
+              <>
+                <PricingSummary
+                  preview={props.preview}
+                  calculating={props.calculating}
+                  error={props.previewError}
+                  labels={{
+                    amount: t("table.accessorKey.amount"),
+                    discount: t("order.discount"),
+                    total: t("table.accessorKey.total"),
+                    calculating: t("cashier.calculating"),
+                    error:
+                      props.previewErrorMessage || t("cashier.previewFailed"),
+                  }}
+                />
+                {props.previewError && (
+                  <Button variant="outline" onClick={props.retryPreview}>
+                    {t("cashier.retryPreview")}
+                  </Button>
+                )}
+              </>
+            )}
             <div className="w-full flex gap-2">
               <Button
-                disabled={printDisabled || isEdit}
-                onClick={handlePrint}
-                className="flex-1 bg-primary-foreground hover:opacity-25"
+                variant="outline"
+                aria-label={t("order.appointmentSlip")}
+                disabled={props.printDisabled || props.isEdit}
+                onClick={props.handlePrint}
               >
-                <Printer className="h-4 w-4 mr-2 text-primary" />
+                <Printer className="h-4 w-4" />
               </Button>
               <Button
-                variant="default"
-                className="flex-1 bg-primary text-background hover:opacity-25"
-                disabled={disable || isProcessing}
-                onClick={handleSubmit}
+                className="flex-1"
+                disabled={props.disable || props.isProcessing}
+                onClick={props.handleProcessOrder}
               >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t("common.status.handling")}...
-                  </>
-                ) : isEdit ? (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    {t("cashier.updateOrder")}
-                  </>
+                {props.isProcessing ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : props.isEdit ? (
+                  <Save className="mr-2 h-4 w-4" />
                 ) : (
-                  <>
-                    <ShoppingCart className="mr-2 h-4 w-4" />
-                    {t("cashier.createOrder")}
-                  </>
+                  <ShoppingCart className="mr-2 h-4 w-4" />
+                )}
+                {t(
+                  props.isProcessing
+                    ? "common.status.handling"
+                    : props.isEdit
+                      ? "cashier.updateOrder"
+                      : "cashier.createOrder",
                 )}
               </Button>
             </div>
           </div>
         </CardFooter>
-      </Card>
-    </>
+      </fieldset>
+    </Card>
   );
-};
+}

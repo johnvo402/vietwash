@@ -13,6 +13,7 @@ import PickupTicket from "../orders/components/PickupTicket";
 import { useState } from "react";
 import { CustomerFormDialog } from "../customer/components/user-create/create-customer-dialog";
 import { Input } from "@/components/ui/input";
+import { formatOrderMoney as formatPriceVN } from "@/utils/format";
 
 export default function Cashier() {
   const [searchTermService, setSearchTermService] = useState("");
@@ -24,16 +25,15 @@ export default function Cashier() {
     completedOrder,
     pickupTicketRef,
     customerData,
-    total,
-    amount,
-    discountValue,
-    discountFixed,
+    pricing,
+    readyToSubmit,
+    customerPhase,
+    customerPending,
     voucherCode,
     note,
     handleAddItem,
     handleRemoveItem,
     handleUpdateQuantity,
-    handleUpdatePrice,
     handleSelectCustomer,
     handlePrint,
     handleProcessOrder,
@@ -49,8 +49,7 @@ export default function Cashier() {
     tariffData,
     handleSelectTariff,
     tariffId,
-    point,
-    handleUpdatePoints,
+    handleSetDeliveryTime,
     deliveryTime,
     orderId,
   } = useCashier();
@@ -76,7 +75,7 @@ export default function Cashier() {
                       <Input
                         type="text"
                         placeholder={t(
-                          "equipment.equipmentList.searchPlaceholder"
+                          "equipment.equipmentList.searchPlaceholder",
                         )}
                         value={searchTermService}
                         onChange={(e) => setSearchTermService(e.target.value)}
@@ -88,6 +87,7 @@ export default function Cashier() {
               </CardHeader>
               <CardContent>
                 <ServiceSectionView
+                  key={tariffId[activeTab] || 0}
                   onAddItem={(item) => handleAddItem(item, activeTab)}
                   tariffId={tariffId[activeTab]}
                   search={searchTermService}
@@ -147,8 +147,8 @@ export default function Cashier() {
                       onUpdateQuantity={(itemId, quantity) =>
                         handleUpdateQuantity(itemId, quantity, tab.id)
                       }
-                      onUpdatePrice={(itemId, price) =>
-                        handleUpdatePrice(itemId, price, tab.id)
+                      preview={
+                        tab.id === activeTab ? pricing.preview : undefined
                       }
                     />
                   </CardContent>
@@ -159,23 +159,19 @@ export default function Cashier() {
 
           <div className="space-y-6">
             <OrderPaymentSection
-              disable={
-                !customer[activeTab] || (items[activeTab] || []).length === 0
-              }
+              disable={!readyToSubmit}
               isProcessing={isProcessing[activeTab] || false}
-              total={total[activeTab] || 0}
-              amount={amount[activeTab] || 0}
-              discountValue={discountValue[activeTab] || 0}
-              discountFixed={discountFixed[activeTab]}
+              preview={pricing.preview}
+              calculating={pricing.calculating}
+              previewError={!!pricing.error}
+              previewErrorMessage={pricing.errorMessage}
+              retryPreview={pricing.retry}
               voucherCode={voucherCode[activeTab] || ""}
-              handleProcessOrder={(value) =>
-                handleProcessOrder(value, activeTab)
-              }
-              handlePrint={() => handlePrint(activeTab)}
+              handleProcessOrder={() => handleProcessOrder(activeTab)}
+              handlePrint={handlePrint}
               printDisabled={!completedOrder}
               handleApplyVoucher={handleApplyVoucher}
               activeTab={activeTab}
-              voucherDisabled={!customer[activeTab]}
               customers={customerData}
               onSelect={(customer) => handleSelectCustomer(customer, activeTab)}
               customerInit={customer[activeTab] || null}
@@ -185,13 +181,24 @@ export default function Cashier() {
               tariffId={tariffId[activeTab]}
               onSetTariff={(id) => handleSelectTariff(id!)}
               tariffs={tariffData?.prices ?? []}
-              point={point[activeTab] || 0}
-              handleUpdatePoints={handleUpdatePoints}
-              deliveryTime={deliveryTime[activeTab] || null}
+              customerPending={customerPending}
+              deliveryTime={deliveryTime[activeTab] || ""}
+              onSetDeliveryTime={(date) =>
+                handleSetDeliveryTime(date, activeTab)
+              }
               isEdit={!!orderId[activeTab]} // Sử dụng orderId từ useCashier
             />
             {completedOrder && (
-              <PickupTicket ref={pickupTicketRef} order={completedOrder} />
+              <>
+                <p
+                  role="status"
+                  className="text-sm"
+                  data-testid="persisted-order-total"
+                >
+                  {completedOrder.code}: {formatPriceVN(completedOrder.total)}
+                </p>
+                <PickupTicket ref={pickupTicketRef} order={completedOrder} />
+              </>
             )}
           </div>
         </div>
@@ -200,6 +207,15 @@ export default function Cashier() {
         <CustomerFormDialog
           isOpen={openCreateCustomer}
           onClose={() => setOpenCreateCustomer(false)}
+          submissionLabel={
+            customerPhase === "creating"
+              ? t("cashier.customerCreating")
+              : t("cashier.customerSynchronizing")
+          }
+          retryLabel={
+            customerPending ? t("cashier.retryCustomerSync") : undefined
+          }
+          isRetry={customerPending}
           onSubmit={(data) =>
             createCustomerHandle({
               displayName: data.displayName,

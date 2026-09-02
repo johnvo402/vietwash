@@ -6,9 +6,10 @@ import {
   savePricesToIndexedDB,
 } from "@/utils/tariff-db";
 import { useEffect, useState } from "react";
+import { pricesQueryKey } from "./cashier-draft";
 
 const fetchPrices = async (
-  branchId: number
+  branchId: number,
 ): Promise<{ prices: PriceItem[] }> => {
   const response =
     await apiClient.ecommerceApiTariffsTariffByBranchGet(branchId);
@@ -19,25 +20,34 @@ const fetchPrices = async (
     name: item.name!,
   }));
 
-  await savePricesToIndexedDB(prices);
+  await savePricesToIndexedDB(prices, branchId);
   return { prices };
 };
 
 export const usePrices = (
-  branchId: number
+  branchId: number,
 ): UseQueryResult<{ prices: PriceItem[] }, Error> => {
   return useQuery({
-    queryKey: ["prices"],
+    queryKey: pricesQueryKey(branchId),
     queryFn: () => fetchPrices(branchId),
-    initialData: { prices: [] },
+    enabled: branchId > 0,
   });
 };
-export const usePricesFromIndexedDB = () => {
+export const usePricesFromIndexedDB = (branchId: number) => {
   const [prices, setPrices] = useState<PriceItem[]>([]);
 
   useEffect(() => {
-    getPricesFromIndexedDB().then(setPrices).catch(console.error);
-  }, []);
+    let cancelled = false;
+    setPrices([]);
+    getPricesFromIndexedDB(branchId)
+      .then((rows) => {
+        if (!cancelled) setPrices(rows);
+      })
+      .catch(console.error);
+    return () => {
+      cancelled = true;
+    };
+  }, [branchId]);
 
   return prices;
 };

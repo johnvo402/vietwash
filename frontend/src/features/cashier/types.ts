@@ -25,6 +25,7 @@ export type Order = {
   voucherCode?: string;
   discountFixed: boolean;
   discountValue: number;
+  discountAmount?: number;
   total: number;
   vat?: number;
   vatAmount?: number;

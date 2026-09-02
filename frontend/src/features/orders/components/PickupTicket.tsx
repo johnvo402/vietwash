@@ -1,6 +1,6 @@
 "use client";
 
-import { formatPriceVN } from "@/utils/format";
+import { formatOrderMoney as formatPriceVN } from "@/utils/format";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useTranslations } from "next-intl";
@@ -110,7 +110,7 @@ const PickupTicket = forwardRef<PickupTicketRef, PickupTicketProps>(
                 :
               </strong>{" "}
               {user?.branchAccounts.find(
-                (branch) => branch.branchId === order.branchId
+                (branch) => branch.branchId === order.branchId,
               )?.branchName ?? "--"}
             </p>
             <div
@@ -222,15 +222,17 @@ const PickupTicket = forwardRef<PickupTicketRef, PickupTicketProps>(
             <div className="summary-row">
               <span style={{ fontWeight: "bold" }}>{t("order.discount")}:</span>
               <span style={{ fontWeight: "bold" }}>
-                {order.discountFixed
-                  ? formatPriceVN(order.discountValue)
-                  : `${order.discountValue}%`}
+                {order.discountAmount !== undefined
+                  ? formatPriceVN(order.discountAmount)
+                  : order.discountFixed
+                    ? formatPriceVN(order.discountValue)
+                    : `${order.discountValue}%`}
               </span>
             </div>
             <div className="summary-row">
               <span style={{ fontWeight: "bold" }}>VAT({order.vat}%):</span>
               <span style={{ fontWeight: "bold" }}>
-                {order.vatAmount ? formatPriceVN(order.vatAmount) : "--"}
+                {formatPriceVN(order.vatAmount ?? 0)}
               </span>
             </div>
             <div className="summary-row">
@@ -270,7 +272,7 @@ const PickupTicket = forwardRef<PickupTicketRef, PickupTicketProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 PickupTicket.displayName = "PickupTicket";

@@ -860,6 +860,22 @@ const en = {
     lastMaintenance: "Last Maintenance",
   },
   cashier: {
+    customerCreating: "Creating customer...",
+    customerSynchronizing: "Synchronizing customer...",
+    customerSyncPending:
+      "Customer was created successfully but is not ready in Ecommerce yet. Please retry synchronization in a moment; do not create another customer.",
+    retryCustomerSync: "Retry synchronization",
+    branchDraftReset: "The draft was reset because the branch changed.",
+    tariffItemsReset:
+      "Items and voucher were cleared because the tariff changed.",
+    calculating: "Calculating...",
+    previewFailed:
+      "Unable to calculate pricing. Check the tariff, services and voucher, then retry.",
+    retryPreview: "Retry pricing",
+    createRetry:
+      "Unable to create the order. Your draft has been kept so you can check and retry.",
+    editPricingOnSave:
+      "The backend will recalculate this existing order when changes are saved.",
     customerSelection: "Select Customer",
     changeCustomer: "Change Customer",
     erroMaxrDiscount: "Discount cannot exceed 100%",

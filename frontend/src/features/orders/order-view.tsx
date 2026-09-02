@@ -83,7 +83,7 @@ export default function OrderView() {
         orderId: orderDetail?.id!,
         code: orderDetail?.code!,
         tariffId: orderDetail?.tariff?.id!,
-        point: orderDetail?.point!,
+        branchId: orderDetail?.branchId!,
         note: orderDetail?.note || "",
         deliveryTime: orderDetail?.deliveryTime!,
         orderItems:
@@ -99,7 +99,7 @@ export default function OrderView() {
             .map((item) => ({
               serviceId: item.serviceId!,
               unitRelationId: item.unitRelationId!,
-              price: item.unitPrice!,
+              price: item.price!,
               quantity: item.quantity!,
               unitRelationName: item.unitRelationName ?? "",
               processingTime: item.processingTime ?? 0,
@@ -114,7 +114,7 @@ export default function OrderView() {
       };
 
       // Gọi handleUpdateOrder với dữ liệu chi tiết
-      cashier.handleUpdateOrder(updateOrderData);
+      await cashier.handleUpdateOrder(updateOrderData);
       pushRouter({
         router: ROUTE_CASHIER,
         redirect: "blank",

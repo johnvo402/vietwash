@@ -1,23 +1,7 @@
-import { ServiceItem, OrderEquipment } from "@/features/cashier/types";
-import { Customer } from "./customer-indexedDb";
-import { OrderTab } from "@/features/cashier/hooks/use-cashier";
+import type { OrderTab } from "@/features/cashier/hooks/use-cashier";
+import type { CashierDraft } from "@/features/cashier/hooks/cashier-draft";
 
-interface OrderState {
-  customer: Customer | null;
-  items: ServiceItem[];
-  total: number;
-  amount: number;
-  discountValue: number;
-  discountFixed: boolean;
-  voucherCode: string;
-  note: string;
-  tariffId: number;
-  point: number;
-  deliveryTime: string;
-  orderId: number | null;
-  // NEW: equipments for this tab
-  orderEquipments: OrderEquipment[];
-}
+type OrderState = CashierDraft;
 
 export class OrderIndexedDB {
   private dbName = "cashier-orders";
@@ -110,21 +94,17 @@ export class OrderIndexedDB {
         const result = request.result;
         if (!result) return resolve(undefined);
         resolve({
+          branchId: typeof result.branchId === "number" ? result.branchId : 0,
+          pendingCustomerId:
+            typeof result.pendingCustomerId === "number"
+              ? result.pendingCustomerId
+              : null,
           customer: result.customer || null,
           items: Array.isArray(result.items) ? result.items : [],
-          total: typeof result.total === "number" ? result.total : 0,
-          amount: typeof result.amount === "number" ? result.amount : 0,
-          discountValue:
-            typeof result.discountValue === "number" ? result.discountValue : 0,
-          discountFixed:
-            typeof result.discountFixed === "boolean"
-              ? result.discountFixed
-              : true,
           voucherCode:
             typeof result.voucherCode === "string" ? result.voucherCode : "",
           note: typeof result.note === "string" ? result.note : "",
           tariffId: typeof result.tariffId === "number" ? result.tariffId : 0,
-          point: typeof result.point === "number" ? result.point : 0,
           deliveryTime:
             typeof result.deliveryTime === "string" ? result.deliveryTime : "",
           orderId: typeof result.orderId === "number" ? result.orderId : null,

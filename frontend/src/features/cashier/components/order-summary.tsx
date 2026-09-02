@@ -2,22 +2,24 @@
 
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { formatPriceVN } from "@/utils/format";
+import { formatOrderMoney as formatPriceVN } from "@/utils/format";
 import { ServiceItem } from "../types";
 import { useTranslations } from "next-intl";
+import type { PreviewOrderResponse } from "@/api/generated";
+import { itemKey } from "../hooks/cashier-draft";
 
 interface OrderSummaryProps {
   items: ServiceItem[];
-  onRemoveItem: (itemId: number) => void;
-  onUpdateQuantity: (itemId: number, quantity: number) => void;
-  onUpdatePrice: (itemId: number, price: number) => void; // New prop for price updates
+  onRemoveItem: (itemId: string) => void;
+  onUpdateQuantity: (itemId: string, quantity: number) => void;
+  preview?: PreviewOrderResponse;
 }
 
 export function OrderSummary({
   items,
   onRemoveItem,
   onUpdateQuantity,
-  onUpdatePrice,
+  preview,
 }: OrderSummaryProps) {
   const t = useTranslations();
   if (items.length === 0) {
@@ -28,17 +30,11 @@ export function OrderSummary({
     );
   }
 
-  const handlePriceEditSave = (itemId: number, price: number) => {
-    if (price >= 0) {
-      onUpdatePrice(itemId, price);
-    }
-  };
-
   return (
     <div className="space-y-4 mt-2">
       {items.map((item) => (
         <div
-          key={item.id}
+          key={itemKey(item)}
           className="flex justify-between items-center pb-4 border-b"
         >
           <div className="flex-1">
@@ -52,7 +48,19 @@ export function OrderSummary({
 
           <div className="flex items-center gap-2">
             <div className="w-full text-right font-medium">
-              {formatPriceVN(item.price)}
+              {preview?.orderItems?.find(
+                (line) =>
+                  line.serviceId === item.id &&
+                  line.unitRelationId === item.unitRelationId,
+              )?.unitPrice !== undefined
+                ? formatPriceVN(
+                    preview.orderItems.find(
+                      (line) =>
+                        line.serviceId === item.id &&
+                        line.unitRelationId === item.unitRelationId,
+                    )!.unitPrice!,
+                  )
+                : "—"}
             </div>
 
             <Button
@@ -60,7 +68,7 @@ export function OrderSummary({
               size="icon"
               className="h-8 w-8"
               onClick={() =>
-                onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))
+                onUpdateQuantity(itemKey(item), Math.max(1, item.quantity - 1))
               }
             >
               <Minus className="h-4 w-4" />
@@ -72,7 +80,7 @@ export function OrderSummary({
               variant="outline"
               size="icon"
               className="h-8 w-8"
-              onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+              onClick={() => onUpdateQuantity(itemKey(item), item.quantity + 1)}
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -81,14 +89,26 @@ export function OrderSummary({
               variant="ghost"
               size="icon"
               className="h-8 w-8 text-destructive"
-              onClick={() => onRemoveItem(item.id)}
+              onClick={() => onRemoveItem(itemKey(item))}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
 
           <div className="w-20 text-right font-medium">
-            {formatPriceVN(item.price * item.quantity || 0)}
+            {preview?.orderItems?.find(
+              (line) =>
+                line.serviceId === item.id &&
+                line.unitRelationId === item.unitRelationId,
+            )?.lineAmount !== undefined
+              ? formatPriceVN(
+                  preview.orderItems.find(
+                    (line) =>
+                      line.serviceId === item.id &&
+                      line.unitRelationId === item.unitRelationId,
+                  )!.lineAmount!,
+                )
+              : "—"}
           </div>
         </div>
       ))}

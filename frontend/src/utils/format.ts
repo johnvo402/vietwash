@@ -5,6 +5,15 @@ export const formatPriceVN = (price: number = 0) => {
     maximumFractionDigits: 0,
   }).format(price);
 };
+
+// Preserve fractional monetary values returned by the server, without recalculating totals.
+export const formatOrderMoney = (price: number = 0) =>
+  new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 20,
+  }).format(price);
 export const formatNumberVN = (num: number) => {
   return new Intl.NumberFormat("vi-VN", {
     maximumFractionDigits: 0,

@@ -872,6 +872,21 @@ const vi = {
     lastMaintenance: "Bảo dưỡng gần nhất",
   },
   cashier: {
+    customerCreating: "Đang tạo khách hàng...",
+    customerSynchronizing: "Đang đồng bộ khách hàng...",
+    customerSyncPending:
+      "Khách hàng đã được tạo thành công nhưng chưa sẵn sàng tại Ecommerce. Vui lòng thử đồng bộ lại sau giây lát; không cần tạo khách mới.",
+    retryCustomerSync: "Thử đồng bộ lại",
+    branchDraftReset: "Đã đặt lại bản nháp vì chi nhánh thay đổi.",
+    tariffItemsReset: "Đã xóa dịch vụ và voucher vì bảng giá thay đổi.",
+    calculating: "Đang tính giá...",
+    previewFailed:
+      "Chưa thể tính giá. Kiểm tra bảng giá, dịch vụ và voucher rồi thử lại.",
+    retryPreview: "Tính giá lại",
+    createRetry:
+      "Chưa tạo được đơn. Bản nháp được giữ nguyên để kiểm tra và thử lại.",
+    editPricingOnSave:
+      "Giá của đơn hiện có sẽ được backend tính lại khi lưu thay đổi.",
     customerSelection: "Chọn khách hàng",
     changeCustomer: "Thay đổi khách hàng",
     erroMaxrDiscount: "Giảm giá không được vượt quá 100%",

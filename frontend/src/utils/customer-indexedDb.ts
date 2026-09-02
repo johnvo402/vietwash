@@ -29,9 +29,29 @@ const openDB = (): Promise<IDBDatabase> => {
   });
 };
 
+export const cacheCustomer = async (customer: Customer): Promise<void> => {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, "readwrite");
+    transaction.objectStore(STORE_NAME).put(customer);
+    transaction.oncomplete = () => {
+      db.close();
+      resolve();
+    };
+    transaction.onerror = () => {
+      db.close();
+      reject(transaction.error);
+    };
+    transaction.onabort = () => {
+      db.close();
+      reject(transaction.error);
+    };
+  });
+};
+
 // 5. Hàm lưu dữ liệu vào IndexedDB với ánh xạ
 const saveToIndexedDB = async (
-  apiCustomers: ListUserResponse[]
+  apiCustomers: ListUserResponse[],
 ): Promise<void> => {
   const db: IDBDatabase = await openDB();
   const transaction: IDBTransaction = db.transaction(STORE_NAME, "readwrite");
@@ -85,7 +105,7 @@ const fetchCustomers = async (): Promise<{ users: Customer[] }> => {
         phoneNumber: apiCustomer.phoneNumber || "",
         email: apiCustomer.email || "",
         customerGroup: apiCustomer.customerGroup,
-      }) as Customer
+      }) as Customer,
   );
 
   await saveToIndexedDB(apiCustomers); // Lưu dữ liệu vào IndexedDB

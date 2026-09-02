@@ -13,7 +13,6 @@ using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Specifications;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Vouchers;
-using Domain.Aggregates.Vouchers.Specifications;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
 
@@ -64,63 +63,23 @@ namespace Application.Feature.Orders.Command.Create
                 _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
                 DateTimeOffset now = DateTimeOffset.UtcNow;
 
-                Result<ResolvedOrderPricing> pricing = await OrderPricingResolver.ResolveAsync(
+                var selection = await OrderPricingReader.ReadAsync(
                     unitOfWork,
                     request.BranchId,
                     request.TariffId,
+                    request.CustomerId,
+                    request.VoucherCode,
                     request.OrderItems,
+                    orgSetting.VatPercent,
                     now,
                     cancellationToken
                 );
-                if (pricing.IsFailure)
+                if (selection.IsFailure)
                 {
-                    return await RollbackFailure(pricing.Error!, cancellationToken);
+                    return await RollbackFailure(selection.Error!, cancellationToken);
                 }
 
-                VoucherRedemption? voucher = null;
-                if (!string.IsNullOrWhiteSpace(request.VoucherCode))
-                {
-                    string voucherCode = request.VoucherCode.Trim();
-                    voucher = await unitOfWork
-                        .Repository<Voucher>()
-                        .QueryAsync(
-                            VoucherEligibility.ForCustomer(voucherCode, request.CustomerId, now)
-                        )
-                        .Select(x => new VoucherRedemption
-                        {
-                            VoucherId = x.Id,
-                            Code = x.Code,
-                            DiscountFixed = x.DiscountFixed,
-                            DiscountValue = x.DiscountValue,
-                        })
-                        .FirstOrDefaultAsync(cancellationToken);
-
-                    if (voucher is null)
-                    {
-                        return await RollbackFailure(
-                            new NotFoundError(
-                                "Voucher is invalid, inactive, expired, used, or not assigned to this customer.",
-                                Messager
-                                    .Create<Voucher>()
-                                    .Message(MessageType.Valid)
-                                    .Negative()
-                                    .Build()
-                            ),
-                            cancellationToken
-                        );
-                    }
-                }
-
-                Result<OrderPriceSummary> totals = OrderPriceCalculator.Calculate(
-                    pricing.Value!.Items,
-                    voucher?.DiscountFixed ?? false,
-                    voucher?.DiscountValue ?? 0,
-                    orgSetting.VatPercent
-                );
-                if (totals.IsFailure)
-                {
-                    return await RollbackFailure(totals.Error!, cancellationToken);
-                }
+                var (pricing, totals, voucher) = selection.Value!;
 
                 if (voucher is not null)
                 {
@@ -154,8 +113,8 @@ namespace Application.Feature.Orders.Command.Create
                 Order order = request.ToEntity(
                     (long)currentAccount.Id!,
                     orgSetting.VatPercent,
-                    pricing.Value!,
-                    totals.Value!,
+                    pricing,
+                    totals,
                     voucher
                 );
                 order.CodeConfirm = barcode.GenerateQrBase64(encryption.Encrypt(order.Code));

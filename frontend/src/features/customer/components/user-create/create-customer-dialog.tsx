@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -112,6 +112,9 @@ interface CustomerFormDialogProps {
   onSubmit: (data: CustomerFormData) => Promise<void>;
   customer?: Customer;
   pageType?: "cashier" | "manage";
+  submissionLabel?: string;
+  retryLabel?: string;
+  isRetry?: boolean;
 }
 
 export function CustomerFormDialog({
@@ -120,10 +123,14 @@ export function CustomerFormDialog({
   onSubmit,
   customer,
   pageType = "cashier",
+  submissionLabel,
+  retryLabel,
+  isRetry = false,
 }: CustomerFormDialogProps) {
   const t = useTranslations();
   const isEditMode = !!customer;
   const [isLoading, setIsLoading] = useState(false);
+  const submitting = useRef(false);
 
   const form = useForm<CustomerFormData>({
     resolver: zodResolver(formSchema(t, isEditMode)),
@@ -153,7 +160,7 @@ export function CustomerFormDialog({
     form.setValue(
       "accountContact",
       { ...currentContact, [field]: value },
-      { shouldValidate: true }
+      { shouldValidate: true },
     );
     const updatedContact = form.getValues("accountContact") || {};
     const addressParts = [
@@ -168,6 +175,8 @@ export function CustomerFormDialog({
   };
 
   const handleSubmit = async (data: CustomerFormData) => {
+    if (submitting.current) return;
+    submitting.current = true;
     setIsLoading(true);
     try {
       await onSubmit({
@@ -186,12 +195,18 @@ export function CustomerFormDialog({
         message: error.message || t("common.error.submissionFailed"),
       });
     } finally {
+      submitting.current = false;
       setIsLoading(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={() => {
+        if (!submitting.current) onClose();
+      }}
+    >
       <DialogContent
         className="w-full max-w-lg max-h-[80%] sm:max-w-md overflow-y-auto p-0"
         aria-describedby={undefined}
@@ -205,11 +220,18 @@ export function CustomerFormDialog({
         </DialogHeader>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleSubmit)}
+            onSubmit={
+              isRetry
+                ? (event) => {
+                    event.preventDefault();
+                    void handleSubmit(form.getValues());
+                  }
+                : form.handleSubmit(handleSubmit)
+            }
             className="space-y-6 p-6 pb-0"
           >
             {form.formState.errors.root && (
-              <div className="text-red-500 text-sm">
+              <div role="alert" className="text-destructive text-sm">
                 {form.formState.errors.root.message}
               </div>
             )}
@@ -226,7 +248,7 @@ export function CustomerFormDialog({
                       placeholder={t("dialog.placeholder", {
                         entity: t("order.customerName").toLowerCase(),
                       })}
-                      disabled={isLoading}
+                      disabled={isLoading || isRetry}
                     />
                   </FormControl>
                   <FormMessage />
@@ -246,7 +268,7 @@ export function CustomerFormDialog({
                       placeholder={t("dialog.placeholder", {
                         entity: t("user.phoneNumber.title").toLowerCase(),
                       })}
-                      disabled={isLoading}
+                      disabled={isLoading || isRetry}
                     />
                   </FormControl>
                   <FormMessage />
@@ -264,7 +286,7 @@ export function CustomerFormDialog({
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
-                      disabled={isLoading}
+                      disabled={isLoading || isRetry}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue
@@ -354,7 +376,17 @@ export function CustomerFormDialog({
               >
                 {t("common.cancel")}
               </Button>
-              <Button type="submit" variant="default" disabled={isLoading}>
+              <Button
+                type="submit"
+                variant="default"
+                disabled={isLoading}
+                aria-label={
+                  isLoading
+                    ? submissionLabel || t("common.loading")
+                    : retryLabel ||
+                      t(isEditMode ? "common.update" : "common.create")
+                }
+              >
                 {isLoading ? (
                   <span className="flex items-center">
                     <svg
@@ -375,9 +407,12 @@ export function CustomerFormDialog({
                         d="M4 12a8 8 0 018-8v8h8a8 8 0 11-16 0z"
                       />
                     </svg>
-                    {t("common.loading")}
+                    <span role="status">
+                      {submissionLabel || t("common.loading")}
+                    </span>
                   </span>
                 ) : (
+                  retryLabel ||
                   t(isEditMode ? "common.update" : "common.create")
                 )}
               </Button>

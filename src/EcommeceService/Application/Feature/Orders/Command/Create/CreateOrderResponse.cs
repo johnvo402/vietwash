@@ -2,5 +2,8 @@
 
 namespace Application.Feature.Orders.Command.Create
 {
-    public class CreateOrderResponse : OrderDetailProjection;
+    public class CreateOrderResponse : OrderDetailProjection
+    {
+        public decimal DiscountAmount => Amount + VatAmount - Total;
+    }
 }

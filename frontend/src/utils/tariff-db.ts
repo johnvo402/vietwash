@@ -25,13 +25,20 @@ const openPriceDB = (): Promise<IDBDatabase> => {
 
 // Hàm lưu bảng giá
 export const savePricesToIndexedDB = async (
-  prices: PriceItem[]
+  prices: PriceItem[],
+  branchId: number,
 ): Promise<void> => {
   const db = await openPriceDB();
   const transaction = db.transaction(STORE_NAME, "readwrite");
   const store = transaction.objectStore(STORE_NAME);
 
-  prices.forEach((item) => store.put(item));
+  const request = store.getAll();
+  request.onsuccess = () => {
+    request.result
+      .filter((item) => item.branchId === branchId)
+      .forEach((item) => store.delete(item.id));
+    prices.forEach((item) => store.put({ ...item, branchId }));
+  };
 
   return new Promise((resolve, reject) => {
     transaction.oncomplete = () => resolve();
@@ -40,14 +47,17 @@ export const savePricesToIndexedDB = async (
 };
 
 // Hàm lấy bảng giá
-export const getPricesFromIndexedDB = async (): Promise<PriceItem[]> => {
+export const getPricesFromIndexedDB = async (
+  branchId: number,
+): Promise<PriceItem[]> => {
   const db = await openPriceDB();
   const transaction = db.transaction(STORE_NAME, "readonly");
   const store = transaction.objectStore(STORE_NAME);
   const request = store.getAll();
 
   return new Promise((resolve, reject) => {
-    request.onsuccess = () => resolve(request.result);
+    request.onsuccess = () =>
+      resolve(request.result.filter((item) => item.branchId === branchId));
     request.onerror = () => reject(request.error);
   });
 };

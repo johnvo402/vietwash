@@ -1,6 +1,9 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Customer, useCustomers } from "@/utils/customer-indexedDb";
+import { useState, useEffect, useRef } from "react";
+import {
+  cacheCustomer,
+  Customer,
+  useCustomers,
+} from "@/utils/customer-indexedDb";
 import { useOrder } from "./order-composition";
 import { PickupTicketRef } from "@/features/orders/components/PickupTicket";
 import { useAuth } from "@/hooks/use-auth";
@@ -8,858 +11,525 @@ import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import { ServiceItem, Order, OrderEquipment } from "../types";
 import { orderIndexedDB } from "@/utils/indexDb-order";
-import debounce from "lodash/debounce";
-import { useStringUtil } from "@/lib/stringUtil";
-import { useCustomerMutations } from "@/features/customer/hooks/use-customer-hook";
 import { Gender } from "@/api/generated";
-import { formatPriceVN } from "@/utils/format";
+import { apiClient } from "@/api/client";
 import { usePrices } from "./use-tariff";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  CashierDraft,
+  changeDraftTariff,
+  emptyDraft,
+  itemKey,
+  previewInput,
+  restoreDraft,
+  selectTariffId,
+} from "./cashier-draft";
+import { synchronizeCustomer } from "./customer-sync";
+import { useOrderPreview } from "./use-order-preview";
 
 export interface OrderTab {
   id: string;
   isActive: boolean;
 }
-
-interface OrderItem {
-  serviceId: number;
-  unitRelationId: number;
-  price: number;
-  quantity: number;
-  unitRelationName: string;
-  processingTime: number;
-  serviceName: string;
-  unitPrice: number;
-}
-
-// NEW: equipment type used by payload and UI
-
 export interface UpdateOrder {
   code?: string;
   orderId?: number;
+  branchId: number;
   tariffId: number;
-  point: number;
   note: string;
   deliveryTime: string;
-  orderItems: OrderItem[];
+  orderItems: {
+    serviceId: number;
+    unitRelationId: number;
+    price: number;
+    quantity: number;
+    unitRelationName: string;
+    processingTime: number;
+    serviceName: string;
+    unitPrice: number;
+  }[];
   customer: Customer;
-  // NEW: include equipments when editing an order (optional)
   orderEquipments?: OrderEquipment[];
 }
 
-let tabIdCounter = 1;
-
-export const useCashier = () => {
-  const { branchActive } = useAuth();
+export function useCashier() {
+  const branchId = useAuth((state) => state.branchActive?.branchId) ?? 0;
   const t = useTranslations();
-  const { data: customerData } = useCustomers();
-  const { createOrder, checkVoucher, updateOrder } = useOrder();
-  const { createCustomer } = useCustomerMutations();
-  const { textByLang } = useStringUtil();
-  const { data: tariffData } = usePrices(branchActive?.branchId!);
   const queryClient = useQueryClient();
-
-  const pickupTicketRef = useRef<PickupTicketRef>(null);
-  const orderListRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
-
-  const initializeTabs = async (): Promise<OrderTab[]> => {
-    try {
-      await orderIndexedDB.initialize();
-      const savedTabs = await orderIndexedDB.loadOrderTabs();
-      if (savedTabs.length > 0) {
-        const maxId = Math.max(
-          ...savedTabs.map((tab) => {
-            const num = parseInt(tab.id.replace("#", ""), 10);
-            return isNaN(num) ? 0 : num;
-          })
-        );
-        tabIdCounter = Math.max(tabIdCounter, maxId + 1);
-      }
-      const activeTabExists = savedTabs.some((tab) => tab.isActive);
-      const tabs =
-        savedTabs.length > 0
-          ? savedTabs.map((tab, index) => ({
-              ...tab,
-              isActive: activeTabExists ? tab.isActive : index === 0,
-            }))
-          : [{ id: `#${tabIdCounter++}`, isActive: true }];
-      return tabs;
-    } catch (error) {
-      console.error("Lỗi khởi tạo tabs:", error);
-      return [{ id: `#${tabIdCounter++}`, isActive: true }];
-    }
-  };
-
-  const initializeTabState = (tabId: string) => ({
-    customer: null as Customer | null,
-    items: [] as ServiceItem[],
-    isProcessing: false as boolean,
-    total: 0 as number,
-    amount: 0 as number,
-    discountValue: 0 as number,
-    discountFixed: true as boolean,
-    voucherCode: "" as string,
-    note: "" as string,
-    tariffId: 0 as number,
-    point: 0 as number,
-    deliveryTime: "" as string,
-    orderId: null as number | null,
-    // NEW: per-tab equipments
-    orderEquipments: [] as OrderEquipment[],
-  });
-
-  const loadInitialState = async () => {
-    try {
-      const tabs = await initializeTabs();
-      const initialState: {
-        [key: string]: ReturnType<typeof initializeTabState>;
-      } = {};
-      for (const tab of tabs) {
-        const savedState = await orderIndexedDB.loadOrderState(tab.id);
-        initialState[tab.id] = savedState
-          ? {
-              ...initializeTabState(tab.id),
-              customer: savedState.customer || null,
-              items: Array.isArray(savedState.items) ? savedState.items : [],
-              total:
-                typeof savedState.total === "number" ? savedState.total : 0,
-              amount:
-                typeof savedState.amount === "number" ? savedState.amount : 0,
-              discountValue:
-                typeof savedState.discountValue === "number"
-                  ? savedState.discountValue
-                  : 0,
-              discountFixed:
-                typeof savedState.discountFixed === "boolean"
-                  ? savedState.discountFixed
-                  : true,
-              voucherCode:
-                typeof savedState.voucherCode === "string"
-                  ? savedState.voucherCode
-                  : "",
-              note: typeof savedState.note === "string" ? savedState.note : "",
-              tariffId:
-                typeof savedState.tariffId === "number"
-                  ? savedState.tariffId
-                  : 0,
-              point: 0,
-              deliveryTime:
-                typeof savedState.deliveryTime === "string"
-                  ? savedState.deliveryTime
-                  : "",
-              orderId:
-                typeof savedState.orderId === "number"
-                  ? savedState.orderId
-                  : null,
-              // NEW: restore equipments if present
-              orderEquipments: Array.isArray(savedState.orderEquipments)
-                ? savedState.orderEquipments
-                : [],
-            }
-          : initializeTabState(tab.id);
-      }
-      setOrderTabs(tabs);
-      const activeTabId = tabs.find((tab) => tab.isActive)?.id || tabs[0].id;
-      setActiveTab(activeTabId);
-      return initialState;
-    } catch (error) {
-      console.error("Lỗi load state ban đầu:", error);
-      const defaultTabId = `#${tabIdCounter}`;
-      const defaultState = {
-        [defaultTabId]: initializeTabState(defaultTabId),
-      };
-      setState(defaultState);
-      setOrderTabs([{ id: defaultTabId, isActive: true }]);
-      setActiveTab(defaultTabId);
-      tabIdCounter++;
-      toast.error(t("cashier.loadFailed"));
-      return defaultState;
-    }
-  };
-
-  type TabState = ReturnType<typeof initializeTabState>;
-  const [state, setState] = useState<{ [key: string]: TabState }>({});
+  const { data: customerData } = useCustomers();
+  const { data: tariffData } = usePrices(branchId);
+  const { createOrder, updateOrder } = useOrder();
+  const [state, setState] = useState<Record<string, CashierDraft>>({});
+  const stateRef = useRef(state);
   const [orderTabs, setOrderTabs] = useState<OrderTab[]>([]);
-  const [activeTab, setActiveTab] = useState<string>("");
+  const [activeTab, setActiveTab] = useState("");
+  const [hydratedBranch, setHydratedBranch] = useState(0);
+  const [processingTab, setProcessingTab] = useState<string | null>(null);
+  const processingRef = useRef(false);
+  const [customerPhase, setCustomerPhase] = useState<
+    "idle" | "creating" | "syncing"
+  >("idle");
+  const customerBusy = useRef(false);
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
+  const pickupTicketRef = useRef<PickupTicketRef>(null);
+  const orderListRef = useRef<Record<string, HTMLDivElement | null>>({});
+  const persistence = useRef(Promise.resolve());
+
+  const replaceState = (next: Record<string, CashierDraft>) => {
+    stateRef.current = next;
+    setState(next);
+  };
+  const updateTab = (
+    id: string,
+    updater: (draft: CashierDraft) => CashierDraft,
+  ) => {
+    const draft = stateRef.current[id];
+    if (!draft || draft.branchId !== branchId) return;
+    replaceState({ ...stateRef.current, [id]: updater(draft) });
+  };
 
   useEffect(() => {
-    loadInitialState().then((initialState) => setState(initialState));
-  }, []);
-
-  const saveToIndexedDB = useCallback(
-    debounce(async (tabId: string) => {
-      if (!state[tabId]) return;
-      try {
-        await orderIndexedDB.saveOrderState(tabId, {
-          customer: state[tabId].customer,
-          items: state[tabId].items,
-          total: state[tabId].total,
-          amount: state[tabId].amount,
-          discountValue: state[tabId].discountValue,
-          discountFixed: state[tabId].discountFixed,
-          voucherCode: state[tabId].voucherCode,
-          note: state[tabId].note,
-          tariffId: state[tabId].tariffId,
-          point: state[tabId].point,
-          deliveryTime: state[tabId].deliveryTime,
-          orderId: state[tabId].orderId,
-          // NEW
-          orderEquipments: state[tabId].orderEquipments,
-        });
-      } catch (error) {
-        console.error(`Lỗi lưu state cho tab ${tabId}:`, error);
-        toast.error(t("cashier.saveFailed"));
-      }
-    }, 500),
-    [state, t]
-  );
-
-  useEffect(() => {
-    Object.keys(state).forEach((tabId) => {
-      saveToIndexedDB(tabId);
+    if (!branchId) return;
+    let cancelled = false;
+    setHydratedBranch(0);
+    if (
+      Object.values(stateRef.current).some(
+        (draft) => draft.branchId !== branchId && draft.items.length,
+      )
+    ) {
+      toast.info(t("cashier.branchDraftReset"));
+    }
+    void (async () => {
+      await persistence.current;
+      const tabs = await orderIndexedDB.loadOrderTabs();
+      const saved = await Promise.all(
+        tabs.map((tab) => orderIndexedDB.loadOrderState(tab.id)),
+      );
+      if (cancelled) return;
+      replaceState(
+        Object.fromEntries(
+          tabs.map((tab, i) => [tab.id, restoreDraft(saved[i], branchId)]),
+        ),
+      );
+      setOrderTabs(tabs);
+      setActiveTab(tabs.find((tab) => tab.isActive)?.id ?? tabs[0].id);
+      setHydratedBranch(branchId);
+    })().catch(() => {
+      if (cancelled) return;
+      replaceState({ "#1": emptyDraft(branchId) });
+      setOrderTabs([{ id: "#1", isActive: true }]);
+      setActiveTab("#1");
+      setHydratedBranch(branchId);
+      toast.error(t("cashier.loadFailed"));
     });
-  }, [state, saveToIndexedDB]);
-
-  useEffect(() => {
-    const handleBeforeUnload = async () => {
-      try {
-        await orderIndexedDB.saveOrderTabs(orderTabs);
-        for (const tab of orderTabs) {
-          if (state[tab.id]) {
-            await orderIndexedDB.saveOrderState(tab.id, {
-              customer: state[tab.id].customer,
-              items: state[tab.id].items,
-              total: state[tab.id].total,
-              amount: state[tab.id].amount,
-              discountValue: state[tab.id].discountValue,
-              discountFixed: state[tab.id].discountFixed,
-              voucherCode: state[tab.id].voucherCode,
-              note: state[tab.id].note,
-              tariffId: state[tab.id].tariffId,
-              point: state[tab.id].point,
-              deliveryTime: state[tab.id].deliveryTime,
-              orderId: state[tab.id].orderId,
-              orderEquipments: state[tab.id].orderEquipments,
-            });
-          }
-        }
-      } catch (error) {
-        console.error("Lỗi lưu state trước khi unload:", error);
-      }
+    return () => {
+      cancelled = true;
     };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [orderTabs, state]);
+    // Restoration is tied to branch identity, not changes to draft contents.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [branchId, t]);
 
-  const updateActiveTab = (newActiveTabId: string) => {
-    setOrderTabs((prevTabs) => {
-      const updatedTabs = prevTabs.map((tab) => ({
-        ...tab,
-        isActive: tab.id === newActiveTabId,
-      }));
-      orderIndexedDB.saveOrderTabs(updatedTabs).catch((error) => {
-        console.error("Lỗi lưu order tabs:", error);
-        toast.error(t("cashier.saveFailed"));
-      });
-      return updatedTabs;
-    });
-    setActiveTab(newActiveTabId);
+  useEffect(() => {
+    if (hydratedBranch !== branchId || !branchId || !orderTabs.length) return;
+    const persist = () => {
+      persistence.current = persistence.current
+        .then(async () => {
+          await orderIndexedDB.saveOrderTabs(orderTabs);
+          await Promise.all(
+            orderTabs.map((tab) =>
+              orderIndexedDB.saveOrderState(tab.id, state[tab.id]),
+            ),
+          );
+        })
+        .catch(() => {
+          toast.error(t("cashier.saveFailed"));
+        });
+    };
+    const timer = setTimeout(persist, 250);
+    window.addEventListener("pagehide", persist);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("pagehide", persist);
+    };
+  }, [state, orderTabs, hydratedBranch, branchId, t]);
+
+  useEffect(() => {
+    if (!tariffData || hydratedBranch !== branchId) return;
+    let changed = false;
+    let resetItems = false;
+    const next = Object.fromEntries(
+      Object.entries(stateRef.current).map(([id, draft]) => {
+        const tariffId = selectTariffId(draft.tariffId, tariffData.prices);
+        changed ||= tariffId !== draft.tariffId;
+        resetItems ||= tariffId !== draft.tariffId && draft.items.length > 0;
+        return [id, changeDraftTariff(draft, tariffId)];
+      }),
+    );
+    if (changed) replaceState(next);
+    if (resetItems) toast.info(t("cashier.tariffItemsReset"));
+  }, [tariffData, hydratedBranch, branchId, state, t]);
+
+  const currentDraft =
+    state[activeTab]?.branchId === branchId && hydratedBranch === branchId
+      ? state[activeTab]
+      : emptyDraft(branchId);
+  const pricing = useOrderPreview(previewInput(currentDraft));
+  const validTariff = !!tariffData?.prices.some(
+    (tariff) => tariff.id === currentDraft.tariffId,
+  );
+  const readyToSubmit =
+    customerPhase === "idle" &&
+    !!currentDraft.customer &&
+    !currentDraft.pendingCustomerId &&
+    currentDraft.items.length > 0 &&
+    validTariff &&
+    hydratedBranch === branchId &&
+    (!!currentDraft.orderId || !!pricing.preview);
+
+  const selectTab = (id: string) => {
+    if (processingRef.current) return;
+    setActiveTab(id);
+    setOrderTabs((tabs) =>
+      tabs.map((tab) => ({ ...tab, isActive: tab.id === id })),
+    );
   };
-
   const addNewOrderTab = () => {
-    const newTabId = `#${tabIdCounter++}`;
-    const newTabs = [
-      ...orderTabs.map((tab) => ({ ...tab, isActive: false })),
-      { id: newTabId, isActive: true },
-    ];
-    setOrderTabs(newTabs);
-    setActiveTab(newTabId);
-    setState((prev) => ({
-      ...prev,
-      [newTabId]: initializeTabState(newTabId),
-    }));
-    orderIndexedDB.saveOrderTabs(newTabs).catch((error) => {
-      console.error("Lỗi lưu order tabs:", error);
-      toast.error(t("cashier.saveFailed"));
-    });
-    return newTabId;
+    if (processingRef.current || hydratedBranch !== branchId) return;
+    let index = 1;
+    while (stateRef.current[`#${index}`]) index++;
+    const id = `#${index}`;
+    replaceState({ ...stateRef.current, [id]: emptyDraft(branchId) });
+    setOrderTabs((tabs) => [
+      ...tabs.map((tab) => ({ ...tab, isActive: false })),
+      { id, isActive: true },
+    ]);
+    setActiveTab(id);
+  };
+  const removeOrderTab = async (id: string) => {
+    if (processingRef.current || orderTabs.length <= 1) return;
+    const next = { ...stateRef.current };
+    delete next[id];
+    replaceState(next);
+    const nextId = activeTab === id ? Object.keys(next)[0] : activeTab;
+    setActiveTab(nextId);
+    setOrderTabs((tabs) =>
+      tabs
+        .filter((tab) => tab.id !== id)
+        .map((tab) => ({ ...tab, isActive: tab.id === nextId })),
+    );
+    await orderIndexedDB.clearOrderState(id);
   };
 
-  const removeOrderTab = async (tabId: string) => {
-    const isOnlyOneTab = orderTabs.length === 1;
-    if (isOnlyOneTab) {
-      const remainingTab = orderTabs[0];
-      if (remainingTab.id !== "#1") {
-        try {
-          await renameTabToOne(remainingTab.id, state);
-        } catch (error) {
-          console.error(error);
-          toast.error(t("cashier.renameTabFailed"));
-        }
-      }
+  const handleSelectTariff = (tariffId: number) => {
+    if (
+      !tariffData?.prices.some((tariff) => tariff.id === tariffId) ||
+      processingRef.current
+    )
       return;
-    }
-
-    try {
-      const updatedTabs = orderTabs
-        .filter((tab) => tab.id !== tabId)
-        .map((tab, index) => ({
-          ...tab,
-          isActive: activeTab === tabId && index === 0 ? true : tab.isActive,
-        }));
-
-      await orderIndexedDB.deleteOrderTab(tabId);
-      await orderIndexedDB.clearOrderState(tabId);
-      await orderIndexedDB.saveOrderTabs(updatedTabs);
-
-      setOrderTabs(updatedTabs);
-      let index = 1;
-      if (activeTab === tabId) {
-        index = updatedTabs.length;
-      } else {
-        index =
-          updatedTabs.findIndex((x) => x.id === activeTab) > 0
-            ? updatedTabs.findIndex((x) => x.id === tabId)
-            : 1;
-      }
-      if (activeTab === tabId && updatedTabs.length > 0) {
-        updateActiveTab(updatedTabs[index - 1].id);
-      }
-
-      setState((prev) => {
-        const newState = { ...prev } as any;
-        delete newState[tabId];
-        return newState;
-      });
-
-      if (updatedTabs.length === 1 && updatedTabs[0].id !== "#1") {
-        await renameTabToOne(updatedTabs[0].id, state);
-      }
-    } catch (error) {
-      console.error(`Lỗi xóa tab ${tabId}:`, error);
-      toast.error(t("cashier.removeTabFailed"));
-    }
+    if (currentDraft.tariffId !== tariffId && currentDraft.items.length)
+      toast.info(t("cashier.tariffItemsReset"));
+    updateTab(activeTab, (draft) => changeDraftTariff(draft, tariffId));
   };
-
-  const renameTabToOne = async (
-    remainingTabId: string,
-    currentState: typeof state
-  ) => {
-    const newState = { ...currentState[remainingTabId] };
-
-    await orderIndexedDB.clearOrderState(remainingTabId);
-    await orderIndexedDB.saveOrderState("#1", {
-      customer: newState.customer,
-      items: newState.items,
-      total: newState.total,
-      amount: newState.amount,
-      discountValue: newState.discountValue,
-      discountFixed: newState.discountFixed,
-      voucherCode: newState.voucherCode,
-      note: newState.note || "",
-      tariffId: newState.tariffId,
-      point: newState.point,
-      deliveryTime: newState.deliveryTime,
-      orderId: newState.orderId,
-      orderEquipments: newState.orderEquipments,
-    });
-
-    const newTabs = [{ id: "#1", isActive: true }];
-    await orderIndexedDB.deleteOrderTab(remainingTabId);
-    await orderIndexedDB.saveOrderTabs(newTabs);
-
-    setOrderTabs(newTabs);
-    setActiveTab("#1");
-    setState((prev) => {
-      const newStateCopy = { ...prev } as any;
-      newStateCopy["#1"] = newState;
-      delete newStateCopy[remainingTabId];
-      return newStateCopy;
-    });
-
-    tabIdCounter = 2;
-  };
-
-  const validateVoucher = async (
-    voucherCode: string,
-    customerId: number
-  ): Promise<{
-    discountValue: number;
-    discountFixed: boolean;
-    message: string;
-  }> => {
-    try {
-      const response = await checkVoucher.mutateAsync({
-        code: voucherCode,
-        customerId,
-      });
-      const data = response.data;
-      const value = data.results?.discountFixed
-        ? formatPriceVN(data.results?.discountValue ?? 0)
-        : `${data.results?.discountValue}%`;
+  const handleAddItem = (item: ServiceItem, id: string) => {
+    if (
+      processingRef.current ||
+      !validTariff ||
+      !Number.isInteger(item.quantity) ||
+      item.quantity <= 0
+    )
+      return;
+    updateTab(id, (draft) => {
+      const exists = draft.items.some((row) => itemKey(row) === itemKey(item));
       return {
-        discountValue: data.results?.discountValue || 0,
-        discountFixed: data.results?.discountFixed!,
-        message: t("cashier.voucherApplied", { value }),
-      };
-    } catch (error: any) {
-      const invalidParam = error?.invalidParams?.[0];
-      const reason = invalidParam?.reasons?.[0];
-      return {
-        discountValue: 0,
-        discountFixed: true,
-        message: textByLang(reason) || t("cashier.invalidVoucher"),
-      };
-    }
-  };
-
-  const updateTotal = (tabId: string) => {
-    updateStateForTab(tabId, (prev) => {
-      const amount =
-        prev.items.length > 0
-          ? prev.items.reduce(
-              (sum, item) => sum + item.price * item.quantity,
-              0
+        ...draft,
+        items: exists
+          ? draft.items.map((row) =>
+              itemKey(row) === itemKey(item)
+                ? { ...row, quantity: row.quantity + item.quantity }
+                : row,
             )
-          : 0;
-      const discount = prev.discountFixed
-        ? prev.discountValue
-        : (amount * prev.discountValue) / 100;
-      const pointsDeduction = prev.point * 10;
-
-      // Tính VAT 10%
-      const vat = (amount - discount - pointsDeduction) * 0.1;
-
-      const total = Math.max(0, amount - discount - pointsDeduction + vat);
-
-      return { amount, total } as Partial<TabState>;
-    });
-  };
-
-  const updateStateForTab = (
-    tabId: string,
-    updater: (prev: TabState) => Partial<TabState>
-  ) => {
-    setState((prev) => {
-      const base = prev[tabId] || initializeTabState(tabId);
-      const updatedTabState = { ...base, ...updater(base) } as TabState;
-      return { ...prev, [tabId]: updatedTabState };
-    });
-    saveToIndexedDB(tabId);
-  };
-
-  const handleAddItem = (item: ServiceItem, tabId: string) => {
-    if (item.quantity <= 0 || item.price < 0) {
-      toast.error(t("cashier.quantityAndPriceValidation"));
-      return;
-    }
-    updateStateForTab(tabId, (prev) => {
-      const existingItem = prev.items.find((i) => i.id === item.id);
-      const updatedItems = existingItem
-        ? prev.items.map((i) =>
-            i.id === item.id
-              ? { ...i, quantity: i.quantity + item.quantity }
-              : i
-          )
-        : [...prev.items, item];
-      return { items: updatedItems } as Partial<TabState>;
-    });
-    updateTotal(tabId);
-    setTimeout(() => {
-      const container = orderListRef.current[tabId];
-      if (container) container.scrollTop = container.scrollHeight;
-    }, 0);
-  };
-
-  const handleRemoveItem = (itemId: number, tabId: string) => {
-    updateStateForTab(
-      tabId,
-      (prev) =>
-        ({
-          items: prev.items.filter((item) => item.id !== itemId),
-        }) as Partial<TabState>
-    );
-    updateTotal(tabId);
-  };
-
-  const handleUpdateQuantity = (
-    itemId: number,
-    quantity: number,
-    tabId: string
-  ) => {
-    if (quantity <= 0) {
-      toast.error(t("cashier.quantityValidation"));
-      return;
-    }
-    updateStateForTab(
-      tabId,
-      (prev) =>
-        ({
-          items: prev.items.map((item) =>
-            item.id === itemId ? { ...item, quantity } : item
-          ),
-        }) as Partial<TabState>
-    );
-    updateTotal(tabId);
-  };
-
-  const handleUpdatePrice = (itemId: number, price: number, tabId: string) => {
-    if (price < 0) {
-      toast.error(t("cashier.priceMustBePositive"));
-      return;
-    }
-    updateStateForTab(
-      tabId,
-      (prev) =>
-        ({
-          items: prev.items.map((item) =>
-            item.id === itemId ? { ...item, price } : item
-          ),
-        }) as Partial<TabState>
-    );
-    updateTotal(tabId);
-  };
-
-  const handleSelectCustomer = (customer: Customer | null, tabId: string) => {
-    updateStateForTab(
-      tabId,
-      () => ({ customer, point: 0 }) as Partial<TabState>
-    );
-    if (!customer) {
-      updateStateForTab(
-        tabId,
-        () =>
-          ({
-            discountValue: 0,
-            discountFixed: true,
-            voucherCode: "",
-            point: 0,
-          }) as Partial<TabState>
-      );
-    }
-  };
-
-  const handleSetNote = (note: string | null, tabId: string) => {
-    updateStateForTab(tabId, () => ({ note: note || "" }) as Partial<TabState>);
-  };
-
-  const handleApplyVoucher = async (voucherCode: string, tabId: string) => {
-    if (!voucherCode) {
-      return {
-        discountValue: 0,
-        discountFixed: true,
-        message: t("cashier.enterVoucherCode"),
+          : [...draft.items, item],
       };
-    }
-    const customer = state[tabId]?.customer;
-    const result = await validateVoucher(voucherCode, customer?.id!);
-    updateStateForTab(
-      tabId,
-      () =>
-        ({
-          discountValue: result.discountValue,
-          discountFixed: result.discountFixed,
-          voucherCode,
-        }) as Partial<TabState>
-    );
-    updateTotal(tabId);
-    return result;
-  };
-
-  const handleUpdatePoints = (
-    points: number,
-    tabId: string,
-    maxPoints: number
-  ) => {
-    if (points < 0 || points > maxPoints) return;
-    updateStateForTab(tabId, () => ({ point: points }) as Partial<TabState>);
-    updateTotal(tabId);
-  };
-
-  // NEW: toggle equipment selection for a tab
-  const handleToggleEquipment = (eq: OrderEquipment, tabId: string) => {
-    updateStateForTab(tabId, (prev) => {
-      const exists = prev.orderEquipments.some(
-        (x) => x.equipmentId === eq.equipmentId
-      );
-      const next = exists
-        ? prev.orderEquipments.filter((x) => x.equipmentId !== eq.equipmentId)
-        : [...prev.orderEquipments, eq];
-      return { orderEquipments: next } as Partial<TabState>;
     });
   };
-
-  const handleUpdateOrder = (order: UpdateOrder) => {
-    const tabId = `#${order.code}`;
-    const existingTab = orderTabs.find((tab) => tab.id === tabId);
-
-    if (!existingTab) {
-      const newTabs = [
-        ...orderTabs.map((tab) => ({ ...tab, isActive: false })),
-        { id: tabId, isActive: true },
-      ];
-      setOrderTabs(newTabs);
-      setActiveTab(tabId);
-      orderIndexedDB.saveOrderTabs(newTabs).catch((error) => {
-        console.error("Lỗi lưu order tabs:", error);
-        toast.error(t("cashier.saveFailed"));
-      });
-    } else {
-      updateActiveTab(tabId);
-    }
-
-    updateStateForTab(
-      tabId,
-      () =>
-        ({
-          orderId: order.orderId || null,
-          tariffId: order.tariffId,
-          point: 0,
-          note: order.note,
-          deliveryTime: order.deliveryTime,
-          customer: order.customer,
-          items: order.orderItems.map((item) => ({
-            id: item.serviceId,
-            name: item.serviceName,
-            serviceId: item.serviceId,
-            unitRelationId: item.unitRelationId,
-            price: item.price,
-            quantity: item.quantity,
-            unitRelationName: item.unitRelationName,
-            processingTime: item.processingTime,
-            serviceName: item.serviceName,
-            unitPrice: item.unitPrice,
-          })),
-          // NEW: seed equipments when editing
-          orderEquipments: order.orderEquipments || [],
-        }) as Partial<TabState>
-    );
-    updateTotal(tabId);
+  const handleRemoveItem = (key: string, id: string) => {
+    if (!processingRef.current)
+      updateTab(id, (draft) => ({
+        ...draft,
+        items: draft.items.filter((item) => itemKey(item) !== key),
+      }));
+  };
+  const handleUpdateQuantity = (key: string, quantity: number, id: string) => {
+    if (processingRef.current || !Number.isInteger(quantity) || quantity <= 0)
+      return;
+    updateTab(id, (draft) => ({
+      ...draft,
+      items: draft.items.map((item) =>
+        itemKey(item) === key ? { ...item, quantity } : item,
+      ),
+    }));
+  };
+  const handleSelectCustomer = (customer: Customer | null, id: string) => {
+    if (!processingRef.current)
+      updateTab(id, (draft) => ({ ...draft, customer, voucherCode: "" }));
+  };
+  const handleApplyVoucher = (voucherCode: string, id: string) => {
+    if (!processingRef.current)
+      updateTab(id, (draft) => ({ ...draft, voucherCode: voucherCode.trim() }));
+  };
+  const handleSetNote = (note: string | null, id: string) => {
+    if (!processingRef.current)
+      updateTab(id, (draft) => ({ ...draft, note: note ?? "" }));
+  };
+  const handleSetDeliveryTime = (date: Date | undefined, id: string) => {
+    if (!processingRef.current)
+      updateTab(id, (draft) => ({
+        ...draft,
+        deliveryTime: date?.toISOString() ?? "",
+      }));
   };
 
-  const handleProcessOrder = async (
-    value: {
-      discountValue: number;
-      discountFixed: boolean;
-      bookingDate?: Date;
-      voucherCode?: string;
-    },
-    tabId: string
-  ) => {
-    if (!state[tabId]?.customer || state[tabId]?.items.length === 0) {
-      toast.error(t("cashier.customerAndServiceRequired"));
+  const handleUpdateOrder = async (order: UpdateOrder) => {
+    if (order.branchId !== branchId) {
+      toast.error(t("cashier.branchDraftReset"));
       return;
     }
-    if (!value.bookingDate) {
+    const id = `#${order.code}`;
+    const draft: CashierDraft = {
+      ...emptyDraft(branchId),
+      ...order,
+      orderId: order.orderId ?? null,
+      items: order.orderItems.map((item) => ({
+        ...item,
+        id: item.serviceId,
+        name: item.serviceName,
+      })),
+    };
+    const tabs = [
+      ...orderTabs
+        .filter((tab) => tab.id !== id)
+        .map((tab) => ({ ...tab, isActive: false })),
+      { id, isActive: true },
+    ];
+    replaceState({ ...stateRef.current, [id]: draft });
+    setOrderTabs(tabs);
+    setActiveTab(id);
+    await persistence.current;
+    await orderIndexedDB.saveOrderState(id, draft);
+    await orderIndexedDB.saveOrderTabs(tabs);
+  };
+
+  const handleProcessOrder = async (id: string) => {
+    const draft = stateRef.current[id];
+    if (
+      processingRef.current ||
+      customerBusy.current ||
+      id !== activeTab ||
+      !draft ||
+      draft.branchId !== branchId ||
+      !readyToSubmit ||
+      (!draft.orderId &&
+        JSON.stringify(previewInput(draft)) !==
+          JSON.stringify(previewInput(currentDraft)))
+    )
+      return;
+    if (!draft.deliveryTime) {
       toast.error(t("cashier.pickupTimeRequired"));
       return;
     }
-    updateStateForTab(
-      tabId,
-      () => ({ isProcessing: true }) as Partial<TabState>
-    );
-
-    // Build payload with equipments
-    const payload: any = {
-      id: state[tabId].orderId || undefined,
-      customer: state[tabId].customer!,
-      orderItems: state[tabId].items,
-      total: state[tabId].total,
-      amount: state[tabId].amount,
-      discountValue: value.discountValue,
-      discountFixed: value.discountFixed,
-      voucherCode: value.voucherCode || undefined,
-      deliveryTime: value.bookingDate,
-      branchId: branchActive?.branchId!,
-      note: state[tabId].note || "",
-      point: state[tabId].point,
-      tariffId: state[tabId].tariffId || 0,
-      // NEW: match API sample
-      orderEquipments: (state[tabId].orderEquipments || []).map((e) => ({
-        equipmentId: e.equipmentId,
-        equipmentName: e.equipmentName,
-      })),
+    processingRef.current = true;
+    setProcessingTab(id);
+    const payload: Order = {
+      id: draft.orderId ?? undefined,
+      customer: draft.customer,
+      orderItems: draft.items,
+      branchId: draft.branchId,
+      tariffId: draft.tariffId,
+      voucherCode: draft.voucherCode || undefined,
+      note: draft.note,
+      deliveryTime: new Date(draft.deliveryTime),
+      // Legacy DTO fields are never sent by order-composition.
+      amount: 0,
+      total: 0,
+      discountValue: 0,
+      discountFixed: false,
     };
-
     try {
-      let orderData;
-      if (state[tabId].orderId) {
+      if (draft.orderId) {
         await updateOrder.mutateAsync(payload);
       } else {
         const response = await createOrder.mutateAsync(payload);
-        orderData = response.data.results;
-        setCompletedOrder(orderData as Order);
+        setCompletedOrder(response.data.results as Order);
       }
-
-      const isOnlyOneTab = orderTabs.length === 1;
-      if (isOnlyOneTab) {
-        await orderIndexedDB.clearOrderState(tabId);
-        const newTabId = "#1";
-        tabIdCounter = 2;
-        const defaultTab = { id: newTabId, isActive: true };
-        const defaultState = {
-          [newTabId]: initializeTabState(newTabId),
-        } as any;
-        await orderIndexedDB.saveOrderTabs([defaultTab]);
-        setOrderTabs([defaultTab]);
-        setActiveTab(newTabId);
-        setState(defaultState);
-      } else {
-        await removeOrderTab(tabId);
-        if (orderTabs.length <= 1) {
-          const newTabId = "#1";
-          tabIdCounter = 2;
-          const defaultTab = { id: newTabId, isActive: true };
-          const defaultState = {
-            [newTabId]: initializeTabState(newTabId),
-          } as any;
-          await orderIndexedDB.saveOrderTabs([defaultTab]);
-          setOrderTabs([defaultTab]);
-          setActiveTab(newTabId);
-          setState(defaultState);
-        }
-      }
-
-      setTimeout(async () => {
-        if (!state[tabId].orderId) {
-          if (pickupTicketRef.current) {
-            try {
-              await pickupTicketRef.current.print();
-              toast.info(t("cashier.create.withoutError"));
-            } catch (printError) {
-              toast.error(t("cashier.create.notPrint"));
-            }
-          } else {
-            toast.error(t("cashier.create.notFound"));
-          }
-        } else {
-          toast.info(
-            t("toast.update.success", {
-              entity: t("common.orders").toLowerCase(),
-            })
-          );
-        }
-      }, 100);
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
     } catch (error) {
-      console.error("Lỗi xử lý đơn giặt:", error);
-      toast.error(
-        state[tabId].orderId
-          ? t("toast.update.failed", { entity: t("common.order") })
-          : t("toast.create.failed", { entity: t("common.order") })
-      );
+      const title = (error as { response?: { data?: { title?: string } } })
+        .response?.data?.title;
+      toast.error(title || t("cashier.createRetry"));
+      if (!draft.orderId) void pricing.retry();
+      return; // Preserve customer, items, note, tariff and pickup time on failure.
     } finally {
-      updateStateForTab(
-        tabId,
-        () => ({ isProcessing: false }) as Partial<TabState>
-      );
+      processingRef.current = false;
+      setProcessingTab(null);
     }
-  };
-
-  const handlePrint = async (tabId: string) => {
+    // A cache/print failure after server success must never invite a duplicate create.
+    if (stateRef.current[id]?.branchId === draft.branchId)
+      replaceState({ ...stateRef.current, [id]: emptyDraft(draft.branchId) });
     try {
-      if (pickupTicketRef.current) await pickupTicketRef.current.print();
-      else toast.error(t("cashier.appoimentSlipPrint.notFound"));
-    } catch (error) {
-      console.error("Lỗi in:", error);
-      toast.error(t("cashier.appoimentSlipPrint.unablePrint"));
+      await persistence.current;
+      await orderIndexedDB.saveOrderState(
+        id,
+        stateRef.current[id] ?? emptyDraft(branchId),
+      );
+    } catch {
+      toast.error(t("cashier.saveFailed"));
     }
+    void queryClient.invalidateQueries({ queryKey: ["orders"] });
+    toast.success(
+      t(draft.orderId ? "cashier.updateOrder" : "cashier.create.withoutError"),
+    );
+    if (!draft.orderId) setTimeout(() => pickupTicketRef.current?.print(), 100);
   };
 
-  const createCustomerHandle = async ({
-    displayName,
-    gender,
-    phoneNumber,
-  }: {
+  const createCustomerHandle = async (data: {
     displayName: string;
     phoneNumber: string;
     gender: Gender;
   }) => {
+    if (customerBusy.current)
+      throw new Error(t("cashier.customerSynchronizing"));
+    const tabId = activeTab;
+    const originBranch = branchId;
+    if (!stateRef.current[tabId] || hydratedBranch !== branchId)
+      throw new Error(t("cashier.loadFailed"));
+    customerBusy.current = true;
+    let customerId = stateRef.current[tabId].pendingCustomerId;
     try {
-      const response = await createCustomer.mutateAsync({
-        displayName,
-        gender,
-        phoneNumber,
-      });
-      if (response.data.results) {
-        const customer: Customer = {
-          id: response.data.results.id!,
-          displayName: response.data.results.displayName!,
-          phoneNumber: response.data.results.phoneNumber || "",
-        };
-        handleSelectCustomer(customer, activeTab);
+      if (!customerId) {
+        setCustomerPhase("creating");
+        const response = await apiClient.authApiCustomersPost(data);
+        customerId = response.data.results?.id ?? null;
+        if (!customerId) throw new Error(t("common.error.submissionFailed"));
+        updateTab(tabId, (draft) => ({
+          ...draft,
+          pendingCustomerId: customerId,
+          customer: null,
+          voucherCode: "",
+        }));
+        await persistence.current;
+        await orderIndexedDB.saveOrderState(tabId, stateRef.current[tabId]);
       }
-    } catch (error) {}
+      setCustomerPhase("syncing");
+      await synchronizeCustomer(
+        customerId,
+        async (id) => {
+          const response = await apiClient.ecommerceApiUsersIdGet(id, {
+            timeout: 4000,
+          });
+          const synced = response.data.results;
+          if (
+            !synced?.id ||
+            synced.id !== id ||
+            synced.role !== "CUSTOMER" ||
+            synced.status !== "Active"
+          ) {
+            throw new Error(t("cashier.customerSyncPending"));
+          }
+          return {
+            ...synced,
+            id: synced.id,
+            displayName: synced.displayName ?? "",
+            email: synced.email ?? undefined,
+          } as Customer;
+        },
+        async (customer) => {
+          await cacheCustomer(customer);
+          await queryClient.invalidateQueries({ queryKey: ["customer"] });
+          queryClient.setQueryData<{ users: Customer[] }>(
+            ["customer"],
+            (previous) => ({
+              users: [
+                ...(previous?.users ?? []).filter(
+                  (row) => row.id !== customer.id,
+                ),
+                customer,
+              ],
+            }),
+          );
+          if (stateRef.current[tabId]?.branchId === originBranch) {
+            updateTab(tabId, (draft) => ({
+              ...draft,
+              customer,
+              pendingCustomerId: null,
+            }));
+          }
+        },
+      );
+    } catch (error) {
+      if (customerId) throw new Error(t("cashier.customerSyncPending"));
+      throw error;
+    } finally {
+      customerBusy.current = false;
+      setCustomerPhase("idle");
+    }
   };
 
-  const handleSelectTariff = async (id: number) => {
-    updateStateForTab(activeTab, () => ({ tariffId: id }) as Partial<TabState>);
-  };
-
+  const byTab = <T>(select: (draft: CashierDraft) => T) =>
+    Object.fromEntries(
+      orderTabs.map((tab) => [
+        tab.id,
+        select(
+          state[tab.id]?.branchId === branchId && hydratedBranch === branchId
+            ? state[tab.id]
+            : emptyDraft(branchId),
+        ),
+      ]),
+    );
+  const customers = new Map(
+    (customerData?.users ?? []).map((customer) => [customer.id, customer]),
+  );
+  Object.values(state).forEach((draft) => {
+    if (draft.customer) customers.set(draft.customer.id, draft.customer);
+  });
   return {
-    customer: Object.fromEntries(
-      orderTabs.map((tab) => [tab.id, state[tab.id]?.customer])
+    customer: byTab((draft) => draft.customer),
+    items: byTab((draft) => draft.items),
+    tariffId: byTab((draft) =>
+      tariffData?.prices.some((tariff) => tariff.id === draft.tariffId)
+        ? draft.tariffId
+        : 0,
     ),
-    items: Object.fromEntries(
-      orderTabs.map((tab) => [tab.id, state[tab.id]?.items || []])
-    ),
+    voucherCode: byTab((draft) => draft.voucherCode),
+    note: byTab((draft) => draft.note),
+    deliveryTime: byTab((draft) => draft.deliveryTime),
+    orderId: byTab((draft) => draft.orderId),
     isProcessing: Object.fromEntries(
-      orderTabs.map((tab) => [tab.id, state[tab.id]?.isProcessing || false])
+      orderTabs.map((tab) => [tab.id, processingTab === tab.id]),
     ),
-    completedOrder: completedOrder,
+    customerData: [...customers.values()],
+    tariffData,
+    customerPhase,
+    customerPending: !!currentDraft.pendingCustomerId,
+    readyToSubmit,
+    pricing,
+    completedOrder,
     pickupTicketRef,
     orderListRef,
-    customerData: customerData?.users || [],
-    total: Object.fromEntries(
-      orderTabs.map((tab) => [tab.id, state[tab.id]?.total || 0])
-    ),
-    amount: Object.fromEntries(
-      orderTabs.map((tab) => [tab.id, state[tab.id]?.amount || 0])
-    ),
-    discountValue: Object.fromEntries(
-      orderTabs.map((tab) => [tab.id, state[tab.id]?.discountValue || 0])
-    ),
-    discountFixed: Object.fromEntries(
-      orderTabs.map((tab) => [tab.id, state[tab.id]?.discountFixed])
-    ),
-    voucherCode: Object.fromEntries(
-      orderTabs.map((tab) => [tab.id, state[tab.id]?.voucherCode || ""])
-    ),
-    note: Object.fromEntries(
-      orderTabs.map((tab) => [tab.id, state[tab.id]?.note || ""])
-    ),
-    tariffId: Object.fromEntries(
-      orderTabs.map((tab) => [tab.id, state[tab.id]?.tariffId || 0])
-    ),
-    point: Object.fromEntries(
-      orderTabs.map((tab) => [tab.id, state[tab.id]?.point || 0])
-    ),
-    deliveryTime: Object.fromEntries(
-      orderTabs.map((tab) => [tab.id, state[tab.id]?.deliveryTime || null])
-    ),
-    orderId: Object.fromEntries(
-      orderTabs.map((tab) => [tab.id, state[tab.id]?.orderId || null])
-    ),
-
+    orderTabs,
+    activeTab,
     handleSelectTariff,
-    tariffData,
     handleAddItem,
     handleRemoveItem,
     handleUpdateQuantity,
-    handleUpdatePrice,
     handleSelectCustomer,
-    handlePrint,
+    handleSetNote,
+    handleSetDeliveryTime,
+    handleApplyVoucher,
     handleProcessOrder,
+    handleUpdateOrder,
+    createCustomerHandle,
     addNewOrderTab,
     removeOrderTab,
-    activeTab,
-    setActiveTab: updateActiveTab,
-    orderTabs,
-    handleApplyVoucher,
-    createCustomerHandle,
-    handleSetNote,
-    handleUpdatePoints,
-    handleUpdateOrder,
+    setActiveTab: selectTab,
+    handlePrint: () => pickupTicketRef.current?.print(),
   };
-};
+}
