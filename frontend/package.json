@@ -16,7 +16,8 @@
     "test:run": "playwright test --project=auth --project=feature-tests --project=public",
     "test:headed": "playwright test --project=auth --project=feature-tests --project=public --headed",
     "test:report": "playwright show-report",
-    "test:cashier": "playwright test --config playwright.cashier.config.ts"
+    "test:cashier": "playwright test --config playwright.cashier.config.ts",
+    "test:lifecycle": "playwright test --config playwright.lifecycle.config.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",

@@ -1,16 +1,21 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Check, X, Search } from "lucide-react";
+import { Loader2, Check, X } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { EquipmentStatus, ListEquipmentResponse } from "@/api/generated";
+import { ListEquipmentResponse } from "@/api/generated";
 import { useFormEquipments } from "@/features/equipment/hooks/use-equipment";
 import { OrderEquipment } from "../../cashier/types";
+import {
+  availableOrderEquipmentFilter,
+  isAvailableOrderEquipment,
+} from "../order-lifecycle";
 
 interface EquipmentPickerProps {
+  branchId: number;
+  disabled?: boolean;
   selected: OrderEquipment[];
   onToggle: (equipment: OrderEquipment) => void;
   disabledIds?: number[];
@@ -18,6 +23,8 @@ interface EquipmentPickerProps {
 }
 
 export default function CashierEquipmentPicker({
+  branchId,
+  disabled = false,
   selected,
   onToggle,
   disabledIds = [],
@@ -40,21 +47,9 @@ export default function CashierEquipmentPicker({
     isFetchingNextPage,
   } = useFormEquipments({
     searchTerm: debouncedSearchTerm,
+    enabled: branchId > 0,
     query: {
-      filter: {
-        $and: [
-          {
-            status: {
-              $eq: EquipmentStatus.Active,
-            },
-          },
-          {
-            using: {
-              $eq: false,
-            },
-          },
-        ],
-      },
+      filter: availableOrderEquipmentFilter(branchId),
     },
   });
 
@@ -65,7 +60,7 @@ export default function CashierEquipmentPicker({
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage)
           fetchNextPage();
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
     if (loadMoreRef.current) io.observe(loadMoreRef.current);
     return () => io.disconnect();
@@ -73,7 +68,7 @@ export default function CashierEquipmentPicker({
 
   const selectedIds = useMemo(
     () => new Set(selected.map((s) => s.equipmentId)),
-    [selected]
+    [selected],
   );
 
   if (error) {
@@ -98,9 +93,10 @@ export default function CashierEquipmentPicker({
             {s.equipmentName}
             <button
               type="button"
+              disabled={disabled}
               onClick={() => onToggle(s)}
               className="ml-0.5 rounded hover:bg-muted p-0.5"
-              aria-label={t("common.remove")}
+              aria-label={t("order.removeEquipment")}
             >
               <X className="h-3 w-3" />
             </button>
@@ -122,43 +118,48 @@ export default function CashierEquipmentPicker({
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-3">
-          {equipments.map((eq: ListEquipmentResponse) => {
-            const id = eq.id!;
-            const isSelected = selectedIds.has(id);
-            const isDisabled = disabledIds.includes(id);
-            return (
-              <Card
-                key={id}
-                className={`overflow-hidden rounded-lg border p-2 transition-colors ${
-                  isSelected ? "ring-2 ring-primary" : "hover:bg-muted/30"
-                } ${isDisabled ? "opacity-50 pointer-events-none" : "cursor-pointer"}`}
-                onClick={() =>
-                  onToggle({ equipmentId: id, equipmentName: eq.name! })
-                }
-              >
-                <div className="relative w-full h-20 mb-2">
-                  <Image
-                    src={eq.image ?? "/logo/favicon.svg"}
-                    alt={eq.name!}
-                    fill
-                    className="object-cover rounded"
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                  />
-                  {isSelected && (
-                    <div className="absolute top-1 left-1 flex items-center gap-1 rounded bg-primary text-primary-foreground px-1.5 py-0.5 text-[10px]">
-                      <Check className="h-3 w-3" />
-                    </div>
-                  )}
-                </div>
-                <div className="text-sm font-medium leading-tight line-clamp-2">
-                  {eq.name}
-                </div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">
-                  {eq.code}
-                </div>
-              </Card>
-            );
-          })}
+          {equipments
+            .filter((eq) => isAvailableOrderEquipment(eq, branchId))
+            .map((eq: ListEquipmentResponse) => {
+              const id = eq.id!;
+              const isSelected = selectedIds.has(id);
+              const isDisabled = disabled || disabledIds.includes(id);
+              return (
+                <button
+                  type="button"
+                  aria-pressed={isSelected}
+                  disabled={isDisabled}
+                  key={id}
+                  className={`text-left bg-card text-card-foreground shadow-sm overflow-hidden rounded-lg border p-2 transition-colors ${
+                    isSelected ? "ring-2 ring-primary" : "hover:bg-muted/30"
+                  } ${isDisabled ? "opacity-50 pointer-events-none" : "cursor-pointer"}`}
+                  onClick={() =>
+                    onToggle({ equipmentId: id, equipmentName: eq.name! })
+                  }
+                >
+                  <div className="relative w-full h-20 mb-2">
+                    <Image
+                      src={eq.image ?? "/logo/favicon.svg"}
+                      alt={eq.name!}
+                      fill
+                      className="object-cover rounded"
+                      sizes="(max-width: 768px) 50vw, 25vw"
+                    />
+                    {isSelected && (
+                      <div className="absolute top-1 left-1 flex items-center gap-1 rounded bg-primary text-primary-foreground px-1.5 py-0.5 text-[10px]">
+                        <Check className="h-3 w-3" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-sm font-medium leading-tight line-clamp-2">
+                    {eq.name}
+                  </div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5">
+                    {eq.code}
+                  </div>
+                </button>
+              );
+            })}
         </div>
       )}
 

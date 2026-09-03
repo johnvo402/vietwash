@@ -31,6 +31,7 @@ import {
   ROUTE_ORDERS_DETAIL,
 } from "@/types/router-type";
 import { OrderStatus } from "@/api/generated/api";
+import { canCompleteOrder } from "../order-lifecycle";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -115,10 +116,9 @@ export function PaymentModal({
   const getOrderStatusMessage = () => {
     if (!order?.status) return null;
 
-    const status = order.status.toLowerCase();
-    const isProcessed = status === OrderStatus.Processed.toLowerCase();
-    const isCompleted = status === "completed";
-    const isCanceled = status === OrderStatus.Cancelled.toLowerCase();
+    const isProcessed = canCompleteOrder(order.status);
+    const isCompleted = order.status === OrderStatus.Completed;
+    const isCanceled = order.status === OrderStatus.Cancelled;
 
     const handleViewDetails = () => {
       pushRouter({

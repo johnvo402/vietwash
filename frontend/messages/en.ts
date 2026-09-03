@@ -551,6 +551,15 @@ const en = {
     point: "Points",
   },
   order: {
+    startProcessing: "Start processing",
+    markProcessed: "Mark Processed",
+    startEquipmentRequired:
+      "Select at least one available equipment from this order's branch before starting.",
+    reviewEquipment:
+      "Review the equipment list and your selection, then retry with available equipment.",
+    removeEquipment: "Remove selected equipment",
+    listView: "List view",
+    cardView: "Card view",
     title: "Orders",
     orderList: "Order List",
     returnOrderList: "Return to Order List",

@@ -2,28 +2,8 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import {
-  MoreHorizontal,
-  Clock,
-  Truck,
-  Package,
-  XCircle,
-  Search,
-} from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { formatPriceVN } from "@/utils/format";
-import { apiClient } from "@/api/client";
 import { usePushRouter } from "@/utils/router-utli";
 import { useTranslations } from "next-intl";
 import {
@@ -31,197 +11,16 @@ import {
   ROUTE_ORDERS_DETAIL,
 } from "@/types/router-type";
 import { GetCustomerGroup, GetStatusBadge } from "../../order-utils/order-util";
-import {
-  ListOrderResponse,
-  OrderStatus,
-  PaymentMethod,
-} from "@/api/generated/api";
-import { PaymentMethodSelect } from "../PaymentMethodSelect";
+import { ListOrderResponse, OrderStatus } from "@/api/generated/api";
 import { usePageType } from "@/hooks/use-page-type";
-import { OrderEquipment } from "@/features/cashier/types";
-import { CancelOrderDialog } from "../cancel-order-dialog";
-import {
-  getPaymentErrorMessage,
-  redirectToPayOsCheckout,
-} from "../../payments/payos";
+import { OrderActionMenu } from "../order-action-menu";
 
 export const useOrder = ({
   onEdit,
-  onInProgress,
-}: {
-  onEdit?: (id: number) => void;
-  onInProgress?: (id: string, code: string) => void;
-} = {}) => {
+}: { onEdit?: (id: number) => void } = {}) => {
   const pushRouter = usePushRouter();
-  const queryClient = useQueryClient();
   const t = useTranslations();
   const { isCashierPage } = usePageType();
-
-  // ----- STATE -----
-  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
-  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
-  const [orderToComplete, setOrderToComplete] = useState<{
-    id: string;
-    code: string;
-  } | null>(null);
-  const [orderToCancel, setOrderToCancel] = useState<{
-    id: string;
-    code: string;
-  } | null>(null);
-
-  // Thêm state cho chọn thiết bị
-
-  // ----- STATUS -----
-  const Status = {
-    Pending: "Pending",
-    InProgress: "InProgress",
-    Processed: "Processed",
-    Cancelled: "Cancelled",
-  } as const;
-  type Status = (typeof Status)[keyof typeof Status];
-  const statusOrder = Object.values(OrderStatus) as OrderStatus[];
-
-  const statusDisplayMap: Record<
-    Status,
-    {
-      label: string;
-      icon: React.ComponentType<{ className?: string }>;
-      textColor: string;
-      bgColor: string;
-    }
-  > = {
-    Pending: {
-      label: t("common.status.pending"),
-      icon: Clock,
-      textColor: "text-yellow-800",
-      bgColor: "bg-yellow-100",
-    },
-    InProgress: {
-      label: t("common.status.handling"),
-      icon: Truck,
-      textColor: "text-blue-800",
-      bgColor: "bg-blue-100",
-    },
-    Processed: {
-      label: t("common.status.handled"),
-      icon: Package,
-      textColor: "text-orange-800",
-      bgColor: "bg-orange-100",
-    },
-    Cancelled: {
-      label: t("common.status.canceled"),
-      icon: XCircle,
-      textColor: "text-red-800",
-      bgColor: "bg-red-100",
-    },
-  };
-
-  const validTransitions: Partial<Record<OrderStatus, OrderStatus[]>> = {
-    Pending: ["InProgress", "Cancelled"],
-    InProgress: ["Processed", "Cancelled"],
-    Processed: ["Completed", "Cancelled"],
-    Completed: [],
-    Cancelled: [],
-  };
-
-  // ----- MUTATION -----
-  const updateStatus = useMutation({
-    mutationFn: ({
-      id,
-      status,
-      paymentMethod,
-      equipments,
-      cancellationReason,
-    }: {
-      id: string;
-      status: OrderStatus;
-      paymentMethod?: PaymentMethod;
-      equipments?: OrderEquipment[];
-      cancellationReason?: string;
-    }) =>
-      apiClient.ecommerceApiOrdersUpdateStatusidPut(id, {
-        status,
-        paymentMethod,
-        cancellationReason,
-        orderEquipments: equipments?.map(({ equipmentId }) => ({
-          equipmentId,
-        })),
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-    },
-    onError: (_error, variables) => {
-      alert(
-        t(
-          variables.status === OrderStatus.Cancelled
-            ? "order.errorCancellingOrder"
-            : "order.updateOrderStatusFailed",
-        ),
-      );
-    },
-  });
-
-  // ----- HANDLERS -----
-  const handleCompleteOrder = (orderId: string, code: string) => {
-    setOrderToComplete({ id: orderId, code });
-    setIsPaymentDialogOpen(true);
-  };
-
-  const confirmCompleteOrder = async (paymentMethod: PaymentMethod) => {
-    if (!orderToComplete) return;
-
-    try {
-      if (paymentMethod === PaymentMethod.Card) {
-        await redirectToPayOsCheckout(Number(orderToComplete.id));
-      } else {
-        await updateStatus.mutateAsync({
-          id: orderToComplete.id,
-          status: OrderStatus.Completed,
-          paymentMethod: PaymentMethod.Cash,
-        });
-      }
-      setOrderToComplete(null);
-    } catch (error) {
-      throw new Error(getPaymentErrorMessage(error, t("common.error")));
-    }
-  };
-
-  const handleCancelOrder = (orderId: string, code: string) => {
-    setOrderToCancel({ id: orderId, code });
-    setIsCancelDialogOpen(true);
-  };
-
-  const confirmCancelOrder = async (cancellationReason: string) => {
-    if (orderToCancel) {
-      await updateStatus.mutateAsync({
-        id: orderToCancel.id,
-        status: OrderStatus.Cancelled,
-        cancellationReason,
-      });
-    }
-  };
-
-  const handleChangeStatus = (
-    orderId: string,
-    newStatus: OrderStatus,
-    code: string,
-    currentStatus: OrderStatus,
-  ) => {
-    if (newStatus === OrderStatus.Completed) {
-      handleCompleteOrder(orderId, code);
-      return;
-    }
-
-    if (
-      currentStatus === OrderStatus.Pending &&
-      newStatus === OrderStatus.InProgress
-    ) {
-      onInProgress?.(orderId, code);
-      return;
-    }
-
-    updateStatus.mutate({ id: orderId, status: newStatus });
-  };
 
   // ----- TABLE COLUMNS -----
   const columns: ColumnDef<ListOrderResponse>[] = [
@@ -278,106 +77,24 @@ export const useOrder = ({
     },
     {
       id: "actions",
-      cell: ({ row }) => {
-        const order = row.original;
-        return (
-          <div className="text-right">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">{t("common.openMenu")}</span>
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onClick={() =>
-                    isCashierPage
-                      ? pushRouter.pushRouter({
-                          router: ROUTE_CASHIER_ORDERS_DETAIL,
-                          params: { publicId: order.publicId?.toString()! },
-                          state: { [order.publicId?.toString()!]: order.id! },
-                        })
-                      : pushRouter.pushRouter({
-                          router: ROUTE_ORDERS_DETAIL,
-                          params: { publicId: order.publicId?.toString()! },
-                          state: { [order.publicId?.toString()!]: order.id! },
-                        })
-                  }
-                >
-                  {t("common.viewDetails")}
-                </DropdownMenuItem>
-
-                {order.status === OrderStatus.Pending && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => onEdit?.(order.id!)}>
-                      {t("common.update")}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() =>
-                        handleCancelOrder(order.id!.toString(), order.code!)
-                      }
-                      className="text-red-600"
-                    >
-                      <XCircle className="mr-2 h-4 w-4" />
-                      {t("common.cancel")}
-                    </DropdownMenuItem>
-                  </>
-                )}
-
-                {statusOrder.map((status) => {
-                  if (
-                    validTransitions[order.status!]?.includes(status) &&
-                    status !== OrderStatus.Cancelled &&
-                    status !== OrderStatus.Completed
-                  ) {
-                    const {
-                      icon: Icon,
-                      textColor,
-                      bgColor,
-                      label,
-                    } = statusDisplayMap[status as Status];
-                    return (
-                      <DropdownMenuItem
-                        key={status}
-                        onClick={() =>
-                          handleChangeStatus(
-                            order.id!.toString(),
-                            status,
-                            order.code!,
-                            order.status!,
-                          )
-                        }
-                        className={textColor + " " + bgColor}
-                      >
-                        <Icon className="mr-2 h-4 w-4" />
-                        {label}
-                      </DropdownMenuItem>
-                    );
-                  }
-                  return null;
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Payment Dialog */}
-            {isPaymentDialogOpen && (
-              <PaymentMethodSelect
-                isOpen={isPaymentDialogOpen}
-                onSubmit={confirmCompleteOrder}
-                onClose={() => {
-                  setIsPaymentDialogOpen(false);
-                  setOrderToComplete(null);
-                }}
-              />
-            )}
-
-            {/* Equipment Dialog */}
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <div className="text-right">
+          <OrderActionMenu
+            order={row.original}
+            onEdit={onEdit}
+            onView={() => {
+              const order = row.original;
+              pushRouter.pushRouter({
+                router: isCashierPage
+                  ? ROUTE_CASHIER_ORDERS_DETAIL
+                  : ROUTE_ORDERS_DETAIL,
+                params: { publicId: order.publicId?.toString()! },
+                state: { [order.publicId?.toString()!]: order.id! },
+              });
+            }}
+          />
+        </div>
+      ),
     },
   ];
   const columnOrderServices: ColumnDef<ListOrderResponse>[] = [
@@ -503,21 +220,5 @@ export const useOrder = ({
     },
   ];
 
-  return {
-    columns,
-    columnOrderServices,
-    columnOrderCustomer,
-    cancelOrderDialog: (
-      <CancelOrderDialog
-        open={isCancelDialogOpen}
-        onOpenChange={(open) => {
-          setIsCancelDialogOpen(open);
-          if (!open) setOrderToCancel(null);
-        }}
-        orderCode={orderToCancel?.code}
-        onConfirm={confirmCancelOrder}
-        isPending={updateStatus.isPending}
-      />
-    ),
-  };
+  return { columns, columnOrderServices, columnOrderCustomer };
 };

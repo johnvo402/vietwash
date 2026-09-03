@@ -47,7 +47,10 @@ export const PaymentMethodSelect = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => !open && !isSubmitting && onClose()}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Chọn phương thức thanh toán</DialogTitle>

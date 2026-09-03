@@ -1,7 +1,14 @@
 import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { apiClient } from "@/api/client";
-import { GetOrderDetailByCodeResponse, OrderStatus } from "@/api/generated/api";
+import {
+  GetOrderDetailByCodeResponse,
+  OrderStatus,
+  PaymentMethod,
+} from "@/api/generated/api";
+import { useQueryClient } from "@tanstack/react-query";
+import { invalidateOrderLifecycle } from "../order-lifecycle-cache";
+import { canCompleteOrder } from "../order-lifecycle";
 import {
   getPaymentErrorMessage,
   redirectToPayOsCheckout,
@@ -12,6 +19,7 @@ interface UsePaymentProps {
 }
 
 export function usePayment({ onPaymentSuccess, onClose }: UsePaymentProps) {
+  const queryClient = useQueryClient();
   const t = useTranslations();
   const [paymentStep, setPaymentStep] = useState<"barcode" | "paymentMethod">(
     "barcode",
@@ -35,7 +43,7 @@ export function usePayment({ onPaymentSuccess, onClose }: UsePaymentProps) {
 
         setBarcode(scannedCode);
         setOrder(result);
-        if (result.status !== OrderStatus.Processed) {
+        if (!canCompleteOrder(result.status)) {
           setMessage("");
           return;
         }
@@ -50,7 +58,7 @@ export function usePayment({ onPaymentSuccess, onClose }: UsePaymentProps) {
   );
 
   const handleCashPayment = useCallback(async () => {
-    if (order?.status !== OrderStatus.Processed) {
+    if (!order || !canCompleteOrder(order.status)) {
       setMessage(t("order.notProcessed"));
       return;
     }
@@ -61,10 +69,11 @@ export function usePayment({ onPaymentSuccess, onClose }: UsePaymentProps) {
         order.id!.toString(),
         {
           status: OrderStatus.Completed,
-          paymentMethod: "Cash",
+          paymentMethod: PaymentMethod.Cash,
         },
       );
       setMessage(t("order.cashConfirmed"));
+      await invalidateOrderLifecycle(queryClient);
       onPaymentSuccess?.("cash");
       onClose?.();
     } catch (error) {
@@ -72,10 +81,10 @@ export function usePayment({ onPaymentSuccess, onClose }: UsePaymentProps) {
     } finally {
       setIsCompletingCash(false);
     }
-  }, [order?.id, order?.status, t, onPaymentSuccess, onClose]);
+  }, [order, t, onPaymentSuccess, onClose, queryClient]);
 
   const handleGetPaymentLink = useCallback(async () => {
-    if (!order || order.status !== OrderStatus.Processed) {
+    if (!order || !canCompleteOrder(order.status)) {
       setMessage(t("order.notProcessed"));
       return;
     }

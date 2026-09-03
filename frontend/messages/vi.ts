@@ -560,6 +560,15 @@ const vi = {
     new_noti: "Thông báo mới",
   },
   order: {
+    startProcessing: "Bắt đầu xử lý",
+    markProcessed: "Đánh dấu đã xử lý",
+    startEquipmentRequired:
+      "Chọn ít nhất một thiết bị còn trống thuộc chi nhánh của đơn trước khi bắt đầu.",
+    reviewEquipment:
+      "Kiểm tra danh sách và lựa chọn thiết bị, rồi thử lại với thiết bị còn trống.",
+    removeEquipment: "Bỏ chọn thiết bị",
+    listView: "Dạng danh sách",
+    cardView: "Dạng thẻ",
     title: "Đơn giặt",
     orderList: "Danh sách đơn dịch vụ",
     returnOrderList: "Quay lại danh sách đơn dịch vụ",

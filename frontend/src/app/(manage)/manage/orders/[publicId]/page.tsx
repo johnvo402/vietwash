@@ -3,7 +3,7 @@
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { OrderDetail } from "@/features/orders/components/order-detail/order-detail";
 import { ROUTE_ORDERS } from "@/types/router-type";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiClient } from "@/api/client";
 import {
   GetOrderDetailResponse,
@@ -13,6 +13,7 @@ import {
 import { useRouter } from "nextjs-toploader/app";
 import { useEffect, useState } from "react";
 import LoadingSpinner from "@/components/main/LoadingSpinner";
+import { useOrderTransition } from "@/features/orders/compositions/use-order-transition";
 
 interface OrderDetailProps {
   params: { publicId: string };
@@ -20,7 +21,6 @@ interface OrderDetailProps {
 
 export default function OrderDetailPage({ params }: OrderDetailProps) {
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const [id, setId] = useState<number | null>(null);
 
@@ -58,54 +58,25 @@ export default function OrderDetailPage({ params }: OrderDetailProps) {
     }
   };
 
-  // Mutation để cập nhật trạng thái đơn dịch vụ
-  const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: OrderStatus }) =>
-      apiClient.ecommerceApiOrdersUpdateStatusidPut(id, { status }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["order", id] });
-      console.log("Order status updated successfully");
-    },
-    onError: (error) => {
-      console.error("Failed to update order status:", error);
-      alert("Failed to update order status. Please try again.");
-    },
-  });
-
-  // Mutation để hủy đơn dịch vụ
-  const cancelOrderMutation = useMutation({
-    mutationFn: ({
-      id,
-      cancellationReason,
-    }: {
-      id: string;
-      cancellationReason: string;
-    }) =>
-      apiClient.ecommerceApiOrdersUpdateStatusidPut(id, {
-        status: OrderStatus.Cancelled,
-        cancellationReason,
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["order", id] });
-      console.log("Order canceled successfully");
-    },
-    onError: (error) => {
-      console.error("Failed to cancel order:", error);
-    },
-  });
+  const updateStatusMutation = useOrderTransition();
+  const cancelOrderMutation = useOrderTransition();
 
   const handleChangeStatus = async (
     orderId: string,
-    newStatus: OrderStatus,
+    newStatus: typeof OrderStatus.Processed,
   ) => {
-    await updateStatusMutation.mutate({ id: orderId, status: newStatus });
+    await updateStatusMutation.mutateAsync({ id: orderId, status: newStatus });
   };
 
   const handleCancelOrder = async (
     orderId: string,
     cancellationReason: string,
   ) => {
-    await cancelOrderMutation.mutateAsync({ id: orderId, cancellationReason });
+    await cancelOrderMutation.mutateAsync({
+      id: orderId,
+      status: OrderStatus.Cancelled,
+      cancellationReason,
+    });
   };
 
   if (isLoading) {

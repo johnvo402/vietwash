@@ -34,13 +34,12 @@ test("PAID return waits for the local order before showing success", async ({
   page,
 }) => {
   let reads = 0;
+  let localStatus = "Processed";
   await page.route("**/Ecommerce/api/Orders/10", async (route) => {
     reads += 1;
     await route.fulfill({
       contentType: "application/json",
-      body: JSON.stringify(
-        orderResponse(reads === 1 ? "Processed" : "Completed"),
-      ),
+      body: JSON.stringify(orderResponse(localStatus)),
     });
   });
 
@@ -51,6 +50,14 @@ test("PAID return waits for the local order before showing success", async ({
   await expect(
     page.getByRole("heading", { name: /đã nhận thanh toán|payment received/i }),
   ).toBeVisible();
+  await expect.poll(() => reads).toBeGreaterThan(0);
+  await expect(
+    page.getByRole("heading", {
+      name: /thanh toán đã được xác nhận|payment confirmed/i,
+    }),
+  ).toHaveCount(0);
+  // Keep the backend pending until asserted; repeated mount reads must not advance the fixture.
+  localStatus = "Completed";
   await expect(
     page.getByRole("heading", {
       name: /thanh toán đã được xác nhận|payment confirmed/i,

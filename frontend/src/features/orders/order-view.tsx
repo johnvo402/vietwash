@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Grid3X3, List, ScanLine, Search } from "lucide-react";
+import { Grid3X3, List, ScanLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/table/data-table";
 import { useOrder } from "@/features/orders/components/order-table/columns";
@@ -11,39 +11,18 @@ import { useOrdersQuery } from "./compositions/use-order-query";
 import { OrderFilters } from "./components/order-table/OrderFilters";
 import { OrderCard } from "./components/order-table/OrderCard";
 import { PaymentModal } from "./components/payment-model";
-import { OrderStatus, PaymentMethod } from "@/api/generated";
+import { OrderStatus } from "@/api/generated";
 import { useAuth } from "@/hooks/use-auth";
 import { UpdateOrder, useCashier } from "../cashier/hooks/use-cashier";
 import { usePushRouter } from "@/utils/router-utli";
 import { ROUTE_CASHIER } from "@/types/router-type";
 import { apiClient } from "@/api/client";
 import { toast } from "react-toastify";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import CashierEquipmentPicker from "./components/equipment-picker";
-import { Input } from "@/components/ui/input";
-import { OrderEquipment } from "../cashier/types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-
 export default function OrderView() {
   const t = useTranslations();
-  const queryClient = useQueryClient();
 
   const { pushRouter } = usePushRouter();
   const { branchActive } = useAuth();
-  const [isEquipmentDialogOpen, setIsEquipmentDialogOpen] = useState(false);
-  const [orderToInProgress, setOrderToInProgress] = useState<{
-    id: string;
-    code: string;
-  } | null>(null);
-  const [selectedEquipments, setSelectedEquipments] =
-    useState<OrderEquipment[]>();
-  const [searchTermEquipment, setSearchTermEquipment] = useState("");
   const branchId = useMemo(
     () => branchActive?.branchId?.toString() ?? "",
     [branchActive],
@@ -62,13 +41,9 @@ export default function OrderView() {
     setViewMode,
   } = useOrderFilters();
   const cashier = useCashier();
-  const { columns, cancelOrderDialog } = useOrder({
+  const { columns } = useOrder({
     onEdit(id) {
       handleEdit(id);
-    },
-    onInProgress(id, code) {
-      setOrderToInProgress({ id, code });
-      setIsEquipmentDialogOpen(true);
     },
   });
 
@@ -153,46 +128,6 @@ export default function OrderView() {
     refetch();
   };
 
-  const updateStatus = useMutation({
-    mutationFn: ({
-      id,
-      status,
-      paymentMethod,
-      equipments,
-    }: {
-      id: string;
-      status: OrderStatus;
-      paymentMethod?: PaymentMethod;
-      equipments?: OrderEquipment[];
-    }) =>
-      apiClient.ecommerceApiOrdersUpdateStatusidPut(id, {
-        status,
-        paymentMethod,
-        orderEquipments: equipments?.map(({ equipmentId }) => ({
-          equipmentId,
-        })),
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-    },
-  });
-  const handleToggleEquipment = (equipment: OrderEquipment) => {
-    setSelectedEquipments((prev = []) => {
-      const exists = prev.some((e) => e.equipmentId === equipment.equipmentId); // giả sử OrderEquipment có field id
-      if (exists) {
-        // Nếu đã tồn tại => gỡ ra
-        return prev.filter((e) => e.equipmentId !== equipment.equipmentId);
-      }
-      // Nếu chưa => thêm vào
-      return [...prev, equipment];
-    });
-  };
-
-  const onDialogEquipmentClosed = () => {
-    setIsEquipmentDialogOpen(false);
-    setSelectedEquipments([]);
-    setOrderToInProgress(null);
-  };
   return (
     <div className="w-full mx-auto py-6 space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -209,6 +144,7 @@ export default function OrderView() {
           <Button
             variant={viewMode === "list" ? "default" : "outline"}
             size="icon"
+            aria-label={t("order.listView")}
             onClick={() => setViewMode("list")}
           >
             <List className="h-4 w-4" />
@@ -216,6 +152,7 @@ export default function OrderView() {
           <Button
             variant={viewMode === "card" ? "default" : "outline"}
             size="icon"
+            aria-label={t("order.cardView")}
             onClick={() => setViewMode("card")}
           >
             <Grid3X3 className="h-4 w-4" />
@@ -271,65 +208,6 @@ export default function OrderView() {
         onClose={() => setIsPaymentOpen(false)}
         onPaymentSuccess={handlePaymentSuccess}
       />
-      {cancelOrderDialog}
-      <Dialog
-        open={isEquipmentDialogOpen}
-        onOpenChange={onDialogEquipmentClosed}
-      >
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>
-              <div className="space-y-2">
-                <div className="mb-3 flex justify-start gap-2 items-center">
-                  {t("equipment.title")}
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-border h-4 w-4" />
-                    <Input
-                      type="text"
-                      placeholder={t(
-                        "equipment.equipmentList.searchPlaceholder",
-                      )}
-                      value={searchTermEquipment}
-                      onChange={(e) => setSearchTermEquipment(e.target.value)}
-                      className="pl-9 h-9 text-sm rounded-md"
-                    />
-                  </div>
-                </div>
-              </div>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="max-h-[40vh] overflow-auto p-2">
-            <CashierEquipmentPicker
-              selected={selectedEquipments || []}
-              onToggle={(eq) => handleToggleEquipment(eq)}
-              searchTerm={searchTermEquipment}
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsEquipmentDialogOpen(false)}
-            >
-              {t("common.cancel")}
-            </Button>
-            <Button
-              onClick={() => {
-                if (orderToInProgress) {
-                  updateStatus.mutate({
-                    id: orderToInProgress.id,
-                    status: OrderStatus.InProgress,
-                    equipments: selectedEquipments || [],
-                  });
-                  setIsEquipmentDialogOpen(false);
-                  setOrderToInProgress(null);
-                }
-              }}
-            >
-              {t("common.status.confirm")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -34,9 +34,11 @@ interface UseFormEquipmentsResult {
 export const useFormEquipments = ({
   searchTerm = "",
   query = {},
+  enabled = true,
 }: {
   searchTerm: string;
   query?: PropsQuery;
+  enabled?: boolean;
 }): UseFormEquipmentsResult => {
   const { prepareApiParams, flattenQueryObject } = useQueryFilter();
 
@@ -69,11 +71,12 @@ export const useFormEquipments = ({
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ["form-equipments", { search: searchTerm, query }],
+    enabled,
     queryFn: async ({ pageParam = 1 }) => {
       const args = prepareApiParams(
         searchApiParamsKeys,
         { ...params, page: pageParam },
-        { page: 1, pageSize: 9 }
+        { page: 1, pageSize: 9 },
       );
       const response = await apiClient.ecommerceApiEquipmentsGet(...args);
       return {
@@ -116,7 +119,7 @@ interface UseFormEquipmentsActivityProps {
   equipmentId: number;
 }
 export const useEquipmentActivity = (
-  props: UseFormEquipmentsActivityProps
+  props: UseFormEquipmentsActivityProps,
 ): UseFormEquipmentsActivityResult => {
   const [page] = useQueryState("page", { defaultValue: "1" });
   const [pageSize] = useQueryState("pageSize", { defaultValue: "10" });
@@ -172,7 +175,7 @@ export const useEquipmentActivity = (
     queryKey: ["equipment-activity", { props: props, page, pageSize }],
     queryFn: async () => {
       const response = await apiClient.ecommerceApiEquipmentActivitiesGet(
-        ...args
+        ...args,
       );
       return {
         equipment_activitys: response.data.results?.data || [],
@@ -209,7 +212,7 @@ export const useEquipmentMutations = () => {
       toast.info(
         t("toast.update.success", {
           entity: t("equipment.title").toLowerCase(),
-        })
+        }),
       );
       queryClient.invalidateQueries({ queryKey: ["equipments"] });
     },
@@ -217,7 +220,7 @@ export const useEquipmentMutations = () => {
       toast.error(
         t("toast.update.failed", {
           entity: t("equipment.title").toLowerCase(),
-        })
+        }),
       );
     },
   });
@@ -231,7 +234,7 @@ export const useEquipmentMutations = () => {
     }) => {
       const response = await apiClient.ecommerceApiEquipmentsIdActivitiesPost(
         id,
-        command
+        command,
       );
       return response.data;
     },
@@ -239,7 +242,7 @@ export const useEquipmentMutations = () => {
       toast.info(
         t("toast.create.success", {
           entity: t("equipment.activity").toLowerCase(),
-        })
+        }),
       );
       queryClient.invalidateQueries({ queryKey: ["equipments"] });
     },
@@ -247,7 +250,7 @@ export const useEquipmentMutations = () => {
       toast.error(
         t("toast.create.failed", {
           entity: t("equipment.activity").toLowerCase(),
-        })
+        }),
       );
     },
   });
@@ -262,7 +265,7 @@ export const useEquipmentMutations = () => {
     }) => {
       const response = await apiClient.ecommerceApiEquipmentActivitiesIdPut(
         id,
-        command
+        command,
       );
       return response.data;
     },
@@ -270,7 +273,7 @@ export const useEquipmentMutations = () => {
       toast.info(
         t("toast.create.success", {
           entity: t("equipment.activity").toLowerCase(),
-        })
+        }),
       );
       queryClient.invalidateQueries({ queryKey: ["equipments"] });
     },
@@ -278,7 +281,7 @@ export const useEquipmentMutations = () => {
       toast.error(
         t("toast.create.failed", {
           entity: t("equipment.activity").toLowerCase(),
-        })
+        }),
       );
     },
   });
@@ -293,7 +296,7 @@ export const useEquipmentMutations = () => {
     }) => {
       const response = await apiClient.ecommerceApiEquipmentsUpdateStatusidPut(
         id,
-        status
+        status,
       );
       return response.data;
     },
@@ -302,14 +305,14 @@ export const useEquipmentMutations = () => {
       toast.info(
         t("toast.update.success", {
           entity: t("equipment.title").toLowerCase(),
-        })
+        }),
       );
     },
     onError: (error: any) => {
       toast.error(
         t("toast.update.failed", {
           entity: t("equipment.title").toLowerCase(),
-        })
+        }),
       );
     },
   });

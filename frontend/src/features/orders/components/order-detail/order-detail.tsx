@@ -1,19 +1,12 @@
 "use client";
 
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  useMemo,
-} from "react";
+import React, { useCallback, useRef, useState, useMemo } from "react";
 import { format } from "date-fns";
 import {
   ArrowLeft,
   User,
   Clock,
   Package,
-  CheckCircle2,
   XCircle,
   AlertCircle,
   Loader2,
@@ -37,20 +30,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   CustomerGroup,
   GetOrderDetailResponse,
   OrderStatus,
   PaymentMethod,
 } from "@/api/generated";
 import { formatNumberVN, formatPriceVN } from "@/utils/format";
-import { GetCustomerGroup } from "../../order-utils/order-util";
+import { GetCustomerGroup, GetStatusBadge } from "../../order-utils/order-util";
 import PickupTicket, { PickupTicketRef } from "../PickupTicket";
 import PrintBill, { PrintBillRef } from "../PrintBill";
 import { useTranslations } from "next-intl";
@@ -59,48 +45,14 @@ import Image from "next/image";
 import { PaymentModal } from "../payment-model";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CancelOrderDialog } from "../cancel-order-dialog";
-
-// Valid status transitions and configurations (unchanged)
-const validTransitions: Partial<Record<OrderStatus, OrderStatus[]>> = {
-  Pending: ["Pending", "InProgress"],
-  InProgress: ["InProgress", "Processed"],
-  Processed: ["Processed"],
-  Completed: ["Completed"],
-  Cancelled: ["Cancelled"],
-};
-
-const statusConfig = {
-  Pending: {
-    label: "pending",
-    variant: "secondary" as const,
-    icon: Clock,
-    color: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  },
-  InProgress: {
-    label: "handling",
-    variant: "default" as const,
-    icon: Loader2,
-    color: "bg-blue-100 text-blue-800 border-blue-200",
-  },
-  Processed: {
-    label: "handled",
-    variant: "secondary" as const,
-    icon: Package,
-    color: "bg-purple-100 text-purple-800 border-purple-200",
-  },
-  Completed: {
-    label: "completed",
-    variant: "default" as const,
-    icon: CheckCircle2,
-    color: "bg-green-100 text-green-800 border-green-200",
-  },
-  Cancelled: {
-    label: "cancelled",
-    variant: "error" as const,
-    icon: XCircle,
-    color: "bg-red-100 text-red-800 border-red-200",
-  },
-};
+import { StartOrderDialog } from "../start-order-dialog";
+import {
+  canCancelOrder,
+  canProcessOrder,
+  getOrderActions,
+} from "../../order-lifecycle";
+import { getPaymentErrorMessage } from "../../payments/payos";
+import { toast } from "react-toastify";
 
 // Discount calculation (unchanged)
 const getDiscountValue = (data: {
@@ -118,10 +70,13 @@ const getDiscountValue = (data: {
 interface OrderDetailProps {
   order?: GetOrderDetailResponse;
   onBack: () => void;
-  onStatusChange: (orderId: string, newStatus: OrderStatus) => Promise<void>;
+  onStatusChange: (
+    orderId: string,
+    newStatus: typeof OrderStatus.Processed,
+  ) => Promise<void>;
   onCancel: (orderId: string, cancellationReason: string) => Promise<void>;
   getReceipt: () => Promise<void>;
-  refetch: () => void;
+  refetch: () => unknown;
 }
 
 export function OrderDetail({
@@ -132,7 +87,10 @@ export function OrderDetail({
   getReceipt,
   refetch,
 }: OrderDetailProps) {
-  const [status, setStatus] = useState<OrderStatus | undefined>(order?.status);
+  const actions = getOrderActions(order?.status);
+  const [isStartOpen, setIsStartOpen] = useState(false);
+  const [transitionError, setTransitionError] = useState("");
+  const submitting = useRef(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
@@ -141,11 +99,6 @@ export function OrderDetail({
   const pickupTicketRef = useRef<PickupTicketRef>(null);
   const printBillRef = useRef<PrintBillRef>(null);
   const t = useTranslations();
-
-  // Sync status with order prop changes
-  useEffect(() => {
-    setStatus(order?.status);
-  }, [order?.status]);
 
   // Memoize payment success handler
   const handlePaymentSuccess = useCallback(
@@ -171,23 +124,24 @@ export function OrderDetail({
     }
   }, [getReceipt, t]);
 
-  // Memoize status change handler
-  const handleStatusChange = useCallback(
-    async (newStatus: OrderStatus) => {
-      if (!order?.id) return;
-      setIsUpdating(true);
-      try {
-        await onStatusChange(order.id.toString(), newStatus);
-        setStatus(newStatus);
-      } catch (error) {
-        console.error("Error updating status:", error);
-        alert(t("order.updateOrderStatusFailed"));
-      } finally {
-        setIsUpdating(false);
-      }
-    },
-    [order?.id, onStatusChange, t],
-  );
+  const handleMarkProcessed = async () => {
+    if (!order?.id || !canProcessOrder(order.status) || submitting.current)
+      return;
+    submitting.current = true;
+    setIsUpdating(true);
+    setTransitionError("");
+    try {
+      await onStatusChange(String(order.id), OrderStatus.Processed);
+      await refetch();
+    } catch (error) {
+      setTransitionError(
+        getPaymentErrorMessage(error, t("order.updateOrderStatusFailed")),
+      );
+    } finally {
+      submitting.current = false;
+      setIsUpdating(false);
+    }
+  };
 
   // Memoize cancel handler
   const handleCancel = useCallback(() => {
@@ -196,20 +150,23 @@ export function OrderDetail({
 
   const confirmCancelOrder = useCallback(
     async (cancellationReason: string) => {
-      if (!order?.id) return;
+      if (!order?.id || !canCancelOrder(order.status))
+        throw new Error(t("order.errorCancellingOrder"));
       setIsUpdating(true);
       try {
         await onCancel(order.id.toString(), cancellationReason);
-        setStatus("Cancelled");
+        await refetch();
       } catch (error) {
         console.error("Error cancelling order:", error);
-        alert(t("order.errorCancellingOrder"));
+        toast.error(
+          getPaymentErrorMessage(error, t("order.errorCancellingOrder")),
+        );
         throw error;
       } finally {
         setIsUpdating(false);
       }
     },
-    [order?.id, onCancel, t],
+    [order?.id, order?.status, onCancel, refetch, t],
   );
 
   // Memoize print ticket handler
@@ -295,7 +252,7 @@ export function OrderDetail({
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
-            {order.status === OrderStatus.Processed && (
+            {actions.complete && (
               <Button
                 onClick={() => setIsPaymentOpen(true)}
                 disabled={isPaymentOpen || isUpdating}
@@ -342,58 +299,61 @@ export function OrderDetail({
                 </Button>
               </>
             )}
-            <Select
-              value={status}
-              onValueChange={handleStatusChange}
-              disabled={isUpdating}
+            <div
+              className="flex items-center"
+              data-testid="persisted-order-status"
+              data-order-status={order.status}
             >
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder={t("common.status.selectStatus")} />
-              </SelectTrigger>
-              <SelectContent>
-                {(validTransitions[status as OrderStatus] || []).map(
-                  (nextStatus) => (
-                    <SelectItem key={nextStatus} value={nextStatus}>
-                      <div className="flex items-center gap-2">
-                        {React.createElement(
-                          statusConfig[nextStatus]?.icon || Clock,
-                          { className: "w-4 h-4" },
-                        )}
-                        {t(
-                          "common.status." +
-                            (statusConfig[nextStatus]?.label || nextStatus),
-                        )}
-                      </div>
-                    </SelectItem>
-                  ),
+              {order.status && GetStatusBadge(order.status)}
+            </div>
+            {actions.start && (
+              <Button
+                onClick={() => setIsStartOpen(true)}
+                disabled={isUpdating}
+              >
+                {t("order.startProcessing")}
+              </Button>
+            )}
+            {actions.process && (
+              <Button onClick={handleMarkProcessed} disabled={isUpdating}>
+                {isUpdating && (
+                  <Loader2
+                    className="mr-2 h-4 w-4 animate-spin"
+                    aria-hidden="true"
+                  />
                 )}
-              </SelectContent>
-            </Select>
-            {status !== OrderStatus.Completed &&
-              status !== OrderStatus.Cancelled && (
-                <Button
-                  variant="destructive"
-                  onClick={handleCancel}
-                  disabled={isUpdating}
-                  className="w-full sm:w-auto"
-                >
-                  {isUpdating ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {t("common.status.handling")}...
-                    </>
-                  ) : (
-                    <>
-                      <XCircle className="w-4 h-4 mr-2" />
-                      {t("common.cancel")}
-                    </>
-                  )}
-                </Button>
-              )}
+                {t("order.markProcessed")}
+              </Button>
+            )}
+            {actions.cancel && (
+              <Button
+                variant="destructive"
+                onClick={handleCancel}
+                disabled={isUpdating}
+                className="w-full sm:w-auto"
+              >
+                {isUpdating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {t("common.status.handling")}...
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="w-4 h-4 mr-2" />
+                    {t("common.cancel")}
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         </div>
       </div>
 
+      {transitionError && (
+        <p role="alert" className="text-sm text-destructive">
+          {transitionError}
+        </p>
+      )}
       {/* Content Grid */}
       <div className="grid lg:grid-cols-3 gap-2">
         <div className="lg:col-span-1">
@@ -758,6 +718,16 @@ export function OrderDetail({
         </Card>
       </div>
 
+      <StartOrderDialog
+        open={isStartOpen}
+        orderId={order.id ?? 0}
+        orderCode={order.code}
+        branchId={order.branchId ?? 0}
+        onOpenChange={setIsStartOpen}
+        onStarted={() => {
+          void refetch();
+        }}
+      />
       <CancelOrderDialog
         open={isCancelDialogOpen}
         onOpenChange={setIsCancelDialogOpen}
