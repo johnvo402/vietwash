@@ -611,6 +611,9 @@ const vi = {
     enterBarcode: "Nhập mã barcode",
     invalidBarcode: "Mã barcode không hợp lệ",
     selectPaymentMethod: "Chọn phương thức thanh toán",
+    confirmCashPayment: "Xác nhận thanh toán tiền mặt",
+    cashPaymentDescription:
+      "Xác nhận đã nhận đủ tiền mặt trước khi hoàn tất đơn hàng.",
     cash: "Tiền mặt",
     card: "Thẻ",
     cashConfirmed: "Thanh toán bằng tiền mặt được xác nhận!",

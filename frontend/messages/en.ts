@@ -601,6 +601,9 @@ const en = {
     enterBarcode: "Enter Barcode",
     invalidBarcode: "Invalid Barcode",
     selectPaymentMethod: "Select Payment Method",
+    confirmCashPayment: "Confirm cash payment",
+    cashPaymentDescription:
+      "Confirm that you have received the cash before completing this order.",
     cash: "Cash",
     card: "Card",
     cashConfirmed: "Cash payment confirmed!",

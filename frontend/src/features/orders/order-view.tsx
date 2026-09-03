@@ -121,10 +121,8 @@ export default function OrderView() {
 
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 
-  const handlePaymentSuccess = (method: "cash" | "card") => {
-    alert(
-      t(method === "cash" ? "order.cashConfirmed" : "order.paymentSuccess"),
-    );
+  const handlePaymentSuccess = () => {
+    alert(t("order.cashConfirmed"));
     refetch();
   };
 

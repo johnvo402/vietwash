@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { usePayment } from "../compositions/use-payment";
 import { QRScanner } from "@/components/qr-scanner";
@@ -36,7 +37,7 @@ import { canCompleteOrder } from "../order-lifecycle";
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onPaymentSuccess: (method: "cash" | "card") => void;
+  onPaymentSuccess: (method: "cash") => void;
   stepDefault?: "barcode" | "paymentMethod";
   orderDefault?: any;
 }
@@ -61,8 +62,6 @@ export function PaymentModal({
     message,
     handleBarcodeScan,
     handleCashPayment,
-    handleGetPaymentLink,
-    isCreatingLink,
     isCompletingCash,
     resetState,
   } = usePayment({ onPaymentSuccess, onClose });
@@ -85,30 +84,20 @@ export function PaymentModal({
     console.error("QR Scan Error:", error);
   };
 
-  const PaymentMethodSelection = () => (
+  const CashConfirmation = () => (
     <div className={`p-4 ${isMobile ? "space-y-3" : "space-y-4"}`}>
       <p className={`mb-4 ${isMobile ? "text-sm" : "text-base"}`}>
-        {t("order.selectPaymentMethod")}
+        {t("order.cashPaymentDescription")}
       </p>
       <Button
         onClick={handleCashPayment}
-        disabled={isCompletingCash || isCreatingLink}
-        className={`w-full ${isMobile ? "text-sm py-2" : "text-base"} bg-green-600 hover:bg-green-700`}
+        disabled={isCompletingCash}
+        className={`w-full ${isMobile ? "text-sm py-2" : "text-base"}`}
       >
         {isCompletingCash && (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
         )}
         {isCompletingCash ? t("order.processingPayment") : t("order.cash")}
-      </Button>
-      <Button
-        onClick={handleGetPaymentLink}
-        disabled={isCreatingLink || isCompletingCash}
-        className={`w-full ${isMobile ? "text-sm py-2" : "text-base"} bg-blue-600 hover:bg-blue-700`}
-      >
-        {isCreatingLink && (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-        )}
-        {isCreatingLink ? t("order.creatingLink") : t("order.card")}
       </Button>
     </div>
   );
@@ -174,18 +163,24 @@ export function PaymentModal({
   return (
     <Dialog
       open={isOpen}
-      onOpenChange={() => {
+      onOpenChange={(open) => {
+        if (open || isCompletingCash) return;
         resetState();
         onClose();
       }}
     >
       <DialogContent
-        className={isMobile ? "p-2 max-w-[95vw]" : "w-auto min-w-max max-w-4xl"}
+        className={`w-[95vw] max-w-4xl max-h-[90dvh] overflow-y-auto ${isMobile ? "p-2" : ""}`}
       >
         <DialogHeader className={isMobile ? "px-2" : "px-4"}>
           <DialogTitle className={isMobile ? "text-lg" : "text-xl"}>
-            {t("order.processPayment")}
+            {paymentStep === "barcode"
+              ? t("order.processPayment")
+              : t("order.confirmCashPayment")}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            {t("order.cashPaymentDescription")}
+          </DialogDescription>
         </DialogHeader>
         {message || getOrderStatusMessage() ? (
           <div className={isMobile ? "space-y-4" : "space-y-6"}>
@@ -220,12 +215,12 @@ export function PaymentModal({
             )}
             {paymentStep === "paymentMethod" && (
               <div
-                className={`flex ${isMobile ? "flex-col gap-2" : "flex-row gap-4"} min-w-max`}
+                className={`flex min-w-0 ${isMobile ? "flex-col gap-2" : "flex-row gap-4"}`}
               >
-                <div className={isMobile ? "w-full" : "flex-1"}>
-                  <PaymentMethodSelection />
+                <div className={isMobile ? "w-full" : "min-w-0 w-1/3 shrink-0"}>
+                  <CashConfirmation />
                 </div>
-                <div className={isMobile ? "w-full" : "flex-1"}>
+                <div className={isMobile ? "w-full" : "min-w-0 flex-1"}>
                   <PaymentInfo order={order as Order} />
                 </div>
               </div>

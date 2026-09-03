@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { apiClient } from "@/api/client";
 import {
@@ -9,12 +9,9 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { invalidateOrderLifecycle } from "../order-lifecycle-cache";
 import { canCompleteOrder } from "../order-lifecycle";
-import {
-  getPaymentErrorMessage,
-  redirectToPayOsCheckout,
-} from "../payments/payos";
+import { getPaymentErrorMessage } from "../payments/payos";
 interface UsePaymentProps {
-  onPaymentSuccess?: (method: "cash" | "card") => void;
+  onPaymentSuccess?: (method: "cash") => void;
   onClose?: () => void;
 }
 
@@ -26,7 +23,7 @@ export function usePayment({ onPaymentSuccess, onClose }: UsePaymentProps) {
   );
   const [barcode, setBarcode] = useState<string | null>(null);
   const [order, setOrder] = useState<GetOrderDetailByCodeResponse | null>(null);
-  const [isCreatingLink, setIsCreatingLink] = useState(false);
+  const submitting = useRef(false);
   const [isCompletingCash, setIsCompletingCash] = useState(false);
   const [message, setMessage] = useState<string>("");
 
@@ -58,11 +55,13 @@ export function usePayment({ onPaymentSuccess, onClose }: UsePaymentProps) {
   );
 
   const handleCashPayment = useCallback(async () => {
+    if (submitting.current) return;
     if (!order || !canCompleteOrder(order.status)) {
       setMessage(t("order.notProcessed"));
       return;
     }
 
+    submitting.current = true;
     setIsCompletingCash(true);
     try {
       await apiClient.ecommerceApiOrdersUpdateStatusidPut(
@@ -80,30 +79,9 @@ export function usePayment({ onPaymentSuccess, onClose }: UsePaymentProps) {
       setMessage(getPaymentErrorMessage(error, t("common.error")));
     } finally {
       setIsCompletingCash(false);
+      submitting.current = false;
     }
   }, [order, t, onPaymentSuccess, onClose, queryClient]);
-
-  const handleGetPaymentLink = useCallback(async () => {
-    if (!order || !canCompleteOrder(order.status)) {
-      setMessage(t("order.notProcessed"));
-      return;
-    }
-
-    setIsCreatingLink(true);
-    try {
-      await redirectToPayOsCheckout(order.id!);
-    } catch (error) {
-      console.error("Lỗi khi tạo link thanh toán:", error);
-      setMessage(getPaymentErrorMessage(error, t("common.error")));
-    } finally {
-      setIsCreatingLink(false);
-    }
-  }, [order, t]);
-
-  const handleClosePayOS = useCallback(() => {
-    setPaymentStep("barcode");
-    onClose?.();
-  }, [onClose]);
 
   const resetState = useCallback(() => {
     setMessage("");
@@ -116,13 +94,10 @@ export function usePayment({ onPaymentSuccess, onClose }: UsePaymentProps) {
     paymentStep,
     barcode,
     order,
-    isCreatingLink,
     isCompletingCash,
     message,
     handleBarcodeScan,
     handleCashPayment,
-    handleGetPaymentLink,
-    handleClosePayOS,
     resetState,
     setPaymentStep,
     setOrder,

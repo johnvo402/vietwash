@@ -101,15 +101,10 @@ export function OrderDetail({
   const t = useTranslations();
 
   // Memoize payment success handler
-  const handlePaymentSuccess = useCallback(
-    (method: "cash" | "card") => {
-      alert(
-        t(method === "cash" ? "order.cashConfirmed" : "order.paymentSuccess"),
-      );
-      refetch();
-    },
-    [t, refetch],
-  );
+  const handlePaymentSuccess = useCallback(() => {
+    alert(t("order.cashConfirmed"));
+    refetch();
+  }, [t, refetch]);
 
   // Memoize receipt handler
   const handleGetReceipt = useCallback(async () => {

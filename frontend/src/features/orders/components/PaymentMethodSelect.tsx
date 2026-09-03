@@ -1,19 +1,20 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { PaymentMethod } from "@/api/generated/api";
 import { Loader2 } from "lucide-react";
 
 interface PaymentMethodSelectProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (method: PaymentMethod) => void | Promise<void>;
+  onSubmit: () => void | Promise<void>;
 }
 
 export const PaymentMethodSelect = ({
@@ -21,28 +22,27 @@ export const PaymentMethodSelect = ({
   onClose,
   onSubmit,
 }: PaymentMethodSelectProps) => {
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(
-    null,
-  );
+  const t = useTranslations();
+  const submitting = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   const handleSubmit = async () => {
-    if (selectedMethod === null || isSubmitting) return;
+    if (submitting.current) return;
 
+    submitting.current = true;
     setError("");
     setIsSubmitting(true);
     try {
-      await onSubmit(selectedMethod);
+      await onSubmit();
       onClose();
     } catch (submitError) {
       setError(
-        submitError instanceof Error
-          ? submitError.message
-          : "Không thể bắt đầu thanh toán. Vui lòng thử lại.",
+        submitError instanceof Error ? submitError.message : t("common.error"),
       );
     } finally {
       setIsSubmitting(false);
+      submitting.current = false;
     }
   };
 
@@ -53,45 +53,28 @@ export const PaymentMethodSelect = ({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Chọn phương thức thanh toán</DialogTitle>
+          <DialogTitle>{t("order.confirmCashPayment")}</DialogTitle>
+          <DialogDescription>
+            {t("order.cashPaymentDescription")}
+          </DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col gap-4 mt-4">
-          <Button
-            variant={
-              selectedMethod === PaymentMethod.Cash ? "default" : "outline"
-            }
-            onClick={() => setSelectedMethod(PaymentMethod.Cash)}
-            disabled={isSubmitting}
-          >
-            Tiền mặt
-          </Button>
-          <Button
-            variant={
-              selectedMethod === PaymentMethod.Card ? "default" : "outline"
-            }
-            onClick={() => setSelectedMethod(PaymentMethod.Card)}
-            disabled={isSubmitting}
-          >
-            Thẻ tín dụng
-          </Button>
-        </div>
         {error && (
           <p className="text-sm text-destructive" role="alert">
             {error}
           </p>
         )}
         <DialogFooter>
-          <Button
-            onClick={handleSubmit}
-            disabled={selectedMethod === null || isSubmitting}
-          >
+          <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+            {t("common.cancel")}
+          </Button>
+          <Button onClick={handleSubmit} disabled={isSubmitting}>
             {isSubmitting && (
               <Loader2
                 className="mr-2 h-4 w-4 animate-spin"
                 aria-hidden="true"
               />
             )}
-            {isSubmitting ? "Đang xử lý..." : "Xác nhận"}
+            {isSubmitting ? t("order.processingPayment") : t("order.cash")}
           </Button>
         </DialogFooter>
       </DialogContent>

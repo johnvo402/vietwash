@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { OrderStatus } from "../../src/api/generated";
+import { BarcodeFormat, QRCodeWriter } from "@zxing/library";
 
 type Surface = "table" | "card" | "manager" | "cashier";
 const surfaces: Surface[] = ["table", "card", "manager", "cashier"];
@@ -92,6 +93,7 @@ async function setup(
     updates: [] as any[],
     equipment: [] as URL[],
     links: 0,
+    scans: [] as string[],
     orderReads: 0,
   };
   let release = () => {};
@@ -147,7 +149,9 @@ async function setup(
       if (options.reject) {
         httpStatus = 400;
         title =
-          "Equipment was concurrently claimed. Please choose another machine.";
+          input.status === "Completed"
+            ? "Payment could not be confirmed. Please retry."
+            : "Equipment was concurrently claimed. Please choose another machine.";
         if (input.status === "InProgress") equipment[0].using = true;
       } else {
         target.status = input.status;
@@ -169,6 +173,9 @@ async function setup(
         status: "PENDING",
         checkoutUrl: new URL("/test-payos-checkout", page.url()).href,
       };
+    } else if (path.endsWith("/Orders/GetByCode")) {
+      calls.scans.push(route.request().postDataJSON().code);
+      results = order;
     } else if (path.endsWith("/Orders/1001")) {
       results = order;
       calls.orderReads++;
@@ -218,6 +225,62 @@ function orderScope(page: Page, surface: Surface, id = 1001) {
         .getByRole("row", { includeHidden: true })
         .filter({ hasText: `OD-${id}` })
     : page.getByTestId(`order-card-${id}`);
+}
+
+async function installQrCamera(page: Page, code: string) {
+  // Feed the real scanner a QR image through a synthetic video stream. No camera permission,
+  // production test hooks, component replacement or fake scan callback is needed.
+  const matrix = new QRCodeWriter().encode(
+    code,
+    BarcodeFormat.QR_CODE,
+    0,
+    0,
+    new Map(),
+  );
+  const pixels = Array.from({ length: matrix.getHeight() }, (_, y) =>
+    Array.from({ length: matrix.getWidth() }, (_, x) => matrix.get(x, y)),
+  );
+  await page.addInitScript((pixels) => {
+    Object.defineProperty(navigator, "mediaDevices", {
+      configurable: true,
+      value: {
+        enumerateDevices: async () => [
+          {
+            deviceId: "fixture-camera",
+            kind: "videoinput",
+            label: "Test QR camera",
+            groupId: "test",
+          },
+        ],
+        getUserMedia: async () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = pixels[0].length * 8;
+          canvas.height = pixels.length * 8;
+          const context = canvas.getContext("2d")!;
+          const draw = () => {
+            context.fillStyle = "white";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.fillStyle = "black";
+            pixels.forEach((row, y) =>
+              row.forEach((black, x) => {
+                if (black) context.fillRect(x * 8, y * 8, 8, 8);
+              }),
+            );
+          };
+          draw();
+          const stream = canvas.captureStream(10);
+          const timer = setInterval(draw, 100);
+          const track = stream.getVideoTracks()[0];
+          const stop = track.stop.bind(track);
+          track.stop = () => {
+            clearInterval(timer);
+            stop();
+          };
+          return stream;
+        },
+      },
+    });
+  }, pixels);
 }
 function statusLocator(page: Page, surface: Surface, id = 1001) {
   return surface === "table" || surface === "card"
@@ -420,53 +483,193 @@ for (const surface of surfaces) {
     });
   }
 
-  for (const method of ["cash", "card"] as const) {
-    test(`${surface}: Processed completion uses ${method === "cash" ? "Completed + Cash" : "PayOS only"}`, async ({
-      page,
-    }) => {
-      const { calls, order } = await setup(
-        page,
-        surface,
-        OrderStatus.Processed,
-      );
-      await action(page, surface, "Add Payment");
-      expect(calls.updates).toEqual([]);
-      const dialog = page.getByRole("dialog");
-      if (surface === "table" || surface === "card") {
-        await dialog
-          .getByRole("button", {
-            name: method === "cash" ? "Tiền mặt" : "Thẻ tín dụng",
-            exact: true,
-          })
-          .click();
-        await dialog
-          .getByRole("button", { name: "Xác nhận", exact: true })
-          .click();
-      } else
-        await dialog
-          .getByRole("button", {
-            name: method === "cash" ? "Cash" : "Card",
-            exact: true,
-          })
-          .click();
-      if (method === "cash") {
-        await expect.poll(() => calls.updates.length).toBe(1);
-        expect(calls.updates[0]).toEqual({
-          status: "Completed",
-          paymentMethod: "Cash",
-        });
-        await expect(statusLocator(page, surface)).toHaveAttribute(
-          "data-order-status",
-          "Completed",
-        );
-      } else {
-        await expect(page).toHaveURL(/test-payos-checkout$/);
-        expect(calls.links).toBe(1);
-        expect(calls.updates).toEqual([]);
-        expect(order.status).toBe("Processed");
-      }
+  test(`${surface}: Processed offers Cash only and persists Completed`, async ({
+    page,
+  }) => {
+    const { calls } = await setup(page, surface, OrderStatus.Processed);
+    await action(page, surface, "Add Payment");
+    expect(calls.updates).toEqual([]);
+    const dialog = page.getByRole("dialog", {
+      name: "Confirm cash payment",
+      exact: true,
     });
-  }
+    await expect(
+      dialog.getByRole("button", { name: "Cash", exact: true }),
+    ).toBeVisible();
+    await expect(
+      dialog.getByRole("button", { name: /^(Card|Thẻ tín dụng|PayOS)$/i }),
+    ).toHaveCount(0);
+    const bounds = await dialog.boundingBox();
+    expect(bounds!.x).toBeGreaterThanOrEqual(0);
+    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(
+      page.viewportSize()!.width,
+    );
+    await expect(
+      dialog.getByRole("button", { name: "Close", exact: true }),
+    ).toBeInViewport();
+    await page.screenshot({
+      path: test.info().outputPath("cash-confirmation.png"),
+      animations: "disabled",
+    });
+    await dialog.getByRole("button", { name: "Cash", exact: true }).click();
+    await expect.poll(() => calls.updates.length).toBe(1);
+    expect(calls.updates[0]).toEqual({
+      status: "Completed",
+      paymentMethod: "Cash",
+    });
+    await expect(dialog).not.toBeVisible();
+    await expect(statusLocator(page, surface)).toHaveAttribute(
+      "data-order-status",
+      "Completed",
+    );
+    expect(calls.links).toBe(0);
+    await page.reload();
+    await expect(statusLocator(page, surface)).toHaveAttribute(
+      "data-order-status",
+      "Completed",
+    );
+  });
+
+  test(`${surface}: Cash waits for success and prevents duplicate submission`, async ({
+    page,
+  }) => {
+    const { calls, release } = await setup(
+      page,
+      surface,
+      OrderStatus.Processed,
+      { hold: true },
+    );
+    await action(page, surface, "Add Payment");
+    const dialog = page.getByRole("dialog");
+    await dialog.getByRole("button", { name: "Cash", exact: true }).click();
+    await expect.poll(() => calls.updates.length).toBe(1);
+    await expect(
+      dialog.getByRole("button", {
+        name: "Processing payment...",
+        exact: true,
+      }),
+    ).toBeDisabled();
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeVisible();
+    await expect(statusLocator(page, surface)).toHaveAttribute(
+      "data-order-status",
+      "Processed",
+    );
+    expect(calls.updates).toEqual([
+      { status: "Completed", paymentMethod: "Cash" },
+    ]);
+    expect(calls.links).toBe(0);
+    release();
+    await expect(dialog).not.toBeVisible();
+    await expect(statusLocator(page, surface)).toHaveAttribute(
+      "data-order-status",
+      "Completed",
+    );
+  });
+
+  test(`${surface}: Cash failure retains Processed and reports the error`, async ({
+    page,
+  }) => {
+    const { calls } = await setup(page, surface, OrderStatus.Processed, {
+      reject: true,
+    });
+    await action(page, surface, "Add Payment");
+    const dialog = page.getByRole("dialog");
+    await dialog.getByRole("button", { name: "Cash", exact: true }).click();
+    await expect(dialog.getByRole("alert")).toContainText(
+      "Payment could not be confirmed",
+    );
+    await expect(statusLocator(page, surface)).toHaveAttribute(
+      "data-order-status",
+      "Processed",
+    );
+    expect(calls.updates).toEqual([
+      { status: "Completed", paymentMethod: "Cash" },
+    ]);
+    expect(calls.links).toBe(0);
+  });
+}
+
+test("cashier: mobile Cash confirmation stays usable inside the viewport", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await setup(page, "cashier", OrderStatus.Processed);
+  await action(page, "cashier", "Add Payment");
+  const dialog = page.getByRole("dialog", {
+    name: "Confirm cash payment",
+    exact: true,
+  });
+  const bounds = await dialog.boundingBox();
+  expect(bounds!.x).toBeGreaterThanOrEqual(0);
+  expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(375);
+  await expect(
+    dialog.getByRole("button", { name: "Close", exact: true }),
+  ).toBeInViewport();
+  const cash = dialog.getByRole("button", { name: "Cash", exact: true });
+  await expect(cash).toBeInViewport();
+  await page.screenshot({
+    path: test.info().outputPath("mobile-cash-confirmation.png"),
+    animations: "disabled",
+  });
+  await cash.click();
+  await expect(dialog).not.toBeVisible();
+  await expect(statusLocator(page, "cashier")).toHaveAttribute(
+    "data-order-status",
+    "Completed",
+  );
+});
+
+test("QR scanner finds Processed order and completes with Cash only", async ({
+  page,
+}) => {
+  await installQrCamera(page, "OD-1001");
+  const { calls } = await setup(page, "table", OrderStatus.Processed);
+  await page.getByRole("button", { name: "Scan Order", exact: true }).click();
+  const dialog = page.getByRole("dialog", {
+    name: "Confirm cash payment",
+    exact: true,
+  });
+  await expect(
+    dialog.getByRole("button", { name: "Cash", exact: true }),
+  ).toBeVisible();
+  expect(calls.scans).toEqual(["OD-1001"]);
+  await expect(
+    dialog.getByRole("button", { name: /^(Card|Thẻ tín dụng|PayOS)$/i }),
+  ).toHaveCount(0);
+  await dialog.getByRole("button", { name: "Cash", exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  expect(calls.updates).toEqual([
+    { status: "Completed", paymentMethod: "Cash" },
+  ]);
+  expect(calls.links).toBe(0);
+  await expect(statusLocator(page, "table")).toHaveAttribute(
+    "data-order-status",
+    "Completed",
+  );
+});
+
+for (const status of [
+  OrderStatus.Pending,
+  OrderStatus.InProgress,
+  OrderStatus.Completed,
+  OrderStatus.Cancelled,
+]) {
+  test(`QR scanner refuses payment for ${status}`, async ({ page }) => {
+    await installQrCamera(page, "OD-1001");
+    const { calls } = await setup(page, "table", status);
+    await page.getByRole("button", { name: "Scan Order", exact: true }).click();
+    await expect.poll(() => calls.scans.length).toBe(1);
+    const dialog = page.getByRole("dialog");
+    await expect(
+      dialog.getByRole("button", { name: "View Details", exact: true }),
+    ).toBeVisible();
+    await expect(
+      dialog.getByRole("button", { name: /^(Cash|Card|Thẻ tín dụng|PayOS)$/i }),
+    ).toHaveCount(0);
+    expect(calls.updates).toEqual([]);
+    expect(calls.links).toBe(0);
+  });
 }
 
 test("full table lifecycle claims/releases equipment before Cash completion", async ({
@@ -520,11 +723,7 @@ test("full table lifecycle claims/releases equipment before Cash completion", as
   await action(page, "table", "Add Payment");
   await page
     .getByRole("dialog")
-    .getByRole("button", { name: "Tiền mặt", exact: true })
-    .click();
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "Xác nhận", exact: true })
+    .getByRole("button", { name: "Cash", exact: true })
     .click();
   await expect(statusLocator(page, "table")).toHaveAttribute(
     "data-order-status",

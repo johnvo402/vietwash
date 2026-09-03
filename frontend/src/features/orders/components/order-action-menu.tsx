@@ -21,10 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { getOrderActions } from "../order-lifecycle";
 import { useOrderTransition } from "../compositions/use-order-transition";
-import {
-  getPaymentErrorMessage,
-  redirectToPayOsCheckout,
-} from "../payments/payos";
+import { getPaymentErrorMessage } from "../payments/payos";
 import { StartOrderDialog } from "./start-order-dialog";
 import { CancelOrderDialog } from "./cancel-order-dialog";
 import { PaymentMethodSelect } from "./PaymentMethodSelect";
@@ -80,18 +77,15 @@ export function OrderActionMenu({
       throw error;
     }
   };
-  const pay = async (method: PaymentMethod) => {
+  const pay = async () => {
     if (!actions.complete || !order.id)
       throw new Error(t("order.notProcessed"));
     try {
-      if (method === PaymentMethod.Card)
-        await redirectToPayOsCheckout(order.id);
-      else
-        await mutation.mutateAsync({
-          id: String(order.id),
-          status: OrderStatus.Completed,
-          paymentMethod: PaymentMethod.Cash,
-        });
+      await mutation.mutateAsync({
+        id: String(order.id),
+        status: OrderStatus.Completed,
+        paymentMethod: PaymentMethod.Cash,
+      });
     } catch (error) {
       throw new Error(getPaymentErrorMessage(error, t("common.error")));
     }
