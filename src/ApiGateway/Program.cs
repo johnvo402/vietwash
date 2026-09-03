@@ -89,6 +89,8 @@ app.UseCors("AllowFrontend");
 app.UseWebSockets(new WebSocketOptions { KeepAliveInterval = TimeSpan.FromMinutes(2) });
 app.UseRateLimiter();
 app.MapGet("/", () => "Run oke!");
+// Edge liveness: confirms the gateway is serving, not the health of every dependency.
+app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "gateway" }));
 
 app.MapReverseProxy();
 

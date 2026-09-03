@@ -1,6 +1,5 @@
 services:
   database:
-    container_name: database
     image: postgis/postgis:14-3.5
     restart: always
     command:
@@ -14,11 +13,16 @@ services:
       - ./scripts/docker-entrypoint-initdb.d/000_createdb.sql:/docker-entrypoint-initdb.d/000_createdb.sql
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
     shm_size: ${POSTGRES_SHM_SIZE}
     
   redis:
     image: redis:7.4.11-alpine
-    container_name: redis-db
+    restart: always
     volumes:
       - rd_data:/data  # Persist Redis data using a named volume
     environment:
@@ -28,26 +32,43 @@ services:
 
   gateway:
     depends_on:
-      - "database"
+      database:
+        condition: service_healthy
   gateway-2:
     depends_on:
-      - "database"
+      database:
+        condition: service_healthy
 
   auth:
     depends_on:
-      - "database"
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_started
   project:
     depends_on:
-      - "database"
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_started
   ecommerce:
     depends_on:
-      - "database"
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_started
   finance:
     depends_on:
-      - "database"
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_started
   notification:
     depends_on:
-      - "database"
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_started
       
 volumes:
   db_data:

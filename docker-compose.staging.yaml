@@ -1,59 +1,142 @@
+# Non-secret defaults live in deploy/staging/services.json. Credentials are runtime-only.
+x-service-environment: &service-environment
+  ASPNETCORE_ENVIRONMENT: Staging
+  ASPNETCORE_HTTP_PORTS: "8080"
+  RedisDatabaseSettings__Host: redis
+  RedisDatabaseSettings__Password: ${REDIS_PASSWORD:?Set REDIS_PASSWORD}
+  SecuritySettings__JwtSettings__SecretKey: ${STAGING_JWT_SECRET:?Set STAGING_JWT_SECRET}
+  SecuritySettings__EncryptionOptions__Key: ${STAGING_ENCRYPTION_KEY:?Set a 32-character STAGING_ENCRYPTION_KEY}
+  SecuritySettings__EncryptionOptions__IV: ${STAGING_ENCRYPTION_IV:?Set a 16-character STAGING_ENCRYPTION_IV}
+  HangfireSettings__Credentials__Username: ${STAGING_JOBS_USER:-admin}
+  HangfireSettings__Credentials__Password: ${STAGING_JOBS_PASSWORD:?Set STAGING_JOBS_PASSWORD}
+  S3AwsSettings__ServiceUrl: ${S3_SERVICE_URL:-http://minio:9000}
+  S3AwsSettings__PublicUrl: /image
+  S3AwsSettings__AccessKey: ${MINIO_ACCESS_KEY:?Set MINIO_ACCESS_KEY}
+  S3AwsSettings__SecretKey: ${MINIO_SECRET_KEY:?Set MINIO_SECRET_KEY}
+
+x-service-volumes: &service-volumes
+  - ./logs:/logs
+  - ./deploy/staging/services.json:/app/appsettings.Staging.json:ro
+
+x-gateway-environment: &gateway-environment
+  ASPNETCORE_ENVIRONMENT: Staging
+  ReverseProxy__Clusters__image-cluster__Destinations__image__Address: ${S3_SERVICE_URL:-http://minio:9000}
+
 services:
   auth:
     image: ghcr.io/${GHCR_OWNER:-johnvo402}/vietwash-auth:${IMAGE_TAG:-dev}
     pull_policy: always
-    volumes:
-      - ./logs:/logs
+    volumes: *service-volumes
     environment:
-      - ASPNETCORE_ENVIRONMENT=Staging
+      <<: *service-environment
+      MachineId: "1"
+      DatabaseSettings__DatabaseConnection: Host=database;Username=postgres;Password=${DB_PASSWORD:?Set DB_PASSWORD};Database=auth_service
+      HangfireSettings__Storage__ConnectionString: Host=database;Username=postgres;Password=${DB_PASSWORD};Database=auth_service
+      OtpOption__ApiKey: ${OTP_API_KEY:-not-configured}
 
   ecommerce:
     image: ghcr.io/${GHCR_OWNER:-johnvo402}/vietwash-ecommerce:${IMAGE_TAG:-dev}
     pull_policy: always
-    volumes:
-      - ./logs:/logs
+    volumes: *service-volumes
     environment:
-      - ASPNETCORE_ENVIRONMENT=Staging
-      - PayOsSetting__IsEnabled=${PayOsSetting__IsEnabled:-false}
-      - PayOsSetting__ClientId=${PayOsSetting__ClientId:-}
-      - PayOsSetting__ApiKey=${PayOsSetting__ApiKey:-}
-      - PayOsSetting__ChecksumKey=${PayOsSetting__ChecksumKey:-}
-      - PayOsSetting__ReturnUrl=${PayOsSetting__ReturnUrl:-}
-      - PayOsSetting__CancelUrl=${PayOsSetting__CancelUrl:-}
-      - PayOsSetting__WebhookUrl=${PayOsSetting__WebhookUrl:-}
+      <<: *service-environment
+      MachineId: "2"
+      DatabaseSettings__DatabaseConnection: Host=database;Username=postgres;Password=${DB_PASSWORD};Database=ecommerce_service
+      HangfireSettings__Storage__ConnectionString: Host=database;Username=postgres;Password=${DB_PASSWORD};Database=ecommerce_service
+      PayOsSetting__IsEnabled: ${PayOsSetting__IsEnabled:-false}
+      PayOsSetting__ClientId: ${PayOsSetting__ClientId:-}
+      PayOsSetting__ApiKey: ${PayOsSetting__ApiKey:-}
+      PayOsSetting__ChecksumKey: ${PayOsSetting__ChecksumKey:-}
+      PayOsSetting__ReturnUrl: ${PayOsSetting__ReturnUrl:-}
+      PayOsSetting__CancelUrl: ${PayOsSetting__CancelUrl:-}
+      PayOsSetting__WebhookUrl: ${PayOsSetting__WebhookUrl:-}
 
   project:
     image: ghcr.io/${GHCR_OWNER:-johnvo402}/vietwash-project:${IMAGE_TAG:-dev}
     pull_policy: always
-    volumes:
-      - ./logs:/logs
+    volumes: *service-volumes
+    expose:
+      - "8443"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Staging
+      <<: *service-environment
+      MachineId: "4"
+      DatabaseSettings__DatabaseConnection: Host=database;Username=postgres;Password=${DB_PASSWORD};Database=project_service
+      HangfireSettings__Storage__ConnectionString: Host=database;Username=postgres;Password=${DB_PASSWORD};Database=project_service
+      Kestrel__Endpoints__Api__Url: http://0.0.0.0:8080
+      Kestrel__Endpoints__Api__Protocols: Http1
+      Kestrel__Endpoints__Grpc__Url: http://0.0.0.0:8443
+      Kestrel__Endpoints__Grpc__Protocols: Http2
 
   gateway:
     image: ghcr.io/${GHCR_OWNER:-johnvo402}/vietwash-gateway:${IMAGE_TAG:-dev}
     pull_policy: always
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Staging
+    volumes:
+      - ./deploy/staging/gateway.json:/app/appsettings.Staging.json:ro
+    environment: *gateway-environment
 
   gateway-2:
     image: ghcr.io/${GHCR_OWNER:-johnvo402}/vietwash-gateway:${IMAGE_TAG:-dev}
     pull_policy: always
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Staging
+    volumes:
+      - ./deploy/staging/gateway.json:/app/appsettings.Staging.json:ro
+    environment: *gateway-environment
 
   finance:
     image: ghcr.io/${GHCR_OWNER:-johnvo402}/vietwash-finance:${IMAGE_TAG:-dev}
     pull_policy: always
-    volumes:
-      - ./logs:/logs
+    volumes: *service-volumes
     environment:
-      - ASPNETCORE_ENVIRONMENT=Staging
+      <<: *service-environment
+      MachineId: "3"
+      DatabaseSettings__DatabaseConnection: Host=database;Username=postgres;Password=${DB_PASSWORD};Database=finance_service
+      HangfireSettings__Storage__ConnectionString: Host=database;Username=postgres;Password=${DB_PASSWORD};Database=finance_service
 
   notification:
     image: ghcr.io/${GHCR_OWNER:-johnvo402}/vietwash-notification:${IMAGE_TAG:-dev}
     pull_policy: always
-    volumes:
-      - ./logs:/logs
+    volumes: *service-volumes
+    expose:
+      - "8444"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Staging
+      <<: *service-environment
+      MachineId: "5"
+      DatabaseSettings__DatabaseConnection: Host=database;Username=postgres;Password=${DB_PASSWORD};Database=notification_service
+      HangfireSettings__Storage__ConnectionString: Host=database;Username=postgres;Password=${DB_PASSWORD};Database=notification_service
+      Kestrel__Endpoints__Api__Url: http://0.0.0.0:8080
+      Kestrel__Endpoints__Api__Protocols: Http1
+      Kestrel__Endpoints__Grpc__Url: http://0.0.0.0:8444
+      Kestrel__Endpoints__Grpc__Protocols: Http2
+
+  frontend:
+    image: ghcr.io/${GHCR_OWNER:-johnvo402}/vietwash-frontend:${FRONTEND_IMAGE_TAG:-dev}
+    pull_policy: always
+    restart: unless-stopped
+    expose:
+      - "3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  edge:
+    image: nginx:1.30.4-alpine
+    restart: unless-stopped
+    ports:
+      - "${STAGING_HTTP_PORT:-80}:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      frontend:
+        condition: service_healthy
+      gateway:
+        condition: service_started
+      gateway-2:
+        condition: service_started
+
+# One project-scoped bridge; services use Docker DNS, with no fixed container names.
+# Not internal:true: optional SMS/email/storage providers still need outbound access.
+networks:
+  default:
+    driver: bridge

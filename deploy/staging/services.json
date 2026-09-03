@@ -1,0 +1,26 @@
+{
+  "AllowedHosts": "*",
+  "Serilog": {
+    "Using": ["Serilog.Sinks.Console"],
+    "MinimumLevel": {"Default": "Information", "Override": {"Microsoft": "Warning", "System": "Warning"}},
+    "WriteTo": [{"Name": "Console"}],
+    "Enrich": ["FromLogContext", "WithMachineName"]
+  },
+  "SerilogSettings": {"IsDistributeLog": false, "ServiceName": "VietWash"},
+  "OpenTelemetrySettings": {"IsEnabled": false},
+  "OpenApiSettings": {"ApplicationName": "VietWash", "Version": "v1"},
+  "SecuritySettings": {
+    "JwtSettings": {"Issuer": "vietwash", "Audience": "vietwash", "ExpireTimeAccessToken": "1", "ExpireTimeRefreshToken": "7"}
+  },
+  "RedisDatabaseSettings": {"Port": 6379, "IsEnbaled": true},
+  "PubSubSettings": {"ChannelPrefix": "pubsub", "MaxRetryAttempts": 5, "DeadLetterMaxRetryAttempts": 10, "MaximumDelayInSec": 90, "DeadLetterBatchSize": 100},
+  "S3AwsSettings": {"BucketName": "the-template-project", "PreSignedUrlExpirationInMinutes": "1440", "Protocol": 1},
+  "HangfireSettings": {
+    "Enable": true, "Route": "/jobs",
+    "Server": {"WorkerCount": 2, "Queues": ["default", "notdefault"]},
+    "Storage": {"Options": {"QueuePollInterval": "00:00:05"}}
+  },
+  "OrgSetting": {"VatPercent": 10, "OrgName": "VietWash", "Logo": "Images/favicon.svg", "Stamp": "Images/condau.svg"},
+  "OtpOption": {"DomainUrl": "https://www.traccar.org/sms"},
+  "PayOsSetting": {"IsEnabled": false}
+}

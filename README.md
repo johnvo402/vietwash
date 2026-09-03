@@ -3,101 +3,78 @@
 [![Backend CI](https://github.com/johnvo402/vietwash/actions/workflows/dotnet.yml/badge.svg?branch=dev)](https://github.com/johnvo402/vietwash/actions/workflows/dotnet.yml)
 [![Frontend CI](https://github.com/johnvo402/vietwash/actions/workflows/frontend.yml/badge.svg?branch=dev)](https://github.com/johnvo402/vietwash/actions/workflows/frontend.yml)
 
-VietWash is a full-stack laundry operations platform for branches, orders, services, inventory, customers, finance, and staff workflows. The repository combines a Next.js 14 web application with a .NET 8 microservice backend behind a YARP API Gateway.
+VietWash is a multi-branch laundry operations platform. It connects the cashier counter to service pricing, machines, material stock and revenue reporting, with a Next.js web application and .NET microservices.
 
-Live application: [vietwash.vercel.app](https://vietwash.vercel.app)
+**FEATURE FROZEN — Core demo flow complete. Maintenance/security fixes only.**
 
-## Core capabilities
+## Core features
 
-- Role-aware authentication, account administration, and branch selection
-- Counter workflows for customers, orders, payments, and service pricing
-- Inventory, material, supplier, warehouse, and equipment management
-- Branch and organizational configuration
-- Finance, fund, revenue, and operational reporting
-- Real-time notifications through SignalR
-- S3-compatible media storage, background jobs, caching, tracing, and structured logs
+- Cashier order creation with server-authoritative pricing preview and persisted totals
+- Customer eligibility, assigned vouchers and atomic voucher claims
+- Same-branch equipment assignment and transactional material inventory consumption
+- Order lifecycle: Pending → InProgress → Processed → Completed, with guarded cancellation
+- Cash completion and completed-order revenue reports
+- Multi-branch authorization for staff, managers and administrators
+- Customer OTP registration and Auth-to-Ecommerce synchronization
+- Service/tariff catalogs, inventory, suppliers, finance and real-time notifications
+
+Operational payment is **Cash**. The PayOS implementation is retained but is not exposed in the normal operational UI and is not production-certified.
 
 ## Architecture
 
-Browser traffic enters through the YARP gateway and is routed to independently bounded services. Each service owns its persistence concerns while shared contracts and kernel libraries hold cross-cutting primitives. PostgreSQL/PostGIS, Redis, MinIO, Hangfire, OpenTelemetry, Jaeger, and Seq support the application locally.
-
-See [System Architecture](docs/architecture.md) for the Mermaid topology, service boundaries, request flow, and security decisions. The older PNG is retained only as historical context; the Mermaid document is the maintained source of truth and does not claim a Kubernetes deployment.
-
-## Tech stack
-
-| Area       | Technologies                                                                    |
-| ---------- | ------------------------------------------------------------------------------- |
-| Web        | Next.js 14, React 18, TypeScript, Tailwind CSS, React Query, Zustand, next-intl |
-| Backend    | .NET 8, ASP.NET Core, YARP, Entity Framework Core, CQRS/Mediator, gRPC, SignalR |
-| Data       | PostgreSQL/PostGIS, Redis, MinIO/S3                                             |
-| Operations | Docker Compose, Hangfire, Serilog, OpenTelemetry, Jaeger, Seq                   |
-| Quality    | xUnit, Playwright, ESLint, TypeScript, GitHub Actions                           |
-
-## Repository structure
-
 ```text
-.
-├── frontend/                         Next.js application and Playwright tests
-├── src/
-│   ├── ApiGateway/                   YARP edge gateway
-│   ├── AuthService/                  Identity, accounts, roles, and OTP
-│   ├── EcommeceService/              Orders, catalog, inventory, and payments
-│   ├── FinanceService/               Funds and financial transactions
-│   ├── NotificationService/          Notifications and SignalR hub
-│   ├── ProjectService/               Branches, warehouses, and organization data
-│   ├── Contracts/                    Shared DTOs and service contracts
-│   └── Shared.Kernel/                Shared domain and infrastructure primitives
-├── tests/                            Backend unit and integration tests
-├── docs/                             Maintained architecture documentation
-├── .github/workflows/                Backend/frontend CI and image publishing workflows
-├── docker-compose*.yaml              Application and supporting infrastructure
-├── Directory.Packages.props          Central NuGet package versions
-├── Makefile                          Monorepo developer commands
-└── Micro.sln                         .NET solution
+Browser
+   |
+Nginx edge :80                 only host-published application port
+   |             |
+Next.js :3000   YARP Gateway ×2 :8080
+                 |
+       Auth / Ecommerce / Project / Finance / Notification
+                 |
+          PostgreSQL / Redis
 ```
 
-The legacy `EcommeceService` directory spelling is intentionally retained because solution, deployment, and Docker paths depend on it. The product and documentation use “Ecommerce Service.”
+Everything below the edge communicates over one project-scoped Docker bridge using service DNS names. The browser uses the same origin for pages, APIs, SignalR and `/image` media. The bridge permits outbound provider calls; it is not an egress sandbox. Each domain service owns a logical database.
 
-## Engineering decisions and tradeoffs
+See [architecture](docs/architecture.md) for service boundaries and authentication. The legacy spelling `src/EcommeceService` is retained for compatibility.
 
-- The frontend is a feature-based modular application, not a separately deployed micro-frontend system.
-- The gateway's `X-Api-Key` value is a public client identifier when enabled through route metadata. It is not a secret or an authorization boundary; JWT claims enforce application access.
-- Gateway API-key enforcement is disabled in Development because no route has `ApiKeyRequired=true`. This avoids giving a browser-visible value false security meaning.
-- The backend currently returns access and refresh tokens in JSON. The browser stores them in tab-scoped `sessionStorage`; moving refresh tokens to `HttpOnly`, `Secure`, `SameSite` cookies requires a coordinated backend contract change.
-- Service boundaries and current CQRS/Mediator conventions are preserved to keep this cleanup low-risk. Mediator is kept on the stable 3.0 line to avoid unnecessary API churn.
-- TypeScript typechecking and the Next.js Core Web Vitals rules are enforced. Three broad legacy lint rules remain disabled because the form-heavy codebase currently violates them widely; they should be enabled incrementally per feature instead of producing a noisy CI signal.
+## Stack
 
-## Getting started
+| Layer | Technologies |
+| --- | --- |
+| Backend | .NET 8, ASP.NET Core, EF Core, YARP, CQRS/Mediator, gRPC, SignalR |
+| Data | PostgreSQL/PostGIS, Redis, S3-compatible storage |
+| Frontend | Next.js 14, React 18, TypeScript, Tailwind CSS, React Query, Zustand |
+| Delivery | Docker Compose, Nginx, GitHub Actions, GHCR |
+| Quality | xUnit, PostgreSQL integration tests, Playwright, ESLint |
 
-### Prerequisites
+## Development
 
-- .NET 8 SDK
-- Node.js 20 and npm
-- Java 17 or newer for OpenAPI Generator
-- Docker with Docker Compose
-- GNU Make and Bash for the convenience targets (optional on Windows)
-
-### Clone and configure
+Prerequisites: .NET 8 SDK, Node.js 20/npm, Java 17+ for API generation, Docker Compose, and optionally GNU Make/Bash.
 
 ```bash
 git clone https://github.com/johnvo402/vietwash.git
 cd vietwash
 cp .env.example .env
 cp frontend/.env.example frontend/.env.local
-```
-
-Edit both local environment files before starting infrastructure. Never commit production credentials. ASP.NET Core configuration can be overridden with double-underscore environment variables, for example `SecuritySettings__JwtSettings__SecretKey`, `S3AwsSettings__AccessKey`, `S3AwsSettings__SecretKey`, `OtpOption__ApiKey`, and `PayOsSetting__ApiKey`.
-
-### Install and build
-
-```bash
 dotnet restore Micro.sln --configfile NuGet.Config
-dotnet build Micro.sln --configuration Release --no-restore
-make frontend-install
+dotnet build Micro.sln -c Release --no-restore
 make frontend-check
 ```
 
-Without Make:
+Start local infrastructure, then run backend services and frontend in separate terminals:
+
+```bash
+make dev SERVICE="database redis pgadmin"
+make external                              # optional local S3/observability support
+make run SERVICE="auth ecommerce project finance notification"
+dotnet run --project src/ApiGateway/ApiGateway.csproj
+make frontend-dev
+```
+
+The development overlay binds Gateway `5000`, PostgreSQL `5432`, Redis `6379` and pgAdmin `5050` to **localhost only**. Frontend development remains `npm run dev` on `3000`, with `NEXT_PUBLIC_API_URL=http://localhost:5000`. Configure Development connection/provider settings for these local dependencies. See the [existing seed/startup caveats](docs/closure-verification.md#demo-data-and-existing-setup-caveats) before preparing a fresh demo database.
+
+Without Make, frontend checks are:
 
 ```bash
 cd frontend
@@ -108,112 +85,106 @@ npm run lint
 npm run build:test
 ```
 
-### Run locally
+## Staging: one public entrypoint
 
-Start the core data services:
-
-```bash
-make dev SERVICE="database redis"
-make external
-```
-
-Run the five domain services in separate terminals or through the helper, then start the gateway:
-
-```bash
-make run SERVICE="auth ecommerce project finance notification"
-dotnet run --project src/ApiGateway/ApiGateway.csproj
-```
-
-Start the web application in another terminal:
-
-```bash
-make frontend-dev
-```
-
-The default endpoints are the web application at `http://localhost:3000`, gateway at `http://localhost:5000`, MinIO at `http://127.0.0.1:9000`, and pgAdmin at `http://localhost:5050` when the Development Compose overlay is running.
-
-## Common commands
-
-| Command                             | Purpose                                                           |
-| ----------------------------------- | ----------------------------------------------------------------- |
-| `make frontend-install`             | Install locked frontend dependencies                              |
-| `make frontend-dev`                 | Start Next.js in development mode                                 |
-| `make frontend-check`               | Generate the API client, typecheck, lint, and build               |
-| `make backend-build`                | Build the complete .NET solution in Release mode                  |
-| `make backend-test`                 | Run every pure unit-test project under `tests/UnitTest`           |
-| `make backend-test-all`             | Run all backend tests; PostgreSQL test infrastructure is required |
-| `make check`                        | Run the CI-equivalent backend and frontend checks                 |
-| `make dev SERVICE="database redis"` | Start selected local infrastructure                               |
-| `make staging`                      | Pull and start the complete prebuilt staging stack                |
-| `make staging SERVICE="auth gateway"` | Pull and restart selected prebuilt staging services            |
-| `make deploy SERVICE=auth`          | Run the local staging-host pull/restart helper                    |
-| `make down`                         | Stop the local Compose stack without deleting volumes             |
-
-## Testing
-
-```bash
-dotnet test tests/UnitTest/AuthService.Tests/AuthService.Tests.csproj --configuration Release
-dotnet test Micro.sln --configuration Release
-```
-
-`tests/UnitTest/AuthService.Tests/AuthService.Tests.csproj` is currently the only pure unit-test project. Backend CI discovers every project under `tests/UnitTest`; the full solution command also includes the database-dependent integration projects and needs PostgreSQL configured in `appsettings.Testing-Development.json`.
-
-Playwright tests need a running backend plus non-committed test credentials:
-
-```bash
-cd frontend
-E2E_EMAIL=user@example.test E2E_PASSWORD=change-me npm run test:run
-```
-
-## CI/CD
-
-- Backend CI restores and builds `Micro.sln`, then discovers and runs every pure unit-test project under `tests/UnitTest`.
-- Frontend CI installs from `package-lock.json`, generates the API client, typechecks, lints, and creates a production build.
-- `Publish Backend Images` publishes all six backend application images for one commit. Matrix jobs first push immutable `sha-<12-character-commit>` tags; only after every build succeeds are the matching manifests promoted to the mutable `dev` tags.
-- The workflow publishes images only. It does not SSH to a server or restart staging containers.
+Only Nginx edge is host-exposed. Frontend, both gateways, all microservices, PostgreSQL and Redis stay inside the Docker network. The standard stack contains exactly:
 
 ```text
-push to dev
-     |
-     +--> Backend CI
-     |
-     `--> Publish Backend Images
-              |
-              +--> GHCR gateway
-              +--> GHCR auth
-              +--> GHCR ecommerce
-              +--> GHCR project
-              +--> GHCR finance
-              `--> GHCR notification
-
-staging host
-     |
-     +--> docker compose pull
-     `--> docker compose up -d --no-build
+database redis auth ecommerce project finance notification
+gateway gateway-2 frontend edge
 ```
 
-The backend images are `ghcr.io/johnvo402/vietwash-{gateway,auth,ecommerce,project,finance,notification}`. Both `gateway` and `gateway-2` use the same gateway image. The `dev` tag is the current staging candidate; immutable `sha-*` tags provide traceable rollback points. The frontend remains a separate deployment and the public application is currently hosted on Vercel.
+The host needs Docker Compose, the repository's Compose/configuration files, an untracked `.env`, and Bash for the helper (Make optional). **No npm, .NET SDK or Java is needed on the staging host.**
 
-The staging host needs this repository's Compose files, an untracked `.env`, Docker, and Docker Compose. It does not need the .NET SDK and never builds backend images:
+1. Copy `.env.example` to `.env`. Replace database, Redis and storage placeholders; set a unique `STAGING_JWT_SECRET`, a 32-character `STAGING_ENCRYPTION_KEY`, a 16-character `STAGING_ENCRYPTION_IV`, and `STAGING_JOBS_PASSWORD`. Never expose demo credentials to the internet.
+2. Configure the existing private S3 provider with `S3_SERVICE_URL`, `MINIO_ACCESS_KEY` and `MINIO_SECRET_KEY`. The default `http://minio:9000` requires that DNS name on the application network. For the separate repository S3 support stack on the same network, use its API proxy `http://nginx:9000`. The bucket is `the-template-project`; non-secret defaults live in `deploy/staging/services.json`. Storage must be available before seed media initialization.
+3. Select published images using `IMAGE_TAG` for backend and `FRONTEND_IMAGE_TAG` for frontend. Their immutable tags may differ because publication is independent. Log in to GHCR with a server-only read credential if packages are private.
+4. Deploy:
 
 ```bash
 make staging
-make staging SERVICE="auth ecommerce gateway"
-IMAGE_TAG=sha-8c5ba35f6393 make staging
-IMAGE_TAG=sha-8c5ba35f6393 ./scripts/deploy.sh
+# Same canonical helper without Make:
+./scripts/deploy.sh
 ```
 
-For public GHCR packages, staging pulls without authentication. GitHub may create a package as private initially; either change each package's visibility to public in GitHub Packages, or log in once on the server with a read-only `read:packages` credential stored only on that server. Never add the credential to `.env` or Compose.
+The helper pulls images and runs `up -d --no-build --pull never` with only the base, database and staging Compose files. `make staging SERVICE="frontend edge"` selects services; `ENV_FILE=/path/to/staging.env` selects another environment file. `--no-pull` is only for offline verification of existing local images.
 
-GitHub Actions authenticates to GHCR with the repository-scoped `GITHUB_TOKEN`. Application credentials remain environment-specific ASP.NET Core configuration and must never use frontend `NEXT_PUBLIC_*` variables.
+Use `sha-<12-character-commit>` tags for traceable deployment/rollback. The default edge binding is `80:80`; `STAGING_HTTP_PORT` can select another host port. HTTPS termination belongs to the existing external reverse proxy/load balancer; restrict direct edge access to that trusted proxy when using it. This repository does not provision certificates.
 
-## Security notes
+| Public path | Internal destination |
+| --- | --- |
+| `/`, including `/auth/login` | Next.js standalone |
+| `/{Auth,Ecommerce,Project,Finance,Notification}/api/...` | Gateway → domain service |
+| `/notification/hub` | Gateway, with WebSocket upgrades |
+| `/image/...` | Existing S3 API through Gateway, not the console |
+| `/health` | Gateway liveness, not full dependency readiness |
 
-- Values prefixed with `NEXT_PUBLIC_` are embedded in the browser bundle and must be treated as public.
-- Development keys in tracked configuration are local-only placeholders. Override every signing key, provider credential, database password, and storage credential outside Development.
-- Credentials removed from Git history should be considered exposed and rotated at the provider; deleting the current value does not erase earlier commits.
-- The reviewed frontend dependency-audit baseline and constrained findings are documented in [Frontend dependency audit](docs/frontend-dependency-audit.md).
+The frontend image builds with an empty `NEXT_PUBLIC_API_URL`. Never put Docker hostnames or credentials in `NEXT_PUBLIC_*`. It runs `node server.js` as non-root and excludes Java/OpenAPI generator tooling from runtime.
+
+```bash
+docker compose -f docker-compose.yaml -f docker-compose.database.yaml \
+  -f docker-compose.staging.yaml config
+docker compose -f docker-compose.yaml -f docker-compose.database.yaml \
+  -f docker-compose.staging.yaml ps
+curl http://localhost/
+curl http://localhost/health
+curl -i http://localhost/Ecommerce/api/Orders   # 401 without a token is expected
+ss -lntp
+```
+
+Only `edge` may have a host binding. Internal `8080/tcp`, `3000/tcp`, `5432/tcp` and `6379/tcp` listings without a host mapping are expected. Direct host access must fail unless an unrelated process owns the port. Compose `config` expands secrets: do not publish its full output.
+
+Seq, Jaeger, OTEL, pgAdmin and MinIO support stacks are **not** automatically included by `make staging`. Optional host bindings are localhost-only; use SSH tunnels/private networking for administration. Never publish MinIO console `9001` to the internet.
+
+## Demo flow
+
+Use a disposable, valid seeded database with an assigned STAFF, an active/non-disabled CUSTOMER, an active tariff/service, available same-branch equipment and sufficient material stock.
+
+1. Log in as STAFF and open `/manage/cashier`.
+2. Select customer, tariff and service; verify the server pricing preview.
+3. Create the order: persisted **Pending** status and total.
+4. Start with same-branch equipment: **InProgress** and one material export.
+5. Mark **Processed**, then **Cash**: **Completed**. Reload to verify persistence.
+6. As an authorized MANAGER/ADMIN, view revenue for that branch and completion date.
+
+The live smoke creates real data without API mocks, injected authentication, CSP bypass or PayOS calls:
+
+```bash
+cd frontend
+# Set E2E_EMAIL / E2E_PASSWORD for STAFF and
+# E2E_REPORT_EMAIL / E2E_REPORT_PASSWORD for MANAGER/ADMIN.
+E2E_BASE_URL=http://localhost:80 npx playwright test --config playwright.closure.config.ts
+```
+
+The default post-login dashboard is manager-only; STAFF should open the cashier directly. A legacy nested-modal navigation issue can require refreshing order detail after opening it from the cashier list. The smoke includes this refresh, without forced clicks.
+
+## Verification and delivery
+
+```bash
+dotnet test tests/UnitTest/EcommerceService.Tests/EcommerceService.Tests.csproj \
+  -c Release --no-restore
+docker build -f frontend/Dockerfile -t vietwash-frontend:test .
+git diff --check
+```
+
+Set `VIETWASH_SEED_TEST_DATABASE` to a **disposable PostgreSQL database with citext** to enable database-dependent Ecommerce cases. Never use operational data. Closure validation passed **409/409 Ecommerce tests, zero skips**, frontend checks, the production image build and the same-origin Cash flow. [Verification evidence](docs/closure-verification.md) records the stack, port invariant and database checks.
+
+- Backend CI and the existing six-image publishing workflow retain their behavior.
+- Frontend CI runs install, generation, typecheck, lint and build. On `dev`, after checks, it publishes `ghcr.io/johnvo402/vietwash-frontend:sha-<12-character-commit>`, then promotes that image to `:dev`.
+- Frontend publication is independent of backend changes. Pull requests run checks without publication; manual dispatch is available.
+- Publishing does not automatically deploy a server. `make staging` remains the host-side command.
+
+## Current status and known limitations
+
+**Core demo flow: complete. Project status: feature-frozen / maintenance only.**
+
+- Cash is operational; online-payment production certification is outside this release.
+- No production-grade distributed outbox; notifications remain best-effort.
+- Docker Compose is a demo/staging deployment, not database HA or a zero-downtime platform.
+- Existing seed/bootstrap and navigation caveats are documented above; fresh staging does not automatically populate the Ecommerce demo catalog.
+- The retained Next/PWA tree has an audit backlog: closure `npm ci` reported 40 findings (5 low, 9 moderate, 26 high). See the [prior assessment](docs/frontend-dependency-audit.md); no breaking framework migration is included.
+- Tokens retain the current tab-scoped `sessionStorage` contract. Browser client identifiers are public; JWT/backend authorization enforce access. Rotate historical/demo credentials before exposure.
 
 ## License
 
-VietWash is available under the [MIT License](LICENSE).
+[MIT](LICENSE).

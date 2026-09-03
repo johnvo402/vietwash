@@ -2,13 +2,13 @@ using Application.Common.Errors;
 using Application.Common.Interfaces;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Rules;
 using Application.Feature.Orders.Common;
 using Contracts.ApiWrapper;
 using Contracts.Application.Common.Exceptions;
 using Contracts.Application.Common.Interfaces.Services.Encryptions;
 using Contracts.Common.Messages;
 using Contracts.Infrastructure.Common;
-using Domain.Aggregates.Enums;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Specifications;
 using Domain.Aggregates.Users;
@@ -45,7 +45,7 @@ namespace Application.Feature.Orders.Command.Create
             bool customerExists = await unitOfWork
                 .Repository<User>()
                 .AnyAsync(
-                    x => x.Id == request.CustomerId && x.Status == ActivationStatus.Active,
+                    CustomerEligibility.ForId(request.CustomerId),
                     cancellationToken
                 );
             if (!customerExists)

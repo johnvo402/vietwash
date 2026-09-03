@@ -6,9 +6,9 @@ This document is the maintained architecture source for VietWash. It describes t
 
 ```mermaid
 flowchart LR
-    User[Staff browser] --> Web[Next.js 14 web app]
-    Web -->|HTTPS / REST / JWT| Gateway[YARP API Gateway]
-    Web <-->|SignalR| Gateway
+    User[Staff browser] --> Edge[Nginx edge / only host port 80]
+    Edge --> Web[Next.js 14 standalone web app]
+    Edge -->|same-origin API / SignalR| Gateway[YARP API Gateway x2]
 
     Gateway --> Auth[Auth Service]
     Gateway --> Ecommerce[Ecommerce Service]
@@ -52,7 +52,7 @@ flowchart LR
     Notification --> Seq
 ```
 
-PostgreSQL is represented per service to show data ownership. The local Compose environment can host those logical databases in one PostGIS container.
+PostgreSQL is represented per service to show data ownership. Compose hosts those logical databases in one PostGIS container. Staging publishes only Nginx; frontend, gateways, services, PostgreSQL and Redis share a project-scoped Docker network without host ports. MinIO, Seq, Jaeger and OTEL shown here are optional supporting integrations, not part of the standard staging command. The frontend's relative API and media URLs return to the same Nginx origin.
 
 ## Service boundaries
 
@@ -78,7 +78,7 @@ sequenceDiagram
     participant Domain as Domain service
 
     Staff->>Web: Submit credentials
-    Web->>Gateway: POST /auth/api/login
+    Web->>Gateway: POST /Auth/api/Accounts/Login (through Nginx)
     Gateway->>Auth: Forward request
     Auth-->>Web: Access token + refresh token
     Note over Web: Credentials are kept in tab-scoped sessionStorage
@@ -100,14 +100,14 @@ The gateway can validate `X-Api-Key` and `Platform` only for routes whose YARP m
 ## Configuration and operations
 
 - Development uses explicit local placeholders in tracked settings. Real secrets belong in environment variables, .NET user secrets, or deployment secret stores.
-- Each domain service exposes ASP.NET Core health checks; the gateway root endpoint provides a lightweight liveness response.
+- Domain-service health checks remain internal. Nginx proxies `/health` to Gateway liveness; this does not certify dependency readiness.
 - Hangfire workers and dashboards are configured in the domain services.
-- OpenTelemetry exports traces through the collector to Jaeger, while Serilog can ship structured events to Seq.
+- Optional OpenTelemetry/Seq support stacks use localhost/private administration. Standard staging uses console logs and does not expose their receivers/UIs.
 - Docker Compose is the repository's declared local/staging orchestration. Infrastructure images use explicit stable tags to avoid silent major upgrades.
 
 ## Deliberate constraints
 
 - Service boundaries and the existing CQRS/Mediator organization remain unchanged in this cleanup.
 - The legacy `src/EcommeceService` path is preserved for solution and deployment compatibility.
-- Dockerfiles still run with their existing runtime user because mounted log-directory ownership varies by deployment host. Moving to non-root execution should be paired with an explicit volume-permission migration.
+- Backend Dockerfiles retain their existing runtime users because mounted log-directory ownership varies by deployment host. The new standalone frontend image runs as non-root.
 - Integration tests depend on PostgreSQL and are kept separate from the fast pull-request unit-test gate.

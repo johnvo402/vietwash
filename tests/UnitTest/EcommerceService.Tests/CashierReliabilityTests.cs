@@ -30,6 +30,40 @@ namespace EcommerceService.Tests;
 public class CashierReliabilityTests
 {
     [Theory]
+    [InlineData("CUSTOMER", true, false, true)]
+    [InlineData("STAFF", true, false, false)]
+    [InlineData("MANAGER", true, false, false)]
+    [InlineData("ADMIN", true, false, false)]
+    [InlineData("CUSTOMER", false, false, false)]
+    [InlineData("CUSTOMER", true, true, false)]
+    public async Task PreviewAndCreate_UseIdenticalCustomerEligibility(
+        string role,
+        bool active,
+        bool disabled,
+        bool accepted
+    )
+    {
+        var h = new Harness();
+        h.Customer.Update(
+            role: role,
+            status: active ? ActivationStatus.Active : ActivationStatus.Inactive
+        );
+        h.Customer.Disabled = disabled;
+        var preview = await h.Preview();
+        h.AssertReadOnly();
+        var create = await h.Create();
+        Assert.Equal(accepted, preview.IsSuccess);
+        Assert.Equal(accepted, create.IsSuccess);
+        if (!accepted)
+        {
+            Assert.Equal(404, preview.Error!.Status);
+            Assert.Equal(preview.Error.Title, create.Error!.Title);
+            Assert.Null(h.Persisted);
+            h.Unit.Verify(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
+    }
+
+    [Theory]
     [InlineData(false, 0, 0)]
     [InlineData(true, 50, 8)]
     [InlineData(false, 15, 12)]
@@ -168,6 +202,8 @@ public class CashierReliabilityTests
     [InlineData("CUSTOMER", true, false, 200)]
     [InlineData("CUSTOMER", false, false, 404)]
     [InlineData("STAFF", true, false, 404)]
+    [InlineData("MANAGER", true, false, 404)]
+    [InlineData("ADMIN", true, false, 404)]
     [InlineData("CUSTOMER", true, true, 404)]
     public async Task CustomerLookup_ReturnsOnlyActiveCustomers(
         string role,
@@ -270,6 +306,12 @@ public class CashierReliabilityTests
         public Order? Persisted { get; private set; }
         public int Claims { get; private set; }
         public bool ClaimSucceeds { get; set; } = true;
+        public User Customer { get; } =
+            new("Customer", null, "0901234567", "CUSTOMER", "C501")
+            {
+                Id = 501,
+                Status = ActivationStatus.Active,
+            };
         private readonly OrgSetting settings;
 
         public Harness(bool fixedDiscount = false, decimal discount = 0, int vat = 0)
@@ -324,16 +366,7 @@ public class CashierReliabilityTests
                     },
                 ],
             };
-            var users = ReadRepository(
-                new[]
-                {
-                    new User("Customer", null, "0901234567", "CUSTOMER", "C501")
-                    {
-                        Id = 501,
-                        Status = ActivationStatus.Active,
-                    },
-                }
-            );
+            ReadRepository(new[] { Customer });
             ReadRepository(new[] { Tariff });
             ReadRepository(Prices);
             ReadRepository(new[] { Voucher });
@@ -444,7 +477,7 @@ public class CashierReliabilityTests
     }
 
     // Runs the real query expressions and projections without a database; writes are rejected by default.
-    private sealed class AsyncRows<T> : EnumerableQuery<T>, IAsyncEnumerable<T>, IQueryable<T>
+    internal sealed class AsyncRows<T> : EnumerableQuery<T>, IAsyncEnumerable<T>, IQueryable<T>
     {
         private readonly Func<int>? write;
 

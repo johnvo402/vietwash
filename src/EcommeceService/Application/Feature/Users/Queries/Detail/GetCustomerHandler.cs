@@ -1,13 +1,12 @@
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Rules;
 using Application.Feature.Orders.Common;
 using Contracts.ApiWrapper;
 using Contracts.Application.Common.Exceptions;
 using Contracts.Common.Messages;
-using Domain.Aggregates.Enums;
 using Domain.Aggregates.Users;
-using Infrastructure.Constants;
 using Mediator;
 
 namespace Application.Features.Users.Queries.Detail;
@@ -26,11 +25,7 @@ public sealed class GetCustomerHandler(IUnitOfWork unitOfWork, ICurrentAccount c
         var customer = await unitOfWork
             .Repository<User>()
             .FindByConditionAsync(
-                x =>
-                    x.Id == request.Id
-                    && x.Role == ROLE.CUSTOMER
-                    && x.Status == ActivationStatus.Active
-                    && !x.Disabled,
+                CustomerEligibility.ForId(request.Id),
                 x => new GetCustomerResponse
                 {
                     Id = x.Id,

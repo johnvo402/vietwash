@@ -1,0 +1,22 @@
+{
+  "AllowedHosts": "*",
+  "Logging": {"LogLevel": {"Default": "Information", "Microsoft.AspNetCore": "Warning"}},
+  "ReverseProxy": {
+    "Routes": {
+      "auth": {"ClusterId": "auth-cluster", "Match": {"Path": "/auth/{**catch-all}"}},
+      "ecommerce": {"ClusterId": "ecommerce-cluster", "RateLimiterPolicy": "customPolicy", "Match": {"Path": "/ecommerce/{**catch-all}"}},
+      "project": {"ClusterId": "project-cluster", "RateLimiterPolicy": "customPolicy", "Match": {"Path": "/project/{**catch-all}"}},
+      "finance": {"ClusterId": "finance-cluster", "RateLimiterPolicy": "customPolicy", "Match": {"Path": "/finance/{**catch-all}"}},
+      "notification": {"ClusterId": "notification-cluster", "Match": {"Path": "/notification/{**catch-all}"}},
+      "image": {"ClusterId": "image-cluster", "Match": {"Path": "/image/{**catch-all}"}, "Transforms": [{"PathRemovePrefix": "/image"}]}
+    },
+    "Clusters": {
+      "auth-cluster": {"Destinations": {"auth": {"Address": "http://auth:8080/"}}},
+      "ecommerce-cluster": {"Destinations": {"ecommerce": {"Address": "http://ecommerce:8080/"}}},
+      "project-cluster": {"Destinations": {"project": {"Address": "http://project:8080/"}}},
+      "finance-cluster": {"Destinations": {"finance": {"Address": "http://finance:8080/"}}},
+      "notification-cluster": {"Destinations": {"notification": {"Address": "http://notification:8080/"}}},
+      "image-cluster": {"Destinations": {"image": {"Address": "http://minio:9000/"}}}
+    }
+  }
+}

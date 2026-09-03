@@ -8,6 +8,8 @@ const withPwa = withPWA({
   dest: "public",
   register: true,
   skipWaiting: true,
+  // App Router's build manifest is server-only, not a public precache asset.
+  buildExcludes: [/app-build-manifest\.json$/],
   disable: process.env.NODE_ENV === "development",
 });
 
@@ -114,7 +116,11 @@ const contentSecurityPolicy = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
   images: {
+    // Signed same-origin media is served directly by the edge /image route.
+    // Avoid the standalone server trying to optimize it through its own /image.
+    unoptimized: !process.env.NEXT_PUBLIC_API_URL,
     remotePatterns,
   },
   async headers() {

@@ -2,7 +2,7 @@ import * as signalR from "@microsoft/signalr";
 
 const connections = new Map<string, signalR.HubConnection>();
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") ?? "";
 const publicClientId = process.env.NEXT_PUBLIC_CLIENT_ID;
 const platform = process.env.NEXT_PUBLIC_PLATFORM;
 

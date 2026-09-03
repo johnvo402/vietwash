@@ -1,12 +1,12 @@
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Common.Rules;
 using Application.Feature.Orders.Common;
 using Contracts.ApiWrapper;
 using Contracts.Application.Common.Exceptions;
 using Contracts.Common.Messages;
 using Contracts.Infrastructure.Common;
-using Domain.Aggregates.Enums;
 using Domain.Aggregates.Users;
 using Mediator;
 
@@ -36,7 +36,7 @@ public sealed class PreviewOrderHandler(
             !await unitOfWork
                 .Repository<User>()
                 .AnyAsync(
-                    x => x.Id == request.CustomerId && x.Status == ActivationStatus.Active,
+                    CustomerEligibility.ForId(request.CustomerId),
                     cancellationToken
                 )
         )

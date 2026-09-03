@@ -1,45 +1,38 @@
 services:
   auth:
-    container_name: auth
     image: auth
-    ports:
+    expose:
       - "8080"
     restart: always
   ecommerce:
-    container_name: ecommerce
     image: ecommerce
-    ports:
+    expose:
       - "8080"
     restart: always
   project:
-    container_name: project
     image: project
-    ports:
+    expose:
       - "8080"
     restart: always
 
   gateway:
-    container_name: gateway
     image: gateway
-    ports:
-      - "80:8080"
+    expose:
+      - "8080"
     restart: always
   gateway-2:
-    container_name: gateway-2
     image: gateway-2
-    ports:
+    expose:
       - "8080"
     restart: always
 
   finance:
-    container_name: finance
     image: finance
-    ports:
+    expose:
       - "8080"
     restart: always
   notification:
-    container_name: notification
     image: notification
-    ports:
+    expose:
       - "8080"
     restart: always

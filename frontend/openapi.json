@@ -1252,7 +1252,7 @@
         "tags": [
           "Client"
         ],
-        "summary": "Create voucher",
+        "summary": "Check voucher eligibility",
         "parameters": [
           {
             "name": "id",

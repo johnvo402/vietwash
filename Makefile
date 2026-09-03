@@ -17,7 +17,6 @@ export
 
 rwildcard = $(foreach entry,$(wildcard $1*),$(if $(filter bin obj,$(notdir $(entry))),,$(call rwildcard,$(entry)/,$2) $(filter $(subst *,%,$2),$(entry))))
 UNIT_TEST_PROJECTS := $(sort $(call rwildcard,tests/UnitTest/,*.csproj))
-STAGING_COMPOSE := docker compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.staging.yaml
 
 .PHONY: all help migration update deploy publish test run status dev dev-build staging clean external down stop ssh backup restore sql sql_to_server frontend-install frontend-dev frontend-generate frontend-build frontend-check backend-restore backend-build backend-test backend-test-all check
 
@@ -89,8 +88,7 @@ dev-build:
 	docker compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml up -d --build ${SERVICE}
 
 staging:
-	$(STAGING_COMPOSE) pull $(SERVICE)
-	$(STAGING_COMPOSE) up -d --no-build $(SERVICE)
+	./scripts/deploy.sh $(SERVICE)
 # Mục để tắt Docker container và xóa volume
 clean:
 	@echo "Stopping Docker containers and removing volumes..."

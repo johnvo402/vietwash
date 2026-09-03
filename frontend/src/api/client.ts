@@ -14,7 +14,8 @@ import {
   useAuth,
 } from "@/hooks/use-auth";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+// An explicit empty base prevents the generated client's localhost fallback.
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") ?? "";
 const publicClientId = process.env.NEXT_PUBLIC_CLIENT_ID;
 const platform = process.env.NEXT_PUBLIC_PLATFORM;
 
@@ -36,6 +37,7 @@ let refreshPromise: Promise<Credentials> | null = null;
 let sessionExpirationHandled = false;
 
 const configuration = new Configuration({
+  basePath: BASE_URL,
   accessToken: async () => useAuth.getState().credentials?.token ?? "",
   baseOptions: {
     headers: defaultHeaders,

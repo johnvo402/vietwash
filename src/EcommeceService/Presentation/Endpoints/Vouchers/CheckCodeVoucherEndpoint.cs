@@ -16,15 +16,15 @@ namespace Presentation.Endpoints.Vouchers
         >
     {
         [HttpGet(Router.VoucherRoute.CheckCode)]
-        [SwaggerOperation(Tags = [Router.VoucherRoute.Tags], Summary = "Create voucher")]
-        [AuthorizeBy]
+        [SwaggerOperation(Tags = [Router.VoucherRoute.Tags], Summary = "Check voucher eligibility")]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF, CUSTOMER")]
         public override async Task<ActionResult<ApiResponse<CheckCodeResponse>>> HandleAsync(
             CheckCodeQuery request,
             CancellationToken cancellationToken = default
         )
         {
-            var user = await sender.Send(request, cancellationToken);
-            return user.ToCreatedResult();
+            var result = await sender.Send(request, cancellationToken);
+            return result.ToActionResult();
         }
     }
 }
