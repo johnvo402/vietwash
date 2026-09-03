@@ -4,7 +4,6 @@ using Application.Jobs;
 using Contracts.Application.Common.Interfaces.Services.Notifications;
 using Contracts.Dtos.Requests;
 using Domain.Aggregates.Equipments;
-using Domain.Aggregates.Equipments.Enums;
 using Domain.Aggregates.Inventories;
 using Domain.Aggregates.Inventories.Enums;
 using Domain.Aggregates.Inventories.Events;
@@ -82,28 +81,8 @@ public sealed class InventoryDocumentCompletedHandler
         CancellationToken cancellationToken
     )
     {
-        // Create equipment entries
-        foreach (var supplying in document.EquipmentSupplyings)
-        {
-            for (int i = 0; i < supplying.Quantity; i++)
-            {
-                var code = i == 0 ? supplying.Code : $"{supplying.Code}{i}";
-                var equipment = new Equipment(
-                    branchId: document.BranchId ?? 1,
-                    name: supplying.Name,
-                    code: code,
-                    price: supplying.Price,
-                    status: EquipmentStatus.Active,
-                    description: document.Code,
-                    lastMaintenanceOrRepairDate: DateTimeOffset.UtcNow,
-                    nextMaintenanceDate: DateTimeOffset.UtcNow.AddMonths(6)
-                )
-                {
-                    Image = supplying.Image,
-                };
-                newEquipments.Add(equipment);
-            }
-        }
+        // Keep the existing runtime fallback; development seed validates its branch explicitly.
+        newEquipments.AddRange(InventoryEquipmentFactory.Create(document, DateTimeOffset.UtcNow, fallbackBranchId: 1));
 
         // Combine supplyings into a common structure for grouping
         var supplierItems = document

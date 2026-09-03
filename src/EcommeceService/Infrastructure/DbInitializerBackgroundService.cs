@@ -24,7 +24,7 @@ public class DbInitializerBackgroundService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        if (_env.IsProduction())
+        if (!_env.IsDevelopment())
             return;
 
         await Task.Delay(TimeSpan.FromSeconds(60), stoppingToken);
@@ -38,7 +38,7 @@ public class DbInitializerBackgroundService : BackgroundService
             using var scope = _serviceProvider.CreateScope();
             var sp = scope.ServiceProvider;
 
-            await DbInitializer.InitializeAsync(sp);
+            await DbInitializer.InitializeAsync(sp, stoppingToken);
 
             _logger.LogInformation("DbInitializer finished.");
         }

@@ -1,17 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Common.Interfaces.Services;
-using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Feature.Common.Projections.Inventories;
-using Application.Feature.InventoryDocuments.Commands.Create;
+using Application.Feature.Orders.Command.UpdateStatus;
 using Contracts.Application.Common.Interfaces.Services.Encryptions;
-using Contracts.Dtos.Models;
 using Contracts.Dtos.Requests;
 using Contracts.Utils;
 using Domain.Aggregates.Enums;
@@ -21,7 +17,6 @@ using Domain.Aggregates.Inventories;
 using Domain.Aggregates.Inventories.Enums;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
-using Domain.Aggregates.Orders.Specifications;
 using Domain.Aggregates.Products;
 using Domain.Aggregates.Services;
 using Domain.Aggregates.Services.Specifications;
@@ -31,13 +26,11 @@ using Domain.Aggregates.Users;
 using Domain.Aggregates.Users.Specifications;
 using Domain.Aggregates.Vouchers;
 using Infrastructure.Constants;
-using Mediator;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 using Specification;
-using Wangkanai.Extensions;
 
 namespace Infrastructure.Data;
 
@@ -68,13 +61,15 @@ public class DbInitializer
         CancellationToken cancellationToken = default
     )
     {
+        if (!provider.GetRequiredService<IHostEnvironment>().IsDevelopment())
+            return;
+
         var unitOfWork = provider.GetRequiredService<IUnitOfWork>();
         var encryption = provider.GetRequiredService<IEncryptionService>();
         var qrGenerator = provider.GetRequiredService<IQrGenerator>();
         var logger = provider.GetRequiredService<ILogger>();
-        var media = provider.GetRequiredService<IMediaUpdateService>();
 
-        using var dbTransaction = await unitOfWork.BeginTransactionAsync();
+        using var dbTransaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
 
         try
         {
@@ -132,16 +127,8 @@ public class DbInitializer
                 logger.Information("Hoàn tất khởi tạo dữ liệu sản phẩm chi nhánh.");
             }
 
-            if (
-                !await unitOfWork
-                    .Repository<InventoryDocument>()
-                    .AnyAsync(cancellationToken: cancellationToken)
-            )
-            {
-                logger.Information("Bắt đầu khởi tạo phiếu nhập kho...");
-                await InitializeInventoryDocumentsAsync(unitOfWork, logger, cancellationToken);
-                logger.Information("Hoàn tất khởi tạo phiếu nhập kho.");
-            }
+            await InitializeInventoryDocumentsAsync(unitOfWork, logger, cancellationToken);
+            await EnsureSeedEquipmentsAsync(unitOfWork, logger, cancellationToken);
             if (
                 !await unitOfWork
                     .Repository<Service>()
@@ -149,7 +136,7 @@ public class DbInitializer
             )
             {
                 logger.Information("Bắt đầu khởi tạo dữ liệu dịch vụ...");
-                await InitializeServicesAsync(unitOfWork, logger, media, cancellationToken);
+                await InitializeServicesAsync(unitOfWork, logger, cancellationToken);
                 logger.Information("Hoàn tất khởi tạo dữ liệu dịch vụ.");
             }
             if (
@@ -177,12 +164,20 @@ public class DbInitializer
                 logger.Information("Hoàn tất khởi tạo dữ liệu đơn hàng.");
             }
 
+            await ValidateSeedProductStockAsync(unitOfWork, cancellationToken);
             await unitOfWork.CommitAsync(cancellationToken);
         }
         catch (Exception ex)
         {
-            await unitOfWork.RollbackAsync(cancellationToken);
             logger.Error(ex, "Lỗi xảy ra trong khi khởi tạo dữ liệu: {Message}", ex.Message);
+            try
+            {
+                await unitOfWork.RollbackAsync(CancellationToken.None);
+            }
+            catch (Exception rollbackError)
+            {
+                logger.Error(rollbackError, "Development seed rollback failed; preserving the original seed error.");
+            }
             throw;
         }
     }
@@ -374,7 +369,6 @@ public class DbInitializer
     private static async Task InitializeServicesAsync(
         IUnitOfWork unitOfWork,
         ILogger logger,
-        IMediaUpdateService media,
         CancellationToken cancellationToken
     )
     {
@@ -396,7 +390,7 @@ public class DbInitializer
         ).ToDictionary(u => u.Name, u => u);
 
         if (user == null)
-            throw new InvalidOperationException("Admin user not found.");
+            throw new InvalidOperationException("Development seed requires an Ecommerce admin projection from Auth synchronization. Start Auth/Project and synchronize users and branch assignments before retrying.");
         if (!categories.Any() || !units.Any())
             throw new InvalidOperationException("Missing Category, Unit or Product data.");
 
@@ -675,12 +669,6 @@ public class DbInitializer
             ),
         };
 
-        var imageDir = Path.Combine(
-            AppContext.BaseDirectory,
-            "Resources",
-            "SeedImages",
-            "Services"
-        );
         var serviceEntities = new List<Service>();
         var random = new Random();
 
@@ -695,57 +683,22 @@ public class DbInitializer
             }
 
             var slug = Generator.GenerateSlug(svc.Name);
+            // Optional images are not a prerequisite for development data; no remote upload during seed.
             string? imageUrl = null;
-            if (Directory.Exists(imageDir))
-            {
-                var matchingFile = Directory
-                    .EnumerateFiles(imageDir, "*.png", SearchOption.AllDirectories)
-                    .Concat(
-                        Directory.EnumerateFiles(imageDir, "*.jpg", SearchOption.AllDirectories)
-                    )
-                    .FirstOrDefault(f =>
-                        Path.GetFileNameWithoutExtension(f)
-                            .Equals(slug, StringComparison.OrdinalIgnoreCase)
-                    );
-                if (matchingFile != null)
-                {
-                    try
-                    {
-                        var formFile = GenerateIFormFile(matchingFile);
-                        var key = $"{MediaType.Image}s/{formFile.FileName}";
-                        await media.UploadMediaAsync(formFile, key);
-                        imageUrl = key;
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.Warning(
-                            ex,
-                            $"Lỗi upload ảnh cho dịch vụ '{svc.Name}': {ex.Message}"
-                        );
-                    }
-                }
-                else
-                {
-                    logger.Warning($"Không tìm thấy ảnh cho dịch vụ '{svc.Name}'.");
-                }
-            }
-            else
-            {
-                logger.Warning($"Thư mục ảnh '{imageDir}' không tồn tại.");
-            }
             for (int i = 0; i < branchIds.Length; i++)
             {
                 var products = (
                     await unitOfWork
                         .Repository<BranchProduct>()
-                        .QueryAsync(x => x.BranchId == (i + 1))
+                        .QueryAsync(x => x.BranchId == branchIds[i])
+                        .Include(x => x.UnitRelations)
                         .ToListAsync(cancellationToken)
                 ).ToDictionary(p => p.Name, p => p);
                 if (!products.Any())
                     throw new InvalidOperationException("Missing Product data.");
                 var service = new Service(
                     categoryId: categoryId,
-                    branchId: i + 1,
+                    branchId: branchIds[i],
                     name: svc.Name,
                     status: ActivationStatus.Active,
                     description: svc.Description,
@@ -808,10 +761,7 @@ public class DbInitializer
                     {
                         if (!products.TryGetValue(productName, out var branchProduct))
                         {
-                            logger.Warning(
-                                $"Sản phẩm '{productName}' không tồn tại để thêm ServiceResource cho dịch vụ '{svc.Name}'."
-                            );
-                            continue;
+                            throw new InvalidOperationException($"Seed service '{svc.Name}' is missing product '{productName}' in Branch {branchIds[i]}.");
                         }
                         var unitRelationEntity = branchProduct.UnitRelations.FirstOrDefault(x =>
                             resUnitName.Equals(x.Name, StringComparison.OrdinalIgnoreCase)
@@ -819,10 +769,7 @@ public class DbInitializer
 
                         if (unitRelationEntity == null)
                         {
-                            logger.Warning(
-                                $"Không tìm thấy đơn vị '{resUnitName}' cho sản phẩm '{productName}' trong dịch vụ '{svc.Name}'."
-                            );
-                            continue;
+                            throw new InvalidOperationException($"Seed service '{svc.Name}' has no material unit '{resUnitName}' for '{productName}' in Branch {branchIds[i]}.");
                         }
 
                         var serviceResource = new ServiceResource
@@ -977,7 +924,7 @@ public class DbInitializer
                         minute: random.Next(0, 60),
                         second: random.Next(0, 60),
                         offset: TimeSpan.FromHours(7)
-                    ),
+                    ).ToUniversalTime(),
                 };
 
                 foreach (var unitInfo in item.Units)
@@ -1055,6 +1002,7 @@ public class DbInitializer
                 {
                     s.Id,
                     s.Name,
+                    s.BranchId,
                     UnitRelations = s
                         .UnitRelations.Where(x =>
                             x.Status == ActivationStatus.Active && x.Price > 0
@@ -1091,7 +1039,7 @@ public class DbInitializer
             (
                 "Bảng giá chung",
                 new DateTimeOffset(2024, 10, 1, 0, 0, 0, TimeSpan.Zero),
-                new DateTimeOffset(2026, 12, 31, 23, 59, 59, TimeSpan.Zero)
+                DateTimeOffset.UtcNow.AddYears(1)
             ),
             (
                 "Bảng giá tháng 8",
@@ -1115,7 +1063,7 @@ public class DbInitializer
                 var tariff = new Tariff(
                     name: name,
                     branchId: branchId,
-                    status: startAt <= DateTimeOffset.Now
+                    status: startAt <= DateTimeOffset.UtcNow
                         ? ActivationStatus.Active
                         : ActivationStatus.Inactive,
                     startAt: startAt,
@@ -1125,7 +1073,7 @@ public class DbInitializer
                     CreatedAt = startAt.AddDays(-1),
                 };
 
-                foreach (var service in validServices)
+                foreach (var service in validServices.Where(s => s.BranchId == branchId))
                 {
                     var unitRelations = service
                         .UnitRelations.OrderBy(ur => ur.ProcessingTime)
@@ -1140,7 +1088,7 @@ public class DbInitializer
                                 ServiceId = service.Id,
                                 UnitRelationId = ur.Id,
                                 Price = ur.Price * discount,
-                                CreatedAt = DateTimeOffset.Now,
+                                CreatedAt = DateTimeOffset.UtcNow,
                             }
                         );
                         serviceTariffsCreated++;
@@ -1275,403 +1223,109 @@ public class DbInitializer
         IQrGenerator barcode
     )
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        long[] branchIds = { 1, 2, 3 };
-        var customerResult = await unitOfWork
-            .DynamicReadOnlyRepository<User>()
-            .ListAsync(
-                new ListUserSpecification([ROLE.CUSTOMER]),
-                new QueryParamRequest { },
-                cancellationToken
-            );
-        var staffResult = await unitOfWork
-            .DynamicReadOnlyRepository<User>()
-            .ListAsync(
-                new ListUserSpecification([ROLE.STAFF]),
-                new QueryParamRequest { },
-                SelectOnlyId(),
-                cancellationToken
-            );
+        var customers = await unitOfWork.Repository<User>()
+            .QueryAsync(x => x.Role == ROLE.CUSTOMER && !x.Disabled && x.Status == ActivationStatus.Active)
+            .OrderBy(x => x.Id).ToListAsync(cancellationToken);
+        var staff = await unitOfWork.Repository<User>()
+            .QueryAsync(x => x.Role == ROLE.STAFF && !x.Disabled && x.Status == ActivationStatus.Active)
+            .Include(x => x.BranchUsers).OrderBy(x => x.Id).ToListAsync(cancellationToken);
+        if (customers.Count == 0)
+            throw new InvalidOperationException("Development seed requires an active Ecommerce customer from Auth synchronization.");
 
-        foreach (var branchId in branchIds)
+        var equipments = await unitOfWork.Repository<Equipment>().QueryAsync()
+            .ToListAsync(cancellationToken);
+        var reserved = equipments.Where(x => x.Using).Select(x => x.Id).ToHashSet();
+        var seededOrders = new List<Order>();
+        OrderStatus[] states = [
+            OrderStatus.Completed, OrderStatus.Completed,
+            OrderStatus.Processed, OrderStatus.Processed,
+            OrderStatus.InProgress, OrderStatus.InProgress, OrderStatus.Pending
+        ];
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+        foreach (long branchId in DevelopmentSeedPolicy.BranchIds)
         {
-            var tariffChung = await unitOfWork
-                .Repository<Tariff>()
-                .QueryAsync(x =>
-                    x.Status == ActivationStatus.Active
-                    && x.Name == "Bảng giá chung"
-                    && x.BranchId == branchId
-                )
-                .FirstOrDefaultAsync(cancellationToken);
-            var services = await unitOfWork
-                .DynamicReadOnlyRepository<Service>()
-                .ListAsync(
-                    new ListServiceSpecification(),
-                    new QueryParamRequest { },
-                    s => new
-                    {
-                        s.Id,
-                        s.Name,
-                        UnitRelations = s
-                            .UnitRelations.Where(x =>
-                                x.Status.Equals(ActivationStatus.Active) && x.Price > 0
-                            )
-                            .Select(x => new
-                            {
-                                x.Id,
-                                x.UnitId,
-                                x.Name,
-                                x.Price,
-                                x.ProcessingTime,
-                                x.Status,
-                                x.BaseUnit,
-                                x.Multiple,
-                                AsUnitRelation = x
-                                    .AsUnitRelation.Select(sr => new
-                                    {
-                                        sr.Quantity,
-                                        BranchProductId = sr.BranchProduct.Id,
-                                        UnitProductId = sr.UnitProductId,
-                                        UnitProductPrice = sr.UnitProduct.Price, // Price from UnitRelation (UnitProduct)
-                                    })
-                                    .ToList(),
-                            })
-                            .ToList(),
-                    },
-                    cancellationToken
-                );
-            var equipments = await unitOfWork
-                .Repository<Equipment>()
-                .QueryAsync(e => e.Status == EquipmentStatus.Active)
-                .ToListAsync(cancellationToken);
-            var vouchers = await unitOfWork
-                .Repository<Voucher>()
-                .QueryAsync(v => v.Status == ActivationStatus.Active)
-                .ToListAsync(cancellationToken);
+            var branchStaff = staff.FirstOrDefault(x => x.BranchUsers!.Any(b => b.BranchId == branchId))
+                ?? throw new InvalidOperationException($"Development seed requires active staff assigned to Branch {branchId}.");
+            var tariff = await unitOfWork.Repository<Tariff>()
+                .QueryAsync(x => x.BranchId == branchId && x.Name == "Bảng giá chung" && x.Status == ActivationStatus.Active)
+                .Include(x => x.ServiceTariffs).FirstOrDefaultAsync(cancellationToken)
+                ?? throw new InvalidOperationException($"No active common seed tariff exists for Branch {branchId}.");
+            var services = await unitOfWork.Repository<Service>()
+                .QueryAsync(x => x.BranchId == branchId && x.Status == ActivationStatus.Active && !x.Disable)
+                .Include(x => x.UnitRelations).OrderBy(x => x.Name).ToListAsync(cancellationToken);
+            var choices = services.SelectMany(s => s.UnitRelations
+                .Where(u => u.Status == ActivationStatus.Active && u.Price > 0)
+                .Select(u => new
+                {
+                    Service = s,
+                    Unit = u,
+                    Price = tariff.ServiceTariffs
+                    .FirstOrDefault(t => t.ServiceId == s.Id && t.UnitRelationId == u.Id)?.Price
+                }))
+                .Where(x => x.Price > 0).ToList();
+            if (choices.Count == 0)
+                throw new InvalidOperationException($"No usable seeded service/tariff exists for Branch {branchId}.");
 
-            if (
-                !customerResult.Any()
-                || !staffResult.Any()
-                || tariffChung == null
-                || !services.Any()
-                || !equipments.Any()
-            )
+            var random = new Random(100 + (int)branchId);
+            for (int index = 0; index < states.Length; index++)
             {
-                logger.Warning(
-                    "Missing data for customers, staff, common tariff, services, or equipment to initialize orders."
-                );
-                return;
-            }
-
-            var random = new Random();
-            var startDate = new DateTime(2025, 1, 1);
-            var endDate = new DateTime(2025, 8, 13);
-            var currentDate = startDate;
-            var orders = new List<Order>();
-            int orderIndex = 0;
-            var paymentMethods = Enum.GetValues(typeof(PaymentMethod))
-                .Cast<PaymentMethod>()
-                .ToArray();
-            const int vatPercent = 10;
-
-            while (currentDate <= endDate)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                int ordersToday;
-                if (currentDate.Month == 1)
+                var choice = choices[index % choices.Count];
+                var createdAt = now.AddDays(index - states.Length + 1);
+                const int quantity = 3;
+                const int vat = 10;
+                decimal amount = choice.Price!.Value * quantity;
+                decimal vatAmount = amount * vat / 100;
+                string code = $"DEV-OD-B{branchId}-{index + 1:D2}";
+                // These are explicit historical fixtures, not operational transitions:
+                // do not emit accounting, invoice, notification or voucher events.
+                var order = new Order(branchId, branchStaff.Id, code, amount, amount + vatAmount,
+                    states[index], vat: vat, vatAmount: vatAmount, customerId: customers[index % customers.Count].Id,
+                    tariffId: tariff.Id, note: DevelopmentSeedPolicy.OrderNote, deliveryTime: createdAt.AddDays(2))
                 {
-                    ordersToday = orderIndex < 50 ? random.Next(5, 11) : 0;
-                }
-                else
+                    CreatedAt = createdAt,
+                    CodeConfirm = barcode.GenerateQrBase64(encryption.Encrypt(code)),
+                    PaymentMethod = states[index] == OrderStatus.Completed ? PaymentMethod.Cash : null,
+                    OrderDate = states[index] == OrderStatus.Completed ? createdAt.AddDays(1) : null,
+                };
+                order.OrderItems.Add(new OrderItem
                 {
-                    ordersToday = random.Next(5, 10);
-                }
-                ordersToday /= (int)branchId;
-
-                for (int d = 0; d < ordersToday && (currentDate.Month != 1 || orderIndex < 50); d++)
-                {
-                    var createdAt = new DateTimeOffset(
-                        currentDate.Year,
-                        currentDate.Month,
-                        currentDate.Day,
-                        random.Next(0, 24),
-                        random.Next(0, 60),
-                        random.Next(0, 60),
-                        TimeSpan.FromHours(7)
-                    );
-
-                    var customer = customerResult[orderIndex % customerResult.Count];
-                    long staffId = staffResult[orderIndex % staffResult.Count].Id;
-                    int itemCount = random.Next(1, 6);
-                    var orderItems = new List<OrderItem>();
-                    decimal amount = 0;
-
-                    for (int j = 0; j < itemCount; j++)
+                    ServiceId = choice.Service.Id,
+                    ServiceName = choice.Service.Name,
+                    UnitRelationId = choice.Unit.Id,
+                    UnitRelationName = choice.Unit.Name,
+                    ProcessingTime = (int)choice.Unit.ProcessingTime,
+                    Quantity = quantity,
+                    Price = choice.Price.Value,
+                    UnitPrice = choice.Price.Value,
+                    CreatedAt = createdAt,
+                });
+                foreach (Equipment equipment in DevelopmentSeedPolicy.SelectEquipment(branchId, order.Status, equipments, reserved, random))
+                    order.OrderEquipments.Add(new OrderEquipment
                     {
-                        var serviceIndex = random.Next(0, services.Count);
-                        var service = services[serviceIndex];
-                        var unitRelations = service.UnitRelations.ToList();
-                        if (!unitRelations.Any())
-                        {
-                            logger.Warning($"No unit_relation found for service ID {service.Id}.");
-                            continue;
-                        }
-
-                        var unitRelationIndex = random.Next(0, unitRelations.Count);
-                        var unitRelation = unitRelations[unitRelationIndex];
-                        int quantity = random.Next(1, 6);
-                        decimal unitPrice = unitRelation.Price;
-
-                        var orderItem = new OrderItem
-                        {
-                            ServiceId = service.Id,
-                            UnitRelationId = unitRelation.Id,
-                            Price = unitPrice,
-                            Quantity = quantity,
-                            CreatedAt = createdAt,
-                            UnitRelationName = unitRelation.Name,
-                            ProcessingTime = (int)unitRelation.ProcessingTime,
-                            ServiceName = service.Name,
-                            UnitPrice = unitPrice,
-                        };
-
-                        orderItems.Add(orderItem);
-                        amount += unitPrice * quantity;
-                    }
-
-                    if (!orderItems.Any())
-                    {
-                        logger.Warning($"No OrderItem created for order {orderIndex + 1}.");
-                        continue;
-                    }
-
-                    bool applyVoucher = random.Next(0, 10) < 3;
-                    Voucher? selectedVoucher = null;
-                    if (applyVoucher)
-                    {
-                        var applicableVouchers = vouchers
-                            .Where(v => createdAt >= v.StartAt && createdAt <= v.EndAt)
-                            .ToList();
-                        if (applicableVouchers.Any())
-                        {
-                            selectedVoucher = applicableVouchers[
-                                random.Next(0, applicableVouchers.Count)
-                            ];
-                        }
-                    }
-
-                    bool discountFixed = selectedVoucher?.DiscountFixed ?? false;
-                    decimal discountValue = selectedVoucher?.DiscountValue ?? 0m;
-                    decimal point = random.Next(0, 10);
-
-                    decimal tempTotal = amount;
-                    if (point > 0)
-                    {
-                        tempTotal -= point * 10;
-                    }
-                    if (!discountFixed)
-                    {
-                        tempTotal -= (tempTotal * discountValue / 100);
-                    }
-                    else
-                    {
-                        tempTotal -= discountValue;
-                    }
-                    decimal vatAmount = tempTotal * vatPercent / 100;
-                    decimal total = tempTotal + vatAmount;
-
-                    var orderEquipments = new List<OrderEquipment>();
-                    int eqCount = random.Next(1, 3);
-                    for (int k = 0; k < eqCount; k++)
-                    {
-                        var eqIndex = random.Next(0, equipments.Count);
-                        var equipment = equipments[eqIndex];
-                        orderEquipments.Add(
-                            new OrderEquipment
-                            {
-                                EquipmentId = equipment.Id,
-                                EquipmentName = equipment.Name,
-                                CreatedAt = createdAt,
-                            }
-                        );
-                    }
-
-                    string code = Generator.GenerateCode("OD", 6);
-                    var deliveryTime = createdAt.AddDays(random.Next(1, 4));
-                    var order = new Order(
-                        branchId: tariffChung.BranchId,
-                        staffId: staffId,
-                        code: code,
-                        amount: amount,
-                        total: total,
-                        status: OrderStatus.Pending,
-                        customerId: customer.Id,
-                        tariffId: tariffChung.Id,
-                        deliveryTime: deliveryTime,
-                        voucherId: selectedVoucher?.Id,
-                        voucherCode: selectedVoucher?.Code,
-                        vat: vatPercent,
-                        vatAmount: vatAmount,
-                        discountFixed: discountFixed,
-                        discountValue: discountValue,
-                        point: point,
-                        note: random.Next(0, 2) == 0 ? null : $"{code}"
-                    )
-                    {
+                        EquipmentId = equipment.Id,
+                        EquipmentName = equipment.Name,
                         CreatedAt = createdAt,
-                        CodeConfirm = barcode.GenerateQrBase64(encryption.Encrypt(code)),
-                        PaymentMethod = paymentMethods[orderIndex % paymentMethods.Length],
-                        OrderDate = deliveryTime,
-                    };
-
-                    order.OrderItems.AddRangeSafe(orderItems);
-                    order.OrderEquipments.AddRangeSafe(orderEquipments);
-                    orders.Add(order);
-
-                    var issueLines = orderItems
-                        .SelectMany(oi =>
-                        {
-                            var unitRelation = services
-                                .SelectMany(s => s.UnitRelations)
-                                .FirstOrDefault(ur => ur.Id == oi.UnitRelationId);
-                            if (unitRelation == null)
-                            {
-                                logger.Warning(
-                                    $"No UnitRelation found for UnitRelation ID {oi.UnitRelationId}."
-                                );
-                                return Enumerable.Empty<IssueLine>();
-                            }
-
-                            if (!unitRelation.AsUnitRelation.Any())
-                            {
-                                logger.Warning(
-                                    $"No ServiceResource found for UnitRelation ID {oi.UnitRelationId}."
-                                );
-                                return Enumerable.Empty<IssueLine>();
-                            }
-
-                            return unitRelation.AsUnitRelation.Select(sr =>
-                            {
-                                decimal serviceFactor = unitRelation.BaseUnit
-                                    ? 1m
-                                    : (decimal)unitRelation.Multiple;
-                                decimal requireQty = sr.Quantity * serviceFactor * oi.Quantity;
-
-                                return new IssueLine(
-                                    sr.BranchProductId,
-                                    sr.UnitProductId, // Use UnitProductId for material unit
-                                    requireQty,
-                                    sr.UnitProductPrice
-                                );
-                            });
-                        })
-                        .GroupBy(x => new { x.BranchProductId, x.UnitRelationId })
-                        .Select(g => new IssueLine(
-                            g.Key.BranchProductId,
-                            g.Key.UnitRelationId,
-                            g.Sum(x => x.Quantity),
-                            g.First().Price
-                        ))
-                        .ToList();
-
-                    if (issueLines.Any())
-                    {
-                        decimal totalProductAmount = issueLines.Sum(x => x.Price * x.Quantity);
-                        var exportDocument = new InventoryDocument(
-                            code: Generator.GenerateCode("XH", 6),
-                            amount: totalProductAmount,
-                            type: InventoryType.Export,
-                            branchId: tariffChung.BranchId,
-                            note: $"Phiếu xuất cho đơn hàng #{code}"
-                        )
-                        {
-                            TransactionAt = createdAt,
-                            CreatedAt = createdAt,
-                        };
-
-                        exportDocument.ProductSupplyings.AddRangeSafe(
-                            issueLines
-                                .Select(x => new ProductSupplying
-                                {
-                                    ProductId = x.BranchProductId,
-                                    UnitRelationId = x.UnitRelationId,
-                                    Price = x.Price,
-                                    SupplierId = null,
-                                    Quantity = -x.Quantity,
-                                    CreatedAt = createdAt,
-                                })
-                                .ToList()
-                        );
-                        await unitOfWork
-                            .Repository<InventoryDocument>()
-                            .AddAsync(exportDocument, cancellationToken);
-                        await unitOfWork.SaveAsync(cancellationToken);
-                        exportDocument.UpdateStatus(InventoryStatus.Completed);
-                        await unitOfWork.SaveAsync(cancellationToken);
-                        logger.Information($"Created export inventory document for order {code}.");
-                    }
-                    else
-                    {
-                        logger.Warning(
-                            $"No materials required for order {code}. Skipping export document."
-                        );
-                    }
-
-                    orderIndex++;
-                }
-
-                currentDate = currentDate.AddDays(1);
-            }
-
-            try
-            {
-                logger.Information(
-                    $"Initialized {orderIndex} orders from 2025-01-01 to 2025-08-12."
-                );
-                await unitOfWork.Repository<Order>().AddRangeAsync(orders, cancellationToken);
-                await unitOfWork.SaveAsync(cancellationToken);
-                await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
-                var orderIds = orders.Select(o => o.Id).ToList();
-                var reloadedOrders = await unitOfWork
-                    .DynamicReadOnlyRepository<Order>()
-                    .ListAsync(
-                        new GetOrdersByIdsSpecification(orderIds),
-                        new QueryParamRequest { },
-                        cancellationToken
-                    );
-                int index = 1;
-                foreach (var item in reloadedOrders)
-                {
-                    logger.Information(
-                        $"Update Order {item.Code}: hoan thanh {(((decimal)index / (decimal)orderIndex) * 100).ToString("N2")}."
-                    );
-
-                    if (item != null)
-                    {
-                        item.TransitionTo(OrderStatus.InProgress);
-                        item.TransitionTo(OrderStatus.Processed);
-                        item.TransitionTo(OrderStatus.Completed, PaymentMethod.Cash);
-                    }
-                    index++;
-                }
-                await unitOfWork.Repository<Order>().UpdateRangeAsync(reloadedOrders);
-                await unitOfWork.SaveAsync(cancellationToken);
-            }
-            catch (DbUpdateException ex) when (ex.InnerException is Npgsql.PostgresException pgEx)
-            {
-                logger.Error(
-                    ex,
-                    "Database error while saving orders: {ErrorMessage}",
-                    pgEx.MessageText
-                );
-                throw;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, "Unexpected error while saving orders.");
-                throw;
+                    });
+                seededOrders.Add(order);
             }
         }
+        DevelopmentSeedPolicy.ValidateOrders(seededOrders, equipments);
+        await unitOfWork.Repository<Order>().AddRangeAsync(seededOrders, cancellationToken);
+        await unitOfWork.SaveAsync(cancellationToken);
+        foreach (Order order in seededOrders.Where(x => x.Status != OrderStatus.Pending))
+        {
+            // Reuse the existing resolver/stock validator/export factory and SourceOrderId idempotency.
+            var result = await OrderMaterialConsumption.ConsumeAsync(unitOfWork, order, cancellationToken);
+            if (!result.IsSuccess)
+                throw new InvalidOperationException($"Seed order {order.Code}: {result.ErrorMessage}");
+            if (result.ExportDocument is not null)
+            {
+                result.ExportDocument.CreatedAt = order.CreatedAt;
+                result.ExportDocument.TransactionAt = order.CreatedAt;
+            }
+            await unitOfWork.SaveAsync(cancellationToken);
+        }
+        logger.Information("Created {Count} branch-scoped development orders without operational events.", seededOrders.Count);
     }
 
     private static async Task InitializeInventoryDocumentsAsync(
@@ -1680,189 +1334,133 @@ public class DbInitializer
         CancellationToken cancellationToken
     )
     {
-        var suppliers = await unitOfWork.Repository<Supplier>().ListAsync(cancellationToken);
-        var units = await unitOfWork
-            .Repository<Domain.Aggregates.Services.Unit>()
-            .ListAsync(cancellationToken);
-
-        if (!suppliers.Any() || !units.Any())
+        var supplier = await unitOfWork.Repository<Supplier>().QueryAsync()
+            .OrderBy(x => x.Id).FirstOrDefaultAsync(cancellationToken)
+            ?? throw new InvalidOperationException("Development inventory seed requires a supplier.");
+        var existing = (await unitOfWork.Repository<InventoryDocument>()
+            .QueryAsync(x => x.Type == InventoryType.Import && x.Status == InventoryStatus.Completed)
+            .ToListAsync(cancellationToken)).Where(DevelopmentSeedPolicy.IsSeedImport).ToList();
+        var months = existing.Where(x => x.TransactionAt.HasValue)
+            .Select(x => (x.BranchId, x.TransactionAt!.Value.Year, x.TransactionAt.Value.Month)).ToHashSet();
+        var templates = new[]
         {
-            logger.Warning("Thiếu nhà cung cấp, sản phẩm hoặc đơn vị tính.");
-            return;
-        }
-
-        var supplier = suppliers.First();
-        long[] branchIds = { 1, 2, 3 };
-        // Tháng bắt đầu là tháng 1/2025
-        var startDate = new DateTime(2025, 1, 1);
-        var now = DateTime.Now;
-
-        // Danh sách thiết bị mẫu để nhập
-        var equipmentTemplates = new[]
-        {
-            new
-            {
-                Name = "Máy Giặt Công Nghiệp",
-                CodePrefix = "EQ",
-                UnitPrice = 20000000m,
-                InitialQuantity = 10,
-                Image = "may-giat.1.jpg",
-            },
-            new
-            {
-                Name = "Máy Sấy Công Nghiệp",
-                CodePrefix = "EQ",
-                UnitPrice = 15000000m,
-                InitialQuantity = 5,
-                Image = "may-say.1.jpg",
-            },
-            new
-            {
-                Name = "Bàn Ủi Điện",
-                CodePrefix = "EQ",
-                UnitPrice = 5000000m,
-                InitialQuantity = 2,
-                Image = "banui.jpg",
-            },
+            (Name: "Máy Giặt Công Nghiệp", Code: "WM", Price: 20000000m, Quantity: 10, Image: "may-giat.1.jpg"),
+            (Name: "Máy Sấy Công Nghiệp", Code: "DR", Price: 15000000m, Quantity: 5, Image: "may-say.1.jpg"),
+            (Name: "Bàn Ủi Điện", Code: "IR", Price: 5000000m, Quantity: 2, Image: "banui.jpg"),
         };
-
-        var random = new Random();
-
-        var currentMonth = new DateTime(startDate.Year, startDate.Month, 1);
-        var endMonth = new DateTime(now.Year, now.Month, 1);
-        foreach (var branchId in branchIds)
+        var firstMonth = new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        var now = DateTimeOffset.UtcNow;
+        foreach (long branchId in DevelopmentSeedPolicy.BranchIds)
         {
-            var products = await unitOfWork
-                .Repository<BranchProduct>()
-                .QueryAsync(x => x.BranchId == branchId)
-                .Include(x => x.UnitRelations)
-                .ToListAsync(cancellationToken);
-            ;
-
-            if (!products.Any())
+            var products = await unitOfWork.Repository<BranchProduct>()
+                .QueryAsync(x => x.BranchId == branchId && x.Status == ActivationStatus.Active && !x.Disable
+                    && DevelopmentSeedPolicy.ProductNames.Contains(x.Name)
+                    && x.Description == "Vật tư cửa hàng giặt ủi: " + x.Name)
+                .Include(x => x.UnitRelations).ToListAsync(cancellationToken);
+            if (products.Count == 0)
+                throw new InvalidOperationException($"No active seed products exist for Branch {branchId}.");
+            // Reset the month for EACH branch; an existing receipt owns its lines and is never duplicated.
+            for (var month = firstMonth; month <= now; month = month.AddMonths(1))
             {
-                logger.Warning("Thiếu sản phẩm");
-                return;
-            }
-            while (currentMonth <= endMonth)
-            {
-                bool isFirstMonth = currentMonth == startDate;
-
-                decimal totalProductAmount = 0;
-                var productSupplyings = new List<ProductSupplying>();
-
-                foreach (var product in products)
+                if (months.Contains((branchId, month.Year, month.Month)))
+                    continue;
+                var productLines = products.Select(product =>
                 {
-                    var unitRelation = product.UnitRelations.FirstOrDefault(r => r.BaseUnit);
-                    if (unitRelation == null)
+                    var unit = product.UnitRelations.FirstOrDefault(x => x.BaseUnit && x.Multiple == 1 && x.Status == ActivationStatus.Active)
+                        ?? throw new InvalidOperationException($"Seed product '{product.Name}' in Branch {branchId} has no active base unit.");
+                    return new ProductSupplying
                     {
-                        logger.Warning($"Sản phẩm {product.Name} chưa có đơn vị cơ bản.");
-                        continue;
-                    }
-
-                    int quantity = (isFirstMonth ? 100 : random.Next(200, 500));
-
-                    decimal amount = unitRelation.Price * quantity;
-                    totalProductAmount += amount;
-
-                    productSupplyings.Add(
-                        new ProductSupplying
-                        {
-                            ProductId = product.Id,
-                            SupplierId = supplier.Id,
-                            Quantity = quantity,
-                            Price = unitRelation.Price,
-                            UnitRelationId = unitRelation.Id,
-                            CreatedAt = currentMonth,
-                        }
-                    );
-                }
-
-                decimal totalEquipmentAmount = 0;
-                var equipmentSupplyings = new List<EquipmentSupplying>();
-
-                if (isFirstMonth)
-                {
-                    foreach (var eq in equipmentTemplates)
+                        ProductId = product.Id,
+                        UnitRelationId = unit.Id,
+                        SupplierId = supplier.Id,
+                        Quantity = month == firstMonth ? 100 : 300,
+                        Price = product.CapitalPrice,
+                        CreatedAt = month,
+                    };
+                }).ToList();
+                var equipmentLines = month == firstMonth
+                    ? templates.Select(t => new EquipmentSupplying
                     {
-                        int quantity = eq.InitialQuantity;
-
-                        equipmentSupplyings.Add(
-                            new EquipmentSupplying
-                            {
-                                Name = eq.Name,
-                                Code = Generator.GenerateCode(eq.CodePrefix, 6),
-                                Price = eq.UnitPrice,
-                                Quantity = quantity,
-                                SupplierId = supplier.Id,
-                                CreatedAt = currentMonth,
-                                Image = eq.Image,
-                            }
-                        );
-
-                        totalEquipmentAmount += eq.UnitPrice * quantity;
-                    }
-                }
-                else
-                {
-                    totalEquipmentAmount = 0;
-                }
-
+                        Name = t.Name,
+                        Code = $"DEV-B{branchId}-{t.Code}",
+                        Price = t.Price,
+                        Quantity = t.Quantity,
+                        SupplierId = supplier.Id,
+                        Image = t.Image,
+                        CreatedAt = month,
+                    }).ToList() : [];
                 var document = new InventoryDocument(
-                    code: Generator.GenerateCode("IM", 6),
-                    amount: totalProductAmount + totalEquipmentAmount,
-                    type: InventoryType.Import,
-                    branchId: branchId,
-                    note: $"Phiếu nhập hàng tháng {currentMonth:MM/yyyy}"
-                )
+                    $"DEV-IM-B{branchId}-{month:yyyyMM}",
+                    productLines.Sum(x => x.Price * x.Quantity) + equipmentLines.Sum(x => x.Price * x.Quantity),
+                    InventoryType.Import, branchId, $"Phiếu nhập hàng tháng {month:MM/yyyy}")
                 {
-                    TransactionAt = currentMonth,
-                    CreatedAt = currentMonth,
+                    // Fixture state only: NEVER call UpdateStatus and dispatch runtime completion here.
+                    Status = InventoryStatus.Completed,
+                    TransactionAt = month,
+                    CreatedAt = month,
+                    ProductSupplyings = productLines,
+                    EquipmentSupplyings = equipmentLines,
                 };
-
-                document.ProductSupplyings.AddRangeSafe(productSupplyings);
-                document.EquipmentSupplyings.AddRangeSafe(equipmentSupplyings);
-
-                await unitOfWork
-                    .Repository<InventoryDocument>()
-                    .AddAsync(document, cancellationToken);
-                await unitOfWork.SaveAsync(cancellationToken);
-
-                document.UpdateStatus(InventoryStatus.Completed);
-                await unitOfWork.SaveAsync(cancellationToken);
-
-                currentMonth = currentMonth.AddMonths(1);
+                await unitOfWork.Repository<InventoryDocument>().AddAsync(document, cancellationToken);
             }
+        }
+        await unitOfWork.SaveAsync(cancellationToken);
+        logger.Information("Development inventory receipts reconciled for branches 1, 2 and 3.");
+    }
+
+    public static async Task EnsureSeedEquipmentsAsync(
+        IUnitOfWork unitOfWork, ILogger logger, CancellationToken cancellationToken = default)
+    {
+        var documents = await unitOfWork.Repository<InventoryDocument>()
+            .QueryAsync(x => x.Type == InventoryType.Import && x.Status == InventoryStatus.Completed)
+            .Include(x => x.EquipmentSupplyings).ToListAsync(cancellationToken);
+        var existing = await unitOfWork.Repository<Equipment>().QueryAsync().ToListAsync(cancellationToken);
+        var missing = DevelopmentSeedPolicy.MissingEquipment(documents, existing, DateTimeOffset.UtcNow);
+        if (missing.Count == 0)
+            return;
+        await unitOfWork.Repository<Equipment>().AddRangeAsync(missing, cancellationToken);
+        await unitOfWork.SaveAsync(cancellationToken);
+        logger.Information("Reconciled {Count} missing development seed equipment.", missing.Count);
+    }
+
+    private static async Task ValidateSeedProductStockAsync(IUnitOfWork unitOfWork, CancellationToken cancellationToken)
+    {
+        var services = await unitOfWork.Repository<Service>()
+            .QueryAsync(x => DevelopmentSeedPolicy.BranchIds.Contains(x.BranchId) && x.Status == ActivationStatus.Active && !x.Disable)
+            .Include(x => x.UnitRelations).ThenInclude(x => x.AsUnitRelation).ThenInclude(x => x.BranchProduct)
+            .Include(x => x.UnitRelations).ThenInclude(x => x.AsUnitRelation).ThenInclude(x => x.UnitProduct)
+            .ToListAsync(cancellationToken);
+        var stocks = await unitOfWork.Repository<ProductSupplying>()
+            .QueryAsync(x => x.InventoryDocument.Status == InventoryStatus.Completed)
+            .GroupBy(x => x.ProductId)
+            .Select(x => new MaterialStockSnapshot(x.Key, x.Sum(s => s.Quantity * s.UnitRelation.Multiple)))
+            .ToListAsync(cancellationToken);
+        foreach (long branchId in DevelopmentSeedPolicy.BranchIds)
+        {
+            var branchServices = services.Where(x => x.BranchId == branchId).ToArray();
+            if (branchServices.Length == 0)
+                throw new InvalidOperationException($"No active seed services exist for Branch {branchId}.");
+            bool hasMaterials = false;
+            foreach (var service in branchServices)
+            {
+                var inputs = service.UnitRelations.Where(u => u.Status == ActivationStatus.Active)
+                    .SelectMany(u => u.AsUnitRelation.Select(r => new OrderMaterialInput(
+                        service.Id, u.ServiceId, u.Status, u.BaseUnit, u.Multiple, 5,
+                        r.ProductId, r.BranchProduct.Name, r.BranchProduct.BranchId, r.BranchProduct.Status,
+                        r.BranchProduct.Disable, r.BranchProduct.CapitalPrice, r.UnitProductId,
+                        r.UnitProduct.BranchProductId, r.UnitProduct.Status, r.UnitProduct.BaseUnit,
+                        r.UnitProduct.Multiple, r.Quantity))).ToArray();
+                var resolution = OrderMaterialRequirementResolver.Resolve(branchId, inputs);
+                if (!resolution.IsSuccess)
+                    throw new InvalidOperationException($"Seed service '{service.Name}', Branch {branchId}: {resolution.ErrorMessage}");
+                hasMaterials |= resolution.Requirements.Count > 0;
+                var stock = OrderMaterialStockValidator.Validate(resolution.Requirements, stocks);
+                if (!stock.IsSuccess)
+                    throw new InvalidOperationException($"Seed stock for Branch {branchId}: {stock.ErrorMessage}");
+            }
+            if (!hasMaterials)
+                throw new InvalidOperationException($"Seed services in Branch {branchId} have no material resource definitions.");
         }
     }
 
-    private static IFormFile GenerateIFormFile(string filePath)
-    {
-        if (!File.Exists(filePath))
-            throw new FileNotFoundException($"Không tìm thấy file tại {filePath}");
-
-        byte[] fileBytes = File.ReadAllBytes(filePath);
-        var memoryStream = new MemoryStream(fileBytes);
-        var fileName = Path.GetFileName(filePath);
-        var formFile = new FormFile(memoryStream, 0, fileBytes.Length, "file", fileName)
-        {
-            Headers = new HeaderDictionary(),
-            ContentType = GetContentType(filePath),
-        };
-        return formFile;
-    }
-
-    private static string GetContentType(string path)
-    {
-        var ext = Path.GetExtension(path).ToLowerInvariant();
-        return ext switch
-        {
-            ".jpg" or ".jpeg" => "image/jpeg",
-            ".png" => "image/png",
-            ".gif" => "image/gif",
-            _ => "application/octet-stream",
-        };
-    }
 }
-
-public record IssueLine(long BranchProductId, long UnitRelationId, decimal Quantity, decimal Price);
