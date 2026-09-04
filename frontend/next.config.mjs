@@ -1,15 +1,16 @@
 import createNextIntlPlugin from "next-intl/plugin";
 import withBundleAnalyzer from "@next/bundle-analyzer";
-import withPWA from "next-pwa";
+import withSerwistInit from "@serwist/next";
 
 const withNextIntl = createNextIntlPlugin();
 const withAnalyzer = withBundleAnalyzer({ enabled: false });
-const withPwa = withPWA({
-  dest: "public",
+const withPwa = withSerwistInit({
+  swSrc: "src/app/sw.ts",
+  swDest: "public/sw.js",
   register: true,
-  skipWaiting: true,
-  // App Router's build manifest is server-only, not a public precache asset.
-  buildExcludes: [/app-build-manifest\.json$/],
+  // Only public, versioned build assets belong in the offline cache.
+  // Never cache authenticated documents, API responses or signed media.
+  exclude: [({ asset }) => !asset.name.startsWith("static/")],
   disable: process.env.NODE_ENV === "development",
 });
 
@@ -89,9 +90,7 @@ const imageSources = [
   "'self'",
   "blob:",
   "data:",
-  ...(isDevelopment
-    ? ["http://localhost:9000", "http://127.0.0.1:9000"]
-    : []),
+  ...(isDevelopment ? ["http://localhost:9000", "http://127.0.0.1:9000"] : []),
   ...(mediaUrl ? [mediaUrl.origin] : []),
 ];
 const scriptSources = [

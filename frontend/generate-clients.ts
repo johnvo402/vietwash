@@ -1,3 +1,5 @@
+// CommonJS entry point used by ts-node for the API generation tooling.
+/* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require("fs");
 const path = require("path");
 

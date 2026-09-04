@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
-# Match the Node 20 major used by frontend CI; tooling stays in the build stages.
-FROM node:20-alpine AS dependencies
+# Match the supported Node 22 LTS major used by frontend CI.
+FROM node:22-alpine AS dependencies
 WORKDIR /app
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
@@ -18,7 +18,7 @@ ENV NEXT_TELEMETRY_DISABLED=1 \
     CSP_CONNECT_SRC=${CSP_CONNECT_SRC}
 RUN npm run generate && npm run build:test
 
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs

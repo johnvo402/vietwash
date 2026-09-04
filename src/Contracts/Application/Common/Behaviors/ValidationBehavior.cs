@@ -6,25 +6,21 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Application.Common.Behaviors;
 
 public sealed class ValidationBehavior<TMessage, TResponse>(
-    IServiceScopeFactory serviceScopeFactory
+    IEnumerable<IValidator<TMessage>> validators
 ) : MessagePreProcessor<TMessage, TResponse>
     where TMessage : notnull, IMessage
 {
     protected override async ValueTask Handle(TMessage message, CancellationToken cancellationToken)
     {
-        using IServiceScope scope = serviceScopeFactory.CreateScope();
-        IServiceProvider serviceProvider = scope.ServiceProvider;
-        IEnumerable<IValidator<TMessage>> validators = serviceProvider.GetRequiredService<
-            IEnumerable<IValidator<TMessage>>
-        >();
-
         if (validators.Any())
         {
             var context = new ValidationContext<TMessage>(message);
 
-            IEnumerable<ValidationResult> validationResults = await Task.WhenAll(
-                validators.Select(v => v.ValidateAsync(context, cancellationToken))
-            );
+            // Validators share the request's identity and DbContext. EF contexts
+            // cannot run simultaneous queries, so evaluate them sequentially.
+            List<ValidationResult> validationResults = [];
+            foreach (var validator in validators)
+                validationResults.Add(await validator.ValidateAsync(context, cancellationToken));
 
             List<ValidationFailure> failures = validationResults
                 .Where(r => !r.IsValid)

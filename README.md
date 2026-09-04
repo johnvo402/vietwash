@@ -167,9 +167,9 @@ docker build -f frontend/Dockerfile -t vietwash-frontend:test .
 git diff --check
 ```
 
-Set `VIETWASH_SEED_TEST_DATABASE` to a **disposable PostgreSQL database with citext** to enable database-dependent Ecommerce cases. Never use operational data. Closure validation passed **409/409 Ecommerce tests, zero skips**, frontend checks, the production image build and the same-origin Cash flow. [Verification evidence](docs/closure-verification.md) records the stack, port invariant and database checks.
+Set `VIETWASH_SEED_TEST_DATABASE` to a **disposable local PostgreSQL database with citext and hstore** to enable database-dependent Ecommerce/Notification cases. Its name must start with `vietwash_seed_test`. Never use operational data. Maintenance validation passed **489 backend tests, zero skips**; [current verification](docs/maintenance-completion.md) and [historical closure evidence](docs/closure-verification.md) record scope and limitations.
 
-- Backend CI and the existing six-image publishing workflow retain their behavior.
+- Backend CI provisions disposable PostgreSQL so transactional outbox/inbox regressions run. The existing six-image publishing workflow remains separate.
 - Frontend CI runs install, generation, typecheck, lint and build. On `dev`, after checks, it publishes `ghcr.io/johnvo402/vietwash-frontend:sha-<12-character-commit>`, then promotes that image to `:dev`.
 - Frontend publication is independent of backend changes. Pull requests run checks without publication; manual dispatch is available.
 - Publishing does not automatically deploy a server. `make staging` remains the host-side command.
@@ -179,10 +179,10 @@ Set `VIETWASH_SEED_TEST_DATABASE` to a **disposable PostgreSQL database with cit
 **Core demo flow: complete. Project status: feature-frozen / maintenance only.**
 
 - Cash is operational; online-payment production certification is outside this release.
-- No production-grade distributed outbox; notifications remain best-effort.
+- Processed-order notifications use a transactional outbox and deduplicated persistent inbox. Live SignalR hints remain best-effort; reconnect refreshes unread data. Other Redis integrations are not covered by this outbox. Follow the [receiver-first rollout and monitoring guide](docs/maintenance-completion.md).
 - Docker Compose is a demo/staging deployment, not database HA or a zero-downtime platform.
-- Existing seed/bootstrap and navigation caveats are documented above; fresh staging does not automatically populate the Ecommerce demo catalog.
-- The retained Next/PWA tree has an audit backlog: closure `npm ci` reported 40 findings (5 low, 9 moderate, 26 high). See the [prior assessment](docs/frontend-dependency-audit.md); no breaking framework migration is included.
+- Development DI and STAFF/modal navigation are fixed. Demo staff/manager branch assignments still need provisioning; fresh Staging intentionally does not populate the Ecommerce demo catalog. Development can run the existing initializer after identity synchronization and valid assignments.
+- The former 40 npm findings are remediated; full and production-only audits currently report 0. See [dependency assessment](docs/frontend-dependency-audit.md) and [maintenance verification](docs/maintenance-completion.md), including the Next 15 Maintenance LTS follow-up window.
 - Tokens retain the current tab-scoped `sessionStorage` contract. Browser client identifiers are public; JWT/backend authorization enforce access. Rotate historical/demo credentials before exposure.
 
 ## License

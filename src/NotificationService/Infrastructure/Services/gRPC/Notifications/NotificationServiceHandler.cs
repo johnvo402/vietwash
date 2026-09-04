@@ -27,9 +27,10 @@ namespace Infrastructure.Services.gRPC.Notifications
                         request.Data?.ToDictionary(entry => entry.Key, entry => entry.Value)
                         ?? null,
                     Time = request.Time,
+                    MessageId = request.MessageId,
                 };
 
-                var result = await sender.Send(command);
+                var result = await sender.Send(command, context.CancellationToken);
                 return new SendNotificationResponse { Success = result.IsSuccess };
             }
             catch (Exception ex)

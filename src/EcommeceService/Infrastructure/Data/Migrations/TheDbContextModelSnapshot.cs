@@ -1925,6 +1925,57 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("order_summary_result", (string)null);
                 });
 
+            modelBuilder.Entity("Infrastructure.Notifications.NotificationOutbox", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempts");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset?>("DeliveredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("delivered_at");
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("last_error");
+
+                    b.Property<Guid?>("LeaseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lease_id");
+
+                    b.Property<DateTimeOffset?>("LockedUntil")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("locked_until");
+
+                    b.Property<DateTimeOffset>("NextAttemptAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("next_attempt_at");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload");
+
+                    b.HasKey("Id")
+                        .HasName("pk_notification_outbox");
+
+                    b.HasIndex("NextAttemptAt", "LockedUntil")
+                        .HasDatabaseName("ix_notification_outbox_next_attempt_at_locked_until")
+                        .HasFilter("delivered_at IS NULL");
+
+                    b.ToTable("notification_outbox", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Aggregates.Equipments.EquipmentActivity", b =>
                 {
                     b.HasOne("Domain.Aggregates.Equipments.Equipment", "Equipment")

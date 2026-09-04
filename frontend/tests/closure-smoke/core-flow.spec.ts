@@ -24,6 +24,11 @@ test("live staging: staff creates, processes and completes one Cash order", asyn
   page.on("dialog", (dialog) => void dialog.accept());
   const apiOrigins = new Set<string>();
   const onlinePayments: string[] = [];
+  const forbiddenLandings: string[] = [];
+  page.on("framenavigated", (frame) => {
+    if (frame === page.mainFrame() && new URL(frame.url()).pathname === "/403")
+      forbiddenLandings.push(frame.url());
+  });
   page.context().on("request", (request) => {
     const url = new URL(request.url());
     if (url.pathname.includes("/api/")) apiOrigins.add(url.origin);
@@ -47,9 +52,7 @@ test("live staging: staff creates, processes and completes one Cash order", asyn
   );
   await page.getByRole("button", { name: "Login", exact: true }).click();
   expect((await loginResponse).status()).toBe(200);
-  // The existing default landing page is manager-only; STAFF uses the cashier.
-  await page.waitForURL("**/403");
-  await page.goto("/manage/cashier");
+  await page.waitForURL("**/manage/cashier");
   await expect(page.locator("#customer-select")).toBeVisible();
   await expect(
     page.getByRole("combobox", { name: "Tariff", exact: true }),
@@ -98,13 +101,13 @@ test("live staging: staff creates, processes and completes one Cash order", asyn
   await page.goto("/manage/cashier/orders");
   const row = page.getByRole("row").filter({ hasText: created.code });
   await row.getByRole("button", { name: "Open Menu", exact: true }).click();
-  await page
-    .getByRole("menuitem", { name: "View Details", exact: true })
-    .click();
+  const detailsItem = page.getByRole("menuitem", {
+    name: "View Details",
+    exact: true,
+  });
+  await detailsItem.focus();
+  await detailsItem.press("Enter");
   const status = page.getByTestId("persisted-order-status");
-  await expect(status).toHaveAttribute("data-order-status", "Pending");
-  // Verify the persisted page after leaving the cashier's nested modal.
-  await page.reload();
   await expect(status).toHaveAttribute("data-order-status", "Pending");
   await page
     .getByRole("button", { name: "Start processing", exact: true })
@@ -226,8 +229,19 @@ test("live staging: staff creates, processes and completes one Cash order", asyn
       ),
     )
     .toBe("activated");
+  const cachedPaths = await reportPage.evaluate(async () => {
+    const paths: string[] = [];
+    for (const name of await caches.keys()) {
+      for (const request of await (await caches.open(name)).keys())
+        paths.push(new URL(request.url).pathname);
+    }
+    return paths;
+  });
+  expect(cachedPaths.length).toBeGreaterThan(0);
+  expect(cachedPaths.every((path) => path.startsWith("/_next/static/"))).toBe(true);
   expect([...apiOrigins]).toEqual([new URL(baseURL!).origin]);
   expect(onlinePayments).toEqual([]);
+  expect(forbiddenLandings).toEqual([]);
   const proof = {
     orderId: created.id,
     orderCode: created.code,
@@ -243,10 +257,8 @@ test("live staging: staff creates, processes and completes one Cash order", asyn
     revenueRows,
   };
   console.log(JSON.stringify(proof));
-  await test
-    .info()
-    .attach("closure-proof", {
-      body: JSON.stringify(proof, null, 2),
-      contentType: "application/json",
-    });
+  await test.info().attach("closure-proof", {
+    body: JSON.stringify(proof, null, 2),
+    contentType: "application/json",
+  });
 });

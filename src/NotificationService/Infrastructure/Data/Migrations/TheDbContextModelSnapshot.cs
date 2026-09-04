@@ -151,6 +151,29 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("notification_template", (string)null);
                 });
 
+            modelBuilder.Entity("Infrastructure.Data.NotificationReceipt", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("AcceptedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("accepted_at");
+
+                    b.Property<string>("RecipientKey")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("recipient_key");
+
+                    b.HasKey("Id")
+                        .HasName("pk_notification_receipts");
+
+                    b.ToTable("notification_receipts", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Aggregates.Notifications.Notification", b =>
                 {
                     b.HasOne("Domain.Aggregates.Notifications.NotificationTemplate", "Template")

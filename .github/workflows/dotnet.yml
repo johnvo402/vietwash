@@ -25,6 +25,19 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17.6-alpine
+        env:
+          POSTGRES_USER: seed_test
+          POSTGRES_PASSWORD: ci-local-only
+          POSTGRES_DB: vietwash_seed_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U seed_test -d vietwash_seed_test"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      VIETWASH_SEED_TEST_DATABASE: Host=localhost;Port=5432;Database=vietwash_seed_test;Username=seed_test;Password=ci-local-only
 
     steps:
       - name: Checkout repository
@@ -41,7 +54,12 @@ jobs:
       - name: Build
         run: dotnet build Micro.sln --configuration Release --no-restore
 
-      - name: Run pure unit tests
+      - name: Prepare isolated database extensions
+        run: >-
+          docker exec ${{ job.services.postgres.id }} psql -U seed_test -d vietwash_seed_test
+          -c 'CREATE EXTENSION IF NOT EXISTS citext; CREATE EXTENSION IF NOT EXISTS hstore;'
+
+      - name: Run unit and isolated database regressions
         shell: bash
         run: |
           set -euo pipefail

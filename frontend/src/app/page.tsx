@@ -7,9 +7,10 @@ import { DashboardIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
 import { useAuth } from "@/hooks/use-auth";
+import { getLandingRoute } from "@/lib/auth-routing";
 
 export default function HomePage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   return (
     <div className="flex flex-col min-h-screen">
       <header className="z-[50] sticky top-0 w-full bg-background/95 border-b backdrop-blur-sm dark:bg-black/[0.6] border-border/40">
@@ -23,7 +24,7 @@ export default function HomePage() {
           </Link>
           <nav className="ml-auto flex items-center gap-2">
             <span className="font-bold">
-              {isAuthenticated ? "Dashboard" : "Login"}
+              {isAuthenticated ? "Workspace" : "Login"}
             </span>
             <Button
               variant="outline"
@@ -32,7 +33,10 @@ export default function HomePage() {
               asChild
             >
               {isAuthenticated ? (
-                <Link href="/manage/dashboard">
+                <Link
+                  href={user?.role ? getLandingRoute(user.role) : "/auth/login"}
+                  aria-label="Open workspace"
+                >
                   <DashboardIcon className="h-[1.2rem] w-[1.2rem]" />
                 </Link>
               ) : (

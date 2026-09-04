@@ -3,23 +3,57 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Projections;
 using Domain.Aggregates.Notifications;
 using Microsoft.AspNetCore.SignalR;
+using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using Serilog;
 
 namespace Infrastructure.Services.Notifications
 {
     public class NotificationService(
         IUnitOfWork unitOfWork,
-        IHubContext<NotificationHub> _hubContext
+        IHubContext<NotificationHub> _hubContext,
+        TheDbContext db,
+        ILogger logger
     ) : INotificationService
     {
         public async Task SendAsync(NotificationModel request, CancellationToken cancellationToken)
         {
-            var template = await unitOfWork
-                .Repository<NotificationTemplate>()
-                .FindByIdAsync(request.TemplateId);
+            if (request.UserIds == null || request.UserIds.Count == 0 || request.UserIds.Any(string.IsNullOrWhiteSpace))
+                throw new ArgumentException("Notification recipients are required");
+            if (request.MessageId?.Length > 128)
+                throw new ArgumentException("Notification message ID is too long");
+            var recipients = request.UserIds.Distinct().Order(StringComparer.Ordinal).ToArray();
+            await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+            if (!string.IsNullOrWhiteSpace(request.MessageId))
+            {
+                var recipientKey = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(
+                    JsonSerializer.Serialize(new { request.TemplateId, Recipients = recipients }))));
+                // PostgreSQL waits on a concurrent duplicate's transaction. Its receipt
+                // and notification rows either commit together or both roll back.
+                var inserted = await db.Database.ExecuteSqlInterpolatedAsync($"""
+                    INSERT INTO notification_receipts (id, recipient_key, accepted_at)
+                    VALUES ({request.MessageId}, {recipientKey}, {DateTimeOffset.UtcNow})
+                    ON CONFLICT (id) DO NOTHING
+                    """, cancellationToken);
+                if (inserted == 0)
+                {
+                    var receipt = await db.Set<NotificationReceipt>().AsNoTracking()
+                        .SingleAsync(x => x.Id == request.MessageId, cancellationToken);
+                    if (receipt.RecipientKey != recipientKey)
+                        throw new InvalidOperationException("Message ID cannot be reused for different recipients or templates");
+                    await transaction.CommitAsync(cancellationToken);
+                    return; // First accepted payload wins; retries never create or re-send duplicates.
+                }
+            }
+            var template = await db.Set<NotificationTemplate>()
+                .SingleOrDefaultAsync(x => x.Id == request.TemplateId, cancellationToken);
             if (template == null)
                 throw new Exception("Template not found");
-            string? content = null;
-            string? contentHtml = null;
+            string? content = template.Content;
+            string? contentHtml = template.ContentHtml;
             if (request.Parameters != null)
             {
                 content = ReplaceParameters(template.Content, request.Parameters);
@@ -31,7 +65,7 @@ namespace Infrastructure.Services.Notifications
             {
                 createdAt = DateTimeOffset.UtcNow;
             }
-            foreach (var userId in request.UserIds)
+            foreach (var userId in recipients)
             {
                 var notification = new Notification
                 {
@@ -45,36 +79,30 @@ namespace Infrastructure.Services.Notifications
                     CreatedAt = createdAt,
                 };
 
-                var notificationDto = new NotificationProjection
-                {
-                    Id = notification.Id,
-                    Title = notification.Title,
-                    Content = content,
-                    ContentHtml = contentHtml,
-                    Data = notification.Data,
-                    CreatedAt = notification.CreatedAt,
-                };
-
-                await _hubContext
-                    .Clients.Group($"user:{userId}")
-                    .SendAsync("ReceiveNotification", notificationDto, cancellationToken);
-
                 notifications.Add(notification);
             }
 
-            try
+            db.Set<Notification>().AddRange(notifications);
+            await db.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            // Acknowledgement means durable inbox persistence, not delivery to a
+            // connected browser. Offline/reconnecting clients fetch the unread inbox.
+            foreach (var notification in notifications)
             {
-                _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
-                await unitOfWork
-                    .Repository<Notification>()
-                    .AddRangeAsync(notifications, cancellationToken);
-                await unitOfWork.SaveAsync(cancellationToken);
-                await unitOfWork.CommitAsync(cancellationToken);
-            }
-            catch (Exception)
-            {
-                await unitOfWork.RollbackAsync(cancellationToken);
-                throw;
+                try
+                {
+                    await _hubContext.Clients.Group($"user:{notification.UserId}").SendAsync("ReceiveNotification",
+                        new NotificationProjection
+                        {
+                            Id = notification.Id, Title = notification.Title, Content = notification.Content,
+                            ContentHtml = notification.ContentHtml, Data = notification.Data, CreatedAt = notification.CreatedAt,
+                        }, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    logger.Warning("Notification saved; realtime hint unavailable. NotificationId: {NotificationId}, Failure: {Failure}",
+                        notification.Id, ex.GetType().Name);
+                }
             }
         }
 

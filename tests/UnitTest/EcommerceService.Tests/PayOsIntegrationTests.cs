@@ -30,6 +30,29 @@ namespace EcommerceService.Tests;
 
 public class PayOsSettingTests
 {
+    [Theory]
+    [InlineData("http://app.example.com/payment")]
+    [InlineData("https://localhost/payment")]
+    [InlineData("https://127.0.0.1/payment")]
+    [InlineData("https://10.0.0.2/payment")]
+    [InlineData("https://app.local/payment")]
+    [InlineData("https://user:pass@app.example.com/payment")]
+    public void StagingAndProductionRejectNonPublicHttpsUrls(string url)
+    {
+        var setting = ValidSetting();
+        setting.ReturnUrl = url;
+        Assert.Contains(PayOsSettingValidator.GetErrors(setting, requirePublicHttps: true), x => x.Contains("ReturnUrl"));
+    }
+
+    [Fact]
+    public void StagingWebhookMustMatchThePublishedEdgeRoute()
+    {
+        var setting = ValidSetting();
+        Assert.Empty(PayOsSettingValidator.GetErrors(setting, true));
+        setting.WebhookUrl = "https://api.example.com/wrong-route";
+        Assert.Contains(PayOsSettingValidator.GetErrors(setting, true), x => x.Contains("/Webhook/api/CompletedOrder"));
+    }
+
     [Fact]
     public void DisabledConfiguration_AllowsApplicationStartupWithoutCredentials()
     {
@@ -587,6 +610,26 @@ public class PayOsPaymentLinkHandlerTests
 
 public class PayOsWebhookTests
 {
+    [Fact]
+    public void RealSdkAcceptsCorrectHmacAndRejectsTamperingOrWrongKey()
+    {
+        const string checksum = "local-test-checksum-not-a-merchant-secret";
+        var data = WebhookData();
+        var json = System.Text.Json.JsonSerializer.SerializeToElement(data);
+        var canonical = string.Join("&", json.EnumerateObject().OrderBy(x => x.Name, StringComparer.Ordinal)
+            .Select(x => $"{x.Name}={x.Value}"));
+        var signature = Convert.ToHexString(System.Security.Cryptography.HMACSHA256.HashData(
+            System.Text.Encoding.UTF8.GetBytes(checksum), System.Text.Encoding.UTF8.GetBytes(canonical))).ToLowerInvariant();
+        var verifier = new PayOsWebhookVerifier(new Net.payOS.PayOS("test-client", "test-api-key", checksum));
+        var verified = verifier.Verify(new WebhookType("00", "success", true, data, signature));
+        Assert.Equal(10, verified.orderCode);
+        Assert.Equal(100, verified.amount);
+        Assert.ThrowsAny<Exception>(() => verifier.Verify(new WebhookType("00", "success", true,
+            WebhookData(amount: 101), signature)));
+        var wrongKey = new PayOsWebhookVerifier(new Net.payOS.PayOS("test-client", "test-api-key", "different-test-key"));
+        Assert.ThrowsAny<Exception>(() => wrongKey.Verify(new WebhookType("00", "success", true, data, signature)));
+    }
+
     [Theory]
     [InlineData(false, "00", "00", 100)]
     [InlineData(true, "01", "00", 100)]

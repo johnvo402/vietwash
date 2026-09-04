@@ -20,6 +20,7 @@ using Domain.Aggregates.Users;
 using Domain.Events;
 using Grpc.Core;
 using Infrastructure.Data;
+using Infrastructure.Notifications;
 using Infrastructure.Data.Interceptors;
 using Infrastructure.Services.DistributedCache;
 using Infrastructure.UnitOfWorks;
@@ -94,7 +95,6 @@ public class OrderRuntimeDatabaseTests
             .AddSingleton(Mock.Of<IMemoryCacheService>())
             .AddSingleton(notification.Object)
             .AddSingleton(factory.Object)
-            .AddScoped<UpdateStatusOrderEventHandler>()
             .AddScoped<EInvoiceEventHandler>()
             .AddScoped<CreateFundEventHandler>()
             .AddScoped<IPublisher>(sp =>
@@ -107,7 +107,7 @@ public class OrderRuntimeDatabaseTests
                         events.Add(evt);
                         return evt switch
                         {
-                            UpdateStatusOrderEvent changed => sp.GetRequiredService<UpdateStatusOrderEventHandler>().Handle(changed, token),
+                            UpdateStatusOrderEvent => ValueTask.CompletedTask, // captured by the same DbContext
                             EInvoiceEvent invoice => sp.GetRequiredService<EInvoiceEventHandler>().Handle(invoice, token),
                             CreateFundEvent fund => sp.GetRequiredService<CreateFundEventHandler>().Handle(fund, token),
                             _ => throw new InvalidOperationException($"Unexpected runtime event {evt.GetType().Name}"),
@@ -156,6 +156,24 @@ public class OrderRuntimeDatabaseTests
             Assert.True(result.IsSuccess, result.Error?.ToString());
         }
 
+        // Rolling back the business transaction also discards its notification intent.
+        await using (var rollback = provider.CreateAsyncScope())
+        {
+            var db = rollback.ServiceProvider.GetRequiredService<TheDbContext>();
+            await using var tx = await db.Database.BeginTransactionAsync();
+            var order = await db.Set<Order>().SingleAsync();
+            order.TransitionTo(OrderStatus.Processed);
+            await db.SaveChangesAsync();
+            Assert.Single(await db.Set<NotificationOutbox>().ToListAsync());
+            await tx.RollbackAsync();
+        }
+        events.Clear();
+        await using (var checkRollback = provider.CreateAsyncScope())
+        {
+            var db = checkRollback.ServiceProvider.GetRequiredService<TheDbContext>();
+            Assert.Empty(await db.Set<NotificationOutbox>().ToListAsync());
+            Assert.Equal(OrderStatus.InProgress, (await db.Set<Order>().SingleAsync()).Status);
+        }
         await Transition(OrderStatus.Processed);
         await using (var verification = provider.CreateAsyncScope())
         {
@@ -164,8 +182,9 @@ public class OrderRuntimeDatabaseTests
             Assert.False((await db.Set<Equipment>().SingleAsync()).Using);
         }
         Assert.Single(events.OfType<UpdateStatusOrderEvent>());
-        notification.Verify(x => x.SendNotifyAsync(It.IsAny<SendNotificationRequest>(), It.IsAny<CancellationToken>()), Times.Once);
-        Assert.Contains(logs.Events, log => log.Exception == notificationFailure && log.MessageTemplate.Text.StartsWith("Failed to send processed-order notification"));
+        notification.VerifyNoOtherCalls(); // no network side effects before commit
+        await using (var outboxCheck = provider.CreateAsyncScope())
+            Assert.Single(await outboxCheck.ServiceProvider.GetRequiredService<TheDbContext>().Set<NotificationOutbox>().ToListAsync());
 
         await Transition(OrderStatus.Completed, PaymentMethod.Cash);
         await using (var verification = provider.CreateAsyncScope())

@@ -44,7 +44,7 @@ export function convertObjectsToRows<T = Record<string, any>>(
   input: T[],
   keys?: Array<
     string | ((item: T, rowIndex?: number, columnIndex?: number) => unknown)
-  >
+  >,
 ): unknown[][] {
   if (!input?.length) {
     return [];
@@ -53,8 +53,8 @@ export function convertObjectsToRows<T = Record<string, any>>(
 
   return input.map((m, y) =>
     keys.map((k, x) =>
-      typeof k === "function" ? k(m, y, x) : (m as Record<string, unknown>)[k]
-    )
+      typeof k === "function" ? k(m, y, x) : (m as Record<string, unknown>)[k],
+    ),
   );
 }
 
@@ -74,7 +74,7 @@ const buildBorderStyle = (borders: ExcelBorders): Partial<Borders> => {
   }
 
   borderTypes = borderTypes.filter(
-    (k) => !["top", "left", "bottom", "right", "outside"].includes(k)
+    (k) => !["top", "left", "bottom", "right", "outside"].includes(k),
   );
 
   return {
@@ -83,7 +83,7 @@ const buildBorderStyle = (borders: ExcelBorders): Partial<Borders> => {
         ...acc,
         [k]: borders[k],
       }),
-      {}
+      {},
     ),
     top: borders.outside,
     left: borders.outside,
@@ -229,7 +229,7 @@ export const createExcelBuilder = (options?: ExcelBuilderOptions) => {
           rowPositions[0],
           colPositions[0],
           rowPositions[1],
-          colPositions[1]
+          colPositions[1],
         );
       }
 
@@ -257,7 +257,7 @@ export const createExcelBuilder = (options?: ExcelBuilderOptions) => {
   const addRowsCustom = <T>(
     rows: T[][],
     style?: ExcelStyle,
-    isFirst?: boolean
+    isFirst?: boolean,
   ) => {
     rows.forEach((row) => {
       const newRow = worksheet.addRow(row);
@@ -294,7 +294,7 @@ export const createExcelBuilder = (options?: ExcelBuilderOptions) => {
       width?: number;
     }[],
     styles?: ExcelStyle,
-    width?: number
+    width?: number,
   ) => {
     indexColumns.forEach((c) => {
       if (c.style || styles) {
@@ -339,7 +339,7 @@ export const createExcelBuilder = (options?: ExcelBuilderOptions) => {
   };
   const cellsCustomCurrent = (
     indexCells: string[],
-    numberFormat = "#,##0.#0"
+    numberFormat = "#,##0.#0",
   ) => {
     indexCells.forEach((r) => {
       worksheet.getCell(r).numFmt = numberFormat;
@@ -366,7 +366,7 @@ export const createExcelBuilder = (options?: ExcelBuilderOptions) => {
     cells?: ExcelCell[],
     styleExcel?: ExcelStyle,
     rowsCustom?: any,
-    columns?: ExcelColumns | ExcelColumnDictionary
+    columns?: ExcelColumns | ExcelColumnDictionary,
   ) => {
     const worksheet = workbook.addWorksheet(name);
     const addCells = (cells: ExcelCell[], style?: ExcelStyle) => {
@@ -404,7 +404,7 @@ export const createExcelBuilder = (options?: ExcelBuilderOptions) => {
             rowPositions[0],
             colPositions[0],
             rowPositions[1],
-            colPositions[1]
+            colPositions[1],
           );
         }
 
@@ -561,7 +561,7 @@ export const excelDateNumberToJSDate = (serial: number) => {
     date_info.getDate(),
     hours,
     minutes,
-    seconds
+    seconds,
   );
 };
 
@@ -574,7 +574,7 @@ interface ExportFileOpts {
 export function exportFile(
   fileName: string,
   rawData: string | ArrayBuffer | ArrayBufferView | Blob,
-  opts: string | ExportFileOpts = { mimeType: "application/octet-stream" }
+  opts: string | ExportFileOpts = { mimeType: "application/octet-stream" },
 ): true | Error {
   if (!fileName || !rawData) {
     return new Error("Missing fileName or rawData");
@@ -589,7 +589,20 @@ export function exportFile(
     const blob =
       rawData instanceof Blob
         ? rawData
-        : new Blob([rawData], { type: options.mimeType });
+        : new Blob(
+            [
+              ArrayBuffer.isView(rawData)
+                ? new Uint8Array(
+                    new Uint8Array(
+                      rawData.buffer,
+                      rawData.byteOffset,
+                      rawData.byteLength,
+                    ),
+                  )
+                : rawData,
+            ],
+            { type: options.mimeType },
+          );
 
     // Tạo URL tạm thời cho Blob
     const url = window.URL.createObjectURL(blob);

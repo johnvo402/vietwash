@@ -43,7 +43,7 @@ const NotificationClient = () => {
   // Hàm thử kết nối lại với exponential backoff
   const attemptConnection = async (
     retryDelay = 1000,
-    maxRetries = Infinity
+    maxRetries = Infinity,
   ) => {
     if (isConnectingRef.current || !credentials?.token) return;
 
@@ -54,6 +54,11 @@ const NotificationClient = () => {
       try {
         connectionRef.current = await startSignalRConnection({
           accessToken: credentials.token!,
+          onConnected: () => {
+            // Recover notifications persisted while this browser was disconnected.
+            queryClient.invalidateQueries({ queryKey: ["notification"] });
+            queryClient.invalidateQueries({ queryKey: ["countNotify"] });
+          },
           onReceiveMessage: (message: NotificationMessage) => {
             const title = textByLang(JSON.parse(message.title));
             const content = textByLang(JSON.parse(message.content));
@@ -94,7 +99,7 @@ const NotificationClient = () => {
         } else {
           isConnectingRef.current = false;
           console.warn(
-            "❌ Max retries reached or offline, stopping retry attempts"
+            "❌ Max retries reached or offline, stopping retry attempts",
           );
         }
       }

@@ -14,11 +14,13 @@ if (platform) defaultHeaders.Platform = platform;
 interface ConnectionOptions<TMessage> {
   accessToken: string;
   onReceiveMessage: (message: TMessage) => void;
+  onConnected?: () => void;
 }
 
 export const startSignalRConnection = async <TMessage>({
   accessToken,
   onReceiveMessage,
+  onConnected,
 }: ConnectionOptions<TMessage>) => {
   const hubUrl = `${BASE_URL}/notification/hub?access_token=${accessToken}`;
 
@@ -26,7 +28,7 @@ export const startSignalRConnection = async <TMessage>({
   if (connections.has(hubUrl)) {
     const existingConnection = connections.get(hubUrl)!;
     if (existingConnection.state === signalR.HubConnectionState.Connected) {
-      console.log("Connection already established for:", hubUrl);
+      onConnected?.();
       return existingConnection;
     }
     await stopSignalRConnection(existingConnection);
@@ -41,7 +43,7 @@ export const startSignalRConnection = async <TMessage>({
   connection.on("ReceiveNotification", onReceiveMessage);
 
   connection.onreconnecting(() => console.warn("🔄 Reconnecting"));
-  connection.onreconnected(() => console.log("✅ Reconnected"));
+  connection.onreconnected(() => onConnected?.());
   connection.onclose((error) =>
     console.error("❌ Connection closed for", error),
   );
@@ -50,6 +52,7 @@ export const startSignalRConnection = async <TMessage>({
     await connection.start();
     console.log("✅ SignalR connected");
     connections.set(hubUrl, connection);
+    onConnected?.();
     return connection;
   } catch (error: unknown) {
     const connectionError =

@@ -1,5 +1,20 @@
 # Frontend dependency audit
 
+## Current result — 2026-09-04
+
+The previously reported 40 findings have been remediated. Both `npm audit` and `npm audit --omit=dev` return **0 vulnerabilities** for the checked lockfile. CI now fails on any audit severity. No advisory ignores, `--force`, or downgrade-to-vulnerable workarounds were used.
+
+- Next 15.5.25 replaces unsupported 14.x; matched eslint-config-next/bundle analyzer, next-intl 4.14.2, async route params and cookie access are verified by typecheck/build. React 18 is retained. Node 22 is used in CI/production images. Next 15 remains Maintenance LTS, so this is not a promise of indefinite support.
+- Serwist 9.5.12 replaces next-pwa/its old Workbox/Rollup chain. Its exact Browserslist pin is overridden with patched 4.28.8 (same API). The worker caches only versioned static assets, never account/order APIs.
+- Next's internal PostCSS pin is overridden with the directly declared patched 8.5.26 line, retaining PostCSS 8 compatibility; CSS compilation and production build pass.
+- ExcelJS only imports `uuid.v4` without buffer arguments. A targeted override to CommonJS-compatible uuid 11.1.1 preserves that API; an XLSX round trip including UUID-dependent data-bar conditional formatting passes.
+- Unused `src/lib/crypto.ts` exports had no callers. Removing them eliminates the unpatched elliptic dependency rather than inventing a replacement signing protocol.
+- `@swc/helpers` is explicitly declared for next-intl's newer optional SWC peer; Next retains its own exact helper version. This was verified through Linux `npm ci` and the actual standalone runtime, not only a Windows build.
+
+The full graph is smaller after removing the legacy PWA toolchain. Remaining package deprecation/compiler notices are distinct from security advisories. See [maintenance verification and limits](maintenance-completion.md).
+
+## Historical baseline — 2026-08-31
+
 This baseline was reviewed on 2026-08-31 with the locked dependency graph and both `npm audit` and `npm audit --omit=dev`.
 
 ## Result

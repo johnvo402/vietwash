@@ -7,7 +7,7 @@
     "build": "npm run generate && next build",
     "build:test": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx --ignore-pattern src/api/generated --ignore-pattern public --ignore-pattern .next --ignore-pattern next-env.d.ts",
     "typecheck": "tsc --noEmit",
     "merged-api": "ts-node generate-clients.ts",
     "generate": "rimraf src/api/generated && openapi-generator-cli generate -i ./openapi.json -g typescript-axios -o src/api/generated",
@@ -62,15 +62,13 @@
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
     "dompurify": "^3.4.14",
-    "elliptic": "^6.6.1",
     "exceljs": "^4.4.0",
     "framer-motion": "^11.1.7",
     "html2canvas": "^1.4.1",
     "immer": "^10.1.1",
     "lucide-react": "^0.372.0",
-    "next": "^14.2.35",
-    "next-intl": "^3.26.5",
-    "next-pwa": "^5.6.0",
+    "next": "^15.5.25",
+    "next-intl": "^4.14.2",
     "next-themes": "^0.4.3",
     "nextjs-toploader": "^3.7.15",
     "nuqs": "^2.4.1",
@@ -92,10 +90,11 @@
     "zustand": "^5.0.1"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^15.3.4",
+    "@next/bundle-analyzer": "^15.5.25",
+    "@serwist/next": "^9.5.12",
+    "@swc/helpers": "^0.5.23",
     "@openapitools/openapi-generator-cli": "^2.41.0",
     "@playwright/test": "^1.62.1",
-    "@types/elliptic": "^6.4.18",
     "@types/lodash": "^4.17.19",
     "@types/minimatch": "^6.0.0",
     "@types/node": "^20",
@@ -103,14 +102,26 @@
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18",
     "eslint": "^8",
-    "eslint-config-next": "^14.2.35",
+    "eslint-config-next": "^15.5.25",
     "husky": "^9.1.6",
     "lint-staged": "^15.2.10",
     "postcss": "^8.5.26",
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
+    "serwist": "^9.5.12",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.4.5"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "$postcss"
+    },
+    "@serwist/next": {
+      "browserslist": "^4.28.8"
+    },
+    "exceljs": {
+      "uuid": "11.1.1"
+    }
   },
   "lint-staged": {
     "**/*.{ts,tsx}": [

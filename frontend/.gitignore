@@ -46,6 +46,8 @@ src/api/generated/*
 
 
 /public/sw.js
+/public/sw.js.map
+/public/swe-worker*
 /public/workbox-*.js
 
 /test-results

@@ -3,6 +3,7 @@
   "Logging": {"LogLevel": {"Default": "Information", "Microsoft.AspNetCore": "Warning"}},
   "ReverseProxy": {
     "Routes": {
+      "payos-webhook": {"ClusterId": "ecommerce-cluster", "Match": {"Path": "/Webhook/api/CompletedOrder", "Methods": ["POST"]}},
       "auth": {"ClusterId": "auth-cluster", "Match": {"Path": "/auth/{**catch-all}"}},
       "ecommerce": {"ClusterId": "ecommerce-cluster", "RateLimiterPolicy": "customPolicy", "Match": {"Path": "/ecommerce/{**catch-all}"}},
       "project": {"ClusterId": "project-cluster", "RateLimiterPolicy": "customPolicy", "Match": {"Path": "/project/{**catch-all}"}},

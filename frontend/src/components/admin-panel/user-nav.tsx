@@ -31,6 +31,7 @@ import { apiClient } from "@/api/client";
 import {
   ROUTE_CASHIER,
   ROUTE_DASHBOARD,
+  ROUTE_ORDERS,
   ROUTE_LOGIN,
 } from "@/types/router-type";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -78,7 +79,7 @@ export function UserNav() {
       toast.info(
         t("toast.update.success", {
           entity: t("user.profile"),
-        })
+        }),
       );
       queryClient.invalidateQueries({ queryKey: ["me"] });
     },
@@ -106,10 +107,14 @@ export function UserNav() {
     try {
       await apiClient.authApiAccountsLogoutPost();
     } catch (error) {
-      console.warn("The server logout request failed; clearing the local session.", error);
+      console.warn(
+        "The server logout request failed; clearing the local session.",
+        error,
+      );
     }
 
     logout();
+    queryClient.clear();
     router.replace(ROUTE_LOGIN);
   };
 
@@ -171,7 +176,10 @@ export function UserNav() {
           {isCashierPage ? (
             <DropdownMenuGroup>
               <DropdownMenuItem className="hover:cursor-pointer" asChild>
-                <Link href={ROUTE_DASHBOARD} className="flex items-center">
+                <Link
+                  href={user?.role === "STAFF" ? ROUTE_ORDERS : ROUTE_DASHBOARD}
+                  className="flex items-center"
+                >
                   <SquareGanttChart className="w-4 h-4 mr-3 text-muted-foreground" />
                   {t("common.managerPage")}
                 </Link>

@@ -34,7 +34,7 @@ export const ServiceSectionView = ({
 }: ServiceSectionViewProps) => {
   const t = useTranslations();
   const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
-    null
+    null,
   );
   const [selectedUnitRelationId, setSelectedUnitRelationId] = useState<
     number | null
@@ -70,7 +70,7 @@ export const ServiceSectionView = ({
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (loadMoreRef.current) {
@@ -160,7 +160,7 @@ export const ServiceSectionView = ({
                   onClick={() => {
                     setSelectedServiceId(service.id!);
                     setSelectedUnitRelationId(
-                      service.unitRelations?.[0]?.id || null
+                      service.unitRelations?.[0]?.id || null,
                     );
                     setQuantity(1);
                   }}
@@ -168,7 +168,7 @@ export const ServiceSectionView = ({
                   <div className="relative w-full h-24 mb-2">
                     <Image
                       src={service.image || "/logo/favicon.svg"}
-                      alt={t("image.alt", { entity: service.name })}
+                      alt={t("image.alt", { entity: service.name ?? "" })}
                       fill
                       className="object-cover rounded-md"
                       sizes="(max-width: 768px) 50vw, 25vw"
@@ -182,17 +182,17 @@ export const ServiceSectionView = ({
                     {service.unitRelations && service.unitRelations.length > 1
                       ? `${formatPriceVN(
                           Math.min(
-                            ...service.unitRelations.map((x) => x.price ?? 0)
-                          )
+                            ...service.unitRelations.map((x) => x.price ?? 0),
+                          ),
                         )} - ${formatPriceVN(
                           Math.max(
-                            ...service.unitRelations.map((x) => x.price ?? 0)
-                          )
+                            ...service.unitRelations.map((x) => x.price ?? 0),
+                          ),
                         )}`
                       : service.unitRelations &&
                           service.unitRelations.length === 1
                         ? `${formatPriceVN(
-                            service.unitRelations[0]?.price || 0
+                            service.unitRelations[0]?.price || 0,
                           )}/${service.unitRelations[0]?.name}`
                         : t("common.noData")}
                   </span>
@@ -311,7 +311,7 @@ export const ServiceSectionView = ({
           <div id="total" className="w-full text-center font-medium">
             {formatPriceVN(
               (unitRelations.find((ur) => ur.id === selectedUnitRelationId)
-                ?.price || 0) * quantity
+                ?.price || 0) * quantity,
             )}
           </div>
         </div>

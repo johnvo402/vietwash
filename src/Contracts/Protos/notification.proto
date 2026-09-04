@@ -14,6 +14,8 @@ message SendNotificationRequest {
   map<string, string> parameters = 3;
   map<string, string> data = 4;
   string time = 5;
+  // Optional for legacy producers; stable across retries for durable delivery.
+  string message_id = 6;
 }
 
 message SendNotificationResponse {

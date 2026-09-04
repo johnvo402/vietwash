@@ -1,5 +1,7 @@
 # Project closure verification
 
+Historical evidence for closure commit `84582067`. The DI/STAFF/modal/audit limitations below were subsequently addressed; see [2026-09-04 maintenance verification](maintenance-completion.md) for the current state and the remaining external PayOS sign-off requirement.
+
 Date: 2026-09-03. Baseline: `fdfb17cb1f794cb9c26b65cdd8a27fdabdc97a3b`, branch `dev`, plus this closure patch. This is local verification, not a claim that the new workflow has already published or deployed remotely.
 
 ## Build and regression checks

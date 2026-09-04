@@ -21,9 +21,9 @@ export const isValidCredentials = (
 ): credentials is Credentials =>
   Boolean(
     credentials?.token &&
-      credentials.refresh &&
-      typeof credentials.accessTokenExpiredIn === "number" &&
-      Number.isFinite(credentials.accessTokenExpiredIn),
+    credentials.refresh &&
+    typeof credentials.accessTokenExpiredIn === "number" &&
+    Number.isFinite(credentials.accessTokenExpiredIn),
   );
 
 export interface AuthState {
@@ -60,7 +60,7 @@ export const useAuth = create<AuthState>()(
       login: (credentials) =>
         set(() =>
           isValidCredentials(credentials)
-            ? { credentials, isAuthenticated: true }
+            ? { ...loggedOutState, credentials, isAuthenticated: true }
             : loggedOutState,
         ),
 

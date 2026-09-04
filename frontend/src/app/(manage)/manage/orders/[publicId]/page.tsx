@@ -15,11 +15,10 @@ import { useEffect, useState } from "react";
 import LoadingSpinner from "@/components/main/LoadingSpinner";
 import { useOrderTransition } from "@/features/orders/compositions/use-order-transition";
 
-interface OrderDetailProps {
-  params: { publicId: string };
-}
+import { useParams } from "next/navigation";
 
-export default function OrderDetailPage({ params }: OrderDetailProps) {
+export default function OrderDetailPage() {
+  const params = useParams<{ publicId: string }>();
   const router = useRouter();
 
   const [id, setId] = useState<number | null>(null);

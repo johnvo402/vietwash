@@ -52,41 +52,20 @@ public static class DependencyInjection
         });
 
         services
-            .AddScoped<IDbContext, TheDbContext>()
+            .AddScoped<IDbContext>(sp => sp.GetRequiredService<TheDbContext>())
             .AddScoped<IUnitOfWork, UnitOfWork>()
-            .AddSingleton<UpdateAuditableEntityInterceptor>()
+            .AddScoped<UpdateAuditableEntityInterceptor>()
             .AddSingleton<DispatchDomainEventInterceptor>();
 
-        if (environmentName!.CompareTo("Development") == 0)
-        {
-            services.AddDbContext<TheDbContext>(
-                (sp, options) =>
-                {
-                    NpgsqlDataSource npgsqlDataSource = sp.GetRequiredService<NpgsqlDataSource>();
-                    options
-                        .UseNpgsql(npgsqlDataSource)
-                        .AddInterceptors(
-                            sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
-                            sp.GetRequiredService<DispatchDomainEventInterceptor>()
-                        );
-                }
-            );
-        }
-        else
-        {
-            services.AddDbContextPool<TheDbContext>(
-                (sp, options) =>
-                {
-                    NpgsqlDataSource npgsqlDataSource = sp.GetRequiredService<NpgsqlDataSource>();
-                    options
-                        .UseNpgsql(npgsqlDataSource)
-                        .AddInterceptors(
-                            sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
-                            sp.GetRequiredService<DispatchDomainEventInterceptor>()
-                        );
-                }
-            );
-        }
+        // Audit identity is scoped to the request. A pooled context/options singleton
+        // would retain the first scope's interceptor and can stamp the wrong actor.
+        services.AddDbContext<TheDbContext>((sp, options) =>
+            options.UseNpgsql(sp.GetRequiredService<NpgsqlDataSource>())
+                .AddInterceptors(
+                    sp.GetRequiredService<UpdateAuditableEntityInterceptor>(),
+                    sp.GetRequiredService<DispatchDomainEventInterceptor>()
+                )
+        );
         services.Configure<OtpOption>(configuration.GetSection(nameof(OtpOption)));
         services.AddOptions<EmailSettings>().Bind(configuration.GetSection(nameof(EmailSettings)));
         services
@@ -110,7 +89,7 @@ public static class DependencyInjection
             .AddJwtAuth(configuration)
             .AddMemoryCache()
             .AddRedis(configuration)
-            .PubSubLogClient(environmentName)
+            .PubSubLogClient(environmentName, configuration)
             .AddHostedService<PubSubBackgroundService>()
             .AddHostedService<DeadletterPubSubBackgroundService>()
             .AddHostedService<DbInitializerBackgroundService>()

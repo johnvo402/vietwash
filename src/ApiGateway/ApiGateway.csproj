@@ -3,6 +3,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Local/CI publish output must never become input on the next publish. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);app/**</DefaultItemExcludes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Wangkanai.Detection" />

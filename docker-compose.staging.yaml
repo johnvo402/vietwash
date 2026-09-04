@@ -2,6 +2,8 @@
 x-service-environment: &service-environment
   ASPNETCORE_ENVIRONMENT: Staging
   ASPNETCORE_HTTP_PORTS: "8080"
+  GrpcEndpoints__Project: http://project:8443
+  GrpcEndpoints__Notification: http://notification:8444
   RedisDatabaseSettings__Host: redis
   RedisDatabaseSettings__Password: ${REDIS_PASSWORD:?Set REDIS_PASSWORD}
   SecuritySettings__JwtSettings__SecretKey: ${STAGING_JWT_SECRET:?Set STAGING_JWT_SECRET}

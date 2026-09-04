@@ -10,12 +10,14 @@ namespace Infrastructure.Services.PayOs
     {
         public static IServiceCollection AddPayOs(
             this IServiceCollection services,
-            IConfiguration config
+            IConfiguration config,
+            string? environmentName = "Development"
         )
         {
             IConfigurationSection section = config.GetSection(nameof(PayOsSetting));
             PayOsSetting payOsSetting = section.Get<PayOsSetting>() ?? new PayOsSetting();
-            IReadOnlyList<string> errors = PayOsSettingValidator.GetErrors(payOsSetting);
+            IReadOnlyList<string> errors = PayOsSettingValidator.GetErrors(payOsSetting,
+                !string.Equals(environmentName, "Development", StringComparison.OrdinalIgnoreCase));
             if (errors.Count != 0)
                 throw new OptionsValidationException(
                     nameof(PayOsSetting),

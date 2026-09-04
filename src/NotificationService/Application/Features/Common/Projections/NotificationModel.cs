@@ -2,6 +2,7 @@ namespace Application.Features.Common.Projections
 {
     public class NotificationModel
     {
+        public string? MessageId { get; set; }
         public string TemplateId { get; set; }
         public List<string> UserIds { get; set; }
         public Dictionary<string, string>? Parameters { get; set; }

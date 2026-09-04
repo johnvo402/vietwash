@@ -92,7 +92,7 @@ export function OrderActionMenu({
   };
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
@@ -105,7 +105,7 @@ export function OrderActionMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={onView}>
+          <DropdownMenuItem onSelect={onView}>
             {t("common.viewDetails")}
           </DropdownMenuItem>
           {actions.edit && onEdit && (

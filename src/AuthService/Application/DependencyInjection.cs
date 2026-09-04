@@ -20,12 +20,12 @@ public static class DependencyInjection
 
         return services
             .AddMediator(option => option.ServiceLifetime = ServiceLifetime.Scoped)
-            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(ErrorLoggingBehaviour<,>))
-            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>))
-            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>))
-            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(PerformaceBehavior<,>))
-            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(ProcessImagePathBehavior<,>))
-            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(ProcessImageKeyBehavior<,>))
+            .AddScoped(typeof(IPipelineBehavior<,>), typeof(ErrorLoggingBehaviour<,>))
+            .AddScoped(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>))
+            .AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>))
+            .AddScoped(typeof(IPipelineBehavior<,>), typeof(PerformaceBehavior<,>))
+            .AddScoped(typeof(IPipelineBehavior<,>), typeof(ProcessImagePathBehavior<,>))
+            .AddScoped(typeof(IPipelineBehavior<,>), typeof(ProcessImageKeyBehavior<,>))
             .AddValidatorsFromAssembly(currentAssembly)
             .AddSingleton<IAuthorizationPolicyProvider, AuthorizePolicyProvider>()
             .AddSingleton<IAuthorizationHandler, AuthorizeHandler>()

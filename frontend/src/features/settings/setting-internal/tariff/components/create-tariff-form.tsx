@@ -49,7 +49,7 @@ const tariffSchema = z.object({
         }),
         unitRelationId: z.number({ required_error: "common.entityRequired" }),
         price: z.number().min(0, { message: "common.priceMustBePositive" }),
-      })
+      }),
     )
     .min(1, { message: "common.entityRequired" }),
 });
@@ -91,7 +91,7 @@ export default function TariffDialog({
   const isEditMode = !!tariff;
   const branches = React.useMemo(
     () => user?.branchAccounts || [],
-    [user?.branchAccounts]
+    [user?.branchAccounts],
   );
   const branchOptions = React.useMemo(
     () =>
@@ -99,7 +99,7 @@ export default function TariffDialog({
         value: branch.branchId?.toString() || "0",
         label: branch.branchName ?? t("common.unknown"),
       })),
-    [branches, t]
+    [branches, t],
   );
 
   const { data: services, isLoading: isServicesLoading } = useQuery({
@@ -111,7 +111,7 @@ export default function TariffDialog({
         undefined,
         undefined,
         undefined,
-        ["name"]
+        ["name"],
       );
       return response.data.results?.data || [];
     },
@@ -135,7 +135,7 @@ export default function TariffDialog({
           </div>
         ),
       })) || [],
-    [services, t]
+    [services, t],
   );
 
   const {
@@ -207,7 +207,7 @@ export default function TariffDialog({
   const handleUnitChange = (index: number, value: string) => {
     const unitId = parseInt(value) || 0;
     const unitOptions = getUnitOptions(
-      formData.serviceTariffs[index].serviceId
+      formData.serviceTariffs[index].serviceId,
     );
     const selectedUnit = unitOptions.find((option) => option.value === value);
     setValue(`serviceTariffs.${index}.unitRelationId`, unitId, {
@@ -239,7 +239,7 @@ export default function TariffDialog({
             serviceId,
             unitRelationId,
             price,
-          })
+          }),
         ),
       };
 
@@ -252,7 +252,7 @@ export default function TariffDialog({
     } catch (error) {
       console.error(
         `Error ${isEditMode ? "updating" : "creating"} tariff:`,
-        error
+        error,
       );
     }
   };
@@ -287,7 +287,7 @@ export default function TariffDialog({
                     entity: t("common.tariff").toLowerCase(),
                   })}
                 />
-                {errors.name && (
+                {errors.name?.message && (
                   <p className="text-sm text-destructive">
                     {t(errors.name.message, {
                       Entity: t("common.tariff").toLowerCase(),
@@ -311,7 +311,7 @@ export default function TariffDialog({
                   })}
                   emptyMessage={t("common.noResult")}
                 />
-                {errors.branchId && (
+                {errors.branchId?.message && (
                   <p className="text-sm text-destructive">
                     {t(errors.branchId.message, {
                       Entity: t("common.branch").toLowerCase(),
@@ -343,7 +343,7 @@ export default function TariffDialog({
                     </SelectItem>
                   </SelectContent>
                 </Select>
-                {errors.status && (
+                {errors.status?.message && (
                   <p className="text-sm text-destructive">
                     {t(errors.status.message, {
                       Entity: t("common.status.title").toLowerCase(),
@@ -360,7 +360,7 @@ export default function TariffDialog({
                   type="datetime-local"
                   {...register("startAt")}
                 />
-                {errors.startAt && (
+                {errors.startAt?.message && (
                   <p className="text-sm text-destructive">
                     {t(errors.startAt.message, {
                       Entity: t("table.accessorKey.startAt").toLowerCase(),
@@ -375,7 +375,7 @@ export default function TariffDialog({
                   type="datetime-local"
                   {...register("endAt")}
                 />
-                {errors.endAt && (
+                {errors.endAt?.message && (
                   <p className="text-sm text-destructive">
                     {t(errors.endAt.message, {
                       Entity: t("table.accessorKey.endAt").toLowerCase(),
@@ -431,7 +431,7 @@ export default function TariffDialog({
                             setValue(
                               `serviceTariffs.${index}.serviceId`,
                               parseInt(value) || 0,
-                              { shouldValidate: true }
+                              { shouldValidate: true },
                             )
                           }
                           placeholder={t("common.entitySelectPlaceholder", {
@@ -444,18 +444,21 @@ export default function TariffDialog({
                           disabled={isServicesLoading}
                           loading={isServicesLoading}
                         />
-                        {errors.serviceTariffs?.[index]?.serviceId && (
+                        {errors.serviceTariffs?.[index]?.serviceId?.message && (
                           <p className="text-sm text-destructive mt-1">
-                            {t(errors.serviceTariffs[index].serviceId.message, {
-                              Entity: t("common.service"),
-                            })}
+                            {t(
+                              errors.serviceTariffs[index].serviceId.message!,
+                              {
+                                Entity: t("common.service"),
+                              },
+                            )}
                           </p>
                         )}
                       </td>
                       <td className="px-4 py-2">
                         <Combobox
                           options={getUnitOptions(
-                            formData.serviceTariffs[index].serviceId
+                            formData.serviceTariffs[index].serviceId,
                           )}
                           value={formData.serviceTariffs[
                             index
@@ -473,14 +476,15 @@ export default function TariffDialog({
                             !formData.serviceTariffs[index].serviceId
                           }
                         />
-                        {errors.serviceTariffs?.[index]?.unitRelationId && (
+                        {errors.serviceTariffs?.[index]?.unitRelationId
+                          ?.message && (
                           <p className="text-sm text-destructive mt-1">
                             {t(
                               errors.serviceTariffs[index].unitRelationId
-                                .message,
+                                .message!,
                               {
                                 Entity: t("common.unit"),
-                              }
+                              },
                             )}
                           </p>
                         )}
@@ -489,23 +493,23 @@ export default function TariffDialog({
                         <Input
                           type="text"
                           value={formatNumberVN(
-                            formData.serviceTariffs[index].price
+                            formData.serviceTariffs[index].price,
                           )}
                           onChange={(e) => {
                             const value = e.target.value.replace(/[^\d]/g, "");
                             setValue(
                               `serviceTariffs.${index}.price`,
                               parseInt(value) || 0,
-                              { shouldValidate: true }
+                              { shouldValidate: true },
                             );
                           }}
                           placeholder={t("common.placeholderDes", {
                             entity: t("common.price"),
                           })}
                         />
-                        {errors.serviceTariffs?.[index]?.price && (
+                        {errors.serviceTariffs?.[index]?.price?.message && (
                           <p className="text-sm text-destructive mt-1">
-                            {t(errors.serviceTariffs[index].price.message)}
+                            {t(errors.serviceTariffs[index].price.message!)}
                           </p>
                         )}
                       </td>
