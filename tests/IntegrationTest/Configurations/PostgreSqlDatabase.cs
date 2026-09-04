@@ -11,7 +11,7 @@ public class PostgreSqlDatabase<TDbContext> : IDatabase
     where TDbContext : DbContext
 {
     private NpgsqlConnection? _connection;
-    private readonly string? _connectionString;
+    private readonly string _connectionString;
     private Respawner? _respawner;
     private readonly string _environmentName;
 
@@ -28,9 +28,14 @@ public class PostgreSqlDatabase<TDbContext> : IDatabase
                 optional: true,
                 reloadOnChange: true
             )
+            .AddEnvironmentVariables()
             .Build();
 
-        _connectionString = configuration["DatabaseSettings:DatabaseConnection"];
+        _connectionString =
+            configuration["DatabaseSettings:DatabaseConnection"]
+            ?? throw new InvalidOperationException(
+                "DatabaseSettings:DatabaseConnection is required for integration tests."
+            );
     }
 
     public async Task InitialiseAsync()
@@ -64,9 +69,7 @@ public class PostgreSqlDatabase<TDbContext> : IDatabase
     public DbConnection GetConnection() =>
         _connection ?? throw new InvalidOperationException("Connection not initialized");
 
-    public string GetConnectionString() =>
-        _connectionString
-        ?? throw new InvalidOperationException("Connection string not initialized");
+    public string GetConnectionString() => _connectionString;
 
     public string GetEnvironmentVariable() => $"Testing-{_environmentName}"!;
 

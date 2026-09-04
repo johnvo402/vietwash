@@ -11,12 +11,7 @@ import FilterPanel from "../components/filter-report-order";
 import { useRevenueReportTable } from "./components/column";
 import { useRevenueReport } from "./hooks/use-revenue-report";
 import { Button } from "@/components/ui/button";
-import {
-  convertObjectsToRows,
-  createExcelBuilder,
-  ExcelCell,
-  exportFile,
-} from "@/shared/utils/excel";
+import type { ExcelCell } from "@/shared/utils/excel";
 import { excelHeaderStyle } from "@/shared/themes/excel";
 import { toast } from "react-toastify";
 import { format, formatDate } from "date-fns";
@@ -59,6 +54,8 @@ export default function ReportRevenueView() {
     setExportLoading(true);
 
     try {
+      const { convertObjectsToRows, createExcelBuilder, exportFile } =
+        await import("@/shared/utils/excel");
       toast.loading(t("common.excel_downloading"));
 
       const allData = await fetchAllData();

@@ -1,0 +1,82 @@
+name: Backend Integration CI
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - "src/**"
+      - "tests/IntegrationTest/**"
+      - "Directory.Packages.props"
+      - "NuGet.Config"
+      - ".github/workflows/integration.yml"
+  pull_request:
+    branches: [dev]
+    paths:
+      - "src/**"
+      - "tests/IntegrationTest/**"
+      - "Directory.Packages.props"
+      - "NuGet.Config"
+      - ".github/workflows/integration.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  auth-integration-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17.6-alpine
+        env:
+          POSTGRES_USER: integration_test
+          POSTGRES_PASSWORD: ci-local-only
+          POSTGRES_DB: auth_integration_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U integration_test -d auth_integration_test"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+      redis:
+        image: redis:7.4-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+      DatabaseSettings__DatabaseConnection: Host=localhost;Port=5432;Database=auth_integration_test;Username=integration_test;Password=ci-local-only
+      HangfireSettings__Storage__ConnectionString: Host=localhost;Port=5432;Database=auth_integration_test;Username=integration_test;Password=ci-local-only;Include Error Detail=true
+      RedisDatabaseSettings__Host: localhost
+      RedisDatabaseSettings__Port: 6379
+      RedisDatabaseSettings__Password: ci-local-only
+      RedisDatabaseSettings__IsEnbaled: "true"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Configure isolated Redis authentication
+        run: >-
+          docker exec ${{ job.services.redis.id }}
+          redis-cli CONFIG SET requirepass ci-local-only
+
+      - name: Restore integration tests
+        run: >-
+          dotnet restore tests/IntegrationTest/AuthService.Tests/AuthService.Test.csproj
+          --configfile NuGet.Config
+
+      - name: Build integration tests
+        run: >-
+          dotnet build tests/IntegrationTest/AuthService.Tests/AuthService.Test.csproj
+          --configuration Release --no-restore
+
+      - name: Run AuthService integration tests
+        run: >-
+          dotnet test tests/IntegrationTest/AuthService.Tests/AuthService.Test.csproj
+          --configuration Release --no-build --no-restore
+          --logger "console;verbosity=normal"

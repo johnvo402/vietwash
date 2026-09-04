@@ -11,12 +11,7 @@ import { useCustomerRevenueTable } from "./components/column";
 import { useTranslations } from "next-intl";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import {
-  convertObjectsToRows,
-  createExcelBuilder,
-  ExcelCell,
-  exportFile,
-} from "@/shared/utils/excel";
+import type { ExcelCell } from "@/shared/utils/excel";
 import { excelHeaderStyle } from "@/shared/themes/excel";
 import { toast } from "react-toastify";
 import { format, formatDate } from "date-fns";
@@ -56,6 +51,8 @@ export default function CustomerRevenueView() {
     setExportLoading(true);
 
     try {
+      const { convertObjectsToRows, createExcelBuilder, exportFile } =
+        await import("@/shared/utils/excel");
       toast.loading(t("common.excel_downloading"));
 
       // Lấy toàn bộ dữ liệu

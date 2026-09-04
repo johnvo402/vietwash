@@ -66,12 +66,14 @@ export function OrderSummary({
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8"
+              className="h-11 w-11 shrink-0"
+              aria-label={t("common.decreaseQuantity", { item: item.name })}
+              disabled={item.quantity <= 1}
               onClick={() =>
                 onUpdateQuantity(itemKey(item), Math.max(1, item.quantity - 1))
               }
             >
-              <Minus className="h-4 w-4" />
+              <Minus className="h-4 w-4" aria-hidden="true" />
             </Button>
 
             <span className="w-8 text-center">{item.quantity}</span>
@@ -79,19 +81,21 @@ export function OrderSummary({
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8"
+              className="h-11 w-11 shrink-0"
+              aria-label={t("common.increaseQuantity", { item: item.name })}
               onClick={() => onUpdateQuantity(itemKey(item), item.quantity + 1)}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4" aria-hidden="true" />
             </Button>
 
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-destructive"
+              className="h-11 w-11 shrink-0 text-destructive"
+              aria-label={t("common.removeItem", { item: item.name })}
               onClick={() => onRemoveItem(itemKey(item))}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-4 w-4" aria-hidden="true" />
             </Button>
           </div>
 
