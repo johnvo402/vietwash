@@ -1,25 +1,34 @@
 using Application.Common.Interfaces.Services.DistributedCache;
-using Microsoft.Extensions.Options;
 using Shared.Kernel.Extensions;
 using StackExchange.Redis;
 
 namespace Infrastructure.Services.DistributedCache;
 
-public class RedisCacheService(IOptions<RedisDatabaseSettings> options) : IRedisCacheService
+public class RedisCacheService(IConnectionMultiplexer multiplexer) : IRedisCacheService
 {
-    private readonly RedisDatabaseSettings redisDatabaseSettings = options.Value;
-    public IDatabase Database => GetDatabase();
+    private readonly IDatabase database = multiplexer.GetDatabase();
+    public IDatabase Database => database;
 
     public T? GetOrSet<T>(string key, Func<T> func, TimeSpan? expiry = null)
     {
-        throw new NotImplementedException();
+        RedisValue currentValue = Database.StringGet(key);
+
+        if (currentValue.IsNull)
+        {
+            T value = func();
+            SerializeResult result = SerializerExtension.Serialize(value!);
+            _ = Database.StringSet(key, result.StringJson, expiry, when: When.Always);
+            return value;
+        }
+
+        return SerializerExtension.Deserialize<T>(currentValue.ToString()).Object;
     }
 
     public async Task<T?> GetOrSetAsync<T>(string key, Func<Task<T>> task, TimeSpan? expiry = null)
     {
-        string? currentValue = await Database.StringGetAsync(key);
+        RedisValue currentValue = await Database.StringGetAsync(key);
 
-        if (currentValue == null)
+        if (currentValue.IsNull)
         {
             T value = await task();
             SerializeResult result = SerializerExtension.Serialize(value!);
@@ -27,18 +36,6 @@ public class RedisCacheService(IOptions<RedisDatabaseSettings> options) : IRedis
             return value;
         }
 
-        return SerializerExtension.Deserialize<T>(currentValue).Object;
-    }
-
-    private IDatabase GetDatabase()
-    {
-        ConfigurationOptions options = new()
-        {
-            EndPoints = { { redisDatabaseSettings.Host!, redisDatabaseSettings.Port!.Value } },
-            Password = redisDatabaseSettings.Password,
-        };
-        ConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect(options);
-
-        return multiplexer.GetDatabase();
+        return SerializerExtension.Deserialize<T>(currentValue.ToString()).Object;
     }
 }

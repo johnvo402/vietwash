@@ -97,7 +97,8 @@ try
 }
 catch (Exception ex)
 {
-    Log.Logger.Fatal("Application has launched fail with error {error}", ex.Message);
+    Log.Fatal(ex, "Application failed to start");
+    throw;
 }
 finally
 {
