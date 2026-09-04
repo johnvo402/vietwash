@@ -62,12 +62,12 @@ export default function ProductSupplyingRow({
   const t = useTranslations();
   const [stock, setStock] = useState(0);
   const getUnitRelationsForProduct = (
-    productId: number
+    productId: number,
   ): UnitRelationProjection[] =>
     products.find((p) => p.id === productId)?.unitRelations || [];
 
   const units = getUnitRelationsForProduct(
-    form.getValues(`productSupplyings.${index}.productId`)
+    form.getValues(`productSupplyings.${index}.productId`),
   );
 
   const handleIncrement = (field: any) => {
@@ -101,7 +101,7 @@ export default function ProductSupplyingRow({
     form.setValue(
       `productSupplyings.${index}.price`,
       selectedProduct?.capitalPrice || 0,
-      { shouldValidate: false }
+      { shouldValidate: false },
     );
 
     // Trigger validation after setting values
@@ -204,8 +204,11 @@ export default function ProductSupplyingRow({
                   type="button"
                   variant="outline"
                   size="icon"
-                  className="bg-primary-foreground hover:bg-gray-200 rounded-lg"
+                  className="h-11 w-11 bg-primary-foreground hover:bg-gray-200 rounded-lg"
                   onClick={() => handleDecrement(field, 1)}
+                  aria-label={t("common.decreaseQuantity", {
+                    item: t("common.product"),
+                  })}
                 >
                   <MinusCircle className="h-4 w-4" />
                 </Button>
@@ -224,8 +227,11 @@ export default function ProductSupplyingRow({
                   type="button"
                   variant="outline"
                   size="icon"
-                  className="bg-primary-foreground hover:bg-gray-200 rounded-lg"
+                  className="h-11 w-11 bg-primary-foreground hover:bg-gray-200 rounded-lg"
                   onClick={() => handleIncrement(field)}
+                  aria-label={t("common.increaseQuantity", {
+                    item: t("common.product"),
+                  })}
                 >
                   <PlusCircle className="h-4 w-4" />
                 </Button>
@@ -261,6 +267,10 @@ export default function ProductSupplyingRow({
           variant="ghost"
           size="icon"
           onClick={() => removeProduct(index)}
+          className="h-11 w-11"
+          aria-label={t("common.removeItem", {
+            item: t("common.product"),
+          })}
         >
           <Trash2 className="h-4 w-4 text-destructive" />
         </Button>

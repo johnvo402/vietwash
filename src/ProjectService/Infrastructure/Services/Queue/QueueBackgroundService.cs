@@ -10,7 +10,6 @@ using Serilog;
 namespace Infrastructure.Services.DistributedCache;
 
 public class PubSubBackgroundService(
-    IPubSubFactory queueFactory,
     IServiceProvider serviceProvider,
     IOptions<PubSubSettings> options
 ) : BackgroundService

@@ -9,7 +9,7 @@ namespace Domain.Aggregates.Inventories
     {
         public long? SupplierId { get; set; }
         public ActivationStatus Status { get; set; }
-        public string Note { get; set; }
+        public string Note { get; set; } = default!;
         public InventoryRequestType Type { get; set; }
         public DateTimeOffset? RequestAt { get; set; }
         public string? CancelReason { get; set; }

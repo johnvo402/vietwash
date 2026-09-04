@@ -3,6 +3,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Dtos.Requests;
 using Contracts.Dtos.Responses;
 using Contracts.Extensions.QueryExtensions;
+using Infrastructure.UnitOfWorks;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -26,14 +27,14 @@ namespace Contracts.Infrastructure.UnitOfWorks.Repositories
                 .CallPostgreSqlFunction<T>(functionName, parameters)
                 .Select(mappingResult)
                 .Filter(queryParam.Filter)
-                .Search(queryParam?.Keyword, queryParam?.Targets)
+                .Search(queryParam.Keyword, queryParam.Targets)
                 .ToCursorPagedListAsync(
                     new CursorPaginationRequest(
                         queryParam.Before,
                         queryParam.After,
                         queryParam.PageSize,
-                        defaultSort,
-                        queryParam.Sort
+                        queryParam.Sort.GetDefaultSort(),
+                        uniqueSort ?? defaultSort
                     )
                 );
         }

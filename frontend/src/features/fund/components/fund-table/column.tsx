@@ -217,7 +217,12 @@ export const useFundTable = ({
       cell: ({ row }) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="default">
+            <Button
+              variant="ghost"
+              size="default"
+              className="h-11 w-11"
+              aria-label={t("common.openMenu")}
+            >
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -262,7 +267,7 @@ export const useFundTable = ({
                           if (onStatusChange && row.original.id) {
                             onStatusChange(
                               row.original.id.toString(),
-                              FundStatus.Confirmed
+                              FundStatus.Confirmed,
                             );
                           }
                         }}
@@ -278,7 +283,7 @@ export const useFundTable = ({
                             if (onStatusChange && row.original.id) {
                               onStatusChange(
                                 row.original.id.toString(),
-                                FundStatus.Cancelled
+                                FundStatus.Cancelled,
                               );
                             }
                           }}

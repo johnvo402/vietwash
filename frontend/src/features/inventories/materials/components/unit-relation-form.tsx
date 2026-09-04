@@ -60,7 +60,7 @@ export function UnitRelationsForm({
 }: UnitRelationsFormProps) {
   const t = useTranslations();
   const [unitInputModes, setUnitInputModes] = useState<boolean[]>(
-    form.getValues("unitRelations").map(() => true)
+    form.getValues("unitRelations").map(() => true),
   );
   const isUpdatingRef = useRef(false); // Prevent recursive updates
 
@@ -80,7 +80,7 @@ export function UnitRelationsForm({
           processingTime: 0,
         },
       ],
-      { shouldValidate: true }
+      { shouldValidate: true },
     );
     setUnitInputModes((prev) => [...prev, true]);
   }, [form]);
@@ -93,12 +93,12 @@ export function UnitRelationsForm({
         form.setValue(
           "unitRelations",
           currentRelations.filter((_, i) => i !== originalIndex),
-          { shouldValidate: true }
+          { shouldValidate: true },
         );
         setUnitInputModes((prev) => prev.filter((_, i) => i !== originalIndex));
       }
     },
-    [form]
+    [form],
   );
 
   // Handle base unit selection
@@ -131,7 +131,7 @@ export function UnitRelationsForm({
       // Update unitInputModes to match new unitRelations
       setUnitInputModes(newUnitRelations.map(() => true));
     },
-    [form, currentUnits]
+    [form, currentUnits],
   );
 
   // Sync base unit price with capital price and suggest price for non-base units
@@ -155,7 +155,7 @@ export function UnitRelationsForm({
             // Base unit: set price to capitalPrice and multiple to 1
             const currentPrice = form.getValues(`unitRelations.${index}.price`);
             const currentMultiple = form.getValues(
-              `unitRelations.${index}.multiple`
+              `unitRelations.${index}.multiple`,
             );
             if (currentPrice !== capitalPrice) {
               form.setValue(`unitRelations.${index}.price`, capitalPrice, {
@@ -199,7 +199,7 @@ export function UnitRelationsForm({
         console.error("Error creating unit:", error);
       }
     },
-    [createUnit, unitForm, setUnitDialogOpen]
+    [createUnit, unitForm, setUnitDialogOpen],
   );
 
   // Get available units
@@ -208,30 +208,30 @@ export function UnitRelationsForm({
       const currentRelations = form.getValues("unitRelations");
       const selectedUnitNames = currentRelations
         .map((relation, index) =>
-          index !== currentIndex ? relation.name : null
+          index !== currentIndex ? relation.name : null,
         )
         .filter((name) => name !== null && name !== "");
 
       return (
         currentUnits?.filter(
-          (unit: any) => !selectedUnitNames.includes(unit?.name)
+          (unit: any) => !selectedUnitNames.includes(unit?.name),
         ) || []
       );
     },
-    [form, currentUnits]
+    [form, currentUnits],
   );
 
   // Toggle unit input mode
   const toggleUnitInputMode = useCallback(
     (index: number) => {
       setUnitInputModes((prev) =>
-        prev.map((mode, i) => (i === index ? !mode : mode))
+        prev.map((mode, i) => (i === index ? !mode : mode)),
       );
       form.setValue(`unitRelations.${index}.name`, "", {
         shouldValidate: true,
       });
     },
-    [form]
+    [form],
   );
 
   return (
@@ -263,7 +263,7 @@ export function UnitRelationsForm({
                         <SelectItem key={index} value={unit.name}>
                           {unit.name}
                         </SelectItem>
-                      )
+                      ),
                   )}
                 </SelectContent>
               </Select>
@@ -290,7 +290,7 @@ export function UnitRelationsForm({
             .watch("unitRelations")
             .findIndex(
               (r) =>
-                r.name === relation.name && r.baseUnit === relation.baseUnit
+                r.name === relation.name && r.baseUnit === relation.baseUnit,
             );
           const availableUnits = getAvailableUnits(originalIndex);
           const currentUnitName = relation.name;
@@ -301,7 +301,7 @@ export function UnitRelationsForm({
           let displayUnits = availableUnits;
           if (currentUnitNotAvailable && currentUnitName) {
             const currentUnit = currentUnits.find(
-              (unit) => unit.name === currentUnitName
+              (unit) => unit.name === currentUnitName,
             );
             if (currentUnit) {
               displayUnits = [...(availableUnits || []), currentUnit];
@@ -335,7 +335,7 @@ export function UnitRelationsForm({
                         <Select
                           onValueChange={(value) => {
                             const selectedUnit = currentUnits.find(
-                              (unit) => unit.name === value
+                              (unit) => unit.name === value,
                             );
                             if (selectedUnit) {
                               field.onChange(selectedUnit.name);
@@ -369,6 +369,8 @@ export function UnitRelationsForm({
                         variant="outline"
                         size="icon"
                         onClick={() => toggleUnitInputMode(originalIndex)}
+                        className="h-11 w-11"
+                        aria-label={t("common.toggleUnitInput")}
                       >
                         {unitInputModes[originalIndex] ? (
                           <Tag className="h-4 w-4" />
@@ -381,7 +383,12 @@ export function UnitRelationsForm({
                         onOpenChange={setUnitDialogOpen}
                       >
                         <DialogTrigger asChild>
-                          <Button variant="outline" size="icon">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-11 w-11"
+                            aria-label={t("common.createUnit")}
+                          >
                             <Plus className="h-4 w-4" />
                           </Button>
                         </DialogTrigger>
@@ -415,7 +422,7 @@ export function UnitRelationsForm({
                                       {t("common.entityName", {
                                         entity: t("common.unit").replace(
                                           /^./,
-                                          (c) => c.toUpperCase()
+                                          (c) => c.toUpperCase(),
                                         ),
                                       })}
                                     </FormLabel>
@@ -505,9 +512,7 @@ export function UnitRelationsForm({
                       <FormLabel>{t("common.status.title")}</FormLabel>
                       <FormControl>
                         <RadioGroup
-                          onValueChange={(value) =>
-                            field.onChange(value)
-                          }
+                          onValueChange={(value) => field.onChange(value)}
                           defaultValue={field.value.toString()}
                           className="flex flex-col space-y-1"
                         >
@@ -541,7 +546,10 @@ export function UnitRelationsForm({
                   size="icon"
                   onClick={() => removeUnitRelation(originalIndex)}
                   disabled={form.watch("unitRelations").length <= 1}
-                  className="ml-auto"
+                  className="ml-auto h-11 w-11"
+                  aria-label={t("common.removeItem", {
+                    item: t("common.unit"),
+                  })}
                 >
                   <Trash2 className="h-4 w-4 text-destructive" />
                 </Button>

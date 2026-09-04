@@ -7,7 +7,7 @@ namespace Application.Feature.Common.Projections.Tariffs
 {
     public class TariffProjection : BaseEntity
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = default!;
         public long BranchId { get; set; }
         public DateTimeOffset? StartAt { get; set; }
         public DateTimeOffset? EndAt { get; set; }
@@ -30,7 +30,7 @@ namespace Application.Feature.Common.Projections.Tariffs
 
     public class TariffByBranchProjection
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = default!;
         public long Id { get; set; }
     }
 }

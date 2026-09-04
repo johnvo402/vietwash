@@ -13,7 +13,9 @@ namespace Application.Feature.Feedbacks.Command.Reply
             return new Feedback(
                 branchId: parentFeedback.BranchId,
                 serviceId: parentFeedback.ServiceId,
-                comment: model.ReplyFeedback.Comment,
+                comment: Application.Common.Security.RichTextSanitizer.Sanitize(
+                    model.ReplyFeedback.Comment
+                ),
                 parentId: model.Id,
                 userId: userId
             );

@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import { useStringUtil } from "@/lib/stringUtil";
 import NotificationDropdown from "@/components/admin-panel/notification";
 import { useQueryClient } from "@tanstack/react-query";
+import { SafeHtml } from "@/components/ui/safe-html";
 
 // Define interfaces for better type safety
 interface NotificationMessage {
@@ -29,7 +30,7 @@ interface CustomToastProps {
 export const CustomToast = ({ title, content }: CustomToastProps) => (
   <div>
     <strong>{title}</strong>
-    {content && <div dangerouslySetInnerHTML={{ __html: content }} />}
+    {content && <SafeHtml html={content} />}
   </div>
 );
 

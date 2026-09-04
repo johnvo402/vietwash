@@ -19,7 +19,7 @@ namespace Application.Feature.Orders.Queries.GetLinkPayment
                     .OrderItems.AsEnumerable()
                     .Select(x => new OrderPaymentItem
                     {
-                        Name = x.ServiceName,
+                        Name = x.ServiceName ?? string.Empty,
                         Amount = x.Price,
                         Quantity = x.Quantity,
                     })
@@ -40,7 +40,7 @@ namespace Application.Feature.Orders.Queries.GetLinkPayment
 
     public class OrderPaymentItem
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = default!;
         public int Quantity { get; set; }
         public decimal Amount { get; set; }
     }

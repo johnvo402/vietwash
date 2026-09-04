@@ -16,7 +16,7 @@ public static class GRPCRegisterExtension
 
     public static void UseGrpcHubEndpoints(this WebApplication app)
     {
-        app.MapGrpcService<NotificationServiceHandler>();
-        app.MapGrpcReflectionService();
+        app.MapGrpcService<NotificationServiceHandler>().AllowAnonymous();
+        app.MapGrpcReflectionService().AllowAnonymous();
     }
 }

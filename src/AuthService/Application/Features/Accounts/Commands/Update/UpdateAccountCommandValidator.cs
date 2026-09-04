@@ -94,7 +94,10 @@ public partial class UpdateAccountCommandValidator : AbstractValidator<UpdateAcc
     ) =>
         !await unitOfWork
             .Repository<Account>()
-            .AnyAsync(x => x.Id != id && EF.Functions.ILike(x.Email, email), cancellationToken);
+            .AnyAsync(
+                x => x.Id != id && x.Email != null && EF.Functions.ILike(x.Email, email),
+                cancellationToken
+            );
 
     [GeneratedRegex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$")]
     private static partial Regex EmailValidationRegex();

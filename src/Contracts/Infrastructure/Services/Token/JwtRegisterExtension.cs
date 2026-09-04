@@ -4,6 +4,7 @@ using Contracts.Application.Common.Interfaces.Services.Token;
 using Contracts.Common.Messages;
 using Contracts.Infrastructure.Services.Token;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -26,6 +27,12 @@ public static class JwtRegisterExtension
             .Get<JwtSettings>();
 
         services.AddSingleton<ITokenSecurityService, TokenSecurityService>();
+        services.AddAuthorization(options =>
+        {
+            options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .Build();
+        });
 
         return services
             .AddAuthentication(authentication =>

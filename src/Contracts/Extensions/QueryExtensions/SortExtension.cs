@@ -14,7 +14,7 @@ public static class SortExtension
     /// <typeparam name="T"></typeparam>
     /// <param name="entities"></param>
     /// <param name="sortBy"></param>
-    /// <param name="thenby"></param>
+    /// <param name="isNullCheck"></param>
     /// <returns></returns>
     /// <exception cref="NotFoundException"></exception>
     public static IQueryable<T> Sort<T>(

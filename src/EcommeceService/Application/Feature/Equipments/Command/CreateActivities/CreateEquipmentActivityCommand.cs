@@ -12,6 +12,6 @@ namespace Application.Feature.Equipments.Command.CreateActivities
         public long Id { get; set; }
 
         [FromBody]
-        public EquipmentActivityModel EquipmentActivity { get; set; }
+        public EquipmentActivityModel EquipmentActivity { get; set; } = default!;
     }
 }

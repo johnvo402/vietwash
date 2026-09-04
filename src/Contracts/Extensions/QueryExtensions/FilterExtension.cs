@@ -43,7 +43,7 @@ public static class FilterExtension
         foreach (var dynamicFilter in dynamicFilters)
         {
             string propertyName = dynamicFilter.Key;
-            object value = dynamicFilter.Value;
+            object? value = dynamicFilter.Value;
 
             // Log for debugging
             Console.WriteLine(
@@ -64,7 +64,7 @@ public static class FilterExtension
             if (isAndOperator != 0 && isOrOperator != 0 && propertyName.Contains('$'))
             {
                 Expression left = paramOrMember;
-                return Compare(propertyName, left, value);
+                return Compare(propertyName, left, value!);
             }
 
             Expression expression = null!;
@@ -115,7 +115,7 @@ public static class FilterExtension
             );
 
             Expression expression = FilterExpression(
-                value,
+                value!,
                 payload.ParamOrMember,
                 payload.Type,
                 payload.ParameterName
@@ -186,7 +186,7 @@ public static class FilterExtension
 
         if (operationType == OperationType.Between)
         {
-            return CompareBetweenOperations(left, right);
+            return CompareBetweenOperations(left, right!);
         }
 
         bool isFound = BinaryCompararisions.TryGetValue(operationType, out var comparisonFunc);
@@ -197,10 +197,10 @@ public static class FilterExtension
                 throw new NotFoundException(nameof(operationType), nameof(operationType));
             }
 
-            return CompareMethodCallOpertations(left, right, callMethodType, operationType);
+            return CompareMethodCallOpertations(left, right!, callMethodType, operationType);
         }
 
-        return CompareBinaryOperations(left, right, comparisonFunc!, operationType);
+        return CompareBinaryOperations(left, right!, comparisonFunc!, operationType);
     }
 
     private static BinaryExpression CompareBetweenOperations(Expression left, object right)

@@ -38,6 +38,7 @@ import { GetCustomerGroup } from "@/features/orders/order-utils/order-util";
 import { useAuth } from "@/hooks/use-auth";
 import { ReplyForm } from "./reply-form";
 import { EditReplyForm } from "./edit-feedback-form";
+import { SafeHtml } from "@/components/ui/safe-html";
 
 const StarRating = ({ rating }: { rating: number }) => {
   return (
@@ -87,7 +88,7 @@ export default function StaffReviewsComponent({
   const t = useTranslations();
   const { user } = useAuth();
   const [ratingFilter, setRatingFilter] = useState<number | undefined>(
-    undefined
+    undefined,
   );
   const [sortBy, setSortBy] = useState<"date" | "rating">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -104,7 +105,7 @@ export default function StaffReviewsComponent({
       { reviewId, comment },
       {
         onSuccess: () => setReplyingTo(null),
-      }
+      },
     );
   };
 
@@ -113,7 +114,7 @@ export default function StaffReviewsComponent({
       { replyId, comment },
       {
         onSuccess: () => setEditingReplyId(null),
-      }
+      },
     );
   };
 
@@ -203,14 +204,14 @@ export default function StaffReviewsComponent({
                     {t(
                       sortBy === "date"
                         ? "user.review.newestFirst"
-                        : "user.review.highestFirst"
+                        : "user.review.highestFirst",
                     )}
                   </SelectItem>
                   <SelectItem value="asc">
                     {t(
                       sortBy === "date"
                         ? "user.review.oldestFirst"
-                        : "user.review.lowestFirst"
+                        : "user.review.lowestFirst",
                     )}
                   </SelectItem>
                 </SelectContent>
@@ -262,7 +263,7 @@ export default function StaffReviewsComponent({
                           </h3>
                           {GetCustomerGroup(
                             t,
-                            review.createdUser?.customerGroup
+                            review.createdUser?.customerGroup,
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground">
@@ -275,10 +276,7 @@ export default function StaffReviewsComponent({
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                  <div
-                    className="prose"
-                    dangerouslySetInnerHTML={{ __html: review.comment ?? "" }}
-                  />
+                  <SafeHtml className="prose" html={review.comment} />
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2 text-muted-foreground">
@@ -309,7 +307,7 @@ export default function StaffReviewsComponent({
                       size="sm"
                       onClick={() =>
                         setReplyingTo(
-                          replyingTo === review.id ? null : (review.id ?? null)
+                          replyingTo === review.id ? null : (review.id ?? null),
                         )
                       }
                       className="gap-2"
@@ -355,7 +353,7 @@ export default function StaffReviewsComponent({
                                   <AvatarFallback className="bg-secondary text-primary text-xs">
                                     {reply.createdUser?.displayName
                                       ? getInitials(
-                                          reply.createdUser.displayName
+                                          reply.createdUser.displayName,
                                         )
                                       : "?"}
                                   </AvatarFallback>
@@ -382,7 +380,7 @@ export default function StaffReviewsComponent({
                                       setEditingReplyId(
                                         editingReplyId === reply.id
                                           ? null
-                                          : (reply.id ?? null)
+                                          : (reply.id ?? null),
                                       )
                                     }
                                     className="gap-2"
@@ -412,11 +410,9 @@ export default function StaffReviewsComponent({
                               isSubmitting={editReply.isPending}
                             />
                           ) : (
-                            <div
+                            <SafeHtml
                               className="text-sm prose"
-                              dangerouslySetInnerHTML={{
-                                __html: reply.comment ?? "",
-                              }}
+                              html={reply.comment}
                             />
                           )}
                         </div>

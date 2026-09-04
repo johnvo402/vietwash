@@ -8,7 +8,7 @@ public static class Messager
     public static Message<T> Create<T>(string? objectName = null)
         where T : class => new(objectName);
 
-    public static Message<T> Property<T>(this Message<T> message, Expression<Func<T, object>> prop)
+    public static Message<T> Property<T>(this Message<T> message, Expression<Func<T, object?>> prop)
         where T : class
     {
         message.PropertyName = prop.ToStringProperty();

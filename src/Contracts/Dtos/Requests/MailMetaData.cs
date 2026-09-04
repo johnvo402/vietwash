@@ -12,7 +12,7 @@ public class MailTemplateData : MailData
 
 public class MailData
 {
-    public required string? Subject { get; set; }
+    public required string Subject { get; set; }
 
     public required string? DisplayName { get; set; }
 

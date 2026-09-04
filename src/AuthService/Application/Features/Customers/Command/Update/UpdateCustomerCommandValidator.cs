@@ -24,7 +24,7 @@ public partial class UpdateCustomerCommandValidator : AbstractValidator<UpdateCu
             )
             .ChildRules(item =>
             {
-                item.RuleFor(x => x.DisplayName)
+                item.RuleFor(x => x!.DisplayName)
                     .MaximumLength(256)
                     .WithState(x =>
                         Messager
@@ -34,7 +34,7 @@ public partial class UpdateCustomerCommandValidator : AbstractValidator<UpdateCu
                             .Build()
                     );
 
-                item.RuleFor(x => x.Status)
+                item.RuleFor(x => x!.Status)
                     .IsInEnum()
                     .WithState(x =>
                         Messager
@@ -44,7 +44,7 @@ public partial class UpdateCustomerCommandValidator : AbstractValidator<UpdateCu
                             .Build()
                     );
 
-                item.RuleFor(x => x.PhoneNumber)
+                item.RuleFor(x => x!.PhoneNumber)
                     .NotEmpty()
                     .WithState(x =>
                         Messager

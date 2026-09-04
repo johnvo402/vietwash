@@ -22,7 +22,7 @@ namespace Application.Feature.Common.Projections.Feedbacks
     {
         public long Id { get; set; }
         public long? StaffId { get; set; }
-        public string Comment { get; set; }
+        public string Comment { get; set; } = default!;
         public DateTimeOffset CreatedAt { get; set; }
         public UserDTO? CreatedUser { get; set; }
     }

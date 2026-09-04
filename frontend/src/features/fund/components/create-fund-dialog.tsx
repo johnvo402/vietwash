@@ -24,9 +24,13 @@ import { FundType, ListFundBehaviorResponse } from "@/api/generated/api";
 import { FormEvent, useCallback, useState } from "react";
 import { z } from "zod";
 import { ZodError } from "zod";
-import TextEditor from "@/components/ui/text-editor";
+import dynamic from "next/dynamic";
 import { useAuth } from "@/hooks/use-auth";
 import { formatNumberVN, parseNumberVN } from "@/utils/format";
+
+const TextEditor = dynamic(() => import("@/components/ui/text-editor"), {
+  ssr: false,
+});
 
 interface FundCreatePopupProps {
   isOpen: boolean;
@@ -73,7 +77,7 @@ export function FundCreatePopup({
     amount: z.number().positive({
       message: t("common.entityInvalid").replace(
         "{Entity}",
-        t("table.accessorKey.amount")
+        t("table.accessorKey.amount"),
       ),
     }), // "Số tiền không hợp lệ"
     fundBehaviorId: z
@@ -88,7 +92,7 @@ export function FundCreatePopup({
     branchId: z.number().positive({
       message: t("common.entityInvalid").replace(
         "{Entity}",
-        t("common.branch")
+        t("common.branch"),
       ),
     }), // "Chi nhánh không hợp lệ"
   });
@@ -130,13 +134,13 @@ export function FundCreatePopup({
         handleClose();
       }
     },
-    [formData, onSubmit, t]
+    [formData, onSubmit, t],
   );
 
   // Handle fundBehaviorId change and update type accordingly
   const handleFundBehaviorChange = (value: string) => {
     const selectedBehavior = fundBehaviors.find(
-      (behavior) => behavior.id!.toString() === value
+      (behavior) => behavior.id!.toString() === value,
     );
     setFormData({
       ...formData,
@@ -191,7 +195,7 @@ export function FundCreatePopup({
                     <SelectValue
                       placeholder={t("common.entitySelectPlaceholder").replace(
                         "{entity}",
-                        t("common.branch")
+                        t("common.branch"),
                       )}
                     />{" "}
                     {/* "Chọn chi nhánh" */}
@@ -231,7 +235,7 @@ export function FundCreatePopup({
                   className="w-full border rounded-[var(--radius)] focus:ring-2 focus:ring-ring"
                   placeholder={t("common.placeholder").replace(
                     "{entity}",
-                    t("table.accessorKey.amount").toLowerCase()
+                    t("table.accessorKey.amount").toLowerCase(),
                   )}
                   disabled={isUpdate || loading}
                 />
@@ -327,7 +331,7 @@ export function FundCreatePopup({
               className="w-full border rounded-[var(--radius)] focus-within:ring-2 focus-within:ring-ring min-h-[100px]"
               placeholder={t("common.placeholderDes").replace(
                 "{entity}",
-                t("common.note")
+                t("common.note"),
               )}
             />
             {errors.note && (

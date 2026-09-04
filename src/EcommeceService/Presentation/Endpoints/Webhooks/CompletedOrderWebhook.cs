@@ -5,6 +5,7 @@ using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Domain.Aggregates.Orders.Enums;
 using Mediator;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Net.payOS.Types;
 using Presentation.Routes;
@@ -16,6 +17,7 @@ public class CompletedOrderWebhook(IOrderPaymentWebhookVerifier verifier, ISende
     : EndpointBaseAsync.WithRequest<WebhookType>.WithActionResult<ApiResponse>
 {
     [HttpPost(Router.Webhook.CompletedOrder)]
+    [AllowAnonymous]
     [SwaggerOperation(Tags = [Router.Webhook.Tags], Summary = "Complete a PayOS order")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         WebhookType request,

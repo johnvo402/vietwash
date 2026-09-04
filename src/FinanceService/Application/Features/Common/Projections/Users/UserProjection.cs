@@ -26,7 +26,7 @@ public class UserProjection : BaseResponse
     public string? Avatar { get; set; }
     public CustomerGroup? CustomerGroup { get; set; }
     public ActivationStatus Status { get; set; }
-    public string Role { get; set; }
+    public string Role { get; set; } = default!;
 }
 
 public class UserDTO

@@ -82,7 +82,7 @@ export function QRScanner({
       // Enumerate video input devices
       const allDevices = await navigator.mediaDevices.enumerateDevices();
       const videoDevices = allDevices.filter(
-        (d) => d.kind === "videoinput"
+        (d) => d.kind === "videoinput",
       ) as MediaDeviceInfo[];
 
       setDevices(videoDevices);
@@ -127,7 +127,7 @@ export function QRScanner({
           if (error && !(error instanceof NotFoundException)) {
             console.error("Scan error:", error);
           }
-        }
+        },
       );
     } catch (err) {
       const msg = t("cannotStartCamera");
@@ -148,7 +148,7 @@ export function QRScanner({
   const switchCamera = () => {
     if (devices.length > 1) {
       const currentIndex = devices.findIndex(
-        (device) => device.deviceId === selectedDeviceId
+        (device) => device.deviceId === selectedDeviceId,
       );
       const nextIndex = (currentIndex + 1) % devices.length;
       setSelectedDeviceId(devices[nextIndex].deviceId);
@@ -217,7 +217,8 @@ export function QRScanner({
                 size="sm"
                 variant="secondary"
                 onClick={switchCamera}
-                className={`h-8 w-8 p-0 ${isMobile ? "h-7 w-7" : ""}`}
+                className="h-11 w-11 p-0"
+                aria-label={t("switchCamera")}
               >
                 <RotateCcw className="w-4 h-4" />
               </Button>

@@ -7,8 +7,8 @@ namespace Domain.Aggregates.Inventories
     {
         public long InventoryDocumentId { get; set; }
         public long SupplierId { get; set; }
-        public string PdfUrl { get; set; }
-        public InventoryDocument InventoryDocument { get; set; }
-        public Supplier Supplier { get; set; }
+        public string PdfUrl { get; set; } = default!;
+        public InventoryDocument InventoryDocument { get; set; } = default!;
+        public Supplier Supplier { get; set; } = default!;
     }
 }

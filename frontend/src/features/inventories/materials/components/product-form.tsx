@@ -13,11 +13,15 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { CategoryFormQuery } from "@/features/settings/setting-data/category-settings/components/category-form";
 import CategorySelect from "@/features/services/components/category-select";
-import TextEditor from "@/components/ui/text-editor";
+import dynamic from "next/dynamic";
 import { ActivationStatus } from "@/api/generated";
 import { formatNumberVN } from "@/utils/format";
 import { UseFormReturn } from "react-hook-form";
 import { FormValues, CategoryFormValues } from "./create-material-dialog";
+
+const TextEditor = dynamic(() => import("@/components/ui/text-editor"), {
+  ssr: false,
+});
 
 interface ProductFormFieldsProps {
   form: UseFormReturn<FormValues>;
@@ -65,7 +69,7 @@ export function ProductFormFields({
               <FormLabel>
                 {t("dialog.name", {
                   Entity: t("common.product").replace(/^./, (c) =>
-                    c.toUpperCase()
+                    c.toUpperCase(),
                   ),
                 })}
               </FormLabel>
@@ -115,6 +119,10 @@ export function ProductFormFields({
                   variant="outline"
                   size="icon"
                   onClick={() => setCategoryDialogOpen(true)}
+                  className="h-11 w-11"
+                  aria-label={t("common.add", {
+                    entity: t("common.category"),
+                  })}
                 >
                   <Plus className="h-4 w-4" />
                 </Button>

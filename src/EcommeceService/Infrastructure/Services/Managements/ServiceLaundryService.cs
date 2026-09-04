@@ -101,7 +101,7 @@ namespace Infrastructure.Services.Managements
                     {
                         _unitRelationContext.Update(unitRelation); // Cập nhật
                     }
-                    else if (unitRelation.Id == 0 || unitRelation.Id == null)
+                    else if (unitRelation.Id == 0)
                     {
                         unitRelation.Id = 0; // Đảm bảo DB tự tăng
                         _unitRelationContext.Add(unitRelation); // Thêm mới

@@ -16,8 +16,8 @@ import { MoreVertical } from "lucide-react";
 export const useEquipmentActivityTable = (
   onAction?: (
     action: "detail" | "edit",
-    row: ListEquipmentActivityResponse
-  ) => void
+    row: ListEquipmentActivityResponse,
+  ) => void,
 ) => {
   const t = useTranslations();
 
@@ -36,7 +36,7 @@ export const useEquipmentActivityTable = (
       header: t("equipment.activityType.title"),
       cell: ({ row }) =>
         t(
-          `equipment.activityType.${(row.getValue("type") as string).toLowerCase()}`
+          `equipment.activityType.${(row.getValue("type") as string).toLowerCase()}`,
         ),
     },
     {
@@ -78,7 +78,12 @@ export const useEquipmentActivityTable = (
       cell: ({ row }) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-11 w-11"
+              aria-label={t("common.openMenu")}
+            >
               <MoreVertical className="h-5 w-5" />
             </Button>
           </DropdownMenuTrigger>

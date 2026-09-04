@@ -14,7 +14,7 @@ namespace Application.Feature.Common.Projections.BranchProducts
     public class BranchProductProjection : BaseResponse
     {
         public long BranchId { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = default!;
         public string? Description { get; set; }
         public string? Sku { get; set; }
 
@@ -26,7 +26,7 @@ namespace Application.Feature.Common.Projections.BranchProducts
         public ActivationStatus Status { get; set; }
 
         public long CategoryId { get; set; }
-        public CategoryService Category { get; set; }
+        public CategoryService Category { get; set; } = default!;
 
         public ICollection<UnitRelationProjection> UnitRelations { get; set; } = [];
 

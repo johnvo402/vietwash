@@ -17,28 +17,24 @@ namespace Application.Common.HandleEventDomains.Orders
             CancellationToken cancellationToken
         )
         {
+            if (notification.Order is null)
+            {
+                logger.Warning("EInvoiceEventHandler received an event without an order");
+                return;
+            }
+
             logger.Information("EInvoiceEventHandler: {@Id}", notification.Order.Id);
-
-            if (notification.Order != null)
+            var data = notification.Order.ToEInvoiceMessage();
+            var check = await queueFactory
+                .GetPubSub(PubSubType.Origin)
+                .PublishAsync(data, "EInvoiceEvent");
+            if (!check)
             {
-                var data = notification.Order.ToEInvoiceMessage();
-                var check = await queueFactory
-                    .GetPubSub(PubSubType.Origin)
-                    .PublishAsync(data, "EInvoiceEvent");
-                if (!check)
-                {
-                    logger.Error(
-                        "EInvoiceEventHandler: {@Id} enqueue failed",
-                        notification.Order.Id
-                    );
-                }
+                logger.Error(
+                    "EInvoiceEventHandler: {@Id} enqueue failed",
+                    notification.Order.Id
+                );
             }
-            else
-            {
-                logger.Warning("EInvoiceEventHandler: {@Id} enqueue failed", notification.Order.Id);
-            }
-
-            await Task.CompletedTask;
         }
     }
 }

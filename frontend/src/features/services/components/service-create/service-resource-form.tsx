@@ -65,11 +65,11 @@ export function ServiceResourcesForm({
   const removeServiceResource = useCallback(
     (resourceIndex: number) => {
       const current = form.getValues(
-        `unitRelations.${unitIndex}.serviceResources`
+        `unitRelations.${unitIndex}.serviceResources`,
       );
       if (current && current.length > 1) removeRes(resourceIndex);
     },
-    [form, unitIndex, removeRes]
+    [form, unitIndex, removeRes],
   );
 
   const handleProductChange = (value: string, resourceIndex: number) => {
@@ -77,12 +77,12 @@ export function ServiceResourcesForm({
     form.setValue(
       `unitRelations.${unitIndex}.serviceResources.${resourceIndex}.productId`,
       productId,
-      { shouldValidate: false, shouldDirty: true }
+      { shouldValidate: false, shouldDirty: true },
     );
     form.setValue(
       `unitRelations.${unitIndex}.serviceResources.${resourceIndex}.unitProductId`,
       0,
-      { shouldValidate: false, shouldDirty: true }
+      { shouldValidate: false, shouldDirty: true },
     );
   };
 
@@ -103,10 +103,10 @@ export function ServiceResourcesForm({
 
       {resFields.map((rf, resourceIndex) => {
         const resource = form.getValues(
-          `unitRelations.${unitIndex}.serviceResources.${resourceIndex}`
+          `unitRelations.${unitIndex}.serviceResources.${resourceIndex}`,
         );
         const selectedProduct = products.find(
-          (p) => p.id === resource?.productId
+          (p) => p.id === resource?.productId,
         );
         const unitOptions: UnitRelationProjection[] =
           (selectedProduct?.unitRelations as any) ?? [];
@@ -114,11 +114,11 @@ export function ServiceResourcesForm({
 
         // Làm sạch unitProductId để loại bỏ ký tự "~" hoặc định dạng không mong muốn
         const cleanUnitProductId = String(
-          resource?.unitProductId || ""
+          resource?.unitProductId || "",
         ).replace(/[~]/g, "");
         // Tìm đơn vị được chọn từ unitOptions dựa trên unitProductId đã làm sạch
         const selectedUnit = unitOptions.find(
-          (u) => String(u.id) === cleanUnitProductId
+          (u) => String(u.id) === cleanUnitProductId,
         );
 
         // Debug log để kiểm tra dữ liệu
@@ -226,7 +226,7 @@ export function ServiceResourcesForm({
                       onBlur={(e) => {
                         const val = parseFloat(e.target.value || "0.001");
                         field.onChange(
-                          Number.isNaN(val) ? 0.001 : Math.max(0.001, val)
+                          Number.isNaN(val) ? 0.001 : Math.max(0.001, val),
                         );
                       }}
                     />
@@ -243,10 +243,14 @@ export function ServiceResourcesForm({
                 variant="ghost"
                 size="icon"
                 onClick={() => removeServiceResource(resourceIndex)}
+                className="h-11 w-11"
+                aria-label={t("common.removeItem", {
+                  item: t("service.resources.title"),
+                })}
                 disabled={
                   (
                     form.getValues(
-                      `unitRelations.${unitIndex}.serviceResources`
+                      `unitRelations.${unitIndex}.serviceResources`,
                     ) ?? []
                   ).length <= 1
                 }

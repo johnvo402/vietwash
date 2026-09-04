@@ -19,8 +19,8 @@ namespace Application.Feature.Common.Projections.Units
     {
         public long UnitProductId { get; set; }
         public long ProductId { get; set; }
-        public string UnitName { get; set; }
-        public string ProductName { get; set; }
+        public string UnitName { get; set; } = default!;
+        public string ProductName { get; set; } = default!;
         public decimal Quantity { get; set; }
     }
 }

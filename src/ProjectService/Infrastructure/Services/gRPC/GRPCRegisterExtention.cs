@@ -19,8 +19,8 @@ public static class GRPCRegisterExtension
 
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapGrpcService<PubSubLogServiceHandler>();
-            endpoints.MapGrpcReflectionService();
+            endpoints.MapGrpcService<PubSubLogServiceHandler>().AllowAnonymous();
+            endpoints.MapGrpcReflectionService().AllowAnonymous();
         });
 
         return app;

@@ -14,8 +14,12 @@ import { ActivationStatus } from "@/api/generated";
 import { CategoryFormQuery } from "@/features/settings/setting-data/category-settings/components/category-form";
 import { useListCategoryResponseQuery } from "@/features/settings/setting-data/category-settings/hooks/use-category-data-query";
 import CategorySelect from "../category-select";
-import TextEditor from "@/components/ui/text-editor";
+import dynamic from "next/dynamic";
 import { CategoryFormValues } from "@/features/inventories/materials/components/create-material-dialog";
+
+const TextEditor = dynamic(() => import("@/components/ui/text-editor"), {
+  ssr: false,
+});
 
 interface ServiceFormFieldsProps {
   form: any; // UseFormReturn<FormValues>
@@ -52,7 +56,7 @@ export function ServiceFormFields({
               <FormLabel>
                 {t("dialog.name", {
                   Entity: t("common.service").replace(/^./, (c) =>
-                    c.toUpperCase()
+                    c.toUpperCase(),
                   ),
                 })}
               </FormLabel>
@@ -90,6 +94,10 @@ export function ServiceFormFields({
                   variant="outline"
                   size="icon"
                   onClick={() => setCategoryDialogOpen(true)}
+                  className="h-11 w-11"
+                  aria-label={t("common.add", {
+                    entity: t("common.category"),
+                  })}
                 >
                   <Plus className="h-4 w-4" />
                 </Button>

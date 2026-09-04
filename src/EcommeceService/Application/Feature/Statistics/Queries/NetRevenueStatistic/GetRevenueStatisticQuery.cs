@@ -8,12 +8,12 @@ namespace Application.Feature.Statistics.Queries.RevenueStatistic
     public class GetRevenueStatisticQuery : IRequest<Result<IEnumerable<GetRevenueStatistic>>>
     {
         [FromQuery]
-        public string BranchId { get; set; }
+        public string BranchId { get; set; } = default!;
 
         [FromQuery]
-        public string From { get; set; }
+        public string From { get; set; } = default!;
 
         [FromQuery]
-        public string To { get; set; }
+        public string To { get; set; } = default!;
     }
 }

@@ -12,6 +12,7 @@ Baseline closure commit: `84582067` on `dev`. This follow-up supersedes the DI, 
 - Next 15.5.25 (Maintenance LTS), next-intl 4.14.2 and Serwist replace the vulnerable Next 14/next-pwa tree. React 18 and the existing UI remain. Server route params/cookies are migrated to async access. Node 22 LTS is used in Docker and CI.
 - Unused secp256k1 helpers and `elliptic` were removed after verifying there were no callers. Reviewed dependency overrides and verification are described in `frontend-dependency-audit.md`.
 - Service-worker caching is limited to public versioned `/_next/static` assets. Authenticated documents, API responses and signed media remain network-only. Legacy next-pwa caches are removed on activation.
+- Rich text is sanitized on write and again before browser rendering; authorization now defaults to authenticated access, with anonymous endpoints explicitly documented in code. Icon-only controls have accessible names and 44 px targets, while heavy editors and QR scanning load on demand.
 
 ## Durable processed-order notifications
 
@@ -46,13 +47,13 @@ Delivered outbox cleanup requires a documented retention/replay policy. Do not t
 
 ## Verification
 
-- 489 backend tests passed, zero failures/skips: Ecommerce 412, Auth 33, Finance 35, Notification 7, Project 2. PostgreSQL tests use an isolated localhost database and unique schemas. CI now provisions PostgreSQL and enables these tests rather than silently skipping outbox/inbox regressions.
+- 503 backend tests passed, zero failures/skips: Ecommerce 421, Auth 34, Finance 39, Notification 7, Project 2. PostgreSQL tests use an isolated localhost database and unique schemas. CI now provisions PostgreSQL and enables these tests rather than silently skipping outbox/inbox regressions.
 - Transaction rollback, failed transport/negative acknowledgement, retry identity, backoff, concurrent claims, expired leases, shutdown, concurrent duplicate receiver delivery, receiver rollback and offline-client persistence are covered.
 - Full and production-only npm audits report **0 findings** at verification time. Lint/typecheck, production build and Linux standalone image build pass. ExcelJS workbook export/import with UUID-dependent conditional formatting passes.
 - Real PayOS SDK HMAC verification accepts a locally signed fixture and rejects amount tampering/wrong keys. Existing payment amount, state, role and replay tests remain. No provider API or real transfer was used.
 - The edge forwards only `POST /Webhook/api/CompletedOrder` to Ecommerce, with a 64 KiB limit. An unsigned fixture reaches the backend and returns 400; unauthenticated order API remains 401. Nginx configuration validates.
 
-Build/deprecation warnings are not hidden; zero npm advisories is not certification of OS packages, .NET packages, the whole application or future advisories. Next 15 is on Maintenance LTS: plan its next supported-major migration before its support window ends.
+Build/deprecation warnings are not hidden: the clean backend build has zero warnings and CI treats future warnings as errors. Zero npm advisories is not certification of OS packages, .NET packages, the whole application or future advisories. Next 15 is on Maintenance LTS: plan its next supported-major migration before its support window ends.
 
 ## PayOS production sign-off: blocked on the merchant environment
 

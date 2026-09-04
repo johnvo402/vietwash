@@ -21,6 +21,7 @@ import {
   UserCircle,
   Contact,
   Plus,
+  Loader2,
 } from "lucide-react";
 import { useProfileForm } from "@/features/profile/hooks/use-profile-form";
 import { ProfileAvatar } from "@/features/profile/components/profile-avatar";
@@ -36,12 +37,23 @@ import { Label } from "@/components/ui/label";
 import { Gender } from "@/api/generated/api";
 import { useTranslations } from "next-intl";
 
+interface MutationControls<TVariables> {
+  mutate: (variables: TVariables, options?: { onSuccess?: () => void }) => void;
+  isPending: boolean;
+}
+
 interface ProfileDialogProps {
   user: UserProfile;
   visible: boolean;
   onClose?: () => void;
-  updateProfileMutation: any;
-  changePasswordMutation: any;
+  updateProfileMutation: MutationControls<{
+    user: UserProfile;
+    avt?: File;
+  }>;
+  changePasswordMutation: MutationControls<{
+    oldPassword: string;
+    newPassword: string;
+  }>;
 }
 
 export function ProfileDialog({
@@ -72,28 +84,33 @@ export function ProfileDialog({
     handleSelectChange,
     handlePasswordChange,
     handleCancel,
-    handleChangePassword,
+    resetPasswordChange,
     handleContactChange,
     otpState,
     handleSendOtp,
   } = useProfileForm({ initialUser });
 
   const handleSave = () => {
-    updateProfileMutation.mutate({ user, avt: avtFile });
-    setIsEditing(false);
-    setOpen(false);
-    onClose?.();
+    updateProfileMutation.mutate(
+      { user, avt: avtFile ?? undefined },
+      {
+        onSuccess: () => {
+          setIsEditing(false);
+          setOpen(false);
+          onClose?.();
+        },
+      },
+    );
   };
 
   const handlePasswordUpdate = () => {
-    try {
-      changePasswordMutation.mutate({
+    changePasswordMutation.mutate(
+      {
         oldPassword: passwords.current,
         newPassword: passwords.new,
-      });
-    } finally {
-      handleChangePassword();
-    }
+      },
+      { onSuccess: resetPasswordChange },
+    );
   };
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -178,7 +195,7 @@ export function ProfileDialog({
                           <Label>
                             {t("user.otpFor", {
                               entity: t("user.email.title").replace(/^./, (c) =>
-                                c.toLowerCase()
+                                c.toLowerCase(),
                               ),
                             })}
                           </Label>
@@ -346,7 +363,11 @@ export function ProfileDialog({
               <Button
                 className="bg-blue-600 hover:bg-blue-700"
                 onClick={handleSave}
+                disabled={updateProfileMutation.isPending}
               >
+                {updateProfileMutation.isPending && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 {t("common.saveChanges")}
               </Button>
             </>
@@ -362,15 +383,18 @@ export function ProfileDialog({
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 {t("common.backTo", {
                   entity: t("user.profile").replace(/^./, (c) =>
-                    c.toUpperCase()
+                    c.toUpperCase(),
                   ),
                 })}
               </Button>
               <Button
                 className="bg-green-600 hover:bg-green-700"
                 onClick={() => handlePasswordUpdate()}
-                disabled={!isPasswordValid}
+                disabled={!isPasswordValid || changePasswordMutation.isPending}
               >
+                {changePasswordMutation.isPending && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 {t("user.updatePassword")}
               </Button>
             </>

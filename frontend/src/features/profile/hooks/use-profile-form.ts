@@ -158,8 +158,7 @@ export function useProfileForm({ initialUser }: UseProfileFormProps) {
     });
   };
 
-  const handleChangePassword = () => {
-    console.log("Changing password:", passwords);
+  const resetPasswordChange = () => {
     setShowPasswordChange(false);
     setPasswords({ current: "", new: "", confirm: "" });
   };
@@ -182,7 +181,7 @@ export function useProfileForm({ initialUser }: UseProfileFormProps) {
     handlePasswordChange,
     handleSendOtp,
     handleCancel,
-    handleChangePassword,
+    resetPasswordChange,
     otpState,
     setOtpState,
   };

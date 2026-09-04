@@ -3,6 +3,7 @@ using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Mediator;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
 using Swashbuckle.AspNetCore.Annotations;
@@ -17,6 +18,7 @@ public class RefreshAccountTokenEndpoint(ISender sender)
     private readonly ISender sender = sender;
 
     [HttpPost(Router.AccountRoute.RefreshToken)]
+    [AllowAnonymous]
     [SwaggerOperation(Tags = [Router.AccountRoute.Tags], Summary = "refresh token")]
     public override async Task<ActionResult<ApiResponse<RefreshTokenResponse>>> HandleAsync(
         RefreshTokenCommand request,

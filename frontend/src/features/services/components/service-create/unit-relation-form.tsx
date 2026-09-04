@@ -269,6 +269,8 @@ export function UnitRelationsForm({
                     variant="outline"
                     size="icon"
                     onClick={() => toggleUnitInputMode(id, originalIndex)}
+                    className="h-11 w-11"
+                    aria-label={t("common.toggleUnitInput")}
                   >
                     {unitInputModes[id] ? (
                       <Tag className="h-4 w-4" />
@@ -388,7 +390,10 @@ export function UnitRelationsForm({
                 variant="ghost"
                 size="icon"
                 onClick={() => removeUnitRelation(originalIndex, id)}
-                className="ml-auto"
+                className="ml-auto h-11 w-11"
+                aria-label={t("common.removeItem", {
+                  item: t("common.unit"),
+                })}
               >
                 <Trash2 className="h-4 w-4 text-destructive" />
               </Button>
@@ -413,7 +418,8 @@ export function UnitRelationsForm({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-11 w-11"
+                aria-label={t("common.toggleDetails")}
               >
                 <ChevronsUpDown className="h-4 w-4" />
               </Button>

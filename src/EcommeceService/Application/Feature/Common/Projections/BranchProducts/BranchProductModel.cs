@@ -6,9 +6,9 @@ namespace Application.Feature.Common.Projections.BranchProducts
     public class BranchProductModel
     {
         public long BranchId { get; set; } = default!;
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string Sku { get; set; }
+        public string Name { get; set; } = default!;
+        public string Description { get; set; } = default!;
+        public string Sku { get; set; } = default!;
         public decimal CapitalPrice { get; set; }
         public string? Image { get; set; }
         public long CategoryId { get; set; }

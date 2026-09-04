@@ -8,11 +8,9 @@ namespace Contracts.Infrastructure.Services.Pdf
     {
         private readonly RazorViewToStringRenderer _razorView;
         private readonly SemaphoreSlim _semaphore = new(1, 1);
-        private IBrowser _browser;
+        private IBrowser? _browser;
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         public PdfService(RazorViewToStringRenderer razorView)
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         {
             _razorView = razorView;
         }
@@ -42,7 +40,7 @@ namespace Contracts.Infrastructure.Services.Pdf
                 _semaphore.Release();
             }
 
-            return _browser;
+            return _browser!;
         }
 
         public async Task<byte[]> GeneratePdfAsync(PdfGlobalParams settings)

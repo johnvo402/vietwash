@@ -24,7 +24,8 @@ export default function FilterActions({
         variant={"ghost"}
         onClick={onReset}
         disabled={isLoading}
-        className="flex items-center py-2 px-3 justify-center bg-primary-foreground rounded-md focus:outline-none focus:ring-2  focus:ring-offset-2 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex h-11 min-w-11 items-center py-2 px-3 justify-center bg-primary-foreground rounded-md focus:outline-none focus:ring-2  focus:ring-offset-2 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+        aria-label={t("common.reset")}
       >
         <RotateCcw size={16} />
       </Button>

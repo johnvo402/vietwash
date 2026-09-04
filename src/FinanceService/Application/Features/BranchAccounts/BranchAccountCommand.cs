@@ -11,6 +11,6 @@ namespace Application.Features.BranchUsers
     public class BranchCreateEvent
     {
         public long BranchId { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = default!;
     }
 }

@@ -111,7 +111,7 @@ export default function EquipmentSupplyingRow({
               "inventory.equipmentSupplyings.validation.totalImageSize",
               {
                 max: "200MB",
-              }
+              },
             ),
           });
           setImagePreview(null);
@@ -122,7 +122,7 @@ export default function EquipmentSupplyingRow({
         field.onChange(null);
       }
     },
-    [form, index, code, t]
+    [form, index, code, t],
   );
 
   // Xử lý khi xóa ảnh
@@ -183,7 +183,7 @@ export default function EquipmentSupplyingRow({
               <FormControl>
                 <Input
                   placeholder={t(
-                    "inventory.equipmentSupplyings.placeholder.name"
+                    "inventory.equipmentSupplyings.placeholder.name",
                   )}
                   {...field}
                 />
@@ -202,7 +202,7 @@ export default function EquipmentSupplyingRow({
               <FormControl>
                 <Input
                   placeholder={t(
-                    "inventory.equipmentSupplyings.placeholder.code"
+                    "inventory.equipmentSupplyings.placeholder.code",
                   )}
                   {...field}
                   value={field.value || ""}
@@ -234,8 +234,11 @@ export default function EquipmentSupplyingRow({
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="absolute h-4 w-4 -top-2 -right-2 bg-destructive text-white"
+                        className="absolute h-8 w-8 -top-4 -right-4 bg-destructive text-white after:absolute after:-inset-2"
                         onClick={() => handleRemoveImage(field)}
+                        aria-label={t("common.removeItem", {
+                          item: t("common.image"),
+                        })}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -247,6 +250,7 @@ export default function EquipmentSupplyingRow({
                       size="icon"
                       className="bg-background hover:bg-primary-foreground rounded-lg"
                       asChild
+                      aria-label={t("common.upload")}
                     >
                       <label>
                         <ImageIcon className="h-4 w-4" />
@@ -278,8 +282,11 @@ export default function EquipmentSupplyingRow({
                     type="button"
                     variant="outline"
                     size="icon"
-                    className="bg-background hover:bg-primary-foreground rounded-lg"
                     onClick={() => handleDecrement(field, 1)}
+                    className="h-11 w-11 bg-background hover:bg-primary-foreground rounded-lg"
+                    aria-label={t("common.decreaseQuantity", {
+                      item: t("common.equipment"),
+                    })}
                   >
                     <MinusCircle className="h-4 w-4" />
                   </Button>
@@ -298,8 +305,11 @@ export default function EquipmentSupplyingRow({
                     type="button"
                     variant="outline"
                     size="icon"
-                    className="bg-background hover:bg-primary-foreground rounded-lg"
                     onClick={() => handleIncrement(field)}
+                    className="h-11 w-11 bg-background hover:bg-primary-foreground rounded-lg"
+                    aria-label={t("common.increaseQuantity", {
+                      item: t("common.equipment"),
+                    })}
                   >
                     <PlusCircle className="h-4 w-4" />
                   </Button>
@@ -369,6 +379,10 @@ export default function EquipmentSupplyingRow({
           variant="ghost"
           size="icon"
           onClick={() => removeEquipment(index)}
+          className="h-11 w-11"
+          aria-label={t("common.removeItem", {
+            item: t("common.equipment"),
+          })}
         >
           <Trash2 className="h-4 w-4 text-destructive" />
         </Button>

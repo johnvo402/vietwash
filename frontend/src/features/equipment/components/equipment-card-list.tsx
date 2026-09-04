@@ -98,7 +98,7 @@ export default function EquipmentCardList() {
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (loadMoreRef.current) {
@@ -125,7 +125,7 @@ export default function EquipmentCardList() {
       if (image instanceof File) {
         const response = await apiClient.authApiMediaPost(
           [image],
-          MediaType.Image
+          MediaType.Image,
         );
         image = response.data.results?.key?.[0] ?? "";
       }
@@ -189,7 +189,8 @@ export default function EquipmentCardList() {
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
-                            className="absolute top-2 right-2 p-1 rounded-full bg-border hover:bg-background"
+                            className="absolute top-2 right-2 h-11 w-11 p-1 rounded-full bg-border hover:bg-background"
+                            aria-label={t("common.openMenu")}
                           >
                             <MoreVertical className="h-5 w-5 text-gray-600" />
                           </Button>
@@ -243,7 +244,7 @@ export default function EquipmentCardList() {
                           className={`px-3 py-1 ${getStatusColor(equipment.status!)} font-medium`}
                         >
                           {t(
-                            `common.status.${equipment.status!.toLowerCase()}`
+                            `common.status.${equipment.status!.toLowerCase()}`,
                           )}
                         </Badge>
                       </div>

@@ -123,10 +123,10 @@ public partial class CreateAccountCommandValidator : AbstractValidator<CreateAcc
             );
     }
 
-    private async Task<bool> IsRolesAvailableAsync(string roles)
-    {
-        return new List<string> { "ADMIN", "MANAGER", "STAFF", "CUSTOMER" }.Contains(roles);
-    }
+    private Task<bool> IsRolesAvailableAsync(string roles) =>
+        Task.FromResult(
+            new List<string> { "ADMIN", "MANAGER", "STAFF", "CUSTOMER" }.Contains(roles)
+        );
 
     private async Task<bool> IsEmailAvailableAsync(
         string email,
@@ -134,7 +134,10 @@ public partial class CreateAccountCommandValidator : AbstractValidator<CreateAcc
     ) =>
         !await unitOfWork
             .Repository<Account>()
-            .AnyAsync(x => EF.Functions.ILike(x.Email, email), cancellationToken);
+            .AnyAsync(
+                x => x.Email != null && EF.Functions.ILike(x.Email, email),
+                cancellationToken
+            );
 
     [GeneratedRegex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$")]
     private static partial Regex EmailValidationRegex();

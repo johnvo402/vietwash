@@ -59,7 +59,6 @@ export function UserNav() {
         await apiClient
           .authApiMediaPost([data.avt], MediaType.Image)
           .then((response) => {
-            console.log(response);
             avtUrl = response.data.results?.key?.[0] || null;
           });
       }

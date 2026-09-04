@@ -13,6 +13,7 @@ import { useStringUtil } from "@/lib/stringUtil";
 import { usePushRouter } from "@/utils/router-utli";
 import { ROUTE_SERVICE_EDIT } from "@/types/router-type";
 import StarRating from "./start-rating";
+import { SafeHtml } from "@/components/ui/safe-html";
 
 interface ServiceInformationProps {
   service: GetServiceDetailResponse;
@@ -25,7 +26,7 @@ export const ServiceInformation = (props: ServiceInformationProps) => {
 
   const statusTitle = t("common.status.title");
   const categoryTitle = t("common.category").replace(/^./, (c) =>
-    c.toUpperCase()
+    c.toUpperCase(),
   );
   const priceTitle = t("common.price"); // Giả sử bạn có key này trong translations
   const ratingTitle = t("service.rating");
@@ -89,11 +90,10 @@ export const ServiceInformation = (props: ServiceInformationProps) => {
             className="object-cover mb-2 rounded"
           />
           <h1 className="text-lg font-semibold">{props.service?.name}</h1>
-          <div
+          <SafeHtml
             className="text-sm prose text-muted-foreground text-center"
-            dangerouslySetInnerHTML={{
-              __html: props.service?.description || "--",
-            }}
+            html={props.service?.description}
+            fallback="--"
           />
         </div>
 

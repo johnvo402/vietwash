@@ -20,6 +20,7 @@ import { apiClient } from "@/api/client";
 import { useAuth } from "@/hooks/use-auth";
 import { usePushRouter } from "@/utils/router-utli";
 import { ROUTE_INVENTORY_MATERIAL_EDIT } from "@/types/router-type";
+import { SafeHtml } from "@/components/ui/safe-html";
 
 interface BranchProductInformationProps {
   branchProduct?: DetailBranchProductResponse; // Made optional to handle loading state
@@ -48,7 +49,7 @@ export const BranchProductInformation = ({
   const branch = useMemo(() => {
     return (
       user?.branchAccounts.find(
-        (x) => x.branchId === branchProduct?.branchId
+        (x) => x.branchId === branchProduct?.branchId,
       ) || null
     );
   }, [branchProduct?.branchId, user?.branchAccounts]);
@@ -146,11 +147,10 @@ export const BranchProductInformation = ({
               className="object-cover mb-2 rounded"
             />
             <h1 className="text-lg font-semibold">{branchProduct?.name}</h1>
-            <div
+            <SafeHtml
               className="text-sm text-muted-foreground text-center"
-              dangerouslySetInnerHTML={{
-                __html: branchProduct?.description || "--",
-              }}
+              html={branchProduct?.description}
+              fallback="--"
             />
           </div>
 
@@ -166,7 +166,7 @@ export const BranchProductInformation = ({
                 className="capitalize text-xs"
               >
                 {t(
-                  `common.status.${branchProduct?.status?.toLocaleLowerCase()}`
+                  `common.status.${branchProduct?.status?.toLocaleLowerCase()}`,
                 )}
               </Badge>
             </div>

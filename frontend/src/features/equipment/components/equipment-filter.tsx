@@ -46,7 +46,7 @@ export function EquipmentFilter({
         label: t("common.status.underrepair"),
       },
     ],
-    [t]
+    [t],
   );
 
   // Current selected value for the single-select (empty string = all)
@@ -64,7 +64,7 @@ export function EquipmentFilter({
       setStatusFilter(
         found
           ? found
-          : { value: EquipmentStatus.Active, label: t("common.status.active") }
+          : { value: EquipmentStatus.Active, label: t("common.status.active") },
       );
     }
   };
@@ -107,7 +107,13 @@ export function EquipmentFilter({
           </SelectContent>
         </Select>
 
-        <Button variant="default" size="sm" onClick={handleReset}>
+        <Button
+          variant="default"
+          size="sm"
+          onClick={handleReset}
+          className="h-11 min-w-11"
+          aria-label={t("common.reset")}
+        >
           <RotateCcw size={16} />
         </Button>
       </div>

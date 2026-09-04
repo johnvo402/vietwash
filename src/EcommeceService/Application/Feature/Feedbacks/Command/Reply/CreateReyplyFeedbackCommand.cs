@@ -12,6 +12,6 @@ namespace Application.Feature.Feedbacks.Command.Reply
         public long Id { get; set; }
 
         [FromBody]
-        public ReplyFeedbackModel ReplyFeedback { get; set; }
+        public ReplyFeedbackModel ReplyFeedback { get; set; } = default!;
     };
 }

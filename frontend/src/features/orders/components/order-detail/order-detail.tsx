@@ -232,8 +232,9 @@ export function OrderDetail({
               variant="outline"
               size="icon"
               onClick={onBack}
-              className="shrink-0"
+              className="h-11 w-11 shrink-0"
               disabled={isUpdating}
+              aria-label={t("common.back")}
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>

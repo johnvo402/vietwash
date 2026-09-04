@@ -119,7 +119,10 @@ export default function Cashier() {
                 variant="outline"
                 size="sm"
                 onClick={addNewOrderTab}
-                className="ml-2"
+                className="ml-2 h-11 w-11"
+                aria-label={t("common.add", {
+                  entity: t("common.orders"),
+                })}
               >
                 <Plus className="h-4 w-4" />
               </Button>

@@ -4,7 +4,6 @@ using Contracts.Common.Messages;
 using Domain.Aggregates.Services;
 using FluentValidation;
 using Infrastructure.UnitOfWorks;
-using Contracts.Common.Messages;
 using Application.Feature.BranchProducts.Command.Update;
 
 namespace Application.Feature.Services.Command.Update

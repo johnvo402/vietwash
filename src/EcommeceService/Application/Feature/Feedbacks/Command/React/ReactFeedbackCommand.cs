@@ -12,6 +12,6 @@ namespace Application.Feature.Feedbacks.Command.React
         public long FeedbackId { get; set; }
 
         [FromBody]
-        public FeedbackReactionModel FeedbackReaction { get; set; }
+        public FeedbackReactionModel FeedbackReaction { get; set; } = default!;
     }
 }

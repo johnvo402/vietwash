@@ -280,12 +280,17 @@ export const ServiceSectionView = ({
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8"
+              className="h-11 w-11"
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              aria-label={t("common.decreaseQuantity", {
+                item: t("common.service"),
+              })}
+              aria-controls="quantity-input"
             >
               <Minus className="h-4 w-4" />
             </Button>
             <Input
+              id="quantity-input"
               type="text"
               value={formatNumberVN(quantity)}
               onChange={(e) => handleQuantityChange(e.target.value)}
@@ -297,8 +302,12 @@ export const ServiceSectionView = ({
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8"
+              className="h-11 w-11"
               onClick={() => setQuantity(quantity + 1)}
+              aria-label={t("common.increaseQuantity", {
+                item: t("common.service"),
+              })}
+              aria-controls="quantity-input"
             >
               <Plus className="h-4 w-4" />
             </Button>

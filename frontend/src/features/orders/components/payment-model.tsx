@@ -11,7 +11,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { usePayment } from "../compositions/use-payment";
-import { QRScanner } from "@/components/qr-scanner";
+import dynamic from "next/dynamic";
 import { Order } from "@/features/cashier/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,7 @@ import {
   User,
   Loader2,
 } from "lucide-react";
+
 import { formatPriceVN } from "@/utils/format";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePageType } from "@/hooks/use-page-type"; // Added hook
@@ -33,6 +34,11 @@ import {
 } from "@/types/router-type";
 import { OrderStatus } from "@/api/generated/api";
 import { canCompleteOrder } from "../order-lifecycle";
+
+const QRScanner = dynamic(
+  () => import("@/components/qr-scanner").then((module) => module.QRScanner),
+  { ssr: false },
+);
 
 interface PaymentModalProps {
   isOpen: boolean;

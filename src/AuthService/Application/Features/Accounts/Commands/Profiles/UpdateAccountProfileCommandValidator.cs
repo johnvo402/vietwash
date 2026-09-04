@@ -85,8 +85,11 @@ public class UpdateAccountProfileCommandValidator : AbstractValidator<UpdateAcco
             .Repository<Account>()
             .AnyAsync(
                 x =>
-                    (!id.HasValue && EF.Functions.ILike(x.Email, email))
-                    || (x.Id != id && EF.Functions.ILike(x.Email, email)),
+                    x.Email != null
+                    && (
+                        (!id.HasValue && EF.Functions.ILike(x.Email, email))
+                        || (x.Id != id && EF.Functions.ILike(x.Email, email))
+                    ),
                 cancellationToken
             );
     }

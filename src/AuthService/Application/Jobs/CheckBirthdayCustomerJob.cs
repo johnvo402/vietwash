@@ -64,7 +64,7 @@ namespace Application.Jobs
                         DisplayName = "VietWash",
                         Subject = "Chúc mừng sinh nhật!",
                         To = [customer.Email],
-                        Template = new("HappyBirthday", customer.DisplayName),
+                        Template = new("HappyBirthday", customer.DisplayName ?? string.Empty),
                     }
                 );
                 try

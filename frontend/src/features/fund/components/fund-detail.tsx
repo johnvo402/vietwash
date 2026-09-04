@@ -17,6 +17,7 @@ import {
 import { useTranslations } from "next-intl";
 import { useStringUtil } from "@/lib/stringUtil";
 import { use, useEffect, useState } from "react";
+import { SafeHtml } from "@/components/ui/safe-html";
 
 // Mock data - In real app, this would come from API
 const getPaymentMethodName = (t: any, method?: PaymentMethod) => {
@@ -74,9 +75,7 @@ const getTypeBadge = (t: any, type?: FundType) => {
       );
     case FundType.Spend:
       return (
-        <span className="font-medium text-red-600">
-          {t("fund.type.spend")}
-        </span>
+        <span className="font-medium text-red-600">{t("fund.type.spend")}</span>
       );
     default:
       return <span className="font-medium text-gray-600">{"--"}</span>;
@@ -88,7 +87,7 @@ export default function FundDetails({ fund }: { fund: GetFundDetailResponse }) {
   const t = useTranslations();
   const { textByLang } = useStringUtil();
   const [displayName, setDisplayName] = useState(
-    fund.user?.displayName || "--"
+    fund.user?.displayName || "--",
   );
 
   useEffect(() => {
@@ -206,7 +205,7 @@ export default function FundDetails({ fund }: { fund: GetFundDetailResponse }) {
                   {fund.transactionDate
                     ? format(
                         new Date(fund.transactionDate),
-                        "dd/MM/yy HH:mm:ss"
+                        "dd/MM/yy HH:mm:ss",
                       )
                     : "--"}
                 </p>
@@ -290,11 +289,11 @@ export default function FundDetails({ fund }: { fund: GetFundDetailResponse }) {
                 <p className="text-sm font-semibold text-gray-600">
                   {t("user.note")}
                 </p>
-                <p className="text-gray-900 mt-2 bg-gray-50 p-4 rounded-lg">
-                  <div
-                    dangerouslySetInnerHTML={{ __html: fund.note || "--" }}
-                  />
-                </p>
+                <SafeHtml
+                  className="text-gray-900 mt-2 bg-gray-50 p-4 rounded-lg"
+                  html={fund.note}
+                  fallback="--"
+                />
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-600">

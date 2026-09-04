@@ -14,7 +14,9 @@ namespace Application.Feature.Feedbacks.Command.Create
             return new Feedback(
                 branchId: branchId,
                 serviceId: model.Id,
-                comment: model.FeedbackModel.Comment,
+                comment: Application.Common.Security.RichTextSanitizer.Sanitize(
+                    model.FeedbackModel.Comment
+                ),
                 rating: model.FeedbackModel.Rating,
                 userId: userId
             );

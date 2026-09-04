@@ -2,7 +2,11 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import TextEditor from "@/components/ui/text-editor";
+import dynamic from "next/dynamic";
+
+const TextEditor = dynamic(() => import("@/components/ui/text-editor"), {
+  ssr: false,
+});
 
 interface EditReplyFormProps {
   initialComment: string;

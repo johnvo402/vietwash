@@ -2,6 +2,7 @@ using Application.Features.Accounts.Commands.ResetPassword;
 using Ardalis.ApiEndpoints;
 using Contracts.RouteResults;
 using Mediator;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
 using Swashbuckle.AspNetCore.Annotations;
@@ -12,6 +13,7 @@ public class ResetAccountPasswordEndpoint(ISender sender)
     : EndpointBaseAsync.WithRequest<ResetAccountPasswordCommand>.WithoutResult
 {
     [HttpPut(Router.AccountRoute.ResetPassowrd)]
+    [AllowAnonymous]
     [SwaggerOperation(Tags = [Router.AccountRoute.Tags], Summary = "reset Account password")]
     public override async Task<IActionResult> HandleAsync(
         ResetAccountPasswordCommand request,

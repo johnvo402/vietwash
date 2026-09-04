@@ -10,7 +10,6 @@ using Serilog;
 namespace Infrastructure.Services.DistributedCache;
 
 public class DeadletterPubSubBackgroundService(
-    IPubSubFactory factory,
     IServiceProvider serviceProvider,
     IOptions<PubSubSettings> options
 ) : BackgroundService

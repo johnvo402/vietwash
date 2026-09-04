@@ -212,7 +212,7 @@ namespace AuthService.Tests.Accounts
 
             validator
                 .RuleFor(x => x.Email)
-                .MustAsync(async (email, cancellation) => moqCheck)
+                .MustAsync((email, cancellation) => Task.FromResult(moqCheck))
                 .WithState(x => expectedState);
 
             // Act
@@ -362,7 +362,7 @@ namespace AuthService.Tests.Accounts
         public async Task Validate_WhenRoleNullOrEmpty_ShouldReturnNullFailure(string? role)
         {
             // Arrange
-            command.Role = role;
+            command.Role = role!;
             var expectedState = Messager
                 .Create<CreateAccountCommand>(nameof(Account))
                 .Property(x => x.Role)

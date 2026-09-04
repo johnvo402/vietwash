@@ -16,6 +16,21 @@ namespace Application.Feature.Equipments.Command.UpdateStatus
             CancellationToken cancellationToken
         )
         {
+            if (command.Status is not { } status)
+            {
+                return Result.Failure(
+                    new BadRequestError(
+                        "Equipment status is required",
+                        Messager
+                            .Create<UpdateStatusEquipmentCommand>()
+                            .Property(x => x.Status)
+                            .Message(MessageType.Null)
+                            .Negative()
+                            .BuildMessage()
+                    )
+                );
+            }
+
             try
             {
                 Equipment? existingEquipment = await unitOfWork
@@ -38,7 +53,7 @@ namespace Application.Feature.Equipments.Command.UpdateStatus
                     );
                 }
 
-                existingEquipment.Status = command.Status.Value;
+                existingEquipment.Status = status;
 
                 using var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
 

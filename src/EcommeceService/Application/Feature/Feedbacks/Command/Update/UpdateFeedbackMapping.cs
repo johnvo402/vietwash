@@ -7,6 +7,9 @@ public static class UpdateFeedbackMapping
 {
     public static void FromUpdateModel(this Feedback entity, UpdateFeedbackModel model)
     {
-        entity.Update(comment: model.Comment, rating: model.Rating);
+        entity.Update(
+            comment: Application.Common.Security.RichTextSanitizer.Sanitize(model.Comment),
+            rating: model.Rating
+        );
     }
 }

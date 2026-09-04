@@ -3,7 +3,9 @@ import withBundleAnalyzer from "@next/bundle-analyzer";
 import withSerwistInit from "@serwist/next";
 
 const withNextIntl = createNextIntlPlugin();
-const withAnalyzer = withBundleAnalyzer({ enabled: false });
+const withAnalyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
 const withPwa = withSerwistInit({
   swSrc: "src/app/sw.ts",
   swDest: "public/sw.js",

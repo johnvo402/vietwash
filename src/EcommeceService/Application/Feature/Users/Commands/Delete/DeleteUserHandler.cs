@@ -26,6 +26,16 @@ public class DeleteUserHandler(
                 cancellationToken
             );
 
+        if (user is null)
+        {
+            return Result.Failure(
+                new Application.Common.Errors.NotFoundError(
+                    "User not found",
+                    Messager.Create<User>().Message(MessageType.Found).Negative().BuildMessage()
+                )
+            );
+        }
+
         string? avatar = user.AvtUrl;
         await unitOfWork.Repository<User>().DeleteAsync(user);
         await unitOfWork.SaveAsync(cancellationToken);

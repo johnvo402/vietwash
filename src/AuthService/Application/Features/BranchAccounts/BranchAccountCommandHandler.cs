@@ -16,6 +16,19 @@ public class BranchAccountCommandHandler(IUnitOfWork unitOfWork)
         CancellationToken cancellationToken
     )
     {
+        if (command.Payload is null)
+        {
+            return new PubSubResponse<BranchAccountCommand>
+            {
+                Error = "Payload is required.",
+                ErrorType = PubSubErrorType.Persistent,
+                IsSuccess = false,
+                ResponseData = command,
+                LastAttemptTime = DateTimeOffset.UtcNow,
+                PayloadId = command.PayloadId,
+            };
+        }
+
         var response = await unitOfWork
             .DynamicReadOnlyRepository<Account>()
             .ListAsync(

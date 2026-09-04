@@ -12,5 +12,5 @@ public class CreateFeedbackCommand : IRequest<Result>
     public long Id { get; set; }
 
     [FromBody]
-    public FeedbackModel FeedbackModel { get; set; }
+    public FeedbackModel FeedbackModel { get; set; } = default!;
 };

@@ -22,9 +22,10 @@ public static class PaginationExtension
     /// offset pagination for IQueryable
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <param name="entities"></param>
+    /// <param name="query"></param>
     /// <param name="current"></param>
     /// <param name="size"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
     public static async Task<PaginationResponse<T>> ToPagedListAsync<T>(
         this IQueryable<T> query,
@@ -48,7 +49,7 @@ public static class PaginationExtension
     /// offset pagination for IEnumerable
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <param name="entities"></param>
+    /// <param name="query"></param>
     /// <param name="current"></param>
     /// <param name="size"></param>
     /// <returns></returns>
@@ -178,7 +179,7 @@ public static class PaginationExtension
     }
 
     /// <summary>
-    /// move forward or backward <- | ->
+    /// Move forward or backward through the cursor sequence.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="query"></param>
@@ -220,12 +221,11 @@ public static class PaginationExtension
     }
 
     /// <summary>
-    /// build and clause (x.Age == AgeValue && x.Aname > NameValue)
+    /// Build an AND clause for the cursor comparison expression.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="index"></param>
     /// <param name="CompararisonValues"></param>
-    /// <param name="propertyName"></param>
     /// <param name="order"></param>
     /// <returns></returns>
     private static BinaryExpression BuildAndClause<T>(
@@ -288,7 +288,7 @@ public static class PaginationExtension
     }
 
     /// <summary>
-    /// Build equal query like (x.Age == AgeValue && .....)
+    /// Build the equality portion of a cursor query.
     /// </summary>
     /// <param name="index"></param>
     /// <param name="CompararisonValues"></param>
@@ -346,7 +346,7 @@ public static class PaginationExtension
             return new(Expression.Convert(member, type), Expression.Constant(value, type));
         }
 
-        // ✅ Xử lý DateTimeOffset & Nullable<DateTimeOffset>
+        // Handle DateTimeOffset and nullable DateTimeOffset values.
         if (memberType == typeof(DateTimeOffset) || memberType == typeof(DateTimeOffset?))
         {
             DateTimeOffset? finalValue = value switch

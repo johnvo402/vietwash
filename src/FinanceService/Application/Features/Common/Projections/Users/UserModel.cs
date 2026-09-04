@@ -8,7 +8,7 @@ public class UserModel
     public long Id { get; set; }
     public Gender? Gender { get; set; }
     public ActivationStatus Status { get; set; }
-    public string Role { get; set; }
+    public string Role { get; set; } = default!;
     public string? DisplayName { get; set; }
     public string? Email { get; set; }
     public string? PhoneNumber { get; set; }

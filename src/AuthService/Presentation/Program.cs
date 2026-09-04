@@ -48,7 +48,7 @@ try
     app.MapHealthChecks(
         "/api/health",
         new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }
-    );
+    ).AllowAnonymous();
 
     bool isDevelopment = app.Environment.IsDevelopment();
     bool isStaging = app.Environment.IsStaging();

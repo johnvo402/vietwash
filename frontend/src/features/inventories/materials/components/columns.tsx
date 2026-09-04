@@ -21,7 +21,10 @@ import { MoreVertical } from "lucide-react";
 import { format } from "date-fns";
 
 export const useBranchProducts = (
-  onAction?: (action: "detail" | "edit", row: ListBranchProductResponse) => void
+  onAction?: (
+    action: "detail" | "edit",
+    row: ListBranchProductResponse,
+  ) => void,
 ) => {
   const t = useTranslations();
 
@@ -71,7 +74,7 @@ export const useBranchProducts = (
       header: t("product.unit"),
       cell: ({ row }) => {
         const baseUnit = row.original.unitRelations?.find(
-          (unit) => unit.baseUnit
+          (unit) => unit.baseUnit,
         );
         return <div>{baseUnit ? baseUnit.name : "--"}</div>;
       },
@@ -118,7 +121,12 @@ export const useBranchProducts = (
       cell: ({ row }) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-11 w-11"
+              aria-label={t("common.openMenu")}
+            >
               <MoreVertical className="h-5 w-5" />
             </Button>
           </DropdownMenuTrigger>

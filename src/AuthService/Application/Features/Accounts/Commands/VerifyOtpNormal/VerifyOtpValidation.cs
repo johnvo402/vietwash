@@ -81,7 +81,10 @@ namespace Application.Features.Accounts.Commands.VerifyOtpNormal
         ) =>
             !await unitOfWork
                 .Repository<Account>()
-                .AnyAsync(x => EF.Functions.ILike(x.Email, email), cancellationToken);
+                .AnyAsync(
+                    x => x.Email != null && EF.Functions.ILike(x.Email, email),
+                    cancellationToken
+                );
 
         [GeneratedRegex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$")]
         private static partial Regex EmailValidationRegex();

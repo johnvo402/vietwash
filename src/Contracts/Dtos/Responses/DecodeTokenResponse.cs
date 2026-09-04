@@ -17,7 +17,7 @@ public class DecodeTokenResponse
     public long? ExpiredTime { get; set; }
 
     [JsonPropertyName("role")]
-    public string Role { get; set; }
+    public string Role { get; set; } = default!;
 
     [JsonPropertyName("branchse")]
     public IEnumerable<string>? Branches { get; set; } = [];

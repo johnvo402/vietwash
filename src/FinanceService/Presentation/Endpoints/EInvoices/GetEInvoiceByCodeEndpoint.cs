@@ -3,6 +3,7 @@ using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Mediator;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
 using Swashbuckle.AspNetCore.Annotations;
@@ -15,6 +16,7 @@ namespace Presentation.Endpoints.EInvoices
         >
     {
         [HttpGet(Router.EInvoiceRoute.GetByCode)]
+        [AllowAnonymous]
         [SwaggerOperation(Tags = [Router.EInvoiceRoute.Tags], Summary = "get EInvoiceRoute")]
         public override async Task<
             ActionResult<ApiResponse<GetEInvoiceByCodeResponse>>

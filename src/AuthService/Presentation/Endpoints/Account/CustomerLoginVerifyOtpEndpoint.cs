@@ -3,6 +3,7 @@ using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Mediator;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
 using Swashbuckle.AspNetCore.Annotations;
@@ -15,6 +16,7 @@ public class CustomerLoginVerifyOtpEndpoint(ISender sender)
     >
 {
     [HttpPost(Router.AccountRoute.CustomerLoginVerify)]
+    [AllowAnonymous]
     [SwaggerOperation(Tags = [Router.AccountRoute.Tags], Summary = "Logging in Account Verify")]
     public override async Task<ActionResult<ApiResponse<VerifyOtpResponse>>> HandleAsync(
         VerifyOtpCommand request,

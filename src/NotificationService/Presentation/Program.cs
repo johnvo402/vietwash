@@ -94,7 +94,7 @@ try
     app.MapHealthChecks(
         "/api/health",
         new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }
-    );
+    ).AllowAnonymous();
 
     Log.Logger.Information(
         "Application is launching with {environment}",

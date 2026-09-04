@@ -54,13 +54,13 @@ const branchAccountSchema = (t: any) =>
       0,
       t("common.idRequired", {
         Entity: t("common.branch"),
-      })
+      }),
     ),
     branchName: z.string().min(
       1,
       t("common.nameRequired", {
         Entity: t("common.branch"),
-      })
+      }),
     ),
   });
 
@@ -72,14 +72,14 @@ const formSchema = (t: any) =>
       1,
       t("common.entityRequired", {
         Entity: t("user.displayName.title").toLowerCase(),
-      })
+      }),
     ),
     email: z.string().email(t("table.accessorKey.invalidEmail")),
     password: z
       .string()
       .regex(
         strongPasswordRegex,
-        t("common.checkPasswordStrong") // Ví dụ: "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường và số"
+        t("common.checkPasswordStrong"), // Ví dụ: "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường và số"
       )
       .optional(),
     phoneNumber: z.string().optional(),
@@ -102,7 +102,7 @@ interface PageProps {
   onUpdateUser?: (
     data: FormValues & { id: number },
     formData: FormData,
-    avt?: File
+    avt?: File,
   ) => Promise<void>;
   user?: GetAccountDetailResponse;
 }
@@ -233,7 +233,7 @@ export function CreateUserDialog({
         setPreviewUrl(null);
       }
     },
-    [form, t]
+    [form, t],
   );
 
   const handleClearAvatar = useCallback(() => {
@@ -261,7 +261,7 @@ export function CreateUserDialog({
         if (data.branchAccounts) {
           formData.append(
             "branchAccounts",
-            JSON.stringify(data.branchAccounts)
+            JSON.stringify(data.branchAccounts),
           );
         }
 
@@ -273,7 +273,7 @@ export function CreateUserDialog({
           await onUpdateUser?.(
             { ...data, id },
             formData,
-            data.avatar || undefined
+            data.avatar || undefined,
           );
         } else {
           await onCreateUser?.({
@@ -314,7 +314,7 @@ export function CreateUserDialog({
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [form, t, isEditMode, userId, propUser, onUpdateUser, onCreateUser]
+    [form, t, isEditMode, userId, propUser, onUpdateUser, onCreateUser],
   );
 
   const handleClose = useCallback(() => {
@@ -415,7 +415,10 @@ export function CreateUserDialog({
                         variant="destructive"
                         size="sm"
                         onClick={handleClearAvatar}
-                        className="mt-2"
+                        className="mt-2 h-11 w-11"
+                        aria-label={t("common.removeItem", {
+                          item: t("common.image"),
+                        })}
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -585,7 +588,7 @@ export function CreateUserDialog({
                                   defaultValue: key,
                                 })}
                               </SelectItem>
-                            )
+                            ),
                           )}
                         </SelectContent>
                       </Select>
@@ -652,7 +655,7 @@ export function CreateUserDialog({
                               (option) => ({
                                 branchId: Number(option.value),
                                 branchName: option.label,
-                              })
+                              }),
                             );
                             field.onChange(updatedBranches);
                           }}

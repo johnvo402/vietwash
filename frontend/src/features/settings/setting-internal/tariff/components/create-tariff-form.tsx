@@ -395,7 +395,10 @@ export default function TariffDialog({
               <Button
                 variant="outline"
                 onClick={addTariff}
-                className="flex items-center gap-2"
+                className="flex h-11 w-11 items-center gap-2"
+                aria-label={t("common.add", {
+                  entity: t("common.service"),
+                })}
               >
                 <Plus className="h-4 w-4" />
               </Button>
@@ -518,7 +521,10 @@ export default function TariffDialog({
                           type="button"
                           onClick={() => remove(index)}
                           disabled={fields.length === 1}
-                          className="text-destructive hover:text-destructive/80 disabled:opacity-50"
+                          className="inline-flex h-11 w-11 items-center justify-center text-destructive hover:text-destructive/80 disabled:opacity-50"
+                          aria-label={t("common.removeItem", {
+                            item: t("common.service"),
+                          })}
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>

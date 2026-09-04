@@ -7,13 +7,13 @@ namespace Application.Feature.Statistics.Queries.TopService
     public class GetTopServiceQuery : IRequest<Result<IEnumerable<GetTopServiceResponse>>>
     {
         [FromQuery]
-        public string From { get; set; }
+        public string From { get; set; } = default!;
 
         [FromQuery]
-        public string To { get; set; }
+        public string To { get; set; } = default!;
 
         [FromQuery]
-        public string BranchId { get; set; }
+        public string BranchId { get; set; } = default!;
 
         //public string From { get; }
         //public string To { get; }

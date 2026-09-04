@@ -18,7 +18,7 @@ namespace Domain.Aggregates.Feedbacks
         public User? User { get; set; }
         public bool Disable { get; set; } = false;
         public ICollection<FeedbackReaction> Reactions { get; set; } = [];
-        public Service Service { get; set; }
+        public Service Service { get; set; } = default!;
 
         public Feedback() { }
 

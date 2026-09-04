@@ -5,12 +5,10 @@ using Application.Common.Security;
 using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
 using Mediator;
-using Serilog;
 
 namespace Application.Common.Behaviors;
 
 public class ProcessImagePathBehavior<TMessage, TResponse>(
-    ILogger logger,
     IAmazonS3Service storageService
 ) : MessagePostProcessor<TMessage, TResponse>
     where TMessage : notnull, IMessage
@@ -98,7 +96,7 @@ public class ProcessImagePathBehavior<TMessage, TResponse>(
     // Processes the properties of a data object within a pagination response
     private void ProcessDataPropertiesWithFileAttribute(
         object data,
-        HashSet<object> processedObjects = null
+        HashSet<object>? processedObjects = null
     )
     {
         if (data == null)

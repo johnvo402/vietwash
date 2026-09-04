@@ -5,8 +5,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Send, X } from "lucide-react";
-import TextEditor from "@/components/ui/text-editor";
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
+
+const TextEditor = dynamic(() => import("@/components/ui/text-editor"), {
+  ssr: false,
+});
 
 interface ReplyFormProps {
   reviewId: number;

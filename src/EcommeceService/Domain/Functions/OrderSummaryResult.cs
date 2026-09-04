@@ -3,7 +3,7 @@ public class OrderSummaryResult
 {
     public long OrderId { get; set; }
     public Ulid PublicId { get; set; }
-    public string Code { get; set; }
+    public string Code { get; set; } = default!;
     public long BranchId { get; set; }
     public string? CustomerName { get; set; }
     public int OrderItemCount { get; set; }

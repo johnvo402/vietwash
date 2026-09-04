@@ -30,9 +30,14 @@ import { Customer } from "@/utils/customer-indexedDb";
 import { PriceItem } from "@/utils/tariff-db";
 import CustomDateTime from "./booking-receipt-date";
 import { toast } from "react-toastify";
-import { QRScanner } from "@/components/qr-scanner";
+import dynamic from "next/dynamic";
 import type { PreviewOrderResponse } from "@/api/generated";
 import { PricingSummary } from "./pricing-summary";
+
+const QRScanner = dynamic(
+  () => import("@/components/qr-scanner").then((module) => module.QRScanner),
+  { ssr: false },
+);
 
 interface OrderPaymentProps {
   preview?: PreviewOrderResponse;

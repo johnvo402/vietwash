@@ -120,8 +120,11 @@ public partial class UserValidator : AbstractValidator<UserModel>
             .Repository<User>()
             .AnyAsync(
                 x =>
-                    (!id.HasValue && EF.Functions.ILike(x.Email, email))
-                    || (x.Id != id && EF.Functions.ILike(x.Email, email)),
+                    x.Email != null
+                    && (
+                        (!id.HasValue && EF.Functions.ILike(x.Email, email))
+                        || (x.Id != id && EF.Functions.ILike(x.Email, email))
+                    ),
                 cancellationToken
             );
 }

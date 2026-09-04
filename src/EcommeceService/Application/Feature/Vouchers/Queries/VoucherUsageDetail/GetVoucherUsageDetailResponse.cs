@@ -6,7 +6,7 @@ namespace Application.Feature.Vouchers.Queries.VoucherUsageDetail
     {
         public OrderShortInfo? Order { get; set; }
 
-        public virtual void MappingFrom(Domain.Aggregates.Vouchers.VoucherUsage voucherUsage)
+        public override void MappingFrom(Domain.Aggregates.Vouchers.VoucherUsage voucherUsage)
         {
             Id = voucherUsage.Id;
             VoucherId = voucherUsage.VoucherId;

@@ -99,12 +99,12 @@ namespace Application.Feature.Common.Projections.Orders
 
     public class OrderEquipmentProjection
     {
-        public string Code { get; set; }
+        public string Code { get; set; } = default!;
 
         [File]
         public string? Image { get; set; }
 
-        public string EquipmentName { get; set; }
+        public string EquipmentName { get; set; } = default!;
     }
 
     public class OrderItemProjection

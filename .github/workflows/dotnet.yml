@@ -52,7 +52,7 @@ jobs:
         run: dotnet restore Micro.sln --configfile NuGet.Config
 
       - name: Build
-        run: dotnet build Micro.sln --configuration Release --no-restore
+        run: dotnet build Micro.sln --configuration Release --no-restore --warnaserror
 
       - name: Prepare isolated database extensions
         run: >-

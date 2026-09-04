@@ -3,6 +3,7 @@ using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
 using Mediator;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Routes;
 using Swashbuckle.AspNetCore.Annotations;
@@ -13,6 +14,7 @@ public class LoginEndpoint(ISender sender)
     : EndpointBaseAsync.WithRequest<LoginCommand>.WithActionResult<ApiResponse<LoginResponse>>
 {
     [HttpPost(Router.AccountRoute.Login)]
+    [AllowAnonymous]
     [SwaggerOperation(Tags = [Router.AccountRoute.Tags], Summary = "Logging in Account")]
     public override async Task<ActionResult<ApiResponse<LoginResponse>>> HandleAsync(
         LoginCommand request,

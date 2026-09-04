@@ -41,7 +41,7 @@ export default function MultiSelect({
   const filteredOptions = options.filter(
     (option) =>
       !value.some((v) => v.value === option.value) &&
-      option.label.toLowerCase().includes(searchTerm.toLowerCase())
+      option.label.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleSelect = (option: Option) => {
@@ -99,7 +99,7 @@ export default function MultiSelect({
         <div
           className={cn(
             "flex items-center w-full border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
-            value.length > 0 ? "rounded-t-md" : "rounded-md"
+            value.length > 0 ? "rounded-t-md" : "rounded-md",
           )}
         >
           <input
@@ -120,7 +120,8 @@ export default function MultiSelect({
                 size="sm"
                 onClick={handleClearAll}
                 disabled={disabled}
-                className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+                className="h-11 min-w-11 px-2 text-xs text-muted-foreground hover:text-foreground"
+                aria-label={t("common.reset")}
               >
                 <XCircle className="h-4 w-4" />
               </Button>
@@ -131,7 +132,9 @@ export default function MultiSelect({
               size="sm"
               onClick={() => setIsOpen(!isOpen)}
               disabled={disabled}
-              className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+              className="h-11 min-w-11 px-2 text-xs text-muted-foreground hover:text-foreground"
+              aria-label={t("common.toggleDetails")}
+              aria-expanded={isOpen}
             >
               {isOpen ? (
                 <ChevronUp className="h-4 w-4" />
@@ -159,6 +162,9 @@ export default function MultiSelect({
                     className="p-0 h-auto"
                     disabled={disabled}
                     onClick={() => handleRemove(option)}
+                    aria-label={t("common.removeItem", {
+                      item: option.label,
+                    })}
                   >
                     <X className="h-4 w-4" />
                   </Button>

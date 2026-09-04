@@ -15,6 +15,6 @@ public class CreateAccountCommand : AccountModel, IRequest<Result<CreateAccountR
 
     public AccountStatus Status { get; set; }
 
-    public string Role { get; set; }
+    public string Role { get; set; } = default!;
     public List<BranchAccountModel>? BranchAccounts { get; set; } = [];
 }

@@ -349,7 +349,8 @@ export default function CustomDateTime({
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-7 w-7"
+                  className="h-11 w-11"
+                  aria-label={t("common.previousMonth")}
                   onClick={handlePrevMonth}
                   disabled={
                     getMonth(calendarDate) <= getMonth(now) &&
@@ -393,7 +394,8 @@ export default function CustomDateTime({
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-7 w-7"
+                  className="h-11 w-11"
+                  aria-label={t("common.nextMonth")}
                   onClick={handleNextMonth}
                 >
                   <ChevronRight className="h-4 w-4" />

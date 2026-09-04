@@ -25,6 +25,6 @@ public class UpdateAccount : UserModel
 
     public ActivationStatus Status { get; set; }
 
-    public string Role { get; set; }
+    public string Role { get; set; } = default!;
     public CustomerGroup? CustomerGroup { get; set; }
 }
