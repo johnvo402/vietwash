@@ -1,4 +1,5 @@
 ﻿using Application.Features.Report.FinanceReport;
+using Application.Common.Auth;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Mediator;
@@ -16,7 +17,7 @@ namespace Presentation.Endpoints.Reports
     {
         [HttpGet(Router.ReportRoute.FinancialReport)]
         [SwaggerOperation(Tags = [Router.ReportRoute.Tags], Summary = "Report financial")]
-        // [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<
             ActionResult<ApiResponse<FinancialReportResponse>>
         > HandleAsync(

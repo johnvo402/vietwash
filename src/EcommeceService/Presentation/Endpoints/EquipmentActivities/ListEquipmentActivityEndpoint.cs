@@ -18,7 +18,7 @@ namespace Presentation.Endpoints.EquipmentActivities
 	{
 		[HttpGet(Router.EquipmentActivityRoute.EquipmentActivities)]
 		[SwaggerOperation(Tags = [Router.EquipmentActivityRoute.Tags], Summary = "list  equipment activity")]
-		[AuthorizeBy]
+		[AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
 		public override async Task<
 			ActionResult<ApiResponse<PaginationResponse<ListEquipmentActivityResponse>>>
 		> HandleAsync(

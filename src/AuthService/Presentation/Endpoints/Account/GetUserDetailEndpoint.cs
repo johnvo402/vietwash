@@ -17,7 +17,7 @@ public class GetAccountDetailEndpoint(ISender sender)
 {
     [HttpGet(Router.AccountRoute.GetUpdateDelete, Name = Router.AccountRoute.GetRouteName)]
     [SwaggerOperation(Tags = [Router.AccountRoute.Tags], Summary = "Detail Account")]
-    [AuthorizeBy]
+    [AuthorizeBy(roles: "ADMIN, MANAGER")]
     public override async Task<ActionResult<ApiResponse<GetAccountDetailResponse>>> HandleAsync(
         [FromRoute(Name = RouterBase.Id)] long id,
         CancellationToken cancellationToken = default

@@ -16,7 +16,7 @@ namespace Presentation.Endpoints.Tariffs
 	{
 		[HttpGet(Routes.Router.TariffRoute.GetDetail)]
 		[SwaggerOperation(Tags = [Routes.Router.TariffRoute.Tags], Summary = "Detail tariff")]
-		[AuthorizeBy]
+		[AuthorizeBy(roles: "ADMIN")]
 		public override async Task<ActionResult<ApiResponse<GetTariffDetailResponse>>> HandleAsync(
 			GetTariffDetailQuery request,
 			CancellationToken cancellationToken = default

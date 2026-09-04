@@ -15,7 +15,7 @@ namespace Presentation.Endpoints.BranchProducts
 	{
 		[HttpDelete(Router.BranchProductRoute.GetUpdateDelete)]
 		[SwaggerOperation(Tags = [Router.BranchProductRoute.Tags], Summary = "Delete branch product")]
-		[AuthorizeBy]
+		[AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
 		public override async Task<ActionResult<ApiResponse>> HandleAsync(
 			DeleteBranchProductCommand request,
 			CancellationToken cancellationToken = default

@@ -6,9 +6,14 @@ using Contracts.Dtos.Responses;
 using Domain.Functions;
 using Mediator;
 
+using Application.Common.Interfaces.Services;
+using Application.Feature.Reports.Common;
+using Contracts.Application.Common.Exceptions;
+using Contracts.Common.Messages;
+
 namespace Application.Feature.Reports.OrderReport;
 
-public class OrderReportHandler(IUnitOfWork unitOfWork)
+public class OrderReportHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
     : IRequestHandler<OrderReportQuery, Result<PaginationResponse<OrderSummaryResult>>>
 {
     private const string functionName = "get_order_summary";
@@ -18,10 +23,18 @@ public class OrderReportHandler(IUnitOfWork unitOfWork)
         CancellationToken cancellationToken
     )
     {
-        // Chuyển đổi parameters từ Dictionary thành mảng object[]
+        ReportBranchScopeResult branchScope = ReportBranchScope.Resolve(
+            currentUser.Session?.Branches,
+            request.BranchIds
+        );
+        if (branchScope.HasUnauthorizedBranch)
+            return Result<PaginationResponse<OrderSummaryResult>>.Failure(
+                new ForbiddenError(Message.FORBIDDEN)
+            );
+
         var parameters = new object[]
         {
-            request.BranchIds ?? new List<long>(),
+            branchScope.BranchIds.ToArray(),
             DateTimeOffset.FromUnixTimeSeconds(request.From).ToOffset(TimeSpan.FromHours(0)),
             DateTimeOffset.FromUnixTimeSeconds(request.To).ToOffset(TimeSpan.FromHours(0)),
             string.IsNullOrWhiteSpace(request.SearchKeywords)

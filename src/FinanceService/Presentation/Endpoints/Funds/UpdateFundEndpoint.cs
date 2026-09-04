@@ -15,7 +15,7 @@ namespace Presentation.Endpoints.Funds
     {
         [HttpPut(Router.FundRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.FundRoute.Tags], Summary = "Update fund")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             UpdateFundCommand command,
             CancellationToken cancellationToken = default

@@ -1,4 +1,5 @@
 ﻿using Application.Features.Branches.Commands.Update;
+using Application.Common.Auth;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -14,6 +15,7 @@ namespace Presentation.Endpoints.Branches
     {
         [HttpPut(Router.BranchRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.BranchRoute.Tags], Summary = "Update Branch")]
+        [AuthorizeBy(roles: "ADMIN")]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             UpdateBranchCommand request,
             CancellationToken cancellationToken = default

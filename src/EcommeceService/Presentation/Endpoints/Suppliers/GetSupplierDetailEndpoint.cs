@@ -20,7 +20,7 @@ namespace Presentation.Endpoints.Suppliers
             Tags = [Presentation.Routes.Router.SupplierRoute.Tags],
             Summary = "Detail supplier"
         )]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<
             ActionResult<ApiResponse<GetSupplierDetailResponse>>
         > HandleAsync(

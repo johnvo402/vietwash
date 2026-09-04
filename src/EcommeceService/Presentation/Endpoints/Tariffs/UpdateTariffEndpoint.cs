@@ -15,7 +15,7 @@ namespace Presentation.Endpoints.Tariffs
 	{
 		[HttpPut(Router.TariffRoute.GetUpdateDelete)]
 		[SwaggerOperation(Tags = [Router.TariffRoute.Tags], Summary = "Update tariff")]
-		[AuthorizeBy]
+		[AuthorizeBy(roles: "ADMIN")]
 		public override async Task<ActionResult<ApiResponse>> HandleAsync(
 			UpdateTariffCommand request,
 			CancellationToken cancellationToken = default

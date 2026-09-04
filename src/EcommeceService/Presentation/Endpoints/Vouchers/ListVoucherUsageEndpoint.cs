@@ -19,7 +19,7 @@ namespace Presentation.Endpoints.Vouchers
     {
         [HttpGet(Router.VoucherRoute.VoucherUsage)]
         [SwaggerOperation(Tags = [Router.VoucherRoute.Tags], Summary = "Voucher usage list")]
-        //[AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<ListVoucherUsageResponse>>>
         > HandleAsync(

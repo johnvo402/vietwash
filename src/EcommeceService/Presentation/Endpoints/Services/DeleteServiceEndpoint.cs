@@ -15,7 +15,7 @@ namespace Presentation.Endpoints.Services
     {
         [HttpDelete(Router.ServiceRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.ServiceRoute.Tags], Summary = "Delete service")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             [FromRoute(Name = RouterBase.Id)] long serviceId,
             CancellationToken cancellationToken = default

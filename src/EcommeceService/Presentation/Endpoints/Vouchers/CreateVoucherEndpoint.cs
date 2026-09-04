@@ -1,5 +1,6 @@
 ﻿using Contracts.RouteResults;
 using Application.Feature.Vouchers.Commands.Create;
+using Application.Common.Auth;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Mediator;
@@ -14,7 +15,7 @@ namespace Presentation.Endpoints.Vouchers
     {
         [HttpPost(Router.VoucherRoute.Vouchers)]
         [SwaggerOperation(Tags = [Router.VoucherRoute.Tags], Summary = "Create voucher")]
-        //[AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             [FromBody] CreateVoucherCommand request,
             CancellationToken cancellationToken = default

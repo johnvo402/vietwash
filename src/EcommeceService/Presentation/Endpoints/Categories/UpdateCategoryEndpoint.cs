@@ -1,4 +1,5 @@
 using Application.Feature.Categories.Command.Update;
+using Application.Common.Auth;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -14,6 +15,7 @@ public class UpdateCategoryEndpoint(ISender sender)
 {
     [HttpPut(Router.CategoryRoute.GetUpdateDelete)]
     [SwaggerOperation(Tags = [Router.CategoryRoute.Tags], Summary = "Update category")]
+    [AuthorizeBy(roles: "ADMIN, MANAGER")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         UpdateCategoryCommand request,
         CancellationToken cancellationToken = default

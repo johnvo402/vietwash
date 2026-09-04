@@ -15,7 +15,7 @@ namespace Presentation.Endpoints.Equipments
     {
         [HttpPut(Router.EquipmentRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.EquipmentRoute.Tags], Summary = "Update equipment")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             UpdateEquipmentCommand request,
             CancellationToken cancellationToken = default

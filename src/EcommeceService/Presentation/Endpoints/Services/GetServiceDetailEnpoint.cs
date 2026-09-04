@@ -16,7 +16,7 @@ namespace Presentation.Endpoints.Services
     {
         [HttpGet(Routes.Router.ServiceRoute.GetDetail)]
         [SwaggerOperation(Tags = [Routes.Router.ServiceRoute.Tags], Summary = "Detail service")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<ActionResult<ApiResponse<GetServiceDetailResponse>>> HandleAsync(
             GetServiceDetailQuery request,
             CancellationToken cancellationToken = default

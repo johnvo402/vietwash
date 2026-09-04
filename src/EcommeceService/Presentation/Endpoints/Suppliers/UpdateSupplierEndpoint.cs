@@ -15,7 +15,7 @@ namespace Presentation.Endpoints.Suppliers
     {
         [HttpPut(Router.SupplierRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.SupplierRoute.Tags], Summary = "Update supplier")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             UpdateSupplierCommand request,
             CancellationToken cancellationToken = default

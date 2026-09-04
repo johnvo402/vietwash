@@ -18,7 +18,7 @@ namespace Presentation.Endpoints.Suppliers
     {
         [HttpGet(Router.SupplierRoute.ImportExportHistories)]
         [SwaggerOperation(Tags = [Router.SupplierRoute.Tags], Summary = "Supplier list")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<ImportExportHistoryResponse>>>
         > HandleAsync(

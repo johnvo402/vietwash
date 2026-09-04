@@ -18,7 +18,7 @@ public class ListTransactionEndpoint(ISender sender)
 {
     [HttpGet(Router.TransactionRoute.Transaction)]
     [SwaggerOperation(Tags = [Router.TransactionRoute.Tags], Summary = "list Transaction")]
-    [AuthorizeBy]
+    [AuthorizeBy(roles: "ADMIN, MANAGER")]
     public override async Task<
         ActionResult<ApiResponse<PaginationResponse<ListTransactionResponse>>>
     > HandleAsync(

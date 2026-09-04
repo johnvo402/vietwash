@@ -15,7 +15,7 @@ namespace Presentation.Endpoints.Tariffs
     {
         [HttpPost(Router.TariffRoute.Tariffs)]
         [SwaggerOperation(Tags = [Router.TariffRoute.Tags], Summary = "Create Tariff")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN")]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             [FromBody] CreateTariffCommand request,
             CancellationToken cancellationToken = default

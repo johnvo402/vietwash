@@ -15,7 +15,7 @@ namespace Presentation.Endpoints.Equipments
 	{
 		[HttpPost(Router.EquipmentRoute.Activities)]
 		[SwaggerOperation(Tags = [Router.EquipmentRoute.Tags], Summary = "Create activities for equipment")]
-		[AuthorizeBy]
+		[AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
 		public override async Task<ActionResult<ApiResponse>> HandleAsync(
 			CreateEquipmentActivityCommand request,
 			CancellationToken cancellationToken = default

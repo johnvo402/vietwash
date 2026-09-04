@@ -1,4 +1,5 @@
 using Application.Feature.Categories.Command.Create;
+using Application.Common.Auth;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -14,6 +15,7 @@ public class CreateCategoryEndpoint(ISender sender)
 {
     [HttpPost(Router.CategoryRoute.Categories)]
     [SwaggerOperation(Tags = [Router.CategoryRoute.Tags], Summary = "Create category")]
+    [AuthorizeBy(roles: "ADMIN, MANAGER")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         CreateCategoryCommand request,
         CancellationToken cancellationToken = default

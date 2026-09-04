@@ -1,4 +1,5 @@
 ﻿using Application.Features.Branches.Commands.Create;
+using Application.Common.Auth;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -14,6 +15,7 @@ namespace Presentation.Endpoints.Branches
     {
         [HttpPost(Router.BranchRoute.Branches)]
         [SwaggerOperation(Tags = [Router.BranchRoute.Tags], Summary = "Create Branch")]
+        [AuthorizeBy(roles: "ADMIN")]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             [FromBody] CreateBranchCommand request,
             CancellationToken cancellationToken = default

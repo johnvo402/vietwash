@@ -15,7 +15,7 @@ namespace Presentation.Endpoints.Units
     {
         [HttpPost(UnitRoute.Units)]
         [SwaggerOperation(Tags = [UnitRoute.Tags], Summary = "Create a new unit")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             [FromBody] CreateUnitCommand request,
             CancellationToken cancellationToken = default

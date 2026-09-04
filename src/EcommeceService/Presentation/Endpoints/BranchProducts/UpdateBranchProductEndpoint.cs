@@ -19,7 +19,7 @@ namespace Presentation.Endpoints.BranchProducts
             Tags = [Router.BranchProductRoute.Tags],
             Summary = "Update branch product"
         )]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             UpdateBranchProductCommand request,
             CancellationToken cancellationToken = default

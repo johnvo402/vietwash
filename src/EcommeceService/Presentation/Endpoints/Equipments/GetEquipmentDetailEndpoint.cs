@@ -16,7 +16,7 @@ namespace Presentation.Endpoints.Equipments
 	{
 		[HttpGet(Routes.Router.EquipmentRoute.GetDetail)]
 		[SwaggerOperation(Tags = [Routes.Router.EquipmentRoute.Tags], Summary = "Detail equipment")]
-		[AuthorizeBy]
+		[AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
 		public override async Task<ActionResult<ApiResponse<GetEquipmentDetailResponse>>> HandleAsync(
 			GetEquipmentDetailQuery request,
 			CancellationToken cancellationToken = default

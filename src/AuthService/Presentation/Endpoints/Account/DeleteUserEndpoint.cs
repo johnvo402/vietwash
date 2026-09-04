@@ -17,7 +17,7 @@ public class DeleteAccountEndpoint(ISender sender)
 {
     [HttpDelete(Router.AccountRoute.GetUpdateDelete)]
     [SwaggerOperation(Tags = [Router.AccountRoute.Tags], Summary = "Delete Account")]
-    [AuthorizeBy]
+    [AuthorizeBy(roles: "ADMIN, MANAGER")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         [FromRoute(Name = RouterBase.Id)] long userId,
         CancellationToken cancellationToken = default

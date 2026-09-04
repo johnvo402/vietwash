@@ -15,7 +15,7 @@ namespace Presentation.Endpoints.Suppliers
     {
         [HttpPost(Router.SupplierRoute.Suppliers)]
         [SwaggerOperation(Tags = [Router.SupplierRoute.Tags], Summary = "create Supplier")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             [FromBody] CreateSupplierCommand request,
             CancellationToken cancellationToken = default

@@ -20,7 +20,7 @@ namespace Presentation.Endpoints.BranchProducts
             Tags = [Router.BranchProductRoute.Tags],
             Summary = "Detail branch product"
         )]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<
             ActionResult<ApiResponse<DetailBranchProductResponse>>
         > HandleAsync(

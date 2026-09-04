@@ -18,7 +18,7 @@ namespace Presentation.Endpoints.Customer
     {
         [HttpGet(Router.CustomerRoute.GetList)]
         [SwaggerOperation(Tags = [Router.CustomerRoute.Tags], Summary = "list Customer")]
-        //[AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<ListCustomerResponse>>>
         > HandleAsync(

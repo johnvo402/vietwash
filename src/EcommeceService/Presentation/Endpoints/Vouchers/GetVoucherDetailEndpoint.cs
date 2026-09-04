@@ -16,7 +16,7 @@ namespace Presentation.Endpoints.Vouchers
     {
         [HttpGet(Routes.Router.VoucherRoute.GetDetail)]
         [SwaggerOperation(Tags = [Routes.Router.VoucherRoute.Tags], Summary = "Detail voucher")]
-        //[AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<ActionResult<ApiResponse<GetVoucherDetailResponse>>> HandleAsync(
             GetVoucherDetailQuery request,
             CancellationToken cancellationToken = default

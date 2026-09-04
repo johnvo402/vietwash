@@ -19,7 +19,7 @@ namespace Presentation.Endpoints.Customer
     {
         [HttpGet(Router.CustomerRoute.GetUpdateDelete, Name = Router.CustomerRoute.GetRouteName)]
         [SwaggerOperation(Tags = [Router.CustomerRoute.Tags], Summary = "Detail Customer")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<
             ActionResult<ApiResponse<GetCustomerDetailResponse>>
         > HandleAsync(

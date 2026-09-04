@@ -19,7 +19,7 @@ namespace Presentation.Endpoints.Reports
     {
         [HttpGet(Router.ReportRoute.Order)]
         [SwaggerOperation(Tags = [Router.ReportRoute.Tags], Summary = "Report service order")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<OrderSummaryResult>>>
         > HandleAsync(

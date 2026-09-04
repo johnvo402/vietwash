@@ -18,7 +18,7 @@ namespace Presentation.Endpoints.Inventories
     {
         [HttpGet(Router.InventoryRoute.Inventories)]
         [SwaggerOperation(Tags = [Router.InventoryRoute.Tags], Summary = "Inventory Document list")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<ListInventoryDocumentResponse>>>
         > HandleAsync(

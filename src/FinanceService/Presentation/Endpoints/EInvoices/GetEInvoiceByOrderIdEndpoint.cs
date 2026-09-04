@@ -17,7 +17,7 @@ namespace Presentation.Endpoints.EInvoices
     {
         [HttpGet(Router.EInvoiceRoute.GetByOrderId)]
         [SwaggerOperation(Tags = [Router.EInvoiceRoute.Tags], Summary = "create EInvoiceRoute")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<
             ActionResult<ApiResponse<GetEInvoiceByOrderIdResponse>>
         > HandleAsync(

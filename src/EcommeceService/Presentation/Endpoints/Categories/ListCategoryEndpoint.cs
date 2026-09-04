@@ -1,4 +1,5 @@
 using Application.Feature.Categories.Queries.List;
+using Application.Common.Auth;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
@@ -17,6 +18,7 @@ public class ListCategoryEndpoint(ISender sender)
 {
     [HttpGet(Router.CategoryRoute.Categories)]
     [SwaggerOperation(Tags = [Router.CategoryRoute.Tags], Summary = "Category list")]
+    [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
     public override async Task<
         ActionResult<ApiResponse<PaginationResponse<ListCategoryResponse>>>
     > HandleAsync(

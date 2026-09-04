@@ -1,4 +1,5 @@
 ﻿using Application.Features.Funds.Command.Create;
+using Application.Common.Auth;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -14,6 +15,7 @@ namespace Presentation.Endpoints.Funds
     {
         [HttpPost(Router.FundRoute.Funds)]
         [SwaggerOperation(Tags = [Router.FundRoute.Tags], Summary = "create fund")]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             [FromBody] CreateFundCommand request,
             CancellationToken cancellationToken = default

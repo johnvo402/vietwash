@@ -15,7 +15,7 @@ public class UpdateServiceEndpoint(ISender sender)
 {
     [HttpPut(Router.ServiceRoute.GetUpdateDelete)]
     [SwaggerOperation(Tags = [Router.ServiceRoute.Tags], Summary = "Update service")]
-    [AuthorizeBy]
+    [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
     public override async Task<ActionResult<ApiResponse>> HandleAsync(
         UpdateServiceCommand request,
         CancellationToken cancellationToken = default

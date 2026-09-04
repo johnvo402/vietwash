@@ -15,7 +15,7 @@ namespace Presentation.Endpoints.Vouchers
     {
         [HttpPut(Router.VoucherRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.VoucherRoute.Tags], Summary = "Update voucher")]
-        //[AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             UpdateVoucherCommand request,
             CancellationToken cancellationToken = default

@@ -18,7 +18,7 @@ namespace Presentation.Endpoints.Inventories
             Tags = [Router.InventoryRoute.Tags],
             Summary = "Inventory Document delete"
         )]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             DeleteInventoryCommand request,
             CancellationToken cancellationToken = default

@@ -1,4 +1,5 @@
 ﻿using Application.Features.Branches.Queries;
+using Application.Common.Auth;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.Dtos.Responses;
@@ -17,6 +18,7 @@ namespace Presentation.Endpoints.Branches
     {
         [HttpGet(Router.BranchRoute.Branches)]
         [SwaggerOperation(Tags = [Router.BranchRoute.Tags], Summary = "List Branch")]
+        [AuthorizeBy(roles: "ADMIN")]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<ListBranchResponse>>>
         > HandleAsync(

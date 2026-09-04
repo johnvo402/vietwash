@@ -1,4 +1,5 @@
 using Application.Feature.InventoryDocuments.Queries.GetReceipt;
+using Application.Common.Auth;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -19,7 +20,7 @@ namespace Presentation.Endpoints.Inventories
             Tags = [Router.InventoryRoute.Tags],
             Summary = "Inventory Document GetReceipt"
         )]
-        // [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<ActionResult<ApiResponse<InventoryReceiptResponse>>> HandleAsync(
             InventoryReceiptQuery request,
             CancellationToken cancellationToken = default

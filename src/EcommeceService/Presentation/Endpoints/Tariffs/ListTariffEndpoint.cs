@@ -18,7 +18,7 @@ namespace Presentation.Endpoints.Tariffs
     {
         [HttpGet(Router.TariffRoute.Tariffs)]
         [SwaggerOperation(Tags = [Router.TariffRoute.Tags], Summary = "List Tariff")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN")]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<ListTariffResponse>>>
         > HandleAsync(

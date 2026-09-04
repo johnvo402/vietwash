@@ -18,7 +18,7 @@ public class ListAccountEndpoint(ISender sender)
 {
     [HttpGet(Router.AccountRoute.Accounts)]
     [SwaggerOperation(Tags = [Router.AccountRoute.Tags], Summary = "list Account")]
-    [AuthorizeBy]
+    [AuthorizeBy(roles: "ADMIN, MANAGER")]
     public override async Task<
         ActionResult<ApiResponse<PaginationResponse<ListAccountResponse>>>
     > HandleAsync(

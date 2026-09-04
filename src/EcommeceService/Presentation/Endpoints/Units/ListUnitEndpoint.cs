@@ -18,7 +18,7 @@ namespace Presentation.Endpoints.Units
     {
         [HttpGet(Router.UnitRoute.Units)]
         [SwaggerOperation(Tags = [Router.UnitRoute.Tags], Summary = "list Unit")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<ListUnitResponse>>>
         > HandleAsync(

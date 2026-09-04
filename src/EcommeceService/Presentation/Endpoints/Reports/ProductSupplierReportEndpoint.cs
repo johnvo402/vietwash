@@ -18,7 +18,7 @@ namespace Presentation.Endpoints.Reports
     {
         [HttpGet(Router.ReportRoute.ProductSupplierReport)]
         [SwaggerOperation(Tags = [Router.ReportRoute.Tags], Summary = "Product supplier report")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<ProductSupplierReportResponse>>>
         > HandleAsync(

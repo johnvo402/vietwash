@@ -8,9 +8,14 @@ using Domain.Aggregates.Suppliers;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
 
+using Application.Common.Interfaces.Services;
+using Application.Feature.Reports.Common;
+using Contracts.Application.Common.Exceptions;
+using Contracts.Common.Messages;
+
 namespace Application.Feature.Reports.ProductSupplierReport
 {
-    public class ProductSupplierReportHandler(IUnitOfWork unitOfWork)
+    public class ProductSupplierReportHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
         : IRequestHandler<
             ProductSupplierReportQuery,
             Result<PaginationResponse<ProductSupplierReportResponse>>
@@ -21,6 +26,15 @@ namespace Application.Feature.Reports.ProductSupplierReport
             CancellationToken cancellationToken
         )
         {
+            ReportBranchScopeResult branchScope = ReportBranchScope.Resolve(
+                currentUser.Session?.Branches,
+                request.BranchIds
+            );
+            if (branchScope.HasUnauthorizedBranch)
+                return Result<PaginationResponse<ProductSupplierReportResponse>>.Failure(
+                    new ForbiddenError(Message.FORBIDDEN)
+                );
+
             var from = DateTimeOffset
                 .FromUnixTimeSeconds(request.From)
                 .ToOffset(TimeSpan.FromHours(0));
@@ -37,9 +51,8 @@ namespace Application.Feature.Reports.ProductSupplierReport
                     x.ProductSupplying.CreatedAt >= from
                     && x.ProductSupplying.CreatedAt <= to
                     && x.ProductSupplying.InventoryDocument.Status == InventoryStatus.Completed
-                    && request.BranchIds != null
                     && x.ProductSupplying.InventoryDocument.BranchId.HasValue
-                    && request.BranchIds.Contains(
+                    && branchScope.BranchIds.Contains(
                         x.ProductSupplying.InventoryDocument.BranchId.Value
                     )
                 )

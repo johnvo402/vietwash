@@ -17,7 +17,7 @@ namespace Presentation.Endpoints.Units
     {
         [HttpPut(Router.UnitRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.UnitRoute.Tags], Summary = "Update Unit")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<ActionResult<ApiResponse<UpdateUnitResponse>>> HandleAsync(
             UpdateUnitCommand request,
             CancellationToken cancellationToken = default

@@ -1,4 +1,5 @@
 ﻿using Application.Features.FundBehaviors.Queries;
+using Application.Common.Auth;
 using Ardalis.ApiEndpoints;
 using Contracts.ApiWrapper;
 using Contracts.RouteResults;
@@ -16,6 +17,7 @@ namespace Presentation.Endpoints.FundBehaviors
     {
         [HttpGet(Router.FundBehaviorRoute.FundBehaviors)]
         [SwaggerOperation(Tags = [Router.FundBehaviorRoute.Tags], Summary = "list Fundbehavior")]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<
             ActionResult<ApiResponse<IEnumerable<ListFundBehaviorResponse>>>
         > HandleAsync(

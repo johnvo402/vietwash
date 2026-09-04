@@ -18,7 +18,7 @@ public class ListServiceEndpoint(ISender sender)
 {
     [HttpGet(Router.ServiceRoute.Services)]
     [SwaggerOperation(Tags = [Router.ServiceRoute.Tags], Summary = "Service list")]
-    [AuthorizeBy]
+    [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
     public override async Task<
         ActionResult<ApiResponse<PaginationResponse<ListServiceResponse>>>
     > HandleAsync(

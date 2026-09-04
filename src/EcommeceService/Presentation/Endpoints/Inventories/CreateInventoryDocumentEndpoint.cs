@@ -20,7 +20,7 @@ namespace Presentation.Endpoints.Inventories
             Tags = [Router.InventoryRoute.Tags],
             Summary = "Inventory Document a new order"
         )]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<
             ActionResult<ApiResponse<CreateInventoryDocumentResponse>>
         > HandleAsync(

@@ -16,7 +16,7 @@ namespace Presentation.Endpoints.Tariffs
     {
         [HttpDelete(Router.TariffRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.TariffRoute.Tags], Summary = "Delete Tariff")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN")]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
 			DeleteTariffCommand request,
             CancellationToken cancellationToken = default

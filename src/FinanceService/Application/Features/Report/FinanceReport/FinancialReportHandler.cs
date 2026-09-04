@@ -5,9 +5,14 @@ using Domain.Aggregates.Funds.Enums;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
 
+using Application.Common.Interfaces.Services;
+using Application.Features.Report.Common;
+using Contracts.Application.Common.Exceptions;
+using Contracts.Common.Messages;
+
 namespace Application.Features.Report.FinanceReport
 {
-    public class FinancialReportHandler(IUnitOfWork unitOfWork)
+    public class FinancialReportHandler(IUnitOfWork unitOfWork, ICurrentAccount currentUser)
         : IRequestHandler<FinancialReportQuery, Result<FinancialReportResponse>>
     {
         public async ValueTask<Result<FinancialReportResponse>> Handle(
@@ -15,7 +20,14 @@ namespace Application.Features.Report.FinanceReport
             CancellationToken cancellationToken
         )
         {
-             
+            ReportBranchScopeResult branchScope = ReportBranchScope.Resolve(
+                currentUser.Session?.Branches,
+                request.BranchIds
+            );
+            if (branchScope.HasUnauthorizedBranch)
+                return Result<FinancialReportResponse>.Failure(
+                    new ForbiddenError(Message.FORBIDDEN)
+                );
 
             var from = DateTimeOffset
                 .FromUnixTimeSeconds(request.From)
@@ -26,7 +38,10 @@ namespace Application.Features.Report.FinanceReport
                 .Repository<Fund>()
                 .QueryAsync()
                 .Where(f =>
-                    f.CreatedAt >= from && f.CreatedAt <= to && f.Status == FundStatus.Confirmed
+                    f.CreatedAt >= from
+                    && f.CreatedAt <= to
+                    && f.Status == FundStatus.Confirmed
+                    && branchScope.BranchIds.Contains(f.BranchId)
                 )
                 .GroupBy(f => f.FundBehaviorId)
                 .Select(g => new { FundBehaviorId = g.Key, TotalAmount = g.Sum(f => f.Amount) })

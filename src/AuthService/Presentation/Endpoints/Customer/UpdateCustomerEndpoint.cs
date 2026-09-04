@@ -17,7 +17,7 @@ namespace Presentation.Endpoints.Customer
 	{
 		[HttpPut(Router.CustomerRoute.GetUpdateDelete)]
 		[SwaggerOperation(Tags = [Router.CustomerRoute.Tags], Summary = "Update Customer")]
-		[AuthorizeBy]
+		[AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
 		public override async Task<ActionResult<ApiResponse>> HandleAsync(
 			UpdateCustomerCommand command,
 			CancellationToken cancellationToken = default

@@ -18,7 +18,7 @@ namespace Presentation.Endpoints.Funds
     {
         [HttpGet(Router.FundRoute.Funds)]
         [SwaggerOperation(Tags = [Router.FundRoute.Tags], Summary = "list Fund")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<ListFundResponse>>>
         > HandleAsync(

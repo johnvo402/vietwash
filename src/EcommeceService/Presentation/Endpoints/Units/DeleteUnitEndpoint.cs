@@ -16,7 +16,7 @@ namespace Presentation.Endpoints.Units
     {
         [HttpDelete(Router.UnitRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.UnitRoute.Tags], Summary = "Delete Unit")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<ActionResult<ApiResponse>> HandleAsync(
             [FromRoute(Name = RouterBase.Id)] long unitId,
             CancellationToken cancellationToken = default

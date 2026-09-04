@@ -20,7 +20,7 @@ namespace Presentation.Endpoints.BranchProducts
     {
         [HttpGet(Router.BranchProductRoute.BranchProducts)]
         [SwaggerOperation(Tags = [Router.BranchProductRoute.Tags], Summary = "list branch product")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER, STAFF")]
         public override async Task<
             ActionResult<ApiResponse<PaginationResponse<ListBranchProductResponse>>>
         > HandleAsync(

@@ -17,7 +17,7 @@ namespace Presentation.Endpoints.Funds
     {
         [HttpGet(Router.FundRoute.GetUpdateDelete, Name = Router.FundRoute.GetUpdateDelete)]
         [SwaggerOperation(Tags = [Router.FundRoute.Tags], Summary = "Detail Order")]
-        [AuthorizeBy]
+        [AuthorizeBy(roles: "ADMIN, MANAGER")]
         public override async Task<ActionResult<ApiResponse<GetFundDetailResponse>>> HandleAsync(
             GetFundDetailQuery request,
             CancellationToken cancellationToken = default
