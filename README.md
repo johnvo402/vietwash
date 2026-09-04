@@ -44,13 +44,13 @@ See [architecture](docs/architecture.md) for service boundaries and authenticati
 | --- | --- |
 | Backend | .NET 8, ASP.NET Core, EF Core, YARP, CQRS/Mediator, gRPC, SignalR |
 | Data | PostgreSQL/PostGIS, Redis, S3-compatible storage |
-| Frontend | Next.js 14, React 18, TypeScript, Tailwind CSS, React Query, Zustand |
+| Frontend | Next.js 15.5.25, React 18, TypeScript, Tailwind CSS, React Query, Zustand |
 | Delivery | Docker Compose, Nginx, GitHub Actions, GHCR |
 | Quality | xUnit, PostgreSQL integration tests, Playwright, ESLint |
 
 ## Development
 
-Prerequisites: .NET 8 SDK, Node.js 20/npm, Java 17+ for API generation, Docker Compose, and optionally GNU Make/Bash.
+Prerequisites: .NET 8 SDK, Node.js 22/npm, Java 17+ for API generation, Docker Compose, and optionally GNU Make/Bash.
 
 ```bash
 git clone https://github.com/johnvo402/vietwash.git

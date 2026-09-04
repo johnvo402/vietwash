@@ -69,7 +69,7 @@ public class RequestResetAccountPasswordHandler(
             {
                 DisplayName = "VietWash",
                 Subject = "Đặt lại mật khẩu!",
-                To = [user.Email],
+                To = [user.Email ?? command.Email],
                 Template = new(
                     "ForgotPassword",
                     new ResetPasswordModel() { ResetLink = link.ToString(), Expiry = expiry }

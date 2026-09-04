@@ -27,9 +27,11 @@ This baseline was reviewed on 2026-08-31 with the locked dependency graph and bo
 
 The production omission view includes build-time transitive packages pulled by Next.js and `next-pwa`; its total is not a count of independently runtime-reachable browser vulnerabilities.
 
-The review removed unused direct dependencies (`jspdf`, `node-rsa`, `uuid`, `uploadthing`, and `@uploadthing/react` plus redundant type packages), moved the OpenAPI generator to development dependencies, and updated the generator, Playwright, Next 14 patch line, PostCSS, qs, and Sharp to compatible patched releases. `dompurify`, which application notification code imports, is now declared directly instead of arriving accidentally through the removed `jspdf` dependency. `npm audit fix --force` was not used. A non-breaking dry run proposed no additional lockfile changes.
+The review removed unused direct dependencies (`jspdf`, `node-rsa`, `uuid`, `uploadthing`, and `@uploadthing/react` plus redundant type packages), moved the OpenAPI generator to development dependencies, and updated the generator, Playwright, PostCSS, qs, and Sharp to compatible patched releases. The completed maintenance migration then moved the runtime to Next.js 15.5.25. `dompurify`, which application notification code imports, is now declared directly instead of arriving accidentally through the removed `jspdf` dependency. `npm audit fix --force` was not used. A non-breaking dry run proposed no additional lockfile changes.
 
-## Constrained findings
+## Historical constrained findings
+
+The following table records the pre-migration constraints. The current resolved state is documented in the maintenance summary above.
 
 | Dependency path | Reachability | Decision |
 | --- | --- | --- |

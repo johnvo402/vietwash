@@ -19,7 +19,7 @@ public class LoggingBehavior<TMessage, TResponse>(ILogger logger, ICurrentAccoun
             + replacePhrase
             + " with payload \n {@Request} \n";
 
-        List<object> parameters = [requestName, id, message];
+        List<object?> parameters = [requestName, id, message];
 
         if (id == null)
         {

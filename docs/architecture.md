@@ -7,7 +7,7 @@ This document is the maintained architecture source for VietWash. It describes t
 ```mermaid
 flowchart LR
     User[Staff browser] --> Edge[Nginx edge / only host port 80]
-    Edge --> Web[Next.js 14 standalone web app]
+    Edge --> Web[Next.js 15.5.25 standalone web app]
     Edge -->|same-origin API / SignalR| Gateway[YARP API Gateway x2]
 
     Gateway --> Auth[Auth Service]

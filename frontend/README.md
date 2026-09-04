@@ -1,6 +1,6 @@
 # VietWash Web
 
-The VietWash web application is the Next.js 14 frontend for the laundry management platform in this monorepo. It uses the App Router, TypeScript, React Query, Zustand, Tailwind CSS, next-intl, and an Axios client generated from the backend OpenAPI documents.
+The VietWash web application is the Next.js 15.5.25 frontend for the laundry management platform in this monorepo. It uses the App Router, TypeScript, React Query, Zustand, Tailwind CSS, next-intl, and an Axios client generated from the backend OpenAPI documents.
 
 The codebase is a feature-based modular frontend. It is not an independently deployed micro-frontend system.
 
@@ -8,7 +8,7 @@ The codebase is a feature-based modular frontend. It is not an independently dep
 
 Prerequisites:
 
-- Node.js 20 LTS or newer
+- Node.js 22 LTS or newer
 - npm
 - Java, used by OpenAPI Generator
 

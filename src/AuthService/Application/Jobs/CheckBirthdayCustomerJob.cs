@@ -13,7 +13,7 @@ namespace Application.Jobs
     public class UserDTO
     {
         public long? Id { get; set; }
-        public string? Email { get; set; }
+        public string Email { get; set; } = default!;
         public string? DisplayName { get; set; }
     }
 
