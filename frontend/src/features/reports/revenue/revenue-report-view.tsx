@@ -6,7 +6,6 @@ import { DataTable } from "@/components/ui/table/data-table";
 import { useTableFilters } from "@/compositions/tables/use-table-filters";
 import { useFilterState } from "../hooks/useFilterState";
 import { useTranslations } from "next-intl";
-import { useIsMobile } from "@/hooks/use-mobile";
 import FilterPanel from "../components/filter-report-order";
 import { useRevenueReportTable } from "./components/column";
 import { useRevenueReport } from "./hooks/use-revenue-report";
@@ -31,7 +30,6 @@ export default function ReportRevenueView() {
     fetchAllData,
   } = useRevenueReport();
   const { setIsLoading } = useFilterState();
-  const isMobile = useIsMobile();
   const { searchQuery, setPage, setSearchQuery } = useTableFilters();
   const { columns } = useRevenueReportTable();
   const { user } = useAuth();
@@ -261,26 +259,12 @@ export default function ReportRevenueView() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div
-        className={`${
-          isMobile
-            ? "grid grid-cols-1 gap-2 h-auto"
-            : "grid grid-cols-8 gap-2 h-screen"
-        }`}
-      >
-        <div
-          className={`${
-            isMobile ? "col-span-1 w-full" : "col-span-2"
-          } bg-background rounded-lg shadow-md p-${isMobile ? 4 : 6}`}
-        >
+      <div className="grid h-auto grid-cols-1 gap-2 md:h-screen md:grid-cols-8">
+        <div className="col-span-1 w-full rounded-lg bg-background p-4 shadow-md md:col-span-2 md:p-6">
           <FilterPanel maxDays={365} title="report.revenueByDayReportsTitle" />
         </div>
 
-        <div
-          className={`${
-            isMobile ? "col-span-1 w-full" : "col-span-6"
-          } bg-background rounded-lg shadow-md p-${isMobile ? 2 : 6}`}
-        >
+        <div className="col-span-1 w-full rounded-lg bg-background p-2 shadow-md md:col-span-6 md:p-6">
           <div className="flex justify-end items-center mb-4">
             <Button
               onClick={handleExportExcel}

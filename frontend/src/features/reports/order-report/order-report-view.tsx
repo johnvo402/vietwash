@@ -9,7 +9,6 @@ import { useTableFilters } from "@/compositions/tables/use-table-filters";
 import { useOrderReportTable } from "./components/column";
 import { useFilterState } from "../hooks/useFilterState";
 import { useTranslations } from "next-intl";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import type { ExcelCell } from "@/shared/utils/excel";
 import { excelHeaderStyle } from "@/shared/themes/excel";
@@ -29,7 +28,6 @@ export default function ReportOrderView() {
     fetchAllData,
   } = useOrderReport();
   const { setIsLoading } = useFilterState();
-  const isMobile = useIsMobile();
   const { searchQuery, setPage, setSearchQuery } = useTableFilters();
   const { columns } = useOrderReportTable();
   const { user } = useAuth();
@@ -214,28 +212,14 @@ export default function ReportOrderView() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div
-        className={`${
-          isMobile
-            ? "grid grid-cols-1 gap-2 h-auto"
-            : "grid grid-cols-8 gap-2 h-screen"
-        }`}
-      >
+      <div className="grid h-auto grid-cols-1 gap-2 md:h-screen md:grid-cols-8">
         {/* Filter Panel */}
-        <div
-          className={`${
-            isMobile ? "col-span-1 w-full" : "col-span-2"
-          } bg-background rounded-lg shadow-md p-${isMobile ? 4 : 6}`}
-        >
+        <div className="col-span-1 w-full rounded-lg bg-background p-4 shadow-md md:col-span-2 md:p-6">
           <FilterPanel maxDays={365} title="report.orderReport" />
         </div>
 
         {/* Main Content */}
-        <div
-          className={`${
-            isMobile ? "col-span-1 w-full" : "col-span-6"
-          } bg-background rounded-lg shadow-md p-${isMobile ? 2 : 6}`}
-        >
+        <div className="col-span-1 w-full rounded-lg bg-background p-2 shadow-md md:col-span-6 md:p-6">
           <div className="flex justify-between items-center mb-4">
             <DataTableSearch
               placeholder={t("search.searchBy", {
@@ -255,7 +239,7 @@ export default function ReportOrderView() {
           </div>
 
           {/* Data Table */}
-          <div className={`rounded-md border shadow-sm mt-${isMobile ? 2 : 3}`}>
+          <div className="mt-2 rounded-md border shadow-sm md:mt-3">
             <DataTable
               columns={columns}
               data={orderReport}

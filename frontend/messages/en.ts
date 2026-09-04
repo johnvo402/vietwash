@@ -413,6 +413,7 @@ const en = {
     recentActivities: "Recent Activities",
     recentActivitiesDescription: "User and system activities",
     noneRecentActivities: "No recent activities",
+    refreshRecentActivities: "Refresh recent activities",
   },
   fund: {
     paymentMethod: {

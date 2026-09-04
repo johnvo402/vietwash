@@ -417,6 +417,7 @@ const vi = {
     recentActivities: "Hoạt động gần đây",
     recentActivitiesDescription: "Hoạt động của người dùng và hệ thống",
     noneRecentActivities: "Không có hoạt động nào gần đây",
+    refreshRecentActivities: "Làm mới hoạt động gần đây",
   },
   fund: {
     paymentMethod: {
