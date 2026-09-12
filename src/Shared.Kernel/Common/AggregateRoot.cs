@@ -28,6 +28,9 @@ public abstract class AggregateRoot : DefaultEntity, IAuditable
         return dequeuedEvents;
     }
 
+    public bool TryDequeueUncommittedEvent(out INotification? domainEvent) =>
+        uncommittedEvents.TryDequeue(out domainEvent);
+
     protected void Emit(INotification domainEvent)
     {
         if (TryApplyDomainEvent(domainEvent))

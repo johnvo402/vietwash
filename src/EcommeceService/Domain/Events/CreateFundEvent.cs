@@ -1,11 +1,13 @@
 ﻿using Domain.Aggregates.Orders.Enums;
 using Domain.Events.Enums;
 using Mediator;
+using Shared.Kernel.Common.Events;
 
 namespace Domain.Events
 {
-    public class CreateFundEvent : INotification
+    public class CreateFundEvent : INotification, IIntegrationEvent
     {
+        public Guid MessageId { get; set; }
         public string TypeId { get; set; } = default!;
         public long BehaviorId { get; set; } = default!;
         public long ReferenceId { get; set; } = default!;

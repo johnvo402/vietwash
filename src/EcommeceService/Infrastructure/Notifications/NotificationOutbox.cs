@@ -4,6 +4,7 @@ using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Events;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Shared.Kernel.Common.Events;
 
 namespace Infrastructure.Notifications;
 
@@ -38,7 +39,7 @@ public sealed class NotificationOutbox
 }
 
 public sealed record ProcessedOrderNotification(long OrderId, string PublicId, string OrderCode,
-    long BranchId, long CustomerId, DateTimeOffset OccurredAt);
+    long BranchId, long CustomerId, DateTimeOffset OccurredAt) : IIntegrationEvent;
 
 public sealed class NotificationOutboxConfiguration : IEntityTypeConfiguration<NotificationOutbox>
 {

@@ -2,7 +2,7 @@
 
 namespace Domain.Aggregates.Vouchers.Events
 {
-    public class VoucherUsageEvent : INotification
+    public class VoucherUsageEvent : Shared.Kernel.Common.Events.IDomainEvent
     {
         public long VoucherId { get; init; }
         public long CustomerId { get; init; }

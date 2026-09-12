@@ -10,6 +10,10 @@ namespace Infrastructure.Data.Configurations
         {
             builder.HasKey(x => x.Id);
             builder.HasIndex(x => x.Id);
+            builder
+                .HasIndex(x => x.SourceEventId)
+                .IsUnique()
+                .HasFilter("source_event_id IS NOT NULL");
             builder.Property(o => o.InvoiceNumber).ValueGeneratedOnAdd();
             builder.Property(o => o.OrderDate).HasColumnType("timestamp without time zone");
             builder

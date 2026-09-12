@@ -10,6 +10,7 @@ namespace Application.Events.CreateEInvoiceEvents
 
     public class EInvoiceOrderMessage
     {
+        public Guid MessageId { get; set; }
         public long OrderId { get; set; }
         public string OrderCode { get; set; } = default!;
         public DateTimeOffset CompletedAt { get; set; }

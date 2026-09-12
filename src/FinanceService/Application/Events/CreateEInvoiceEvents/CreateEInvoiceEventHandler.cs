@@ -5,6 +5,8 @@ using Contracts.Infrastructure.Common;
 using Contracts.Utils;
 using Domain.Aggregates.EInvoices;
 using Mediator;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Application.Events.CreateEInvoiceEvents
 {
@@ -14,12 +16,21 @@ namespace Application.Events.CreateEInvoiceEvents
         IQrGenerator qrGenerator
     ) : IRequestHandler<CreateEInvoiceEvent, PubSubResponse<CreateEInvoiceEvent>>
     {
+        public const string SourceEventIndexName = "ix_e_invoice_source_event_id";
 
         public async ValueTask<PubSubResponse<CreateEInvoiceEvent>> Handle(
             CreateEInvoiceEvent request,
             CancellationToken cancellationToken
         )
         {
+            if (
+                request.Payload is { } payload
+                && await unitOfWork
+                    .Repository<EInvoice>()
+                    .AnyAsync(x => x.SourceEventId == request.PayloadId, cancellationToken)
+            )
+                return Success(request);
+
             var lookupCode = Generator.GenerateCode("HD", 6);
             var symbol = Generator.GenerateCode("C25T", 2);
             var qrCode = qrGenerator.GenerateQrBase64(lookupCode);
@@ -41,23 +52,20 @@ namespace Application.Events.CreateEInvoiceEvents
                     PayloadId = request.PayloadId,
                 };
             }
+            eInvoice.SourceEventId = request.PayloadId;
 
             try
             {
-
                 _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
                 await unitOfWork.Repository<EInvoice>().AddAsync(eInvoice);
                 await unitOfWork.SaveAsync(cancellationToken);
                 await unitOfWork.CommitAsync(cancellationToken);
-                return new PubSubResponse<CreateEInvoiceEvent>
-                {
-                    Error = null,
-                    ErrorType = null,
-                    IsSuccess = true,
-                    ResponseData = request,
-                    LastAttemptTime = DateTime.UtcNow,
-                    PayloadId = request.PayloadId,
-                };
+                return Success(request);
+            }
+            catch (DbUpdateException ex) when (IsDuplicateSourceEvent(ex))
+            {
+                await unitOfWork.RollbackAsync(cancellationToken);
+                return Success(request);
             }
             catch (Exception ex)
             {
@@ -74,5 +82,23 @@ namespace Application.Events.CreateEInvoiceEvents
             }
         }
 
+        public static bool IsDuplicateSourceEvent(DbUpdateException exception) =>
+            exception.InnerException
+                is PostgresException
+                {
+                    SqlState: PostgresErrorCodes.UniqueViolation,
+                    ConstraintName: SourceEventIndexName,
+                };
+
+        private static PubSubResponse<CreateEInvoiceEvent> Success(CreateEInvoiceEvent request) =>
+            new()
+            {
+                Error = null,
+                ErrorType = null,
+                IsSuccess = true,
+                ResponseData = request,
+                LastAttemptTime = DateTime.UtcNow,
+                PayloadId = request.PayloadId,
+            };
     }
 }

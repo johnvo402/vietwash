@@ -6,6 +6,7 @@ using Contracts.Infrastructure.UnitOfWorks.CachedRepositories;
 using Contracts.Infrastructure.UnitOfWorks.Repositories;
 using Infrastructure.UnitOfWorks.CachedRepositories;
 using Infrastructure.UnitOfWorks.Repositories;
+using Infrastructure.Data.Interceptors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Serilog;
@@ -15,7 +16,8 @@ namespace Infrastructure.UnitOfWorks;
 public class UnitOfWork(
     IDbContext dbContext,
     ILogger logger,
-    IMemoryCacheService memoryCacheService
+    IMemoryCacheService memoryCacheService,
+    DispatchDomainEventInterceptor? domainEventDispatcher = null
 ) : IUnitOfWork
 {
     public DbTransaction? CurrentTransaction { get; set; }
@@ -150,6 +152,8 @@ public class UnitOfWork(
         {
             await DisposeTransactionAsync();
         }
+
+        await DispatchDomainEventsAsync(cancellationToken);
     }
 
     public async Task RollbackAsync(CancellationToken cancellationToken = default)
@@ -183,8 +187,12 @@ public class UnitOfWork(
         CancellationToken cancellationToken = default
     ) => dbContext.DatabaseFacade.ExecuteSqlRawAsync(sql, parameters, cancellationToken);
 
-    public async Task SaveAsync(CancellationToken cancellationToken = default) =>
+    public async Task SaveAsync(CancellationToken cancellationToken = default)
+    {
         await dbContext.SaveChangesAsync(cancellationToken);
+        if (CurrentTransaction == null && dbContext.DatabaseFacade.CurrentTransaction == null)
+            await DispatchDomainEventsAsync(cancellationToken);
+    }
 
     public void Dispose()
     {
@@ -211,6 +219,11 @@ public class UnitOfWork(
             CurrentTransaction = null;
         }
     }
+
+    private Task DispatchDomainEventsAsync(CancellationToken cancellationToken) =>
+        domainEventDispatcher is not null && dbContext is DbContext context
+            ? domainEventDispatcher.DispatchDomainEventsAsync(context, cancellationToken)
+            : Task.CompletedTask;
 
     private static object? CreateInstance<T>(Type genericType, params object?[]? args)
         where T : class => Activator.CreateInstance(genericType.MakeGenericType(typeof(T)), args);

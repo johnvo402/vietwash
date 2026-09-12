@@ -11,6 +11,7 @@ namespace Domain.Aggregates.EInvoices
 
         public long InvoiceNumber { get; set; }
         public long OrderId { get; set; }
+        public Guid? SourceEventId { get; set; }
         public DateTime OrderDate { get; set; }
 
         public string LookupCode { get; set; } = null!;

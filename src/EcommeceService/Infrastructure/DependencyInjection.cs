@@ -28,6 +28,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using Infrastructure.Notifications;
+using Infrastructure.IntegrationEvents;
 
 namespace Infrastructure;
 
@@ -100,6 +101,8 @@ public static class DependencyInjection
             .AddHostedService<DbInitializerBackgroundService>()
             .AddScoped<NotificationOutboxDispatcher>()
             .AddHostedService<NotificationOutboxWorker>()
+            .AddScoped<IntegrationOutboxDispatcher>()
+            .AddHostedService<IntegrationOutboxWorker>()
             .Configure<CacheSettings>(options =>
                 configuration.GetSection(nameof(CacheSettings)).Bind(options)
             )

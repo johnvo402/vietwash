@@ -96,7 +96,11 @@ public class PubSubBackgroundService : BackgroundService
                     scope.ServiceProvider.GetRequiredService<IPubSubLogService>();
                 var deadLetterPubSub = scope.ServiceProvider.GetRequiredService<IPubSubService>();
 
-                var request = new CreateEInvoiceEvent { Payload = message };
+                var request = new CreateEInvoiceEvent
+                {
+                    Payload = message,
+                    PayloadId = message.MessageId == Guid.Empty ? Guid.NewGuid() : message.MessageId,
+                };
 
                 await ProcessMessageAsync<CreateEInvoiceEvent, PubSubResponse<CreateEInvoiceEvent>>(
                     request,
@@ -122,7 +126,11 @@ public class PubSubBackgroundService : BackgroundService
                 var pubSubLogService =
                     scope.ServiceProvider.GetRequiredService<IPubSubLogService>();
                 var deadLetterPubSub = scope.ServiceProvider.GetRequiredService<IPubSubService>();
-                var request = new UpdateStatusOrderEvent { Payload = message };
+                var request = new UpdateStatusOrderEvent
+                {
+                    Payload = message,
+                    PayloadId = message.MessageId == Guid.Empty ? Guid.NewGuid() : message.MessageId,
+                };
                 await ProcessMessageAsync<
                     UpdateStatusOrderEvent,
                     PubSubResponse<UpdateStatusOrderEvent>

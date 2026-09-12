@@ -9,17 +9,12 @@ namespace Infrastructure.Data.Interceptors;
 public class DispatchDomainEventInterceptor(IServiceScopeFactory serviceScopeFactory)
     : SaveChangesInterceptor
 {
-    public override async ValueTask<int> SavedChangesAsync(
-        SaveChangesCompletedEventData eventData,
-        int result,
+    // Intentionally not dispatched from SavedChanges: an explicit outer transaction may
+    // still roll back. UnitOfWork invokes this only after commit (or an auto-committed save).
+    public async Task DispatchDomainEventsAsync(
+        DbContext? context,
         CancellationToken cancellationToken = default
     )
-    {
-        await DispatchDomainEvents(eventData.Context);
-        return await base.SavedChangesAsync(eventData, result, cancellationToken);
-    }
-
-    public async Task DispatchDomainEvents(DbContext? context)
     {
         if (context == null)
             return;
@@ -29,12 +24,16 @@ public class DispatchDomainEventInterceptor(IServiceScopeFactory serviceScopeFac
             .Where(e => e.Entity.UncommittedEvents.Count != 0)
             .Select(e => e.Entity);
 
-        List<INotification> domainEvents = entities.SelectMany(e => e.UncommittedEvents).ToList();
-        entities.ToList().ForEach(e => e.DequeueUncommittedEvents());
-
         using IServiceScope scope = serviceScopeFactory.CreateScope();
         IPublisher mediator = scope.ServiceProvider.GetRequiredService<IPublisher>();
-        foreach (INotification domainEvent in domainEvents)
-            await mediator.Publish(domainEvent);
+        foreach (AggregateRoot entity in entities.ToList())
+        {
+            while (entity.UncommittedEvents.FirstOrDefault() is INotification domainEvent)
+            {
+                await mediator.Publish(domainEvent, cancellationToken);
+                if (!entity.TryDequeueUncommittedEvent(out _))
+                    throw new InvalidOperationException("The dispatched domain event was not queued.");
+            }
+        }
     }
 }

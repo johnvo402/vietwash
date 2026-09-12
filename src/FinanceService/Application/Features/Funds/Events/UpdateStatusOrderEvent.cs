@@ -12,6 +12,7 @@ namespace Application.Features.Funds.Events
 
     public class CreateFundEventPayload
     {
+        public Guid MessageId { get; set; }
         public string TypeId { get; set; } = default!;
         public long BehaviorId { get; set; } = default!;
         public long ReferenceId { get; set; } = default!;

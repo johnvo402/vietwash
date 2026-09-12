@@ -1,7 +1,10 @@
+using Shared.Kernel.Common.Events;
+
 namespace Application.Common.HandleEventDomains.Orders
 {
-    public class EInvoiceOrderMessage
+    public class EInvoiceOrderMessage : IIntegrationEvent
     {
+        public Guid MessageId { get; set; }
         public long OrderId { get; set; }
         public string OrderCode { get; set; } = default!;
         public DateTimeOffset CompletedAt { get; set; }

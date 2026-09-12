@@ -21,6 +21,7 @@ using Domain.Events;
 using Grpc.Core;
 using Infrastructure.Data;
 using Infrastructure.Notifications;
+using Infrastructure.IntegrationEvents;
 using Infrastructure.Data.Interceptors;
 using Infrastructure.Services.DistributedCache;
 using Infrastructure.UnitOfWorks;
@@ -181,7 +182,7 @@ public class OrderRuntimeDatabaseTests
             Assert.Equal(OrderStatus.Processed, (await db.Set<Order>().SingleAsync()).Status);
             Assert.False((await db.Set<Equipment>().SingleAsync()).Using);
         }
-        Assert.Single(events.OfType<UpdateStatusOrderEvent>());
+        Assert.Empty(events);
         notification.VerifyNoOtherCalls(); // no network side effects before commit
         await using (var outboxCheck = provider.CreateAsyncScope())
             Assert.Single(await outboxCheck.ServiceProvider.GetRequiredService<TheDbContext>().Set<NotificationOutbox>().ToListAsync());
@@ -196,8 +197,17 @@ public class OrderRuntimeDatabaseTests
             Assert.NotNull(order.OrderDate);
             Assert.False((await db.Set<Equipment>().SingleAsync()).Using);
         }
-        Assert.Single(events.OfType<EInvoiceEvent>());
-        Assert.Single(events.OfType<CreateFundEvent>());
+        Assert.Empty(events);
+        for (int i = 0; i < 2; i++)
+        {
+            await using var dispatchScope = provider.CreateAsyncScope();
+            var dispatcher = new IntegrationOutboxDispatcher(
+                dispatchScope.ServiceProvider.GetRequiredService<TheDbContext>(),
+                factory.Object,
+                logger
+            );
+            Assert.True(await dispatcher.DispatchOneAsync(CancellationToken.None));
+        }
         subscriber.Verify(x => x.PublishAsync(It.IsAny<RedisChannel>(), It.IsAny<RedisValue>(), It.IsAny<CommandFlags>()), Times.Exactly(2));
         var count = events.Count;
         await Transition(OrderStatus.Completed, PaymentMethod.Cash);

@@ -1,27 +1,21 @@
 # Order runtime reliability and Cash-only operations
 
-## Optional notification boundary
+## Transactional event boundary
 
-Previously, `UpdateStatusHandler` updated the order and released its equipment inside a transaction,
-then called `SaveAsync`. The unchanged saved-changes interceptor dispatched `UpdateStatusOrderEvent`
-before commit. The Processed event handler could throw from either its branch-name lookup or its
-Notification gRPC call, which caused the primary transaction to roll back.
+`SavedChangesAsync` no longer dispatches domain events because an explicit outer transaction may
+still roll back after `SaveChanges`. UnitOfWork dispatches remaining internal domain events only
+after commit (or after an auto-committed save).
 
-`UpdateStatusOrderEventHandler` now treats the entire preparation/delivery path as best-effort:
+Order integration side effects are materialized before save and committed atomically with the
+aggregate:
 
-- Only Processed orders with a customer attempt notification delivery.
-- Branch lookup receives the handler's cancellation token. Missing branch text falls back to the
-  branch ID, rather than assigning null to the protobuf map.
-- A `false` delivery result logs `Processed-order notification was not delivered` at Warning level.
-- A preparation or delivery exception logs `Failed to send processed-order notification` at Error
-  level, with the exception, and returns normally.
-- Both failure logs include `OrderId`, `OrderCode`, `BranchId`, `CustomerId` and `Status`. They describe
-  a notification failure, not an order-transition failure.
+- Processed-order notification remains in `NotificationOutbox`.
+- Finance and e-invoice messages use `IntegrationOutbox` with stable message IDs, leases and retries;
+  Finance persists those IDs to make consumer retries idempotent.
+- `VoucherUsage` is an internal database effect and is inserted in the same transaction.
 
-The domain lifecycle, equipment claim/release policy, global interceptor, material rules and
-completion events remain unchanged. Caller cancellation and actual persistence errors are still
-handled by the primary command. This is not an outbox: optional messages can be lost, and this patch
-does not add delivery retries or accounting reconciliation.
+A rollback therefore leaves no deliverable message or voucher usage. A successful commit leaves
+durable pending messages for background workers; no Redis or gRPC call occurs in a save interceptor.
 
 ## Cash-only Order UI
 
@@ -59,16 +53,15 @@ OTP, voucher handling, Finance ledger, seed, report or migration code is changed
 missing branch text, cancellation, non-Processed orders and orders without a customer. It also checks
 the forwarded token and structured log fields.
 
-`OrderRuntimeDatabaseTests` runs against an isolated local PostgreSQL schema, with the real
-`UpdateStatusHandler`, UnitOfWork, audit interceptor, domain-event interceptor and event handlers.
-A strict publisher adapter routes the known events to those real handlers in the new event scope.
-Notification throws `RpcException(Unavailable)`. A separate verification context confirms the
-committed Processed status and `Equipment.Using == false`.
+`OrderRuntimeDatabaseTests` runs against an isolated local PostgreSQL schema with the real
+`UpdateStatusHandler`, UnitOfWork and outbox dispatchers. Notification throws
+`RpcException(Unavailable)`. A separate verification context confirms the committed Processed status
+and `Equipment.Using == false`.
 
 The test then completes with Cash. The real `PubSubService` is exercised twice: its Redis subscriber
-returns zero, then its subscriber throws a connection error. In both cases the existing service
-returns false, the real Finance/e-invoice event handlers return normally, and a separate context
-confirms Completed/Cash with the equipment still released. Retrying completion emits no new events.
+returns zero, then its subscriber throws a connection error. In both cases the integration outbox
+retains retryable messages and a separate context confirms Completed/Cash with the equipment still
+released. Retrying completion creates no duplicate messages.
 No external Notification, Finance, Redis or PayOS server is contacted by these tests.
 
 Enable the database test using `VIETWASH_SEED_TEST_DATABASE` pointing to an isolated local database

@@ -7,6 +7,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Shared.Kernel.Common;
 using Domain.Aggregates.Orders;
+using Domain.Aggregates.Orders.Events;
+using Domain.Aggregates.Vouchers;
+using Domain.Aggregates.Vouchers.Events;
+using Domain.Events;
+using Infrastructure.IntegrationEvents;
 using Infrastructure.Notifications;
 
 namespace Infrastructure.Data;
@@ -15,26 +20,60 @@ public class TheDbContext(DbContextOptions<TheDbContext> options) : DbContext(op
 {
     public DatabaseFacade DatabaseFacade => Database;
 
-    private void CaptureNotifications()
+    private void MaterializeOrderEvents()
     {
         foreach (var entry in ChangeTracker.Entries<Order>().ToArray())
         {
-            if (entry.State is not (EntityState.Added or EntityState.Modified)) continue;
-            var message = NotificationOutbox.FromOrder(entry.Entity);
-            if (message != null && !Set<NotificationOutbox>().Local.Any(x => x.Id == message.Id))
-                Set<NotificationOutbox>().Add(message);
+            if (entry.State is not (EntityState.Added or EntityState.Modified))
+                continue;
+
+            Order order = entry.Entity;
+            NotificationOutbox? notification = NotificationOutbox.FromOrder(order);
+            if (
+                notification is not null
+                && !Set<NotificationOutbox>().Local.Any(x => x.Id == notification.Id)
+            )
+                Set<NotificationOutbox>().Add(notification);
+
+            // External effects are durable intents; VoucherUsage is an internal DB effect.
+            foreach (IntegrationOutbox message in IntegrationOutbox.FromOrder(order))
+                if (!Set<IntegrationOutbox>().Local.Any(x => x.Id == message.Id))
+                    Set<IntegrationOutbox>().Add(message);
+
+            foreach (VoucherUsageEvent voucher in order.UncommittedEvents.OfType<VoucherUsageEvent>())
+                if (!Set<VoucherUsage>().Local.Any(x => x.OrderId == voucher.OrderId))
+                    Set<VoucherUsage>().Add(
+                        new VoucherUsage(
+                            voucher.VoucherId,
+                            voucher.CustomerId,
+                            voucher.OrderId,
+                            voucher.DiscountApply
+                        )
+                    );
+
+            if (
+                order.UncommittedEvents.Any(domainEvent =>
+                    domainEvent
+                        is not (UpdateStatusOrderEvent or VoucherUsageEvent or EInvoiceEvent or CreateFundEvent)
+                )
+            )
+                throw new InvalidOperationException("An Order domain event has no persistence policy.");
+
+            // Every current Order event is now represented by aggregate state, an internal row,
+            // or a durable integration outbox row in this same SaveChanges call.
+            _ = order.DequeueUncommittedEvents();
         }
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
-        CaptureNotifications();
+        MaterializeOrderEvents();
         return base.SaveChanges(acceptAllChangesOnSuccess);
     }
 
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
-        CaptureNotifications();
+        MaterializeOrderEvents();
         return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
