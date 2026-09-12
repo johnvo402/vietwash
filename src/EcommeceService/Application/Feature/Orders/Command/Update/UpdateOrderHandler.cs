@@ -9,6 +9,7 @@ using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Specifications;
 using Mediator;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Feature.Orders.Command.Update
 {
@@ -94,10 +95,15 @@ namespace Application.Feature.Orders.Command.Update
                 }
 
                 order.FromUpdateModel(request.Model, pricing.Value!, totals.Value!);
-                await unitOfWork.Repository<Order>().UpdateAsync(order);
+                order.Version = checked(order.Version + 1);
                 await unitOfWork.SaveAsync(cancellationToken);
                 await unitOfWork.CommitAsync(cancellationToken);
                 return Result.Success();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                await unitOfWork.RollbackAsync(cancellationToken);
+                return ConcurrencyFailure();
             }
             catch
             {
@@ -114,5 +120,13 @@ namespace Application.Feature.Orders.Command.Update
             await unitOfWork.RollbackAsync(cancellationToken);
             return Result.Failure(error);
         }
+
+        private static Result ConcurrencyFailure() =>
+            Result.Failure(
+                new ConflictError(
+                    "Order was changed by another request. Please reload and try again.",
+                    Messager.Create<Order>().Message(MessageType.Valid).Negative().Build()
+                )
+            );
     }
 }

@@ -734,6 +734,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnName("vat_amount");
 
                     b.Property<long>("Version")
+                        .IsConcurrencyToken()
                         .HasColumnType("bigint")
                         .HasColumnName("version");
 

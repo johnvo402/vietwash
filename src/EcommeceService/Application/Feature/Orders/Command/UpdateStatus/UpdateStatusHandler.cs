@@ -191,7 +191,11 @@ public class UpdateStatusHandler(
 
             int transitionedRows = await unitOfWork
                 .Repository<Order>()
-                .QueryAsync(x => x.Id == order.Id && x.Status == previousStatus)
+                .QueryAsync(x =>
+                    x.Id == order.Id
+                    && x.Status == previousStatus
+                    && x.Version == order.Version
+                )
                 .ExecuteUpdateAsync(
                     setters => setters.SetProperty(x => x.Status, target),
                     cancellationToken
@@ -207,7 +211,7 @@ public class UpdateStatusHandler(
                 await unitOfWork.RollbackAsync(cancellationToken);
                 return persistedStatus == target
                     ? Result.Success()
-                    : Failure("Order status changed concurrently.");
+                    : ConcurrencyFailure();
             }
 
             if (cancellationPlan.IsCancellation)
@@ -337,9 +341,15 @@ public class UpdateStatusHandler(
                     $"Order transition changed after validation: {applied}."
                 );
 
+            order.Version = checked(order.Version + 1);
             await unitOfWork.SaveAsync(cancellationToken);
             await unitOfWork.CommitAsync(cancellationToken);
             return Result.Success();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            await unitOfWork.RollbackAsync(cancellationToken);
+            return ConcurrencyFailure();
         }
         catch
         {
@@ -358,6 +368,14 @@ public class UpdateStatusHandler(
     }
 
     private static Result Failure(string message) => Result.Failure(CreateBadRequest(message));
+
+    private static Result ConcurrencyFailure() =>
+        Result.Failure(
+            new ConflictError(
+                "Order was changed by another request. Please reload and try again.",
+                Messager.Create<Order>().Message(MessageType.Valid).Negative().Build()
+            )
+        );
 
     private static BadRequestError CreateBadRequest(string message) =>
         new(message, Messager.Create<Order>().Message(MessageType.Valid).Negative().BuildMessage());
