@@ -21,7 +21,7 @@ namespace Application.Features.Notifications.Commands.ReadNotify
         {
             try
             {
-                await notification.ReadAsync(request.Id);
+                await notification.ReadAsync(request.Id, cancellationToken);
                 return Result.Success();
             }
             catch

@@ -116,52 +116,57 @@ namespace Infrastructure.Services.Notifications
             return result;
         }
 
-        public async Task<int> GetUnreadCountAsync(string userId)
+        public async Task<int> GetUnreadCountAsync(
+            string userId,
+            CancellationToken cancellationToken
+        )
         {
             return await unitOfWork
                 .Repository<Notification>()
-                .CountAsync(n => n.UserId == userId && !n.IsRead);
+                .CountAsync(n => n.UserId == userId && !n.IsRead, cancellationToken);
         }
 
-        public async Task ReadAsync(long id)
+        public async Task ReadAsync(long id, CancellationToken cancellationToken)
         {
-            var notification = await unitOfWork.Repository<Notification>().FindByIdAsync(id);
+            var notification = await unitOfWork
+                .Repository<Notification>()
+                .FindByIdAsync(id, cancellationToken);
             if (notification is not null)
             {
                 try
                 {
-                    _ = await unitOfWork.BeginTransactionAsync();
+                    _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
                     notification.IsRead = true;
                     await unitOfWork.Repository<Notification>().UpdateAsync(notification);
-                    await unitOfWork.SaveAsync();
-                    await unitOfWork.CommitAsync();
+                    await unitOfWork.SaveAsync(cancellationToken);
+                    await unitOfWork.CommitAsync(cancellationToken);
                 }
                 catch (Exception)
                 {
-                    await unitOfWork.RollbackAsync();
+                    await unitOfWork.RollbackAsync(cancellationToken);
                     throw;
                 }
             }
         }
 
-        public async Task ReadAllAsync(string userId)
+        public async Task ReadAllAsync(string userId, CancellationToken cancellationToken)
         {
-            var notis = unitOfWork
+            var notis = await unitOfWork
                 .Repository<Notification>()
                 .QueryAsync(n => n.UserId == userId && !n.IsRead)
-                .ToList();
+                .ToListAsync(cancellationToken);
 
             notis.ForEach(n => n.IsRead = true);
             try
             {
-                _ = await unitOfWork.BeginTransactionAsync();
+                _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
                 await unitOfWork.Repository<Notification>().UpdateRangeAsync(notis);
-                await unitOfWork.SaveAsync();
-                await unitOfWork.CommitAsync();
+                await unitOfWork.SaveAsync(cancellationToken);
+                await unitOfWork.CommitAsync(cancellationToken);
             }
             catch (Exception)
             {
-                await unitOfWork.RollbackAsync();
+                await unitOfWork.RollbackAsync(cancellationToken);
                 throw;
             }
         }

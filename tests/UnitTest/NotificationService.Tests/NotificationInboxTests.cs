@@ -1,8 +1,10 @@
 using Application.Common.Interfaces.UnitOfWorks;
 using Application.Features.Common.Projections;
+using Contracts.Application.Common.Interfaces.Services.Cache;
 using Domain.Aggregates.Notifications;
 using Infrastructure.Data;
 using Infrastructure.Services.Notifications;
+using Infrastructure.UnitOfWorks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -105,6 +107,38 @@ public class NotificationInboxTests
         await using var db = fixture.Context();
         Assert.Single(await db.Set<Notification>().ToListAsync());
         Assert.Empty(await db.Set<NotificationReceipt>().ToListAsync());
+    }
+
+    [NotificationDatabaseFact]
+    public async Task ReadAllMarksOnlyTheCurrentUsersUnreadNotifications()
+    {
+        await using var fixture = await Fixture.Create();
+        await fixture.Send(Request(), Mock.Of<IClientProxy>());
+        var other = Request();
+        other.MessageId = "order-processed:1002";
+        other.UserIds = ["502"];
+        await fixture.Send(other, Mock.Of<IClientProxy>());
+
+        var db = fixture.Context();
+        using (var unitOfWork = new UnitOfWork(
+            db,
+            Log.Logger,
+            Mock.Of<IMemoryCacheService>()
+        ))
+        {
+            var service = new Infrastructure.Services.Notifications.NotificationService(
+                unitOfWork,
+                Mock.Of<IHubContext<NotificationHub>>(),
+                db,
+                Log.Logger
+            );
+            using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            await service.ReadAllAsync("501", cancellation.Token);
+        }
+
+        await using var verification = fixture.Context();
+        Assert.True((await verification.Set<Notification>().SingleAsync(x => x.UserId == "501")).IsRead);
+        Assert.False((await verification.Set<Notification>().SingleAsync(x => x.UserId == "502")).IsRead);
     }
 
     private static NotificationModel Request() => new()

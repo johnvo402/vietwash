@@ -35,7 +35,7 @@ namespace Application.Features.Notifications.Commands.ReadAllNotify
                         )
                     );
                 }
-                await notification.ReadAllAsync(id);
+                await notification.ReadAllAsync(id, cancellationToken);
                 return Result.Success();
             }
             catch

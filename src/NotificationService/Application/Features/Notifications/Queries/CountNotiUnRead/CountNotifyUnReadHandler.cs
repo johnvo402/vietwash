@@ -31,7 +31,7 @@ namespace Application.Features.Notifications.Queries.CountNotiUnRead
                     )
                 );
             }
-            var numbers = await notification.GetUnreadCountAsync(id);
+            var numbers = await notification.GetUnreadCountAsync(id, cancellationToken);
             return Result<CountNotifyUnReadResponse>.Success(new() { NumberNotify = numbers });
         }
     }
