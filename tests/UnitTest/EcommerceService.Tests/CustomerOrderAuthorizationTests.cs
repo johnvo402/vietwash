@@ -208,8 +208,7 @@ public class CustomerOrderAuthorizationTests
         Mock<IOrderPaymentLinkClient> paymentClient = new(MockBehavior.Strict);
         UpdateStatusHandler handler = new(
             unitOfWork.Object,
-            Actor(ROLE.CUSTOMER, 100, ["1"]),
-            paymentClient.Object
+            Actor(ROLE.CUSTOMER, 100, ["1"])
         );
 
         Result result = await handler.Handle(

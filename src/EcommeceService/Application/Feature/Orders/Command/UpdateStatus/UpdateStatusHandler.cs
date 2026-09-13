@@ -14,20 +14,16 @@ using Domain.Aggregates.Orders.Specifications;
 using Domain.Aggregates.Vouchers;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
 
 namespace Application.Feature.Orders.Command.UpdateStatus;
 
 public class UpdateStatusHandler(
     IUnitOfWork unitOfWork,
     ICurrentAccount currentAccount,
-    IOrderPaymentLinkClient? paymentClient = null,
-    TimeProvider? timeProvider = null,
-    ILogger? logger = null
+    TimeProvider? timeProvider = null
 ) : IRequestHandler<UpdateStatusCommand, Result>
 {
     private readonly TimeProvider _timeProvider = timeProvider ?? TimeProvider.System;
-    private readonly ILogger _logger = logger ?? Log.Logger;
 
     public async ValueTask<Result> Handle(
         UpdateStatusCommand request,
@@ -167,6 +163,34 @@ public class UpdateStatusHandler(
                 previousStatus,
                 target
             );
+
+            if (cancellationPlan.RequiresPayOsCoordination)
+            {
+                var requests = unitOfWork.Repository<PayOsCancellationRequest>();
+                PayOsCancellationRequest? existing = await requests.FindByConditionAsync(
+                    x => x.OrderId == order.Id,
+                    cancellationToken
+                );
+                if (existing?.IsTerminalFailure == true)
+                    return await RollbackFailure(
+                        CreateBadRequest(
+                            existing.LastError
+                                ?? "The payment link could not be cancelled safely."
+                        ),
+                        cancellationToken
+                    );
+
+                if (existing is null)
+                    _ = await requests.AddAsync(
+                        PayOsCancellationRequest.Create(order.Id, cancellation!),
+                        cancellationToken
+                    );
+
+                await unitOfWork.SaveAsync(cancellationToken);
+                await unitOfWork.CommitAsync(cancellationToken);
+                return Result.Success();
+            }
+
             if (equipmentAction == EquipmentLifecycleAction.Claim)
             {
                 List<EquipmentSnapshot> candidates = await unitOfWork
@@ -226,33 +250,6 @@ public class UpdateStatusHandler(
                         ),
                         cancellationToken
                     );
-
-                if (cancellationPlan.RequiresPayOsCoordination)
-                {
-                    if (paymentClient is null)
-                        return await RollbackFailure(
-                            CreateBadRequest(
-                                "The payment provider is unavailable. This processed order cannot be cancelled safely."
-                            ),
-                            cancellationToken
-                        );
-
-                    ProcessedOrderPaymentCancellationResult paymentCancellation =
-                        await ProcessedOrderPaymentCancellation.EnsureSafeAsync(
-                            paymentClient,
-                            order.Id,
-                            cancellation!.Reason,
-                            _logger
-                        );
-                    if (!paymentCancellation.IsSafe)
-                        return await RollbackFailure(
-                            CreateBadRequest(
-                                paymentCancellation.ErrorMessage
-                                    ?? "The payment link could not be cancelled safely."
-                            ),
-                            cancellationToken
-                        );
-                }
 
                 if (cancellationPlan.ShouldReleaseVoucher)
                 {

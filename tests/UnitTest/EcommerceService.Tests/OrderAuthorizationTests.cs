@@ -323,8 +323,7 @@ public class OrderAuthorizationTests
         Mock<IOrderPaymentLinkClient> paymentClient = new(MockBehavior.Strict);
         UpdateStatusHandler handler = new(
             unitOfWork.Object,
-            CurrentAccount(["1"]),
-            paymentClient.Object
+            CurrentAccount(["1"])
         );
 
         Result result = await handler.Handle(

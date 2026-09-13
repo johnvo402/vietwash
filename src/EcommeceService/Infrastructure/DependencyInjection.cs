@@ -32,6 +32,7 @@ using Infrastructure.IntegrationEvents;
 using Infrastructure.Outbox;
 using Contracts.Observability;
 using Contracts.Settings;
+using Infrastructure.Payments;
 
 namespace Infrastructure;
 
@@ -106,6 +107,8 @@ public static class DependencyInjection
             .AddMemoryCache()
             .AddRedis(configuration)
             .AddPayOs(configuration, environmentName)
+            .AddScoped<PayOsCancellationDispatcher>()
+            .AddHostedService<PayOsCancellationWorker>()
             .PubSubLogClient(environmentName, configuration)
             .AddHostedService<PubSubBackgroundService>()
             .AddHostedService<DeadletterPubSubBackgroundService>()
