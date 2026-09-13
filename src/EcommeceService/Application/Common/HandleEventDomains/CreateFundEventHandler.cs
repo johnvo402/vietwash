@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces.Services.DistributedCache;
 using Domain.Aggregates.PubSubLogs;
 using Domain.Events;
+using Domain.Events.Enums;
 using Mediator;
 using Serilog;
 
@@ -14,6 +15,11 @@ namespace Application.Common.HandleEventDomains
             CancellationToken cancellationToken
         )
         {
+            if (notification.FundEventType == FundEventType.Order)
+                throw new InvalidOperationException(
+                    "Order finance events must be persisted and dispatched through IntegrationOutbox."
+                );
+
             logger.Information("CreateFundEventHandler: {@Id}", notification.ReferenceId);
 
             var check = await queueFactory

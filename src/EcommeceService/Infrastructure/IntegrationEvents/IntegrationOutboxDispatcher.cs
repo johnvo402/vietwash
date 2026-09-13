@@ -4,6 +4,7 @@ using Application.Common.Interfaces.Services.DistributedCache;
 using Domain.Aggregates.PubSubLogs;
 using Domain.Events;
 using Infrastructure.Data;
+using Infrastructure.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -37,9 +38,9 @@ public sealed class IntegrationOutboxDispatcher(
             if (message is null)
                 return false;
 
-            message.LeaseId = Guid.NewGuid();
-            message.LockedUntil = now.AddMinutes(1);
-            message.Attempts = Math.Min(message.Attempts + 1, 1_000_000);
+            message.LeaseId = OutboxDeliveryPolicy.NewLeaseId();
+            message.LockedUntil = OutboxDeliveryPolicy.LeaseUntil(now);
+            message.Attempts = OutboxDeliveryPolicy.IncrementAttempts(message.Attempts);
             await db.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
         }
@@ -65,8 +66,9 @@ public sealed class IntegrationOutboxDispatcher(
         }
         catch (Exception ex)
         {
-            var retryAt = DateTimeOffset.UtcNow.AddSeconds(
-                Math.Min(3600, Math.Pow(2, Math.Min(12, message.Attempts)))
+            var retryAt = OutboxDeliveryPolicy.RetryAt(
+                DateTimeOffset.UtcNow,
+                message.Attempts
             );
             await OwnedLease(message).ExecuteUpdateAsync(
                 setters =>

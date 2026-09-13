@@ -3,6 +3,7 @@ using System.Text.Json;
 using Contracts.Application.Common.Interfaces.Services.Notifications;
 using Domain.Aggregates.Users;
 using Infrastructure.Data;
+using Infrastructure.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Notification_Grpc;
 using Serilog;
@@ -26,9 +27,9 @@ public sealed class NotificationOutboxDispatcher(TheDbContext db, INotificationG
                 ORDER BY next_attempt_at, id LIMIT 1 FOR UPDATE SKIP LOCKED
                 """).ToListAsync(cancellationToken)).SingleOrDefault();
             if (message == null) return false;
-            message.LeaseId = Guid.NewGuid();
-            message.LockedUntil = now.AddMinutes(1);
-            message.Attempts = Math.Min(message.Attempts + 1, 1000000);
+            message.LeaseId = OutboxDeliveryPolicy.NewLeaseId();
+            message.LockedUntil = OutboxDeliveryPolicy.LeaseUntil(now);
+            message.Attempts = OutboxDeliveryPolicy.IncrementAttempts(message.Attempts);
             await db.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
         }
@@ -68,7 +69,7 @@ public sealed class NotificationOutboxDispatcher(TheDbContext db, INotificationG
         }
         catch (Exception ex)
         {
-            var retryAt = DateTimeOffset.UtcNow.AddSeconds(Math.Min(3600, Math.Pow(2, Math.Min(12, message.Attempts))));
+            var retryAt = OutboxDeliveryPolicy.RetryAt(DateTimeOffset.UtcNow, message.Attempts);
             // No payload, customer data, credentials or provider responses in persisted errors.
             await OwnedLease(message).ExecuteUpdateAsync(set => set
                 .SetProperty(x => x.NextAttemptAt, retryAt)
