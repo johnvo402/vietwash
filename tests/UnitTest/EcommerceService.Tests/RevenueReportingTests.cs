@@ -255,13 +255,13 @@ public class RevenueReportingTests
             total: 900m,
             RangeStart,
             discountFixed: false,
-            discountValue: 10m
+            discountValue: 10m,
+            orderItems:
+            [
+                CreateItem(serviceId: 1, price: 600m, quantity: 1),
+                CreateItem(serviceId: 2, price: 400m, quantity: 1),
+            ]
         );
-        order.OrderItems =
-        [
-            CreateItem(serviceId: 1, price: 600m, quantity: 1),
-            CreateItem(serviceId: 2, price: 400m, quantity: 1),
-        ];
 
         ServiceRevenueLineRow[] lines = new[] { order }
             .AsQueryable()
@@ -391,7 +391,8 @@ public class RevenueReportingTests
         decimal total,
         DateTimeOffset orderDate,
         bool discountFixed = false,
-        decimal discountValue = 0m
+        decimal discountValue = 0m,
+        IEnumerable<OrderItem>? orderItems = null
     ) =>
         new(
             branchId: branchId,
@@ -401,11 +402,11 @@ public class RevenueReportingTests
             total: total,
             status: status,
             discountFixed: discountFixed,
-            discountValue: discountValue
-        )
-        {
-            OrderDate = orderDate,
-        };
+            discountValue: discountValue,
+            paymentMethod: status == OrderStatus.Completed ? PaymentMethod.Cash : null,
+            orderDate: orderDate,
+            orderItems: orderItems
+        );
 
     private static OrderItem CreateItem(long serviceId, decimal price, int quantity) =>
         new()

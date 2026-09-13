@@ -1278,16 +1278,7 @@ public class DbInitializer
                 string code = $"DEV-OD-B{branchId}-{index + 1:D2}";
                 // These are explicit historical fixtures, not operational transitions:
                 // do not emit accounting, invoice, notification or voucher events.
-                var order = new Order(branchId, branchStaff.Id, code, amount, amount + vatAmount,
-                    states[index], vat: vat, vatAmount: vatAmount, customerId: customers[index % customers.Count].Id,
-                    tariffId: tariff.Id, note: DevelopmentSeedPolicy.OrderNote, deliveryTime: createdAt.AddDays(2))
-                {
-                    CreatedAt = createdAt,
-                    CodeConfirm = barcode.GenerateQrBase64(encryption.Encrypt(code)),
-                    PaymentMethod = states[index] == OrderStatus.Completed ? PaymentMethod.Cash : null,
-                    OrderDate = states[index] == OrderStatus.Completed ? createdAt.AddDays(1) : null,
-                };
-                order.OrderItems.Add(new OrderItem
+                var orderItem = new OrderItem
                 {
                     ServiceId = choice.Service.Id,
                     ServiceName = choice.Service.Name,
@@ -1298,14 +1289,26 @@ public class DbInitializer
                     Price = choice.Price.Value,
                     UnitPrice = choice.Price.Value,
                     CreatedAt = createdAt,
-                });
-                foreach (Equipment equipment in DevelopmentSeedPolicy.SelectEquipment(branchId, order.Status, equipments, reserved, random))
-                    order.OrderEquipments.Add(new OrderEquipment
+                };
+                OrderEquipment[] orderEquipments = DevelopmentSeedPolicy
+                    .SelectEquipment(branchId, states[index], equipments, reserved, random)
+                    .Select(equipment => new OrderEquipment
                     {
                         EquipmentId = equipment.Id,
                         EquipmentName = equipment.Name,
                         CreatedAt = createdAt,
-                    });
+                    })
+                    .ToArray();
+                var order = new Order(branchId, branchStaff.Id, code, amount, amount + vatAmount,
+                    states[index], vat: vat, vatAmount: vatAmount, customerId: customers[index % customers.Count].Id,
+                    tariffId: tariff.Id, note: DevelopmentSeedPolicy.OrderNote, deliveryTime: createdAt.AddDays(2),
+                    paymentMethod: states[index] == OrderStatus.Completed ? PaymentMethod.Cash : null,
+                    orderDate: states[index] == OrderStatus.Completed ? createdAt.AddDays(1) : null,
+                    codeConfirm: barcode.GenerateQrBase64(encryption.Encrypt(code)),
+                    orderItems: [orderItem], orderEquipments: orderEquipments)
+                {
+                    CreatedAt = createdAt,
+                };
                 seededOrders.Add(order);
             }
         }

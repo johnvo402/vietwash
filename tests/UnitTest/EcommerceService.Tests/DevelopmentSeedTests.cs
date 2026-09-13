@@ -116,20 +116,29 @@ public class DevelopmentSeedTests
     [Fact]
     public void OrderValidation_RejectsMissingCrossBranchAndSharedActiveEquipment()
     {
-        var order = Order();
-        Assert.Throws<InvalidOperationException>(() => DevelopmentSeedPolicy.ValidateOrders([order], []));
-        order.OrderEquipments.Add(new OrderEquipment { EquipmentId = 10 });
+        Assert.Throws<InvalidOperationException>(() => DevelopmentSeedPolicy.ValidateOrders([Order()], []));
+        var order = Order(10);
         Assert.Throws<InvalidOperationException>(() => DevelopmentSeedPolicy.ValidateOrders([order], [Equipment(10, 1)]));
         var equipment = Equipment(10, 2);
         Assert.Throws<InvalidOperationException>(() => DevelopmentSeedPolicy.ValidateOrders([order], [equipment]));
         equipment.Using = true;
-        var second = Order();
-        second.OrderEquipments.Add(new OrderEquipment { EquipmentId = 10 });
+        var second = Order(10);
         Assert.Throws<InvalidOperationException>(() => DevelopmentSeedPolicy.ValidateOrders([order, second], [equipment]));
         DevelopmentSeedPolicy.ValidateOrders([order], [equipment]);
     }
 
-    private static Order Order() => new(2, 7, "DEV-OD", 100, 110, OrderStatus.InProgress);
+    private static Order Order(long? equipmentId = null) =>
+        new(
+            2,
+            7,
+            "DEV-OD",
+            100,
+            110,
+            OrderStatus.InProgress,
+            orderEquipments: equipmentId.HasValue
+                ? [new OrderEquipment { EquipmentId = equipmentId.Value }]
+                : []
+        );
     private static Equipment Equipment(long id, long branchId, string code = "EQ") => new(branchId, "Washer", code, 100, EquipmentStatus.Active) { Id = id };
     private static InventoryDocument Import() => new("DEV-IM-B2-202501", 300, InventoryType.Import, 2)
     {

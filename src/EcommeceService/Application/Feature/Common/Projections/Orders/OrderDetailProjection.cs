@@ -1,7 +1,6 @@
 ﻿using Application.Common.Security;
 using Application.Feature.Common.Projections.Tariffs;
 using Application.Features.Common.Mapping.Users;
-using Contracts.Extensions;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Vouchers;
@@ -66,7 +65,7 @@ namespace Application.Feature.Common.Projections.Orders
                     : null;
             OrderItems =
                 order
-                    ?.OrderItems.ToListMapping(item => new OrderItemProjection
+                    ?.OrderItems.Select(item => new OrderItemProjection
                     {
                         Id = item.Id,
                         OrderId = item.OrderId,
@@ -83,7 +82,7 @@ namespace Application.Feature.Common.Projections.Orders
                     .ToList() ?? [];
             OrderEquipments =
                 order
-                    ?.OrderEquipments.ToListMapping(item => new OrderEquipmentProjection
+                    ?.OrderEquipments.Select(item => new OrderEquipmentProjection
                     {
                         Code = item.Equipment.Code,
                         Image = item.Equipment.Image,

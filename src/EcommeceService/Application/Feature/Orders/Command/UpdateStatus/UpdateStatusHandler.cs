@@ -338,7 +338,7 @@ public class UpdateStatusHandler(
                     $"Order transition changed after validation: {applied}."
                 );
 
-            order.Version = checked(order.Version + 1);
+            order.AdvanceVersion();
             await unitOfWork.SaveAsync(cancellationToken);
             await unitOfWork.CommitAsync(cancellationToken);
             return Result.Success();

@@ -186,7 +186,7 @@ public sealed class PayOsCancellationDispatcher(
                     $"Order cancellation transition changed after provider coordination: {applied}."
                 );
 
-            order.Version = checked(order.Version + 1);
+            order.AdvanceVersion();
             request.MarkCompleted(DateTimeOffset.UtcNow, providerState.ToString());
         }
 

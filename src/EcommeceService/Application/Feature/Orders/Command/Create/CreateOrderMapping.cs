@@ -36,7 +36,7 @@ namespace Application.Feature.Orders.Command.Create
                 tariffId: command.TariffId
             );
 
-            order.OrderItems = pricing.Items.Select(ToOrderItem).ToList();
+            order.ReplaceItems(pricing.Items.Select(ToOrderItem));
             return order;
         }
 

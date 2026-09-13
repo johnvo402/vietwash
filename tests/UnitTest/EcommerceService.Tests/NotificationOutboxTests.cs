@@ -27,10 +27,12 @@ public class NotificationOutboxTests
         var message = NotificationOutbox.FromOrder(order)!;
         Assert.Equal("order-processed:1001", message.Id);
         Assert.Contains("OD-1001", message.Payload);
-        order.Code = "changed";
-        Assert.DoesNotContain("changed", message.Payload);
-        order.CustomerId = null;
-        Assert.Null(NotificationOutbox.FromOrder(order));
+        string payload = message.Payload;
+        _ = order.TransitionTo(OrderStatus.Completed, PaymentMethod.Cash);
+        Assert.Equal(payload, message.Payload);
+        var withoutCustomer = new Order(2, 7, "GUEST", 100, 110, OrderStatus.InProgress);
+        _ = withoutCustomer.TransitionTo(OrderStatus.Processed);
+        Assert.Null(NotificationOutbox.FromOrder(withoutCustomer));
         var seed = new Order(2, 7, "SEED", 100, 110, OrderStatus.Processed, customerId: 501);
         Assert.Null(NotificationOutbox.FromOrder(seed));
     }

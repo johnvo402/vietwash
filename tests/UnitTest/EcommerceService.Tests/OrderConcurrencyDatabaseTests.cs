@@ -279,11 +279,8 @@ public class OrderConcurrencyDatabaseTests
                 100,
                 OrderStatus.Pending,
                 note: "original",
-                tariffId: TariffId
-            )
-            {
-                Id = OrderId,
-                OrderItems =
+                tariffId: TariffId,
+                orderItems:
                 [
                     new OrderItem
                     {
@@ -296,7 +293,10 @@ public class OrderConcurrencyDatabaseTests
                         UnitPrice = 90,
                         ProcessingTime = 30,
                     },
-                ],
+                ]
+            )
+            {
+                Id = OrderId,
             };
             context.AddRange(
                 staff,

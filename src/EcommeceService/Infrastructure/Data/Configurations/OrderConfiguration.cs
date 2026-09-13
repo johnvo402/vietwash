@@ -24,6 +24,10 @@ namespace Infrastructure.Data.Configurations
             builder.HasOne(x => x.Staff).WithMany().HasForeignKey(x => x.StaffId);
             builder.HasOne(x => x.Tariff).WithMany().HasForeignKey(x => x.TariffId);
             builder.HasMany(x => x.OrderEquipments).WithOne().HasForeignKey(x => x.OrderId);
+            builder.Navigation(x => x.OrderItems).UsePropertyAccessMode(PropertyAccessMode.Field);
+            builder
+                .Navigation(x => x.OrderEquipments)
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
         }
     }
 }

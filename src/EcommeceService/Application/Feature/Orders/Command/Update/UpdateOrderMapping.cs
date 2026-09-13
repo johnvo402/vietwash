@@ -13,7 +13,7 @@ namespace Application.Feature.Orders.Command.Update
             OrderPriceSummary totals
         )
         {
-            entity.Update(
+            entity.UpdateDetails(
                 amount: totals.Amount,
                 vatAmount: totals.VatAmount,
                 total: totals.Total,
@@ -23,10 +23,8 @@ namespace Application.Feature.Orders.Command.Update
                 point: 0
             );
 
-            entity.OrderItems.Clear();
-            foreach (ResolvedOrderItem item in pricing.Items)
-            {
-                entity.OrderItems.Add(
+            entity.ReplaceItems(
+                pricing.Items.Select(item =>
                     new OrderItem
                     {
                         ServiceId = item.ServiceId,
@@ -38,8 +36,8 @@ namespace Application.Feature.Orders.Command.Update
                         ServiceName = item.ServiceName,
                         UnitPrice = item.UnitPrice,
                     }
-                );
-            }
+                )
+            );
         }
     }
 }

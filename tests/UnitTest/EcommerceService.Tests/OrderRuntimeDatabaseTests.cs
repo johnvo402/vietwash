@@ -140,10 +140,10 @@ public class OrderRuntimeDatabaseTests
                 new User("Runtime customer", "customer@example.test", "0900000002", "CUSTOMER", "CUS-501")
                 { Id = 501, Status = ActivationStatus.Active });
             db.Set<Equipment>().Add(new Equipment(2, "Washer", "WM-21", 100, EquipmentStatus.Active) { Id = 21, Using = true });
-            db.Set<Order>().Add(new Order(2, 7, "OD-1001", 100, 110, OrderStatus.InProgress, customerId: 501)
+            db.Set<Order>().Add(new Order(2, 7, "OD-1001", 100, 110, OrderStatus.InProgress, customerId: 501,
+                orderEquipments: [new OrderEquipment { EquipmentId = 21, EquipmentName = "Washer" }])
             {
                 Id = 1001,
-                OrderEquipments = [new OrderEquipment { EquipmentId = 21, EquipmentName = "Washer" }],
             });
             await db.SaveChangesAsync();
         }

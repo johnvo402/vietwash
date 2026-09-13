@@ -22,6 +22,65 @@ public class OrderLifecycleTests
     }
 
     [Theory]
+    [InlineData(nameof(Order.Status))]
+    [InlineData(nameof(Order.Code))]
+    [InlineData(nameof(Order.Amount))]
+    [InlineData(nameof(Order.Vat))]
+    [InlineData(nameof(Order.VatAmount))]
+    [InlineData(nameof(Order.Total))]
+    [InlineData(nameof(Order.DiscountFixed))]
+    [InlineData(nameof(Order.DiscountValue))]
+    [InlineData(nameof(Order.Point))]
+    [InlineData(nameof(Order.PaymentMethod))]
+    [InlineData(nameof(Order.OrderDate))]
+    [InlineData(nameof(Order.BranchId))]
+    [InlineData(nameof(Order.CustomerId))]
+    [InlineData(nameof(Order.StaffId))]
+    [InlineData(nameof(Order.TariffId))]
+    [InlineData(nameof(Order.VoucherId))]
+    [InlineData(nameof(Order.VoucherCode))]
+    [InlineData(nameof(Order.Note))]
+    [InlineData(nameof(Order.DeliveryTime))]
+    [InlineData(nameof(Order.CodeConfirm))]
+    public void BusinessState_HasNoPublicMutationPath(string propertyName)
+    {
+        var setter = typeof(Order).GetProperty(propertyName)!.SetMethod;
+
+        Assert.True(setter is null || setter.IsPrivate);
+    }
+
+    [Fact]
+    public void Collections_AreReadOnlyOutsideTheAggregate()
+    {
+        Order order = CreateOrder(OrderStatus.Pending);
+
+        Assert.Throws<NotSupportedException>(() =>
+            ((ICollection<OrderItem>)order.OrderItems).Add(new OrderItem())
+        );
+        Assert.Throws<NotSupportedException>(() =>
+            ((ICollection<OrderEquipment>)order.OrderEquipments).Add(new OrderEquipment())
+        );
+    }
+
+    [Fact]
+    public void UpdateDetails_IsRejectedAfterTheOrderLeavesPending()
+    {
+        Order order = CreateOrder(OrderStatus.Pending);
+        order.UpdateDetails(amount: 120, total: 130, note: "Updated");
+        Assert.Equal(120, order.Amount);
+        Assert.Equal(130, order.Total);
+        Assert.Equal("Updated", order.Note);
+        _ = order.TransitionTo(
+            OrderStatus.InProgress,
+            orderEquipments: [new OrderEquipment { EquipmentId = 1 }]
+        );
+
+        Assert.Throws<InvalidOperationException>(() => order.UpdateDetails(total: 999));
+        Assert.Throws<InvalidOperationException>(() => order.ReplaceItems([]));
+        Assert.Equal(130, order.Total);
+    }
+
+    [Theory]
     [MemberData(nameof(StatusPairs))]
     public void StateMachine_AllowsOnlyExplicitTransitions(
         OrderStatus current,

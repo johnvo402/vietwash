@@ -13,41 +13,45 @@ namespace Domain.Aggregates.Orders
 {
     public class Order : AggregateRoot
     {
-        public long? CustomerId { get; set; }
-        public long BranchId { get; set; } = default!;
-        public long StaffId { get; set; } = default!;
-        public long? VoucherId { get; set; }
-        public long? TariffId { get; set; }
-        public string? VoucherCode { get; set; }
-        public string Code { get; set; } = default!;
-        public decimal Amount { get; set; } = default!;
+        private readonly List<OrderItem> _orderItems = [];
+        private readonly List<OrderEquipment> _orderEquipments = [];
 
-        public int Vat { get; set; }
-        public decimal VatAmount { get; set; }
-        public decimal Total { get; set; } = default!;
+        public long? CustomerId { get; private set; }
+        public long BranchId { get; private set; }
+        public long StaffId { get; private set; }
+        public long? VoucherId { get; private set; }
+        public long? TariffId { get; private set; }
+        public string? VoucherCode { get; private set; }
+        public string Code { get; private set; } = string.Empty;
+        public decimal Amount { get; private set; }
+
+        public int Vat { get; private set; }
+        public decimal VatAmount { get; private set; }
+        public decimal Total { get; private set; }
 
         /// <summary>True for a fixed monetary discount; false for a percentage.</summary>
-        public bool DiscountFixed { get; set; } = default!;
-        public PaymentMethod? PaymentMethod { get; set; }
-        public decimal DiscountValue { get; set; } = default!;
-        public decimal Point { get; set; } = 0;
-        public string Note { get; set; } = default!;
-        public OrderStatus Status { get; set; } = default!;
-        public DateTimeOffset? OrderDate { get; set; }
+        public bool DiscountFixed { get; private set; }
+        public PaymentMethod? PaymentMethod { get; private set; }
+        public decimal DiscountValue { get; private set; }
+        public decimal Point { get; private set; }
+        public string Note { get; private set; } = string.Empty;
+        public OrderStatus Status { get; private set; }
+        public DateTimeOffset? OrderDate { get; private set; }
         public DateTimeOffset? CancelledAt { get; private set; }
         public long? CancelledBy { get; private set; }
         public string? CancellationReason { get; private set; }
-        public DateTimeOffset DeliveryTime { get; set; } = default!;
-        public User? Staff { get; set; }
-        public User? Customer { get; set; }
-        public Tariff? Tariff { get; set; }
-        public virtual VoucherUsage? VoucherUsage { get; set; }
+        public DateTimeOffset DeliveryTime { get; private set; }
+        public User? Staff { get; private set; }
+        public User? Customer { get; private set; }
+        public Tariff? Tariff { get; private set; }
+        public virtual VoucherUsage? VoucherUsage { get; private set; }
 
-        public string? CodeConfirm { get; set; }
+        public string? CodeConfirm { get; private set; }
 
-        public ICollection<OrderItem> OrderItems { get; set; } = [];
+        public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
 
-        public ICollection<OrderEquipment> OrderEquipments { get; set; } = [];
+        public IReadOnlyCollection<OrderEquipment> OrderEquipments =>
+            _orderEquipments.AsReadOnly();
 
         protected override bool TryApplyDomainEvent(INotification domainEvent)
         {
@@ -83,7 +87,12 @@ namespace Domain.Aggregates.Orders
             decimal point = 0,
             string? note = null,
             long? tariffId = null,
-            DateTimeOffset? deliveryTime = null
+            DateTimeOffset? deliveryTime = null,
+            PaymentMethod? paymentMethod = null,
+            DateTimeOffset? orderDate = null,
+            string? codeConfirm = null,
+            IEnumerable<OrderItem>? orderItems = null,
+            IEnumerable<OrderEquipment>? orderEquipments = null
         )
         {
             Guard.Against.Null(code, nameof(code));
@@ -106,9 +115,16 @@ namespace Domain.Aggregates.Orders
             DeliveryTime = deliveryTime ?? DateTimeOffset.UtcNow.AddDays(1);
             Point = point;
             TariffId = tariffId;
+            PaymentMethod = paymentMethod;
+            OrderDate = orderDate;
+            CodeConfirm = codeConfirm;
+            if (orderItems is not null)
+                _orderItems.AddRange(orderItems);
+            if (orderEquipments is not null)
+                _orderEquipments.AddRange(orderEquipments);
         }
 
-        public void Update(
+        public void UpdateDetails(
             decimal? amount = null,
             decimal? total = null,
             decimal? point = null,
@@ -118,6 +134,9 @@ namespace Domain.Aggregates.Orders
             DateTimeOffset? deliveryTime = null
         )
         {
+            if (!OrderLifecycle.CanEditDetails(Status))
+                throw new InvalidOperationException("Only pending orders can be updated.");
+
             if (note != null)
                 Note = note;
 
@@ -138,6 +157,29 @@ namespace Domain.Aggregates.Orders
             if (tariffId.HasValue)
                 TariffId = tariffId;
         }
+
+        public void ReplaceItems(IEnumerable<OrderItem> items)
+        {
+            if (!OrderLifecycle.CanEditDetails(Status))
+                throw new InvalidOperationException("Only pending orders can be updated.");
+
+            ArgumentNullException.ThrowIfNull(items);
+            OrderItem[] replacement = items.ToArray();
+            _orderItems.Clear();
+            _orderItems.AddRange(replacement);
+        }
+
+        public void SetConfirmationCode(string? confirmationCode)
+        {
+            if (!OrderLifecycle.CanEditDetails(Status))
+                throw new InvalidOperationException(
+                    "A confirmation code can only be assigned to a pending order."
+                );
+
+            CodeConfirm = confirmationCode;
+        }
+
+        public void AdvanceVersion() => Version = checked(Version + 1);
 
         public OrderTransitionResult EvaluateTransition(
             OrderStatus target,
@@ -195,7 +237,7 @@ namespace Domain.Aggregates.Orders
 
             if (target == OrderStatus.InProgress && orderEquipments is not null)
                 foreach (OrderEquipment equipment in orderEquipments!)
-                    OrderEquipments.Add(equipment);
+                    _orderEquipments.Add(equipment);
 
             if (target == OrderStatus.Completed)
             {

@@ -197,8 +197,8 @@ public class IntegrationOutboxTests
             OrderTransitionResult.Applied,
             secondOrder.TransitionTo(OrderStatus.Completed, PaymentMethod.Cash)
         );
-        firstOrder.Version = checked(firstOrder.Version + 1);
-        secondOrder.Version = checked(secondOrder.Version + 1);
+        firstOrder.AdvanceVersion();
+        secondOrder.AdvanceVersion();
 
         await first.SaveChangesAsync();
         await Assert.ThrowsAnyAsync<DbUpdateException>(() => second.SaveChangesAsync());

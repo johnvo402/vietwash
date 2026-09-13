@@ -117,7 +117,9 @@ namespace Application.Feature.Orders.Command.Create
                     totals,
                     voucher
                 );
-                order.CodeConfirm = barcode.GenerateQrBase64(encryption.Encrypt(order.Code));
+                order.SetConfirmationCode(
+                    barcode.GenerateQrBase64(encryption.Encrypt(order.Code))
+                );
 
                 Order orderResult = await unitOfWork
                     .Repository<Order>()

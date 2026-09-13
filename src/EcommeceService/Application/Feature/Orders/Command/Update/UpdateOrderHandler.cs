@@ -95,7 +95,7 @@ namespace Application.Feature.Orders.Command.Update
                 }
 
                 order.FromUpdateModel(request.Model, pricing.Value!, totals.Value!);
-                order.Version = checked(order.Version + 1);
+                order.AdvanceVersion();
                 await unitOfWork.SaveAsync(cancellationToken);
                 await unitOfWork.CommitAsync(cancellationToken);
                 return Result.Success();
