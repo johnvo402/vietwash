@@ -90,7 +90,7 @@ public class UnitOfWork(
             repositories.Add(key, value);
         }
 
-        return (IDynamicSpecificationRepository<TEntity>)repositoryInstance!;
+        return (IDynamicSpecificationRepository<TEntity>)value!;
     }
 
     public ISpecificationRepository<TEntity> ReadOnlyRepository<TEntity>(bool isCached = false)
