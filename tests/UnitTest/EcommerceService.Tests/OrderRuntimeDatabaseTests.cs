@@ -9,6 +9,7 @@ using Application.Feature.Common.Projections.Orders;
 using Application.Feature.Orders.Command.UpdateStatus;
 using Contracts.Application.Common.Interfaces.Services.Cache;
 using Contracts.Application.Common.Interfaces.Services.Notifications;
+using Contracts.Observability;
 using Domain.Aggregates.Enums;
 using Domain.Aggregates.Equipments;
 using Domain.Aggregates.Equipments.Enums;
@@ -118,7 +119,9 @@ public class OrderRuntimeDatabaseTests
             })
             .AddSingleton<DispatchDomainEventInterceptor>()
             .AddSingleton<UpdateAuditableEntityInterceptor>()
-            .AddDbContext<TheDbContext>((sp, options) => options.UseNpgsql(dataSource)
+            .AddDbContext<TheDbContext>((sp, options) => options
+                .EnableServiceProviderCaching(false)
+                .UseNpgsql(dataSource)
                 .AddInterceptors(sp.GetRequiredService<UpdateAuditableEntityInterceptor>(), sp.GetRequiredService<DispatchDomainEventInterceptor>()))
             .AddScoped<IDbContext>(sp => sp.GetRequiredService<TheDbContext>())
             .AddScoped<IUnitOfWork, UnitOfWork>();
@@ -201,10 +204,12 @@ public class OrderRuntimeDatabaseTests
         for (int i = 0; i < 2; i++)
         {
             await using var dispatchScope = provider.CreateAsyncScope();
+            using var metrics = new OutboxMetrics();
             var dispatcher = new IntegrationOutboxDispatcher(
                 dispatchScope.ServiceProvider.GetRequiredService<TheDbContext>(),
                 factory.Object,
-                logger
+                logger,
+                metrics
             );
             Assert.True(await dispatcher.DispatchOneAsync(CancellationToken.None));
         }

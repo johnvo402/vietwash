@@ -1,5 +1,6 @@
 ﻿using Contracts.Routers;
 using Contracts.Settings;
+using Contracts.Observability;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -78,6 +79,24 @@ public static class OpenTelemetryExtensions
                                 activity.SetTag("db.name", stateDisplayName);
                             };
                         });
+
+                    if (openTelemetrySettings.OtelpOption == OtelpOption.DistributedServer)
+                    {
+                        options.AddOtlpExporter(opt =>
+                        {
+                            opt.Endpoint = new Uri(openTelemetrySettings.Endpoint!.ToString());
+                            opt.Protocol = OtlpExportProtocol.Grpc;
+                            opt.TimeoutMilliseconds = 300000;
+                        });
+                    }
+                    else if (openTelemetrySettings.OtelpOption == OtelpOption.Console)
+                    {
+                        options.AddConsoleExporter();
+                    }
+                })
+                .WithMetrics(options =>
+                {
+                    options.AddMeter(OutboxMetrics.MeterName);
 
                     if (openTelemetrySettings.OtelpOption == OtelpOption.DistributedServer)
                     {

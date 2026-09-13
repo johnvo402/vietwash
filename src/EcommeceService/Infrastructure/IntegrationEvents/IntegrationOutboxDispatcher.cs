@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Application.Common.HandleEventDomains.Orders;
 using Application.Common.Interfaces.Services.DistributedCache;
+using Contracts.Observability;
 using Domain.Aggregates.PubSubLogs;
 using Domain.Events;
 using Infrastructure.Data;
@@ -13,7 +14,8 @@ namespace Infrastructure.IntegrationEvents;
 public sealed class IntegrationOutboxDispatcher(
     TheDbContext db,
     IPubSubFactory queueFactory,
-    ILogger logger
+    ILogger logger,
+    OutboxMetrics metrics
 )
 {
     public async Task<bool> DispatchOneAsync(CancellationToken cancellationToken)
@@ -45,6 +47,10 @@ public sealed class IntegrationOutboxDispatcher(
             await transaction.CommitAsync(cancellationToken);
         }
 
+        string outboxType = OutboxMetricTypes.ForIntegrationTopic(message.Topic);
+        if (message.Attempts > 1)
+            metrics.RecordRetry(outboxType);
+
         try
         {
             bool delivered = await PublishAsync(message);
@@ -59,6 +65,7 @@ public sealed class IntegrationOutboxDispatcher(
                         .SetProperty(x => x.LastError, (string?)null),
                 cancellationToken
             );
+            metrics.RecordSuccessfulDelivery(outboxType);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -78,6 +85,7 @@ public sealed class IntegrationOutboxDispatcher(
                         .SetProperty(x => x.LastError, ex.GetType().Name),
                 cancellationToken
             );
+            metrics.RecordFailedDelivery(outboxType);
             logger.Warning(
                 "Integration outbox retry scheduled. MessageId: {MessageId}, Attempt: {Attempt}, Failure: {Failure}",
                 message.Id,

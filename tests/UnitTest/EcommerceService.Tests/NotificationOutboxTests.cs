@@ -1,4 +1,5 @@
 using Contracts.Application.Common.Interfaces.Services.Notifications;
+using Contracts.Observability;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
 using Infrastructure.Data;
@@ -123,7 +124,12 @@ public class NotificationOutboxTests
 
     private sealed class Fixture(NpgsqlDataSource source) : IAsyncDisposable
     {
-        public TheDbContext Context() => new(new DbContextOptionsBuilder<TheDbContext>().UseNpgsql(source).Options);
+        public TheDbContext Context() => new(
+            new DbContextOptionsBuilder<TheDbContext>()
+                .EnableServiceProviderCaching(false)
+                .UseNpgsql(source)
+                .Options
+        );
         public static async Task<Fixture> Create()
         {
             var connection = Environment.GetEnvironmentVariable("VIETWASH_SEED_TEST_DATABASE")!;
@@ -147,7 +153,13 @@ public class NotificationOutboxTests
         public async Task<bool> Dispatch(INotificationGrpc transport, CancellationToken token = default)
         {
             await using var db = Context();
-            return await new NotificationOutboxDispatcher(db, transport, Log.Logger).DispatchOneAsync(token);
+            using var metrics = new OutboxMetrics();
+            return await new NotificationOutboxDispatcher(
+                db,
+                transport,
+                Log.Logger,
+                metrics
+            ).DispatchOneAsync(token);
         }
         public async Task MakeDue()
         {

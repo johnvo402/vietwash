@@ -6,6 +6,7 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.DistributedCache;
 using Application.Common.Interfaces.UnitOfWorks;
 using Contracts.Application.Common.Interfaces.Services.Cache;
+using Contracts.Observability;
 using Domain.Aggregates.Enums;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
@@ -110,6 +111,7 @@ public class IntegrationOutboxTests
         );
         using var context = new TheDbContext(
             new DbContextOptionsBuilder<TheDbContext>()
+                .EnableServiceProviderCaching(false)
                 .UseNpgsql("Host=localhost;Database=model_only")
                 .Options
         );
@@ -166,6 +168,7 @@ public class IntegrationOutboxTests
     {
         using var context = new TheDbContext(
             new DbContextOptionsBuilder<TheDbContext>()
+                .EnableServiceProviderCaching(false)
                 .UseNpgsql("Host=localhost;Database=model_only")
                 .Options
         );
@@ -520,7 +523,12 @@ public class IntegrationOutboxTests
             .GetRequiredService<Mock<IPublisher>>();
 
         public TheDbContext Context() =>
-            new(new DbContextOptionsBuilder<TheDbContext>().UseNpgsql(source).Options);
+            new(
+                new DbContextOptionsBuilder<TheDbContext>()
+                    .EnableServiceProviderCaching(false)
+                    .UseNpgsql(source)
+                    .Options
+            );
 
         public static async Task<Fixture> CreateAsync()
         {
@@ -562,6 +570,7 @@ public class IntegrationOutboxTests
                 .AddSingleton<DispatchDomainEventInterceptor>()
                 .AddDbContext<TheDbContext>((sp, options) =>
                     options
+                        .EnableServiceProviderCaching(false)
                         .UseNpgsql(source)
                         .AddInterceptors(
                             sp.GetRequiredService<DispatchDomainEventInterceptor>()
@@ -636,7 +645,13 @@ public class IntegrationOutboxTests
         public async Task<bool> DispatchAsync(IPubSubFactory factory)
         {
             await using TheDbContext db = Context();
-            return await new IntegrationOutboxDispatcher(db, factory, Log.Logger)
+            using var metrics = new OutboxMetrics();
+            return await new IntegrationOutboxDispatcher(
+                db,
+                factory,
+                Log.Logger,
+                metrics
+            )
                 .DispatchOneAsync(CancellationToken.None);
         }
 

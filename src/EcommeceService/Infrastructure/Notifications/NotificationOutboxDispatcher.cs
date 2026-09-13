@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using Contracts.Application.Common.Interfaces.Services.Notifications;
+using Contracts.Observability;
 using Domain.Aggregates.Users;
 using Infrastructure.Data;
 using Infrastructure.Outbox;
@@ -10,7 +11,12 @@ using Serilog;
 
 namespace Infrastructure.Notifications;
 
-public sealed class NotificationOutboxDispatcher(TheDbContext db, INotificationGrpc notification, ILogger logger)
+public sealed class NotificationOutboxDispatcher(
+    TheDbContext db,
+    INotificationGrpc notification,
+    ILogger logger,
+    OutboxMetrics metrics
+)
 {
     public async Task<bool> DispatchOneAsync(CancellationToken cancellationToken)
     {
@@ -33,6 +39,9 @@ public sealed class NotificationOutboxDispatcher(TheDbContext db, INotificationG
             await db.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
         }
+
+        if (message.Attempts > 1)
+            metrics.RecordRetry(OutboxMetricTypes.Notification);
 
         try
         {
@@ -60,6 +69,7 @@ public sealed class NotificationOutboxDispatcher(TheDbContext db, INotificationG
                 .SetProperty(x => x.DeliveredAt, DateTimeOffset.UtcNow)
                 .SetProperty(x => x.LockedUntil, (DateTimeOffset?)null)
                 .SetProperty(x => x.LastError, (string?)null), cancellationToken);
+            metrics.RecordSuccessfulDelivery(OutboxMetricTypes.Notification);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -75,6 +85,7 @@ public sealed class NotificationOutboxDispatcher(TheDbContext db, INotificationG
                 .SetProperty(x => x.NextAttemptAt, retryAt)
                 .SetProperty(x => x.LockedUntil, (DateTimeOffset?)null)
                 .SetProperty(x => x.LastError, ex.GetType().Name), cancellationToken);
+            metrics.RecordFailedDelivery(OutboxMetricTypes.Notification);
             logger.Warning("Notification outbox retry scheduled. MessageId: {MessageId}, Attempt: {Attempt}, Failure: {Failure}",
                 message.Id, message.Attempts, ex.GetType().Name);
         }

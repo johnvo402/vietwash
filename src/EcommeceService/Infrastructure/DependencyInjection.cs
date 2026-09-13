@@ -29,6 +29,9 @@ using Microsoft.Extensions.Options;
 using Npgsql;
 using Infrastructure.Notifications;
 using Infrastructure.IntegrationEvents;
+using Infrastructure.Outbox;
+using Contracts.Observability;
+using Contracts.Settings;
 
 namespace Infrastructure;
 
@@ -49,6 +52,14 @@ public static class DependencyInjection
         services.Configure<OrgSetting>(configuration.GetSection(nameof(OrgSetting)));
         services.AddSingleton(sp => sp.GetRequiredService<IOptions<OrgSetting>>().Value);
         services.TryAddSingleton<IValidateOptions<DatabaseSettings>, ValidateDatabaseSetting>();
+        services.AddSingleton<OutboxMetrics>();
+        if (
+            configuration
+                .GetSection(nameof(OpenTelemetrySettings))
+                .Get<OpenTelemetrySettings>()
+                ?.IsEnabled == true
+        )
+            services.AddHostedService<OutboxMetricsWorker>();
 
         services.AddSingleton(sp =>
         {
