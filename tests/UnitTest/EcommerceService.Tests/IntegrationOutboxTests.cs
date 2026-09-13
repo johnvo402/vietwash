@@ -33,6 +33,22 @@ namespace EcommerceService.Tests;
 public class IntegrationOutboxTests
 {
     [Fact]
+    public async Task OrderEInvoiceEvent_CannotUseDirectDomainEventPublisher()
+    {
+        var handler = new EInvoiceEventHandler();
+
+        InvalidOperationException error = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () =>
+                await handler.Handle(
+                    new EInvoiceEvent { Order = CompletedOrder() },
+                    CancellationToken.None
+                )
+        );
+
+        Assert.Contains("IntegrationOutbox", error.Message);
+    }
+
+    [Fact]
     public async Task OrderFinanceEvent_CannotUseDirectDomainEventPublisher()
     {
         var factory = new Mock<IPubSubFactory>(MockBehavior.Strict);
@@ -228,6 +244,106 @@ public class IntegrationOutboxTests
         transport.Verify(
             x =>
                 x.PublishAsync(It.IsAny<CreateFundEvent>(), IntegrationOutbox.CreateFundTopic),
+            Times.Once
+        );
+        transport.VerifyNoOtherCalls();
+    }
+
+    [DevelopmentSeedDatabaseFact]
+    public async Task FailedEInvoicePublish_RemainsPendingAndRetriesWithSameMessageId()
+    {
+        await using Fixture fixture = await Fixture.CreateAsync();
+        await fixture.CompleteOrderAsync();
+        await fixture.IgnoreFinanceAsync();
+
+        var published = new List<EInvoiceOrderMessage>();
+        var transport = new Mock<IPubSubService>(MockBehavior.Strict);
+        transport
+            .Setup(x =>
+                x.PublishAsync(
+                    It.IsAny<EInvoiceOrderMessage>(),
+                    IntegrationOutbox.EInvoiceTopic
+                )
+            )
+            .Returns((EInvoiceOrderMessage message, string _) =>
+            {
+                published.Add(message);
+                return Task.FromResult(published.Count > 1);
+            });
+        var factory = new Mock<IPubSubFactory>(MockBehavior.Strict);
+        factory.Setup(x => x.GetPubSub(PubSubType.Origin)).Returns(transport.Object);
+
+        Assert.True(await fixture.DispatchAsync(factory.Object));
+        await using (TheDbContext failedVerification = fixture.Context())
+        {
+            IntegrationOutbox pending = await failedVerification
+                .Set<IntegrationOutbox>()
+                .SingleAsync(x => x.Topic == IntegrationOutbox.EInvoiceTopic);
+            Assert.Null(pending.DeliveredAt);
+            Assert.Null(pending.LockedUntil);
+            Assert.Equal(1, pending.Attempts);
+            Assert.True(pending.NextAttemptAt > pending.CreatedAt);
+            Assert.Equal(nameof(InvalidOperationException), pending.LastError);
+        }
+
+        Assert.False(await fixture.DispatchAsync(factory.Object));
+        await fixture.MakeEInvoiceDueAsync();
+        Assert.True(await fixture.DispatchAsync(factory.Object));
+
+        await using (TheDbContext deliveredVerification = fixture.Context())
+        {
+            IntegrationOutbox delivered = await deliveredVerification
+                .Set<IntegrationOutbox>()
+                .SingleAsync(x => x.Topic == IntegrationOutbox.EInvoiceTopic);
+            Assert.NotNull(delivered.DeliveredAt);
+            Assert.Null(delivered.LastError);
+            Assert.Equal(2, delivered.Attempts);
+        }
+        Assert.Equal(2, published.Count);
+        Assert.NotEqual(Guid.Empty, published[0].MessageId);
+        Assert.Equal(published[0].MessageId, published[1].MessageId);
+        Assert.Equal(published[0].OrderId, published[1].OrderId);
+        Assert.Equal(published[0].OrderCode, published[1].OrderCode);
+        Assert.Equal(published[0].Items.Count, published[1].Items.Count);
+    }
+
+    [DevelopmentSeedDatabaseFact]
+    public async Task ConcurrentEInvoiceDispatchers_CannotPublishTheSameMessageTogether()
+    {
+        await using Fixture fixture = await Fixture.CreateAsync();
+        await fixture.CompleteOrderAsync();
+        await fixture.IgnoreFinanceAsync();
+
+        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var transport = new Mock<IPubSubService>(MockBehavior.Strict);
+        transport
+            .Setup(x =>
+                x.PublishAsync(
+                    It.IsAny<EInvoiceOrderMessage>(),
+                    IntegrationOutbox.EInvoiceTopic
+                )
+            )
+            .Returns((EInvoiceOrderMessage _, string _) =>
+            {
+                entered.SetResult();
+                return release.Task;
+            });
+        var factory = new Mock<IPubSubFactory>(MockBehavior.Strict);
+        factory.Setup(x => x.GetPubSub(PubSubType.Origin)).Returns(transport.Object);
+
+        Task<bool> first = fixture.DispatchAsync(factory.Object);
+        await entered.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        Assert.False(await fixture.DispatchAsync(factory.Object));
+        release.SetResult(true);
+        Assert.True(await first);
+
+        transport.Verify(
+            x =>
+                x.PublishAsync(
+                    It.IsAny<EInvoiceOrderMessage>(),
+                    IntegrationOutbox.EInvoiceTopic
+                ),
             Times.Once
         );
         transport.VerifyNoOtherCalls();
@@ -498,12 +614,36 @@ public class IntegrationOutboxTests
                 );
         }
 
+        public async Task IgnoreFinanceAsync()
+        {
+            await using TheDbContext db = Context();
+            await db
+                .Set<IntegrationOutbox>()
+                .Where(x => x.Topic == IntegrationOutbox.CreateFundTopic)
+                .ExecuteUpdateAsync(setters =>
+                    setters.SetProperty(x => x.DeliveredAt, DateTimeOffset.UtcNow)
+                );
+        }
+
         public async Task MakeFinanceDueAsync()
         {
             await using TheDbContext db = Context();
             await db
                 .Set<IntegrationOutbox>()
                 .Where(x => x.Topic == IntegrationOutbox.CreateFundTopic)
+                .ExecuteUpdateAsync(setters =>
+                    setters
+                        .SetProperty(x => x.NextAttemptAt, DateTimeOffset.UtcNow.AddMinutes(-1))
+                        .SetProperty(x => x.LockedUntil, (DateTimeOffset?)null)
+                );
+        }
+
+        public async Task MakeEInvoiceDueAsync()
+        {
+            await using TheDbContext db = Context();
+            await db
+                .Set<IntegrationOutbox>()
+                .Where(x => x.Topic == IntegrationOutbox.EInvoiceTopic)
                 .ExecuteUpdateAsync(setters =>
                     setters
                         .SetProperty(x => x.NextAttemptAt, DateTimeOffset.UtcNow.AddMinutes(-1))
