@@ -1,6 +1,5 @@
 ﻿using Ardalis.GuardClauses;
 using Domain.Aggregates.Enums;
-using Mediator;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Tariffs
@@ -57,9 +56,5 @@ namespace Domain.Aggregates.Tariffs
                 EndAt = endAt;
         }
 
-        protected override bool TryApplyDomainEvent(INotification domainEvent)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

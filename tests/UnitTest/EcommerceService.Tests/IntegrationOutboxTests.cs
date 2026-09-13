@@ -41,7 +41,7 @@ public class IntegrationOutboxTests
         InvalidOperationException error = await Assert.ThrowsAsync<InvalidOperationException>(
             async () =>
                 await handler.Handle(
-                    new EInvoiceEvent { Order = CompletedOrder() },
+                    Assert.Single(CompletedOrder().UncommittedEvents.OfType<EInvoiceEvent>()),
                     CancellationToken.None
                 )
         );

@@ -32,13 +32,15 @@ public sealed class IntegrationOutbox
             switch (domainEvent)
             {
                 case CreateFundEvent fund:
-                    string fundId = $"order-completed:{order.Id}:finance";
-                    fund.MessageId = Guid.NewGuid();
-                    messages.Add(Create(fundId, CreateFundTopic, fund));
+                    string fundId = $"order-completed:{fund.ReferenceId}:finance";
+                    messages.Add(Create(fundId, CreateFundTopic, fund with
+                    {
+                        MessageId = Guid.NewGuid(),
+                    }));
                     break;
-                case EInvoiceEvent:
-                    string invoiceId = $"order-completed:{order.Id}:einvoice";
-                    EInvoiceOrderMessage invoice = order.ToEInvoiceMessage();
+                case EInvoiceEvent invoiceEvent:
+                    string invoiceId = $"order-completed:{invoiceEvent.OrderId}:einvoice";
+                    EInvoiceOrderMessage invoice = invoiceEvent.ToEInvoiceMessage();
                     invoice.MessageId = Guid.NewGuid();
                     messages.Add(Create(invoiceId, EInvoiceTopic, invoice));
                     break;

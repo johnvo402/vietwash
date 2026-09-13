@@ -1,4 +1,3 @@
-using Mediator;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Notifications
@@ -15,9 +14,5 @@ namespace Domain.Aggregates.Notifications
         public bool IsRead { get; set; } = false;
         public NotificationTemplate Template { get; set; } = default!;
 
-        protected override bool TryApplyDomainEvent(INotification domainEvent)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

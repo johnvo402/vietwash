@@ -1,7 +1,6 @@
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Funds.Enums;
 using Domain.Aggregates.Users;
-using Mediator;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Funds
@@ -85,9 +84,5 @@ namespace Domain.Aggregates.Funds
             }
         }
 
-        protected override bool TryApplyDomainEvent(INotification domainEvent)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

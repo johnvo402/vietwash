@@ -2,7 +2,6 @@
 using Domain.Aggregates.Enums;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Tariffs;
-using Mediator;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Services
@@ -70,13 +69,5 @@ namespace Domain.Aggregates.Services
                 Image = image;
         }
 
-        protected override bool TryApplyDomainEvent(INotification domainEvent)
-        {
-            switch (domainEvent)
-            {
-                default:
-                    return false;
-            }
-        }
     }
 }

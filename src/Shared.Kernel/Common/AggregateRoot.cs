@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-using Mediator;
+using Shared.Kernel.Common.Events;
 
 namespace Shared.Kernel.Common;
 
@@ -13,13 +13,13 @@ public abstract class AggregateRoot : DefaultEntity, IAuditable
 
     [JsonIgnore]
     [NotMapped]
-    public IReadOnlyCollection<INotification> UncommittedEvents => uncommittedEvents;
+    public IReadOnlyCollection<IDomainEvent> UncommittedEvents => uncommittedEvents;
 
     [JsonIgnore]
     [NotMapped]
-    private readonly Queue<INotification> uncommittedEvents = [];
+    private readonly Queue<IDomainEvent> uncommittedEvents = [];
 
-    public INotification[] DequeueUncommittedEvents()
+    public IDomainEvent[] DequeueUncommittedEvents()
     {
         var dequeuedEvents = uncommittedEvents.ToArray();
 
@@ -28,16 +28,9 @@ public abstract class AggregateRoot : DefaultEntity, IAuditable
         return dequeuedEvents;
     }
 
-    public bool TryDequeueUncommittedEvent(out INotification? domainEvent) =>
+    public bool TryDequeueUncommittedEvent(out IDomainEvent? domainEvent) =>
         uncommittedEvents.TryDequeue(out domainEvent);
 
-    protected void Emit(INotification domainEvent)
-    {
-        if (TryApplyDomainEvent(domainEvent))
-        {
-            uncommittedEvents.Enqueue(domainEvent);
-        }
-    }
-
-    protected abstract bool TryApplyDomainEvent(INotification domainEvent);
+    protected void RaiseDomainEvent(IDomainEvent domainEvent) =>
+        uncommittedEvents.Enqueue(domainEvent);
 }

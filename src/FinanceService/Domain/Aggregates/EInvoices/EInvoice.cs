@@ -1,6 +1,5 @@
 using Ardalis.GuardClauses;
 using Domain.Aggregates.EInvoices.Enums;
-using Mediator;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.EInvoices
@@ -51,15 +50,6 @@ namespace Domain.Aggregates.EInvoices
         public EInvoiceStatus Status { get; set; }
 
         public List<EInvoiceItem> Items { get; set; } = new();
-
-        protected override bool TryApplyDomainEvent(INotification domainEvent)
-        {
-            switch (domainEvent)
-            {
-                default:
-                    return false;
-            }
-        }
 
         public EInvoice() { }
 

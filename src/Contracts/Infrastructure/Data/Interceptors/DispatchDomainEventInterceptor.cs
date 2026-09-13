@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Kernel.Common;
+using Shared.Kernel.Common.Events;
 
 namespace Infrastructure.Data.Interceptors;
 
@@ -28,7 +29,7 @@ public class DispatchDomainEventInterceptor(IServiceScopeFactory serviceScopeFac
         IPublisher mediator = scope.ServiceProvider.GetRequiredService<IPublisher>();
         foreach (AggregateRoot entity in entities.ToList())
         {
-            while (entity.UncommittedEvents.FirstOrDefault() is INotification domainEvent)
+            while (entity.UncommittedEvents.FirstOrDefault() is IDomainEvent domainEvent)
             {
                 await mediator.Publish(domainEvent, cancellationToken);
                 if (!entity.TryDequeueUncommittedEvent(out _))

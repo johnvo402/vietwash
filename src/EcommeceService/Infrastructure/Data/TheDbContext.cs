@@ -42,7 +42,9 @@ public class TheDbContext(DbContextOptions<TheDbContext> options) : DbContext(op
 
             bool completedNow =
                 order.Status == OrderStatus.Completed
-                && order.UncommittedEvents.OfType<UpdateStatusOrderEvent>().Any();
+                && order.UncommittedEvents
+                    .OfType<UpdateStatusOrderEvent>()
+                    .Any(x => x.Status == OrderStatus.Completed);
             if (
                 completedNow
                 && order.VoucherId is long voucherId

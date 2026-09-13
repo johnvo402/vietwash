@@ -4,7 +4,6 @@ using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
 using Domain.Events;
 using Domain.Events.Enums;
-using Mediator;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Equipments
@@ -55,7 +54,7 @@ namespace Domain.Aggregates.Equipments
         public void AddActivity(EquipmentActivity equipmentActivities)
         {
             this.EquipmentActivities.Add(equipmentActivities);
-            Emit(
+            RaiseDomainEvent(
                 new CreateFundEvent()
                 {
                     TypeId = "spend",
@@ -93,15 +92,5 @@ namespace Domain.Aggregates.Equipments
                 Status = status.Value;
         }
 
-        protected override bool TryApplyDomainEvent(INotification domainEvent)
-        {
-            switch (domainEvent)
-            {
-                case CreateFundEvent:
-                    return true;
-                default:
-                    return false;
-            }
-        }
     }
 }

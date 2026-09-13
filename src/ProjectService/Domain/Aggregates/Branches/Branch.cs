@@ -1,7 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using Domain.Aggregates.Branches.Events;
 using Domain.Aggregates.Enums;
-using Mediator;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Branches
@@ -115,18 +114,7 @@ namespace Domain.Aggregates.Branches
 
         public void CreateEvent()
         {
-            Emit(new BranchCreateEvent() { BranchId = Id, Name = Name });
-        }
-
-        protected override bool TryApplyDomainEvent(INotification domainEvent)
-        {
-            switch (domainEvent)
-            {
-                case BranchCreateEvent:
-                    return true;
-                default:
-                    return false;
-            }
+            RaiseDomainEvent(new BranchCreateEvent() { BranchId = Id, Name = Name });
         }
     }
 }

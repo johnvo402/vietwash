@@ -4,7 +4,6 @@ using System.Linq;
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Enums;
 using Domain.Aggregates.Users.Enums;
-using Mediator;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Vouchers
@@ -110,9 +109,5 @@ namespace Domain.Aggregates.Vouchers
                 Description = description.Trim();
         }
 
-        protected override bool TryApplyDomainEvent(INotification domainEvent)
-        {
-            return false;
-        }
     }
 }

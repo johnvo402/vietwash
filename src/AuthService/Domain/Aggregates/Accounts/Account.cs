@@ -1,7 +1,6 @@
 using Ardalis.GuardClauses;
 using Domain.Aggregates.Accounts.Enums;
 using Domain.Aggregates.Accounts.Events;
-using Mediator;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Accounts;
@@ -96,19 +95,9 @@ public class Account : AggregateRoot
     public void SetPassword(string password) =>
         Password = Guard.Against.NullOrWhiteSpace(password, nameof(password));
 
-    public void CreateAccount() => Emit(new AccountCreateEvent() { Account = this });
+    public void CreateAccount() =>
+        RaiseDomainEvent(new AccountCreateEvent() { Account = this });
 
     public void VerifiedCustomer() => this.Verified = true;
 
-    protected override bool TryApplyDomainEvent(INotification domainEvent)
-    {
-        switch (domainEvent)
-        {
-            case AccountCreateEvent:
-                //CreateAccount();
-                return true;
-            default:
-                return false;
-        }
-    }
 }

@@ -1,4 +1,5 @@
 using Ardalis.GuardClauses;
+using System.Collections.Immutable;
 using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Events;
 using Domain.Aggregates.Tariffs;
@@ -6,7 +7,6 @@ using Domain.Aggregates.Users;
 using Domain.Aggregates.Vouchers;
 using Domain.Events;
 using Domain.Events.Enums;
-using Mediator;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Orders
@@ -52,21 +52,6 @@ namespace Domain.Aggregates.Orders
 
         public IReadOnlyCollection<OrderEquipment> OrderEquipments =>
             _orderEquipments.AsReadOnly();
-
-        protected override bool TryApplyDomainEvent(INotification domainEvent)
-        {
-            switch (domainEvent)
-            {
-                case CreateFundEvent:
-                    return true;
-                case UpdateStatusOrderEvent:
-                    return true;
-                case EInvoiceEvent:
-                    return true;
-                default:
-                    return false;
-            }
-        }
 
         private Order() { }
 
@@ -253,12 +238,45 @@ namespace Domain.Aggregates.Orders
             }
 
             Status = target;
-            Emit(new UpdateStatusOrderEvent { Order = this });
+            RaiseDomainEvent(
+                new UpdateStatusOrderEvent(
+                    Id,
+                    Status,
+                    Code,
+                    PublicId.ToString(),
+                    BranchId,
+                    CustomerId
+                )
+            );
 
             if (target == OrderStatus.Completed)
             {
-                Emit(new EInvoiceEvent { Order = this });
-                Emit(
+                decimal discount =
+                    (DiscountFixed ? DiscountValue : DiscountValue * Total / 100)
+                    + Point * 10;
+                RaiseDomainEvent(
+                    new EInvoiceEvent(
+                        Id,
+                        Code,
+                        OrderDate!.Value,
+                        Vat,
+                        VatAmount,
+                        Customer?.DisplayName ?? string.Empty,
+                        Customer?.PhoneNumber,
+                        Customer?.Email,
+                        Amount,
+                        discount,
+                        _orderItems
+                            .Select(item => new EInvoiceOrderItemSnapshot(
+                                item.ServiceName ?? item.Service?.Name ?? string.Empty,
+                                item.UnitRelationName,
+                                item.Quantity,
+                                item.UnitPrice
+                            ))
+                            .ToImmutableArray()
+                    )
+                );
+                RaiseDomainEvent(
                     new CreateFundEvent
                     {
                         TypeId = "income",

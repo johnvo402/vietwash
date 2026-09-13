@@ -23,17 +23,20 @@ public sealed class NotificationOutbox
 
     public static NotificationOutbox? FromOrder(Order order)
     {
-        if (order.Status != OrderStatus.Processed || order.CustomerId is not long customerId
-            || !order.UncommittedEvents.OfType<UpdateStatusOrderEvent>().Any())
+        UpdateStatusOrderEvent? transition = order.UncommittedEvents
+            .OfType<UpdateStatusOrderEvent>()
+            .LastOrDefault(x => x.Status == OrderStatus.Processed);
+        if (order.Status != OrderStatus.Processed || transition?.CustomerId is not long customerId)
             return null;
         var now = DateTimeOffset.UtcNow;
         return new NotificationOutbox
         {
-            Id = $"order-processed:{order.Id}",
+            Id = $"order-processed:{transition.OrderId}",
             CreatedAt = now,
             NextAttemptAt = now,
             Payload = JsonSerializer.Serialize(new ProcessedOrderNotification(
-                order.Id, order.PublicId.ToString(), order.Code, order.BranchId, customerId, now)),
+                transition.OrderId, transition.PublicId, transition.OrderCode,
+                transition.BranchId, customerId, now)),
         };
     }
 }

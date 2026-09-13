@@ -1,6 +1,5 @@
 ﻿using Domain.Aggregates.Enums;
 using Domain.Aggregates.Inventories.Enums;
-using Mediator;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Inventories
@@ -16,9 +15,5 @@ namespace Domain.Aggregates.Inventories
         public long? FromBranchId { get; set; }
         public long? ToBranchId { get; set; }
 
-        protected override bool TryApplyDomainEvent(INotification domainEvent)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

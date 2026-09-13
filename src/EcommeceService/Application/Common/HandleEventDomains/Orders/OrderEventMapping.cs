@@ -1,39 +1,30 @@
-using Domain.Aggregates.Orders;
+using Domain.Aggregates.Orders.Events;
 
 namespace Application.Common.HandleEventDomains.Orders
 {
     public static class OrderEventMapping
     {
-        public static EInvoiceOrderMessage ToEInvoiceMessage(this Order order)
+        public static EInvoiceOrderMessage ToEInvoiceMessage(this EInvoiceEvent domainEvent)
         {
-            var disCount =
-                (
-                    order.DiscountFixed
-                        ? order.DiscountValue
-                        : order.DiscountValue * order.Total / 100
-                )
-                + order.Point * 10;
             return new EInvoiceOrderMessage
             {
-                OrderId = order.Id,
-                OrderCode = order.Code,
-                CompletedAt = (DateTimeOffset)order.OrderDate!,
-
-                CustomerName = order.Customer?.DisplayName ?? "",
-                CustomerPhone = order.Customer?.PhoneNumber,
-                CustomerEmail = order.Customer?.Email,
-                Vat = order.Vat,
-                VatAmount = order.VatAmount,
-
-                Total = order.Amount,
-                Discount = disCount,
-                Items = order
-                    .OrderItems.Select(i => new EInvoiceOrderItemMessage
+                OrderId = domainEvent.OrderId,
+                OrderCode = domainEvent.OrderCode,
+                CompletedAt = domainEvent.CompletedAt,
+                CustomerName = domainEvent.CustomerName,
+                CustomerPhone = domainEvent.CustomerPhone,
+                CustomerEmail = domainEvent.CustomerEmail,
+                Vat = domainEvent.Vat,
+                VatAmount = domainEvent.VatAmount,
+                Total = domainEvent.Total,
+                Discount = domainEvent.Discount,
+                Items = domainEvent.Items
+                    .Select(item => new EInvoiceOrderItemMessage
                     {
-                        ServiceName = i.ServiceName ?? i.Service.Name,
-                        UnitRelationName = i.UnitRelationName,
-                        Quantity = i.Quantity,
-                        UnitPrice = i.UnitPrice,
+                        ServiceName = item.ServiceName,
+                        UnitRelationName = item.UnitRelationName,
+                        Quantity = item.Quantity,
+                        UnitPrice = item.UnitPrice,
                     })
                     .ToList(),
             };

@@ -1,7 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using Domain.Aggregates.Inventories.Enums;
 using Domain.Aggregates.Inventories.Events;
-using Mediator;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Inventories
@@ -28,7 +27,9 @@ namespace Domain.Aggregates.Inventories
                 Status = status;
             if (status == InventoryStatus.Completed)
             {
-                Emit(new InventoryDocumentCompletedEvent { InventoryDocument = this });
+                RaiseDomainEvent(
+                    new InventoryDocumentCompletedEvent { InventoryDocument = this }
+                );
             }
             if (
                 Type == InventoryType.Import
@@ -36,7 +37,9 @@ namespace Domain.Aggregates.Inventories
                 && EquipmentSupplyings.Any()
             )
             {
-                Emit(new InventoryDocumentCanceledEvent { InventoryDocument = this });
+                RaiseDomainEvent(
+                    new InventoryDocumentCanceledEvent { InventoryDocument = this }
+                );
             }
             CancelReason = cancelReason;
         }
@@ -85,18 +88,5 @@ namespace Domain.Aggregates.Inventories
                 Status = InventoryStatus.Completed,
             };
 
-        protected override bool TryApplyDomainEvent(INotification domainEvent)
-        {
-            switch (domainEvent)
-            {
-                case InventoryDocumentCompletedEvent:
-                    return true;
-                case InventoryDocumentCanceledEvent:
-                    return true;
-                // Các event khác nếu có
-                default:
-                    return false;
-            }
-        }
     }
 }

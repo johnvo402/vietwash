@@ -1,7 +1,6 @@
 using Domain.Aggregates.Enums;
 using Domain.Aggregates.Inventories;
 
-using Mediator;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Suppliers
@@ -77,9 +76,5 @@ namespace Domain.Aggregates.Suppliers
                 Disable = disable.Value;
         }
 
-        protected override bool TryApplyDomainEvent(INotification domainEvent)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

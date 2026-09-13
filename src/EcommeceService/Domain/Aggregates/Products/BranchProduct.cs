@@ -3,7 +3,6 @@ using Domain.Aggregates.Enums;
 using Domain.Aggregates.Inventories;
 using Domain.Aggregates.Products.Events;
 using Domain.Aggregates.Services;
-using Mediator;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Products
@@ -45,7 +44,7 @@ namespace Domain.Aggregates.Products
         }
 
         public void BranchProductCreateEvent() =>
-            Emit(new BranchProductCreateEvent() { BranchProduct = this });
+            RaiseDomainEvent(new BranchProductCreateEvent() { BranchProduct = this });
 
         public void Update(
             long? branchId = null,
@@ -85,9 +84,5 @@ namespace Domain.Aggregates.Products
                 CategoryId = (long)categoryId;
         }
 
-        protected override bool TryApplyDomainEvent(INotification domainEvent)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
