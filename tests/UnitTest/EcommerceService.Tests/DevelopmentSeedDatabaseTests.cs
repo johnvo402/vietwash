@@ -91,7 +91,9 @@ public class DevelopmentSeedDatabaseTests
             .AddSingleton(publisher.Object)
             .AddSingleton<DispatchDomainEventInterceptor>()
             .AddSingleton<UpdateAuditableEntityInterceptor>()
-            .AddDbContext<TheDbContext>((sp, options) => options.UseNpgsql(dataSource)
+            .AddDbContext<TheDbContext>((sp, options) => options
+                .EnableServiceProviderCaching(false)
+                .UseNpgsql(dataSource)
                 .AddInterceptors(sp.GetRequiredService<UpdateAuditableEntityInterceptor>(), sp.GetRequiredService<DispatchDomainEventInterceptor>()))
             .AddScoped<IDbContext>(sp => sp.GetRequiredService<TheDbContext>())
             .AddScoped<IUnitOfWork, UnitOfWork>();

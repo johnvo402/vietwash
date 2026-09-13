@@ -54,6 +54,7 @@ public class OrderConcurrencyDatabaseTests
     {
         using var context = new TheDbContext(
             new DbContextOptionsBuilder<TheDbContext>()
+                .EnableServiceProviderCaching(false)
                 .UseNpgsql("Host=localhost;Database=model_only")
                 .Options
         );
@@ -206,6 +207,7 @@ public class OrderConcurrencyDatabaseTests
         public TheDbContext CreateContext() =>
             new(
                 new DbContextOptionsBuilder<TheDbContext>()
+                    .EnableServiceProviderCaching(false)
                     .UseNpgsql(dataSource)
                     .Options
             );
