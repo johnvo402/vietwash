@@ -131,7 +131,7 @@ public class IntegrationOutboxTests
     }
 
     [DevelopmentSeedDatabaseFact]
-    public async Task OuterTransactionRollback_DiscardsIntegrationEventsWithoutPublishing()
+    public async Task OuterTransactionRollback_DiscardsVoucherUsageAndIntegrationEvents()
     {
         await using Fixture fixture = await Fixture.CreateAsync();
         await using AsyncServiceScope scope = fixture.Provider.CreateAsyncScope();
@@ -159,6 +159,50 @@ public class IntegrationOutboxTests
         var factory = new Mock<IPubSubFactory>(MockBehavior.Strict);
         Assert.False(await fixture.DispatchAsync(factory.Object));
         factory.VerifyNoOtherCalls();
+    }
+
+    [Fact]
+    public void VoucherUsageOrderRelationship_RemainsOneToOne()
+    {
+        using var context = new TheDbContext(
+            new DbContextOptionsBuilder<TheDbContext>()
+                .UseNpgsql("Host=localhost;Database=model_only")
+                .Options
+        );
+        var index = context
+            .Model.FindEntityType(typeof(VoucherUsage))!
+            .GetIndexes()
+            .Single(x => x.Properties.Single().Name == nameof(VoucherUsage.OrderId));
+
+        Assert.True(index.IsUnique);
+    }
+
+    [DevelopmentSeedDatabaseFact]
+    public async Task ConcurrentCompletionSnapshots_PersistOnlyOneVoucherUsage()
+    {
+        await using Fixture fixture = await Fixture.CreateAsync();
+        await using TheDbContext first = fixture.Context();
+        await using TheDbContext second = fixture.Context();
+        Order firstOrder = await first.Set<Order>().Include(x => x.OrderItems).SingleAsync();
+        Order secondOrder = await second.Set<Order>().Include(x => x.OrderItems).SingleAsync();
+
+        Assert.Equal(
+            OrderTransitionResult.Applied,
+            firstOrder.TransitionTo(OrderStatus.Completed, PaymentMethod.Cash)
+        );
+        Assert.Equal(
+            OrderTransitionResult.Applied,
+            secondOrder.TransitionTo(OrderStatus.Completed, PaymentMethod.Cash)
+        );
+        firstOrder.Version = checked(firstOrder.Version + 1);
+        secondOrder.Version = checked(secondOrder.Version + 1);
+
+        await first.SaveChangesAsync();
+        await Assert.ThrowsAnyAsync<DbUpdateException>(() => second.SaveChangesAsync());
+
+        await using TheDbContext verification = fixture.Context();
+        Assert.Equal(OrderStatus.Completed, (await verification.Set<Order>().SingleAsync()).Status);
+        Assert.Single(await verification.Set<VoucherUsage>().ToListAsync());
     }
 
     [DevelopmentSeedDatabaseFact]
@@ -350,7 +394,7 @@ public class IntegrationOutboxTests
     }
 
     [DevelopmentSeedDatabaseFact]
-    public async Task CommitPersistsIntegrationEvents_AndDeliveredRowsAreNotPublishedAgain()
+    public async Task CompletionCommitsVoucherUsageAndOutbox_RetryDoesNotDuplicateEither()
     {
         await using Fixture fixture = await Fixture.CreateAsync();
         await using (AsyncServiceScope scope = fixture.Provider.CreateAsyncScope())
@@ -373,7 +417,15 @@ public class IntegrationOutboxTests
         await using (TheDbContext verification = fixture.Context())
         {
             Assert.Equal(2, await verification.Set<IntegrationOutbox>().CountAsync());
-            Assert.Single(await verification.Set<VoucherUsage>().ToListAsync());
+            Order completed = await verification.Set<Order>().SingleAsync();
+            Assert.Equal(OrderStatus.Completed, completed.Status);
+            VoucherUsage usage = Assert.Single(
+                await verification.Set<VoucherUsage>().ToListAsync()
+            );
+            Assert.Equal(completed.Id, usage.OrderId);
+            Assert.Equal(completed.VoucherId, usage.VoucherId);
+            Assert.Equal(completed.CustomerId, usage.CustomerId);
+            Assert.Equal(completed.DiscountValue, usage.DiscountApply);
             Assert.All(
                 await verification.Set<IntegrationOutbox>().ToListAsync(),
                 message => Assert.Null(message.DeliveredAt)

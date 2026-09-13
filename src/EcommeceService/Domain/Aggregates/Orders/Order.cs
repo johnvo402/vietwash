@@ -4,7 +4,6 @@ using Domain.Aggregates.Orders.Events;
 using Domain.Aggregates.Tariffs;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Vouchers;
-using Domain.Aggregates.Vouchers.Events;
 using Domain.Events;
 using Domain.Events.Enums;
 using Mediator;
@@ -55,8 +54,6 @@ namespace Domain.Aggregates.Orders
             switch (domainEvent)
             {
                 case CreateFundEvent:
-                    return true;
-                case VoucherUsageEvent:
                     return true;
                 case UpdateStatusOrderEvent:
                     return true;
@@ -240,18 +237,6 @@ namespace Domain.Aggregates.Orders
                         FundEventType = FundEventType.Order,
                     }
                 );
-
-                if (VoucherId.HasValue && CustomerId.HasValue)
-                    Emit(
-                        new VoucherUsageEvent
-                        {
-                            VoucherId = VoucherId.Value,
-                            CustomerId = CustomerId.Value,
-                            BranchId = BranchId,
-                            OrderId = Id,
-                            DiscountApply = DiscountValue,
-                        }
-                    );
             }
 
             return OrderTransitionResult.Applied;

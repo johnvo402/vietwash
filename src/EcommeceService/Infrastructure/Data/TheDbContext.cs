@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Shared.Kernel.Common;
 using Domain.Aggregates.Orders;
+using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Events;
 using Domain.Aggregates.Vouchers;
-using Domain.Aggregates.Vouchers.Events;
 using Domain.Events;
 using Infrastructure.IntegrationEvents;
 using Infrastructure.Notifications;
@@ -40,21 +40,23 @@ public class TheDbContext(DbContextOptions<TheDbContext> options) : DbContext(op
                 if (!Set<IntegrationOutbox>().Local.Any(x => x.Id == message.Id))
                     Set<IntegrationOutbox>().Add(message);
 
-            foreach (VoucherUsageEvent voucher in order.UncommittedEvents.OfType<VoucherUsageEvent>())
-                if (!Set<VoucherUsage>().Local.Any(x => x.OrderId == voucher.OrderId))
-                    Set<VoucherUsage>().Add(
-                        new VoucherUsage(
-                            voucher.VoucherId,
-                            voucher.CustomerId,
-                            voucher.OrderId,
-                            voucher.DiscountApply
-                        )
-                    );
+            bool completedNow =
+                order.Status == OrderStatus.Completed
+                && order.UncommittedEvents.OfType<UpdateStatusOrderEvent>().Any();
+            if (
+                completedNow
+                && order.VoucherId is long voucherId
+                && order.CustomerId is long customerId
+                && !Set<VoucherUsage>().Local.Any(x => x.OrderId == order.Id)
+            )
+                Set<VoucherUsage>().Add(
+                    new VoucherUsage(voucherId, customerId, order.Id, order.DiscountValue)
+                );
 
             if (
                 order.UncommittedEvents.Any(domainEvent =>
                     domainEvent
-                        is not (UpdateStatusOrderEvent or VoucherUsageEvent or EInvoiceEvent or CreateFundEvent)
+                        is not (UpdateStatusOrderEvent or EInvoiceEvent or CreateFundEvent)
                 )
             )
                 throw new InvalidOperationException("An Order domain event has no persistence policy.");

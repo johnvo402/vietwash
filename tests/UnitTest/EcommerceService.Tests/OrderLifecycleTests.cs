@@ -6,7 +6,6 @@ using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Events;
 using Domain.Aggregates.Vouchers;
-using Domain.Aggregates.Vouchers.Events;
 using Domain.Events;
 
 namespace EcommerceService.Tests;
@@ -94,7 +93,6 @@ public class OrderLifecycleTests
         Assert.Single(order.UncommittedEvents.OfType<UpdateStatusOrderEvent>());
         Assert.Empty(order.UncommittedEvents.OfType<CreateFundEvent>());
         Assert.Empty(order.UncommittedEvents.OfType<EInvoiceEvent>());
-        Assert.Empty(order.UncommittedEvents.OfType<VoucherUsageEvent>());
     }
 
     [Fact]
@@ -287,44 +285,11 @@ public class OrderLifecycleTests
         Assert.Equal(eventCount, order.UncommittedEvents.Count);
         Assert.Single(order.UncommittedEvents.OfType<CreateFundEvent>());
         Assert.Single(order.UncommittedEvents.OfType<EInvoiceEvent>());
-        Assert.Single(order.UncommittedEvents.OfType<VoucherUsageEvent>());
         Assert.Single(order.UncommittedEvents.OfType<UpdateStatusOrderEvent>());
         Assert.Equal(
             order.Point,
             Assert.Single(order.UncommittedEvents.OfType<CreateFundEvent>()).Point
         );
-    }
-
-    [Fact]
-    public void Completion_EmitsOneVoucherUsageForVoucherAndCustomer()
-    {
-        Order order = CreateOrder(OrderStatus.Processed, customerId: 7, voucherId: 8);
-
-        _ = order.TransitionTo(OrderStatus.Completed, PaymentMethod.Cash);
-
-        VoucherUsageEvent usage = Assert.Single(
-            order.UncommittedEvents.OfType<VoucherUsageEvent>()
-        );
-        Assert.Equal(order.Id, usage.OrderId);
-        Assert.Equal(7, usage.CustomerId);
-        Assert.Equal(8, usage.VoucherId);
-        Assert.Equal(0, usage.DiscountApply);
-    }
-
-    [Theory]
-    [InlineData(null, 8L)]
-    [InlineData(7L, null)]
-    [InlineData(null, null)]
-    public void Completion_DoesNotEmitVoucherUsageWithoutBothReferences(
-        long? customerId,
-        long? voucherId
-    )
-    {
-        Order order = CreateOrder(OrderStatus.Processed, customerId, voucherId);
-
-        _ = order.TransitionTo(OrderStatus.Completed, PaymentMethod.Cash);
-
-        Assert.Empty(order.UncommittedEvents.OfType<VoucherUsageEvent>());
     }
 
     [Fact]
