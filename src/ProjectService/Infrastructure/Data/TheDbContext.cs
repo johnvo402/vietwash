@@ -4,6 +4,7 @@ using System.Reflection;
 using Application.Common.Interfaces.UnitOfWorks;
 using Ardalis.GuardClauses;
 using Infrastructure.Data.Configurations;
+using Infrastructure.Data.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Shared.Kernel.Common;

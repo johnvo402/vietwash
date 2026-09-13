@@ -8,6 +8,7 @@ using Application.Common.Interfaces.UnitOfWorks;
 using Application.Feature.Common.Projections.Orders;
 using Application.Feature.Orders.Command.UpdateStatus;
 using Contracts.Application.Common.Interfaces.Services.Cache;
+using Contracts.Application.Common.Events;
 using Contracts.Application.Common.Interfaces.Services.Notifications;
 using Contracts.Observability;
 using Domain.Aggregates.Enums;
@@ -90,7 +91,7 @@ public class OrderRuntimeDatabaseTests
             Role = "STAFF",
             Branches = new[] { "2" },
         });
-        var events = new List<INotification>();
+        var events = new List<object>();
         var services = new ServiceCollection()
             .AddSingleton<ILogger>(logger)
             .AddSingleton(actor)
@@ -103,15 +104,15 @@ public class OrderRuntimeDatabaseTests
             {
                 // Route only the known events to REAL handlers in the scope created by the real interceptor.
                 var publisher = new Mock<IPublisher>(MockBehavior.Strict);
-                publisher.Setup(x => x.Publish(It.IsAny<INotification>(), It.IsAny<CancellationToken>()))
-                    .Returns((INotification evt, CancellationToken token) =>
+                publisher.Setup(x => x.Publish(It.IsAny<object>(), It.IsAny<CancellationToken>()))
+                    .Returns((object evt, CancellationToken token) =>
                     {
                         events.Add(evt);
                         return evt switch
                         {
-                            UpdateStatusOrderEvent => ValueTask.CompletedTask, // captured by the same DbContext
-                            EInvoiceEvent invoice => sp.GetRequiredService<EInvoiceEventHandler>().Handle(invoice, token),
-                            CreateFundEvent fund => sp.GetRequiredService<CreateFundEventHandler>().Handle(fund, token),
+                            DomainEventNotification { DomainEvent: UpdateStatusOrderEvent } => ValueTask.CompletedTask, // captured by the same DbContext
+                            DomainEventNotification { DomainEvent: EInvoiceEvent invoice } => sp.GetRequiredService<EInvoiceEventHandler>().Handle(invoice, token),
+                            DomainEventNotification { DomainEvent: CreateFundEvent fund } => sp.GetRequiredService<CreateFundEventHandler>().Handle(fund, token),
                             _ => throw new InvalidOperationException($"Unexpected runtime event {evt.GetType().Name}"),
                         };
                     });

@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Specification;
 using Specification.Builders;
 
@@ -8,8 +7,9 @@ public class GetAccountByEmailSpecification : Specification<Account>
 {
     public GetAccountByEmailSpecification(string email)
     {
+        string normalizedEmail = email.ToLowerInvariant();
         Query
-            .Where(x => x.Email != null && EF.Functions.ILike(x.Email, email) && !x.Disabled)
+            .Where(x => x.Email != null && x.Email.ToLower() == normalizedEmail && !x.Disabled)
             .Include(x => x.BranchAccounts)
             .AsNoTracking();
     }

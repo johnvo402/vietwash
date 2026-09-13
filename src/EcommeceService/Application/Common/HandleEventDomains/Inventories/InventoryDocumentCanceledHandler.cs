@@ -10,7 +10,6 @@ using Serilog;
 namespace Application.Common.HandleEventDomains.Inventories;
 
 public sealed class InventoryDocumentCanceledHandler
-    : INotificationHandler<InventoryDocumentCanceledEvent>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger logger;

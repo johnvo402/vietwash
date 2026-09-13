@@ -5,6 +5,7 @@ using Application.Common.HandleEventDomains.Orders;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.DistributedCache;
 using Application.Common.Interfaces.UnitOfWorks;
+using Contracts.Application.Common.Events;
 using Contracts.Application.Common.Interfaces.Services.Cache;
 using Contracts.Observability;
 using Domain.Aggregates.Enums;
@@ -99,7 +100,7 @@ public class IntegrationOutboxTests
         var publisher = new Mock<IPublisher>(MockBehavior.Strict);
         publisher
             .SetupSequence(x =>
-                x.Publish(It.IsAny<INotification>(), It.IsAny<CancellationToken>())
+                x.Publish(It.IsAny<object>(), It.IsAny<CancellationToken>())
             )
             .Throws(new InvalidOperationException("first dispatch failed"))
             .Returns(ValueTask.CompletedTask);
@@ -127,7 +128,7 @@ public class IntegrationOutboxTests
         Assert.Empty(order.UncommittedEvents);
         await dispatcher.DispatchDomainEventsAsync(context);
         publisher.Verify(
-            x => x.Publish(It.IsAny<INotification>(), It.IsAny<CancellationToken>()),
+            x => x.Publish(It.IsAny<object>(), It.IsAny<CancellationToken>()),
             Times.Exactly(2)
         );
     }

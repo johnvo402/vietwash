@@ -1,8 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-
 namespace Domain.Functions
 {
-    [Keyless]
     public class CustomerRevenueResult
     {
         public long? CustomerId { get; set; }

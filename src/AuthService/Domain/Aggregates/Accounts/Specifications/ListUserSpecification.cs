@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Specification;
 using Specification.Builders;
 

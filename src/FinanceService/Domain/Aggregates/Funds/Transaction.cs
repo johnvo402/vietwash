@@ -1,7 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using Domain.Aggregates.Funds.Enums;
 using Domain.Aggregates.Users;
-using Mediator;
 using Shared.Kernel.Common;
 
 namespace Domain.Aggregates.Funds

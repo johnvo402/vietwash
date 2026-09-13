@@ -82,7 +82,7 @@ namespace Application.Features.Accounts.Commands.VerifyOtpNormal
             !await unitOfWork
                 .Repository<Account>()
                 .AnyAsync(
-                    x => x.Email != null && EF.Functions.ILike(x.Email, email),
+                    x => x.Email != null && x.Email.ToLower() == email.ToLower(),
                     cancellationToken
                 );
 

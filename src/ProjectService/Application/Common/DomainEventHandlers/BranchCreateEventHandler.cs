@@ -7,7 +7,6 @@ using Serilog;
 namespace Application.Common.DomainEventHandlers
 {
     public class BranchCreateEventHandler(ILogger logger, IPubSubFactory queueFactory)
-        : INotificationHandler<BranchCreateEvent>
     {
         public async ValueTask Handle(
             BranchCreateEvent notification,

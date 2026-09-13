@@ -8,7 +8,6 @@ using Serilog;
 namespace Application.Common.HandleEventDomains
 {
     public class CreateFundEventHandler(ILogger logger, IPubSubFactory queueFactory)
-        : INotificationHandler<CreateFundEvent>
     {
         public async ValueTask Handle(
             CreateFundEvent notification,

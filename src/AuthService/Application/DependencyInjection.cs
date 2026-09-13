@@ -1,6 +1,7 @@
 using System.Reflection;
 using Application.Common.Auth;
 using Application.Common.Behaviors;
+using Application.Common.DomainEventHandlers;
 using Application.Jobs;
 using FluentValidation;
 using Mediator;
@@ -26,6 +27,7 @@ public static class DependencyInjection
             .AddScoped(typeof(IPipelineBehavior<,>), typeof(PerformaceBehavior<,>))
             .AddScoped(typeof(IPipelineBehavior<,>), typeof(ProcessImagePathBehavior<,>))
             .AddScoped(typeof(IPipelineBehavior<,>), typeof(ProcessImageKeyBehavior<,>))
+            .AddScoped<AccountCreateEventHandler>()
             .AddValidatorsFromAssembly(currentAssembly)
             .AddSingleton<IAuthorizationPolicyProvider, AuthorizePolicyProvider>()
             .AddSingleton<IAuthorizationHandler, AuthorizeHandler>()

@@ -3,7 +3,7 @@ using Mediator;
 
 namespace Application.Common.HandleEventDomains.Orders
 {
-    public class EInvoiceEventHandler : INotificationHandler<EInvoiceEvent>
+    public class EInvoiceEventHandler
     {
         public ValueTask Handle(
             EInvoiceEvent notification,

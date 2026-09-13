@@ -16,23 +16,16 @@ public static class IncludeExpression
         for (int i = 0; i < includeInfos.Length; i++)
         {
             IncludeInfo include = includeInfos[i];
-            ParameterExpression parameter = Expression.Parameter(include.EntityType!, "x");
-
             string command =
                 include.InCludeType == InCludeType.Include
                     ? nameof(EntityFrameworkQueryableExtensions.Include)
                     : nameof(EntityFrameworkQueryableExtensions.ThenInclude);
 
             List<Type> types = [include.EntityType!];
-
             if (include.InCludeType == InCludeType.Include)
-            {
                 types.Add(include.PropertyType!);
-            }
             else
-            {
                 types.AddRange([include.PreviousPropertyType!, include.PropertyType!]);
-            }
 
             queryExpression = Expression.Call(
                 typeof(EntityFrameworkQueryableExtensions),

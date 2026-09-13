@@ -2,6 +2,7 @@ using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using Contracts.Application.Common.Events;
 using Shared.Kernel.Common;
 using Shared.Kernel.Common.Events;
 
@@ -31,7 +32,10 @@ public class DispatchDomainEventInterceptor(IServiceScopeFactory serviceScopeFac
         {
             while (entity.UncommittedEvents.FirstOrDefault() is IDomainEvent domainEvent)
             {
-                await mediator.Publish(domainEvent, cancellationToken);
+                await mediator.Publish(
+                    (object)new DomainEventNotification(domainEvent),
+                    cancellationToken
+                );
                 if (!entity.TryDequeueUncommittedEvent(out _))
                     throw new InvalidOperationException("The dispatched domain event was not queued.");
             }

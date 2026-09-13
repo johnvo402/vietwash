@@ -3,7 +3,6 @@ using System.Text.Json;
 using Shared.Kernel.Common.Specs.Interfaces;
 using Shared.Kernel.Common.Specs.Models;
 using Specification.Builders;
-using Specification.Evaluators;
 using Specification.Exceptions;
 using Specification.Models;
 
@@ -90,7 +89,7 @@ public abstract class Specification<T> : ISpecification<T>
 
     protected string GetUniqueCachedKey(object? queryParameter = null)
     {
-        string query = SpecificationEvaluator.GetStringQuery(this);
+        string query = SpecificationCacheKey.Create(this);
         if (queryParameter == null)
         {
             return query;

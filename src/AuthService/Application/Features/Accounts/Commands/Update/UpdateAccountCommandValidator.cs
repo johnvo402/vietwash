@@ -95,7 +95,7 @@ public partial class UpdateAccountCommandValidator : AbstractValidator<UpdateAcc
         !await unitOfWork
             .Repository<Account>()
             .AnyAsync(
-                x => x.Id != id && x.Email != null && EF.Functions.ILike(x.Email, email),
+                x => x.Id != id && x.Email != null && x.Email.ToLower() == email.ToLower(),
                 cancellationToken
             );
 

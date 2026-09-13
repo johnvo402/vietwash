@@ -10,9 +10,6 @@ namespace Application.Common.HandleEventDomains;
 /// (for example, the transactional outbox) or which currently act as lifecycle markers.
 /// </summary>
 public sealed class AcknowledgeMarkerEventsHandler
-    : INotificationHandler<EquipmentActivityCreatedEvent>,
-        INotificationHandler<UpdateStatusOrderEvent>,
-        INotificationHandler<BranchProductCreateEvent>
 {
     public ValueTask Handle(
         EquipmentActivityCreatedEvent notification,

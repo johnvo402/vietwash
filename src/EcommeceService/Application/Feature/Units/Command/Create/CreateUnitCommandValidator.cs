@@ -48,7 +48,7 @@ namespace Application.Feature.Units.Command.Create
         {
             return !await unitOfWork
                 .Repository<Unit>()
-                .AnyAsync(x => EF.Functions.ILike(x.Name, name), cancellationToken);
+                .AnyAsync(x => x.Name.ToLower() == name.ToLower(), cancellationToken);
         }
     }
 }

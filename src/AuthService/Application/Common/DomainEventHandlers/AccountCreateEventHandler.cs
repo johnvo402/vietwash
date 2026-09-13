@@ -8,7 +8,6 @@ using Serilog;
 namespace Application.Common.DomainEventHandlers;
 
 public class AccountCreateEventHandler(ILogger logger, IPubSubFactory queueFactory)
-    : INotificationHandler<AccountCreateEvent>
 {
     public async ValueTask Handle(
         AccountCreateEvent notification,

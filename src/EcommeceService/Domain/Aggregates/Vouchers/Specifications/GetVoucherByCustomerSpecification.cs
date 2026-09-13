@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using Domain.Aggregates.Users.Enums;
 using Domain.Aggregates.Vouchers;
-using Microsoft.EntityFrameworkCore;
 using Specification;
 using Specification.Builders;
 

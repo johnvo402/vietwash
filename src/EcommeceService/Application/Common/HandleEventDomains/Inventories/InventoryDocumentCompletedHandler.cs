@@ -21,7 +21,6 @@ using Serilog;
 namespace Application.Common.HandleEventDomains.Inventories;
 
 public sealed class InventoryDocumentCompletedHandler
-    : INotificationHandler<InventoryDocumentCompletedEvent>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly INotificationGrpc _notification;

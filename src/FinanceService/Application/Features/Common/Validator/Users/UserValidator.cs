@@ -122,8 +122,8 @@ public partial class UserValidator : AbstractValidator<UserModel>
                 x =>
                     x.Email != null
                     && (
-                        (!id.HasValue && EF.Functions.ILike(x.Email, email))
-                        || (x.Id != id && EF.Functions.ILike(x.Email, email))
+                        (!id.HasValue && x.Email.ToLower() == email.ToLower())
+                        || (x.Id != id && x.Email.ToLower() == email.ToLower())
                     ),
                 cancellationToken
             );
