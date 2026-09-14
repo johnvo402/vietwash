@@ -7,7 +7,7 @@
     "build": "npm run generate && next build",
     "build:test": "next build",
     "start": "next start",
-    "lint": "eslint . --ext .ts,.tsx,.js,.jsx --ignore-pattern src/api/generated --ignore-pattern public --ignore-pattern .next --ignore-pattern next-env.d.ts",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx --ignore-pattern src/api/generated --ignore-pattern public --ignore-pattern .next --ignore-pattern playwright-report --ignore-pattern test-results --ignore-pattern next-env.d.ts",
     "typecheck": "tsc --noEmit",
     "merged-api": "ts-node generate-clients.ts",
     "generate": "rimraf src/api/generated && openapi-generator-cli generate -i ./openapi.json -g typescript-axios -o src/api/generated",

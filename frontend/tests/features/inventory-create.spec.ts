@@ -1,5 +1,10 @@
 import { test, expect } from "@playwright/test";
 
+test.skip(
+  !process.env.E2E_EMAIL || !process.env.E2E_PASSWORD,
+  "E2E_EMAIL and E2E_PASSWORD are required",
+);
+
 test("test-create-inv-docs", async ({ page }) => {
   await page.goto("/manage/inventory/import");
   await expect(

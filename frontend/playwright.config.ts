@@ -47,7 +47,9 @@ export default defineConfig({
   // Playwright sẽ tự chạy `npm run dev` nếu chưa có server
   webServer: {
     command: `npm run dev -- --port ${port}`, // Lệnh để khởi chạy Next.js
-    port,
+    // Compile the public return route before opening browser pages. A bare port
+    // check can race Next.js dev chunk generation on a cold start.
+    url: `http://localhost:${port}/payment/payos-return?code=01&status=PAID&orderCode=invalid`,
     reuseExistingServer: !process.env.CI, // Tái sử dụng server nếu đang test local
     timeout: 60 * 1000, // Cho server tối đa 60 giây để khởi động
   },

@@ -12,6 +12,7 @@ const withPwa = withSerwistInit({
   register: true,
   // Only public, versioned build assets belong in the offline cache.
   // Never cache authenticated documents, API responses or signed media.
+  globPublicPatterns: [],
   exclude: [({ asset }) => !asset.name.startsWith("static/")],
   disable: process.env.NODE_ENV === "development",
 });
