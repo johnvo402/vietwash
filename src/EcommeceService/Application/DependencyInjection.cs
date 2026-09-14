@@ -6,6 +6,9 @@ using Application.Common.HandleEventDomains.Inventories;
 using Application.Common.HandleEventDomains.Orders;
 using Application.Jobs;
 using Application.Feature.Orders.Command.Create;
+using Application.Feature.AiAssistant;
+using Application.Feature.AiAssistant.Interfaces;
+using Application.Feature.AiAssistant.Tools;
 using FluentValidation;
 using Mediator;
 using Microsoft.AspNetCore.Authorization;
@@ -35,6 +38,9 @@ public static class DependencyInjection
             .AddScoped<EInvoiceEventHandler>()
             .AddSingleton(TimeProvider.System)
             .AddSingleton<IOrderCodeGenerator, OrderCodeGenerator>()
+            .AddSingleton<AiAssistantMetrics>()
+            .AddScoped<IAiBusinessDataService, AiBusinessDataService>()
+            .AddScoped<IAiBusinessToolRegistry, AiBusinessToolRegistry>()
             .AddValidatorsFromAssembly(currentAssembly)
             .AddSingleton<IAuthorizationPolicyProvider, AuthorizePolicyProvider>()
             .AddSingleton<IAuthorizationHandler, AuthorizeHandler>()

@@ -57,6 +57,7 @@ public class NotificationOutboxTests
         Assert.Equal(1, failed.Attempts);
         Assert.True(failed.NextAttemptAt > failed.CreatedAt);
         Assert.Equal(nameof(InvalidOperationException), failed.LastError);
+        await fixture.MakeNotDue();
         Assert.False(await fixture.Dispatch(transport.Object));
         await fixture.MakeDue();
         Assert.True(await fixture.Dispatch(transport.Object));
@@ -168,6 +169,13 @@ public class NotificationOutboxTests
             await using var db = Context();
             await db.Set<NotificationOutbox>().ExecuteUpdateAsync(s => s
                 .SetProperty(x => x.NextAttemptAt, DateTimeOffset.UtcNow.AddMinutes(-1))
+                .SetProperty(x => x.LockedUntil, (DateTimeOffset?)null));
+        }
+        public async Task MakeNotDue()
+        {
+            await using var db = Context();
+            await db.Set<NotificationOutbox>().ExecuteUpdateAsync(s => s
+                .SetProperty(x => x.NextAttemptAt, DateTimeOffset.UtcNow.AddMinutes(1))
                 .SetProperty(x => x.LockedUntil, (DateTimeOffset?)null));
         }
         public ValueTask DisposeAsync() => source.DisposeAsync();

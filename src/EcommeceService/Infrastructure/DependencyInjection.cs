@@ -34,6 +34,9 @@ using Infrastructure.Outbox;
 using Contracts.Observability;
 using Contracts.Settings;
 using Infrastructure.Payments;
+using Application.Feature.AiAssistant.Interfaces;
+using Application.Feature.AiAssistant.Models;
+using Infrastructure.AI.Gemini;
 
 namespace Infrastructure;
 
@@ -52,6 +55,20 @@ public static class DependencyInjection
             configuration.GetSection(nameof(DatabaseSettings)).Bind(options)
         );
         services.Configure<OrgSetting>(configuration.GetSection(nameof(OrgSetting)));
+        services.Configure<AiAssistantOptions>(
+            configuration.GetSection(AiAssistantOptions.SectionName)
+        );
+        services.Configure<GeminiOptions>(options =>
+        {
+            configuration.GetSection(AiAssistantOptions.SectionName).Bind(options);
+            options.ApiKey = configuration["GEMINI_API_KEY"];
+        });
+        services.AddHttpClient<IAiChatClient, GeminiAiChatClient>((serviceProvider, client) =>
+        {
+            int seconds = serviceProvider.GetRequiredService<IOptions<GeminiOptions>>()
+                .Value.TimeoutSeconds;
+            client.Timeout = TimeSpan.FromSeconds(seconds is >= 1 and <= 300 ? seconds : 30);
+        });
         services.AddSingleton(sp => sp.GetRequiredService<IOptions<OrgSetting>>().Value);
         services.TryAddSingleton<IValidateOptions<DatabaseSettings>, ValidateDatabaseSetting>();
         services.AddSingleton<OutboxMetrics>();

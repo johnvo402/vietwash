@@ -15,7 +15,8 @@ public static class OpenTelemetryExtensions
 {
     public static IServiceCollection AddOpenTelemetryTracing(
         this WebApplicationBuilder builder,
-        IConfiguration configuration
+        IConfiguration configuration,
+        params string[] additionalMeterNames
     )
     {
         builder.Services.Configure<OpenTelemetrySettings>(
@@ -97,6 +98,8 @@ public static class OpenTelemetryExtensions
                 .WithMetrics(options =>
                 {
                     options.AddMeter(OutboxMetrics.MeterName);
+                    foreach (string meterName in additionalMeterNames)
+                        options.AddMeter(meterName);
 
                     if (openTelemetrySettings.OtelpOption == OtelpOption.DistributedServer)
                     {

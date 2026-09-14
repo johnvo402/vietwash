@@ -52,6 +52,7 @@ services:
       PayOsSetting__ReturnUrl: ${PayOsSetting__ReturnUrl:-}
       PayOsSetting__CancelUrl: ${PayOsSetting__CancelUrl:-}
       PayOsSetting__WebhookUrl: ${PayOsSetting__WebhookUrl:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
 
   project:
     image: ghcr.io/${GHCR_OWNER:-johnvo402}/vietwash-project:${IMAGE_TAG:-dev}

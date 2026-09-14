@@ -7,6 +7,12 @@ namespace Presentation.Routes
     {
         public const string Ecommerce = "Ecommerce";
 
+        public static class AiRoute
+        {
+            public const string Tags = "AI assistant endpoint";
+            public const string Chat = $"{Ecommerce}/{RouterBase.prefix}ai/chat";
+        }
+
         public static class ServiceRoute
         {
             public const string Tags = $"{nameof(ServiceRoute)} endpoint";

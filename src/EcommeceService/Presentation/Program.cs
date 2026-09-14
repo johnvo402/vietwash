@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Application;
+using Application.Feature.AiAssistant;
 using Contracts.Converters;
 using Contracts.Extensions;
 using HealthChecks.UI.Client;
@@ -30,7 +31,7 @@ builder
     });
 services.AddErrorDetails();
 services.AddSwagger(configuration);
-builder.AddOpenTelemetryTracing(configuration);
+builder.AddOpenTelemetryTracing(configuration, AiAssistantMetrics.MeterName);
 builder.AddSerialogs();
 services.AddHealthChecks();
 services.AddDatabaseHealthCheck(configuration);

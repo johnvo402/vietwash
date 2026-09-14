@@ -8,6 +8,7 @@
   },
   "SerilogSettings": {"IsDistributeLog": false, "ServiceName": "VietWash"},
   "OpenTelemetrySettings": {"IsEnabled": false},
+  "AI": {"Provider": "Gemini", "Model": "gemini-2.5-flash", "BaseUrl": "https://generativelanguage.googleapis.com/v1beta/", "MaxToolRounds": 5, "TimeoutSeconds": 30},
   "OpenApiSettings": {"ApplicationName": "VietWash", "Version": "v1"},
   "SecuritySettings": {
     "JwtSettings": {"Issuer": "vietwash", "Audience": "vietwash", "ExpireTimeAccessToken": "1", "ExpireTimeRefreshToken": "7"}
