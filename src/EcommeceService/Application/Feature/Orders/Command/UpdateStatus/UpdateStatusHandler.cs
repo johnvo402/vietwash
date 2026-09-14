@@ -1,17 +1,12 @@
 using Application.Common.Errors;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.UnitOfWorks;
-using Application.Feature.Orders.Common;
-using Application.Feature.Orders.Queries.GetLinkPayment;
 using Contracts.ApiWrapper;
 using Contracts.Application.Common.Exceptions;
 using Contracts.Common.Messages;
-using Domain.Aggregates.Equipments;
-using Domain.Aggregates.Equipments.Enums;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Specifications;
-using Domain.Aggregates.Vouchers;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,11 +29,12 @@ public class UpdateStatusHandler(
             return Failure("OrderId invalid");
         if (request.Model?.Status is not OrderStatus target)
             return Failure("Status invalid");
-        if (
-            !request.IsVerifiedPayOsWebhook
-            && !OrderActorAccess.IsStaffSide(currentAccount.Session?.Role)
-        )
-            return Result.Failure(new ForbiddenError(Message.FORBIDDEN));
+        ErrorDetails? actorError = OrderStatusRequestPolicy.ValidateActor(
+            request,
+            currentAccount
+        );
+        if (actorError is not null)
+            return Result.Failure(actorError);
 
         try
         {
@@ -59,78 +55,31 @@ public class UpdateStatusHandler(
                     cancellationToken
                 );
 
-            if (
-                !request.IsVerifiedPayOsWebhook
-                && !OrderActorAccess.CanOperateOrder(
-                    currentAccount.Session?.Role,
-                    currentAccount.Session?.Branches,
-                    order.BranchId
-                )
-            )
+            ErrorDetails? orderError = OrderStatusRequestPolicy.ValidateOrder(
+                request,
+                currentAccount,
+                order,
+                target
+            );
+            if (orderError is not null)
                 return await RollbackFailure(
-                    new ForbiddenError(Message.FORBIDDEN),
+                    orderError,
                     cancellationToken
                 );
 
-            if (
-                !request.IsVerifiedPayOsWebhook
-                && order.Status == OrderStatus.Processed
-                && target == OrderStatus.Completed
-                && request.Model.PaymentMethod == PaymentMethod.Card
-            )
+            CancellationPreparation cancellationPreparation =
+                OrderStatusRequestPolicy.PrepareCancellation(
+                    request,
+                    currentAccount,
+                    target,
+                    _timeProvider
+                );
+            if (cancellationPreparation.Error is not null)
                 return await RollbackFailure(
-                    CreateBadRequest("Card payments must be completed through PayOS."),
+                    cancellationPreparation.Error,
                     cancellationToken
                 );
-
-            if (request.ExpectedPaymentAmount.HasValue)
-            {
-                if (
-                    !PayOsOrderPolicy.TryGetAmount(order.Total, out int authoritativeAmount)
-                    || authoritativeAmount != request.ExpectedPaymentAmount.Value
-                )
-                    return await RollbackFailure(
-                        CreateBadRequest("Payment amount does not match the order total."),
-                        cancellationToken
-                    );
-            }
-
-            OrderCancellation? cancellation = null;
-            if (target == OrderStatus.Cancelled)
-            {
-                if (currentAccount.Id is not long cancelledBy || cancelledBy <= 0)
-                    return await RollbackFailure(
-                        new UnauthorizedError(Message.UNAUTHORIZED),
-                        cancellationToken
-                    );
-
-                string cancellationReason =
-                    request.Model.CancellationReason?.Trim() ?? string.Empty;
-                if (
-                    cancellationReason.Length
-                    is < OrderCancellation.MinimumReasonLength
-                        or > OrderCancellation.MaximumReasonLength
-                )
-                    return await RollbackFailure(
-                        CreateBadRequest(
-                            $"Cancellation reason must contain between {OrderCancellation.MinimumReasonLength} and {OrderCancellation.MaximumReasonLength} characters."
-                        ),
-                        cancellationToken
-                    );
-
-                cancellation = OrderCancellation.Create(
-                    _timeProvider.GetUtcNow(),
-                    cancelledBy,
-                    cancellationReason
-                );
-            }
-            else if (!string.IsNullOrWhiteSpace(request.Model.CancellationReason))
-                return await RollbackFailure(
-                    CreateBadRequest(
-                        "Cancellation reason is only allowed when cancelling an order."
-                    ),
-                    cancellationToken
-                );
+            OrderCancellation? cancellation = cancellationPreparation.Cancellation;
 
             long[] requestedEquipmentIds =
                 request.Model.OrderEquipments?.Select(x => x.EquipmentId).ToArray() ?? [];
@@ -147,7 +96,9 @@ public class UpdateStatusHandler(
             }
             if (evaluation != OrderTransitionResult.Applied)
                 return await RollbackFailure(
-                    CreateBadRequest(GetTransitionError(evaluation)),
+                    OrderStatusRequestPolicy.BadRequest(
+                        OrderStatusRequestPolicy.GetTransitionError(evaluation)
+                    ),
                     cancellationToken
                 );
 
@@ -166,149 +117,79 @@ public class UpdateStatusHandler(
 
             if (cancellationPlan.RequiresPayOsCoordination)
             {
-                var requests = unitOfWork.Repository<PayOsCancellationRequest>();
-                PayOsCancellationRequest? existing = await requests.FindByConditionAsync(
-                    x => x.OrderId == order.Id,
-                    cancellationToken
-                );
-                if (existing?.IsTerminalFailure == true)
+                ErrorDetails? schedulingError =
+                    await OrderCancellationCoordinator.SchedulePayOsAsync(
+                        unitOfWork,
+                        order,
+                        cancellation!,
+                        cancellationToken
+                    );
+                if (schedulingError is not null)
                     return await RollbackFailure(
-                        CreateBadRequest(
-                            existing.LastError
-                                ?? "The payment link could not be cancelled safely."
-                        ),
+                        schedulingError,
                         cancellationToken
                     );
 
-                if (existing is null)
-                    _ = await requests.AddAsync(
-                        PayOsCancellationRequest.Create(order.Id, cancellation!),
-                        cancellationToken
-                    );
-
-                await unitOfWork.SaveAsync(cancellationToken);
                 await unitOfWork.CommitAsync(cancellationToken);
                 return Result.Success();
             }
 
-            if (equipmentAction == EquipmentLifecycleAction.Claim)
-            {
-                List<EquipmentSnapshot> candidates = await unitOfWork
-                    .Repository<Equipment>()
-                    .QueryAsync(x => requestedEquipmentIds.Contains(x.Id))
-                    .Select(x => new EquipmentSnapshot(x.Id, x.Name, x.BranchId, x.Status, x.Using))
-                    .ToListAsync(cancellationToken);
-                EquipmentSelectionResult equipmentResult = EquipmentSelectionPolicy.Resolve(
-                    order.BranchId,
+            EquipmentSelectionResult equipmentResult =
+                await OrderEquipmentLifecycle.ResolveAsync(
+                    unitOfWork,
+                    order,
+                    equipmentAction,
                     requestedEquipmentIds,
-                    candidates
-                );
-                if (!equipmentResult.IsSuccess)
-                    return await RollbackFailure(
-                        CreateBadRequest(
-                            $"Equipment selection invalid: {equipmentResult.FailureReason}."
-                        ),
-                        cancellationToken
-                    );
-                resolvedEquipments = equipmentResult.Equipments;
-            }
-
-            int transitionedRows = await unitOfWork
-                .Repository<Order>()
-                .QueryAsync(x =>
-                    x.Id == order.Id
-                    && x.Status == previousStatus
-                    && x.Version == order.Version
-                )
-                .ExecuteUpdateAsync(
-                    setters => setters.SetProperty(x => x.Status, target),
                     cancellationToken
                 );
-            if (transitionedRows != 1)
+            if (!equipmentResult.IsSuccess)
+                return await RollbackFailure(
+                    OrderStatusRequestPolicy.BadRequest(
+                        $"Equipment selection invalid: {equipmentResult.FailureReason}."
+                    ),
+                    cancellationToken
+                );
+            resolvedEquipments = equipmentResult.Equipments;
+
+            OrderTransitionWriteResult writeResult = await OrderTransitionPersistence.ReserveAsync(
+                unitOfWork,
+                order,
+                previousStatus,
+                target,
+                cancellationToken
+            );
+            if (writeResult != OrderTransitionWriteResult.Applied)
             {
-                OrderStatus? persistedStatus = await unitOfWork
-                    .Repository<Order>()
-                    .QueryAsync(x => x.Id == order.Id)
-                    .AsNoTracking()
-                    .Select(x => (OrderStatus?)x.Status)
-                    .SingleOrDefaultAsync(cancellationToken);
                 await unitOfWork.RollbackAsync(cancellationToken);
-                return persistedStatus == target
+                return writeResult == OrderTransitionWriteResult.AlreadyApplied
                     ? Result.Success()
                     : ConcurrencyFailure();
             }
 
-            if (cancellationPlan.IsCancellation)
-            {
-                bool hasVoucherUsage = await unitOfWork
-                    .Repository<VoucherUsage>()
-                    .AnyAsync(x => x.OrderId == order.Id, cancellationToken);
-                if (hasVoucherUsage)
-                    return await RollbackFailure(
-                        CreateBadRequest(
-                            "Order cancellation invariant violated: completed voucher usage already exists."
-                        ),
-                        cancellationToken
-                    );
+            ErrorDetails? cancellationError =
+                await OrderCancellationCoordinator.ReleaseLocalResourcesAsync(
+                    unitOfWork,
+                    order,
+                    cancellationPlan,
+                    cancellationToken
+                );
+            if (cancellationError is not null)
+                return await RollbackFailure(cancellationError, cancellationToken);
 
-                if (cancellationPlan.ShouldReleaseVoucher)
-                {
-                    long voucherId =
-                        order.VoucherId
-                        ?? throw new InvalidOperationException(
-                            "Voucher release was planned without a voucher id."
-                        );
-                    long customerId =
-                        order.CustomerId
-                        ?? throw new InvalidOperationException(
-                            "Voucher release was planned without a customer id."
-                        );
-                    _ = await unitOfWork
-                        .Repository<VoucherCustomer>()
-                        .QueryAsync(x =>
-                            x.VoucherId == voucherId && x.CustomerId == customerId && x.IsUsed
-                        )
-                        .ExecuteUpdateAsync(
-                            setters => setters.SetProperty(x => x.IsUsed, false),
-                            cancellationToken
-                        );
-                }
-            }
-
-            if (equipmentAction == EquipmentLifecycleAction.Claim)
-            {
-                int claimedRows = await unitOfWork
-                    .Repository<Equipment>()
-                    .QueryAsync(x =>
-                        requestedEquipmentIds.Contains(x.Id)
-                        && x.BranchId == order.BranchId
-                        && x.Status == EquipmentStatus.Active
-                        && !x.Using
-                    )
-                    .ExecuteUpdateAsync(
-                        setters => setters.SetProperty(x => x.Using, true),
-                        cancellationToken
-                    );
-                if (claimedRows != requestedEquipmentIds.Length)
-                    return await RollbackFailure(
-                        CreateBadRequest("One or more equipments were claimed concurrently."),
-                        cancellationToken
-                    );
-            }
-            else if (equipmentAction == EquipmentLifecycleAction.Release)
-            {
-                long[] equipmentIds = order.OrderEquipments.Select(x => x.EquipmentId).ToArray();
-                if (equipmentIds.Length != 0)
-                    _ = await unitOfWork
-                        .Repository<Equipment>()
-                        .QueryAsync(x =>
-                            equipmentIds.Contains(x.Id) && x.BranchId == order.BranchId
-                        )
-                        .ExecuteUpdateAsync(
-                            setters => setters.SetProperty(x => x.Using, false),
-                            cancellationToken
-                        );
-            }
+            bool equipmentsApplied = await OrderEquipmentLifecycle.ApplyAsync(
+                unitOfWork,
+                order,
+                equipmentAction,
+                requestedEquipmentIds,
+                cancellationToken
+            );
+            if (!equipmentsApplied)
+                return await RollbackFailure(
+                    OrderStatusRequestPolicy.BadRequest(
+                        "One or more equipments were claimed concurrently."
+                    ),
+                    cancellationToken
+                );
 
             if (equipmentAction == EquipmentLifecycleAction.Claim)
             {
@@ -320,7 +201,7 @@ public class UpdateStatusHandler(
                     );
                 if (!materialResult.IsSuccess)
                     return await RollbackFailure(
-                        CreateBadRequest(
+                        OrderStatusRequestPolicy.BadRequest(
                             materialResult.ErrorMessage ?? "Material consumption failed."
                         ),
                         cancellationToken
@@ -364,7 +245,8 @@ public class UpdateStatusHandler(
         return Result.Failure(error);
     }
 
-    private static Result Failure(string message) => Result.Failure(CreateBadRequest(message));
+    private static Result Failure(string message) =>
+        Result.Failure(OrderStatusRequestPolicy.BadRequest(message));
 
     private static Result ConcurrencyFailure() =>
         Result.Failure(
@@ -374,25 +256,4 @@ public class UpdateStatusHandler(
             )
         );
 
-    private static BadRequestError CreateBadRequest(string message) =>
-        new(message, Messager.Create<Order>().Message(MessageType.Valid).Negative().BuildMessage());
-
-    private static string GetTransitionError(OrderTransitionResult result) =>
-        result switch
-        {
-            OrderTransitionResult.InvalidTransition => "Order status transition is not allowed.",
-            OrderTransitionResult.PaymentMethodRequired =>
-                "A valid payment method is required to complete an order.",
-            OrderTransitionResult.PaymentMethodNotAllowed =>
-                "Payment method is only allowed when completing an order.",
-            OrderTransitionResult.EquipmentRequired =>
-                "At least one equipment is required to start an order.",
-            OrderTransitionResult.EquipmentNotAllowed =>
-                "Equipment can only be selected when starting an order.",
-            OrderTransitionResult.CancellationRequired =>
-                "Cancellation metadata is required to cancel an order.",
-            OrderTransitionResult.CancellationNotAllowed =>
-                "Cancellation metadata is only allowed when cancelling an order.",
-            _ => "Order status transition is invalid.",
-        };
 }
