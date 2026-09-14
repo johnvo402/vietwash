@@ -25,7 +25,7 @@ public class RequestResetAccountPasswordHandler(
     )
     {
         Account? user = await unitOfWork
-            .DynamicReadOnlyRepository<Account>(false)
+            .DynamicRepository<Account>()
             .FindByConditionAsync(
                 new GetUserByEmailForgotPasswordSpecification(command.Email),
                 cancellationToken

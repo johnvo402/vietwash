@@ -20,7 +20,7 @@ public class DeleteUserHandler(
     )
     {
         User? user = await unitOfWork
-            .DynamicReadOnlyRepository<User>()
+            .DynamicRepository<User>()
             .FindByConditionAsync(
                 new GetUserByIdWithoutIncludeSpecification(command.UserId),
                 cancellationToken

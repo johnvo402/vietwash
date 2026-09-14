@@ -23,7 +23,7 @@ namespace Application.Feature.Equipments.Command.CreateActivities
         )
         {
             Equipment? existingEquipment = await unitOfWork
-                .DynamicReadOnlyRepository<Equipment>()
+                .DynamicRepository<Equipment>()
                 .FindByConditionAsync(
                     new GetEquipmentWithIncludeByIdSpecification(request.Id),
                     cancellationToken

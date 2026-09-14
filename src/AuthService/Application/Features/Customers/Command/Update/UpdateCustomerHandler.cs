@@ -20,7 +20,7 @@ namespace Application.Features.Customers.Command.Update
         )
         {
             Account? customer = await unitOfWork
-                .DynamicReadOnlyRepository<Account>()
+                .DynamicRepository<Account>()
                 .FindByConditionAsync(
                     new GetAccountByIdSpecification(command.AccountId),
                     cancellationToken

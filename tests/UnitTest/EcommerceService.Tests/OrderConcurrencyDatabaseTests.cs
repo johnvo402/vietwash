@@ -17,11 +17,13 @@ using Domain.Aggregates.Equipments;
 using Domain.Aggregates.Equipments.Enums;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
+using Domain.Aggregates.Orders.Specifications;
 using Domain.Aggregates.Services;
 using Domain.Aggregates.Tariffs;
 using Domain.Aggregates.Users;
 using Infrastructure.Data;
 using Infrastructure.UnitOfWorks;
+using Infrastructure.UnitOfWorks.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -107,6 +109,29 @@ public class OrderConcurrencyDatabaseTests
             failedSave.Exception!.GetBaseException()
         );
         Assert.True(new PostgresOrderCodeCollisionDetector().IsOrderCodeCollision(error));
+    }
+
+    [DevelopmentSeedDatabaseFact]
+    public async Task DynamicRepositories_HaveExplicitTrackingSemantics()
+    {
+        await using TestDatabase database = await TestDatabase.CreateAsync();
+        await using TheDbContext context = database.CreateContext();
+        var readOnly = new DynamicSpecificationRepository<Order>(context, true);
+        var tracked = new DynamicSpecificationRepository<Order>(context);
+
+        Order? readOnlyOrder = await readOnly.FindByConditionAsync(
+            new GetOrderByIdSpecification(OrderId)
+        );
+
+        Assert.NotNull(readOnlyOrder);
+        Assert.Empty(context.ChangeTracker.Entries<Order>());
+
+        Order? trackedOrder = await tracked.FindByConditionAsync(
+            new GetOrderByIdSpecification(OrderId)
+        );
+
+        Assert.NotNull(trackedOrder);
+        Assert.Single(context.ChangeTracker.Entries<Order>());
     }
 
     [DevelopmentSeedDatabaseFact]
@@ -399,6 +424,19 @@ public class OrderConcurrencyDatabaseTests
         {
             IDynamicSpecificationRepository<TEntity> repository =
                 inner.DynamicReadOnlyRepository<TEntity>(isCached);
+            return typeof(TEntity) == typeof(Order)
+                ? (IDynamicSpecificationRepository<TEntity>)(object)new BlockingOrderRepository(
+                    (IDynamicSpecificationRepository<Order>)(object)repository,
+                    gate
+                )
+                : repository;
+        }
+
+        public IDynamicSpecificationRepository<TEntity> DynamicRepository<TEntity>()
+            where TEntity : class
+        {
+            IDynamicSpecificationRepository<TEntity> repository =
+                inner.DynamicRepository<TEntity>();
             return typeof(TEntity) == typeof(Order)
                 ? (IDynamicSpecificationRepository<TEntity>)(object)new BlockingOrderRepository(
                     (IDynamicSpecificationRepository<Order>)(object)repository,

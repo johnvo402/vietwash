@@ -24,7 +24,7 @@ public class ChangeAccountPasswordHandler(IUnitOfWork unitOfWork, ICurrentAccoun
             return Result.Failure(new UnauthorizedError(Message.UNAUTHORIZED));
         }
         Account? user = await unitOfWork
-            .DynamicReadOnlyRepository<Account>()
+            .DynamicRepository<Account>()
             .FindByConditionAsync(
                 new GetAccountByIdWithoutIncludeSpecification((long)userId),
                 cancellationToken

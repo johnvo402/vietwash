@@ -57,5 +57,5 @@ public class SpecificationRepository<T>(IDbContext dbContext) : ISpecificationRe
             .ToPagedListAsync(queryParam.Page, queryParam.PageSize, cancellationToken);
 
     private IQueryable<T> ApplySpecification(ISpecification<T> spec) =>
-        SpecificationEvaluator.GetQuery(dbContext.Set<T>().AsQueryable(), spec);
+        SpecificationEvaluator.GetQuery(dbContext.Set<T>().AsQueryable(), spec).AsNoTracking();
 }

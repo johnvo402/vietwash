@@ -27,7 +27,7 @@ public class LogoutHandler(
             DecodeTokenResponse decodeToken = tokenFactory.DecodeToken(command.Token!);
 
             IEnumerable<AccountToken> refreshTokens = await unitOfWork
-                .DynamicReadOnlyRepository<AccountToken>()
+                .DynamicRepository<AccountToken>()
                 .ListAsync(
                     new ListRefreshtokenByFamillyIdSpecification(
                         decodeToken.FamilyId!,

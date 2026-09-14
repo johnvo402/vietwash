@@ -19,7 +19,7 @@ namespace Application.Feature.Feedbacks.Command.Update
         )
         {
             Feedback? existingFeedback = await unitOfWork
-                .DynamicReadOnlyRepository<Feedback>()
+                .DynamicRepository<Feedback>()
                 .FindByConditionAsync(
                     new GetFeedbackWithIncludeByIdSpecification(command.FeedbackId),
                     cancellationToken

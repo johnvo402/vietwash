@@ -27,7 +27,7 @@ public class UpdateAccountProfileHandler(
     )
     {
         Account? user = await unitOfWork
-            .DynamicReadOnlyRepository<Account>()
+            .DynamicRepository<Account>()
             .FindByConditionAsync(
                 new GetAccountByIdSpecification(currentAccount.Id!.Value),
                 cancellationToken

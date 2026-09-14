@@ -28,7 +28,7 @@ namespace Application.Feature.Orders.Command.Update
             {
                 _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
                 Order? order = await unitOfWork
-                    .DynamicReadOnlyRepository<Order>()
+                    .DynamicRepository<Order>()
                     .FindByConditionAsync(
                         new GetOrderByIdSpecification(request.OrderId),
                         cancellationToken

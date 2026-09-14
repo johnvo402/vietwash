@@ -174,7 +174,7 @@ public class CustomerOtpSynchronizationTests
                 )
                 .ReturnsAsync(existingAccount);
             UnitOfWork
-                .Setup(unit => unit.DynamicReadOnlyRepository<Account>(false))
+                .Setup(unit => unit.DynamicRepository<Account>())
                 .Returns(accountLookup.Object);
             UnitOfWork.Setup(unit => unit.Repository<Account>(false)).Returns(Accounts.Object);
             UnitOfWork

@@ -28,7 +28,7 @@ namespace Application.Jobs
         {
             var now = DateTimeOffset.Now;
             var expiredVouchers = await _unitOfWork
-                        .DynamicReadOnlyRepository<Voucher>()
+                        .DynamicRepository<Voucher>()
                         .ListAsync(
                             new GetExpiredVouchers(now),
                             new QueryParamRequest { }

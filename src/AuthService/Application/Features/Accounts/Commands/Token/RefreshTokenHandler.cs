@@ -38,7 +38,7 @@ public class RefreshTokenHandler(
             DecodeTokenResponse decodeToken = tokenFactory.DecodeToken(command.RefreshToken!);
 
             AccountToken? refresh = await unitOfWork
-                .DynamicReadOnlyRepository<AccountToken>()
+                .DynamicRepository<AccountToken>()
                 .FindByConditionAsync(
                     new GetRefreshtokenSpecification(
                         command.RefreshToken!,
@@ -48,7 +48,7 @@ public class RefreshTokenHandler(
                 );
 
             IEnumerable<AccountToken> refreshTokens = await unitOfWork
-                .DynamicReadOnlyRepository<AccountToken>()
+                .DynamicRepository<AccountToken>()
                 .ListAsync(
                     new ListRefreshtokenByFamillyIdSpecification(
                         decodeToken.FamilyId!,

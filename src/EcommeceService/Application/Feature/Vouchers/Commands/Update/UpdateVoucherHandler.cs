@@ -23,7 +23,7 @@ namespace Application.Feature.Vouchers.Commands.Update
         )
         {
             Voucher? existingVoucher = await unitOfWork
-                .DynamicReadOnlyRepository<Voucher>()
+                .DynamicRepository<Voucher>()
                 .FindByConditionAsync(
                     new GetVoucherWithIncludeByIdSpecification(command.VoucherId),
                     cancellationToken

@@ -20,7 +20,7 @@ public class UpdateAccountHandler(IUnitOfWork unitOfWork, IMediaUpdateService me
     )
     {
         Account? user = await unitOfWork
-            .DynamicReadOnlyRepository<Account>()
+            .DynamicRepository<Account>()
             .FindByConditionAsync(
                 new GetAccountByIdSpecification(command.AccountId),
                 cancellationToken

@@ -44,7 +44,7 @@ public class UpdateStatusHandler(
         {
             _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
             Order? order = await unitOfWork
-                .DynamicReadOnlyRepository<Order>()
+                .DynamicRepository<Order>()
                 .FindByConditionAsync(new GetOrderByIdSpecification(orderId), cancellationToken);
             if (order is null)
                 return await RollbackFailure(

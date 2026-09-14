@@ -28,7 +28,7 @@ namespace Application.Jobs
         public async Task ExecuteAsync()
         {
             var userIds = await _unitOfWork
-                .DynamicReadOnlyRepository<User>()
+                .DynamicRepository<User>()
                 .ListAsync(
                     new ListCustomerWithoutIncludeSpecification(CustomerGroup.Normal),
                     new QueryParamRequest(),

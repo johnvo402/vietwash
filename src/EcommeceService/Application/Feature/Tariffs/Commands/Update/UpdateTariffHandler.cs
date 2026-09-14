@@ -18,7 +18,7 @@ namespace Application.Feature.Tariffs.Commands.Update
         )
         {
             Tariff? existingTariff = await unitOfWork
-                .DynamicReadOnlyRepository<Tariff>()
+                .DynamicRepository<Tariff>()
                 .FindByConditionAsync(
                     new GetTariffByIdWithIncludeSpecification(command.TariffId),
                     cancellationToken

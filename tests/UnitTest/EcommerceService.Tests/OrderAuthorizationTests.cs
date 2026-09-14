@@ -526,6 +526,7 @@ public class OrderAuthorizationTests
         Mock<IDynamicSpecificationRepository<Order>> details = new(MockBehavior.Strict);
         Mock<IUnitOfWork> unitOfWork = new(MockBehavior.Strict);
         unitOfWork.Setup(x => x.Repository<Order>(false)).Returns(orders.Object);
+        unitOfWork.Setup(x => x.DynamicRepository<Order>()).Returns(details.Object);
         unitOfWork.Setup(x => x.DynamicReadOnlyRepository<Order>(false)).Returns(details.Object);
         return (unitOfWork, details);
     }
@@ -549,7 +550,7 @@ public class OrderAuthorizationTests
         unitOfWork
             .Setup(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(transaction.Object);
-        unitOfWork.Setup(x => x.DynamicReadOnlyRepository<Order>(false)).Returns(orders.Object);
+        unitOfWork.Setup(x => x.DynamicRepository<Order>()).Returns(orders.Object);
         if (commitExpected)
             unitOfWork
                 .Setup(x => x.CommitAsync(It.IsAny<CancellationToken>()))

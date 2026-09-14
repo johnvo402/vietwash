@@ -18,7 +18,7 @@ namespace Application.Features.Branches.Commands.Delete
         )
         {
             Branch? branch = await unitOfWork
-                .DynamicReadOnlyRepository<Domain.Aggregates.Branches.Branch>()
+                .DynamicRepository<Domain.Aggregates.Branches.Branch>()
                 .FindByConditionAsync(
                     new GetBranchByIdWithoutIncludeSpecification(command.branchId),
                     cancellationToken

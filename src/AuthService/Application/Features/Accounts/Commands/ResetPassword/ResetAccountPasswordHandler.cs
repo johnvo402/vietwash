@@ -18,7 +18,7 @@ public class ResetAccountPasswordHandler(IUnitOfWork unitOfWork)
     )
     {
         Account? user = await unitOfWork
-            .DynamicReadOnlyRepository<Account>(false)
+            .DynamicRepository<Account>()
             .FindByConditionAsync(
                 new GetAccountByIdIncludeResetPassword(command.AccountId),
                 cancellationToken

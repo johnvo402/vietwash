@@ -49,7 +49,7 @@ namespace Application.Features.Accounts.Commands.VerifyOtpLoginCustomer
 
             // Check for existing account
             Account? user = await _unitOfWork
-                .DynamicReadOnlyRepository<Account>()
+                .DynamicRepository<Account>()
                 .FindByConditionAsync(
                     new GetAccountByPhoneNumberSpecification(request.PhoneNumber, ROLE.CUSTOMER),
                     cancellationToken

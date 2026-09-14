@@ -75,7 +75,7 @@ public class UnitOfWork(
     {
         string key = GetKey(typeof(TEntity).FullName!, nameof(DynamicReadOnlyRepository), isCached);
         Type repositoryType = typeof(DynamicSpecificationRepository<>);
-        object? repositoryInstance = CreateInstance<TEntity>(repositoryType, dbContext);
+        object? repositoryInstance = CreateInstance<TEntity>(repositoryType, dbContext, true);
 
         if (!repositories.TryGetValue(key, out object? value))
         {
@@ -87,6 +87,23 @@ public class UnitOfWork(
                     memoryCacheService
                 )
                 : repositoryInstance;
+            repositories.Add(key, value);
+        }
+
+        return (IDynamicSpecificationRepository<TEntity>)value!;
+    }
+
+    public IDynamicSpecificationRepository<TEntity> DynamicRepository<TEntity>()
+        where TEntity : class
+    {
+        string key = GetKey(typeof(TEntity).FullName!, nameof(DynamicRepository), false);
+        if (!repositories.TryGetValue(key, out object? value))
+        {
+            value = CreateInstance<TEntity>(
+                typeof(DynamicSpecificationRepository<>),
+                dbContext,
+                false
+            );
             repositories.Add(key, value);
         }
 

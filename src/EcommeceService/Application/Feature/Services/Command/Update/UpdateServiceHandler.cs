@@ -20,7 +20,7 @@ public class UpdateServiceHandler(IUnitOfWork unitOfWork, IMediaUpdateService me
     )
     {
         Service? existingService = await unitOfWork
-            .DynamicReadOnlyRepository<Service>()
+            .DynamicRepository<Service>()
             .FindByConditionAsync(
                 new GetServiceWithIncludeByIdSpecification(command.ServiceId),
                 cancellationToken

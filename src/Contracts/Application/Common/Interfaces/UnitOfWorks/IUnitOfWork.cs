@@ -23,6 +23,10 @@ public interface IUnitOfWork : IDisposable
     )
         where TEntity : class;
 
+    /// <summary>Tracked specification queries for command flows that mutate aggregates.</summary>
+    IDynamicSpecificationRepository<TEntity> DynamicRepository<TEntity>()
+        where TEntity : class;
+
     /// <summary>
     /// Read-only operations in specification pattern
     /// </summary>

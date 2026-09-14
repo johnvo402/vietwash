@@ -45,6 +45,23 @@ public class UnitOfWorkTests
         Assert.Same(first, second);
     }
 
+    [Fact]
+    public void DynamicRepository_ReturnsReusableTrackedRepositoryDistinctFromReadOnlyRepository()
+    {
+        using var unitOfWork = CreateUnitOfWork();
+
+        IDynamicSpecificationRepository<TestEntity> first =
+            unitOfWork.DynamicRepository<TestEntity>();
+        IDynamicSpecificationRepository<TestEntity> second =
+            unitOfWork.DynamicRepository<TestEntity>();
+        IDynamicSpecificationRepository<TestEntity> readOnly =
+            unitOfWork.DynamicReadOnlyRepository<TestEntity>();
+
+        Assert.IsType<DynamicSpecificationRepository<TestEntity>>(first);
+        Assert.Same(first, second);
+        Assert.NotSame(first, readOnly);
+    }
+
     private static UnitOfWork CreateUnitOfWork() =>
         new(
             Mock.Of<IDbContext>(),

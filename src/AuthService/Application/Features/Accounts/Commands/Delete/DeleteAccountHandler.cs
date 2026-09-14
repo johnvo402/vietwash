@@ -17,7 +17,7 @@ public class DeleteAccountHandler(IUnitOfWork unitOfWork)
     )
     {
         Account? user = await unitOfWork
-            .DynamicReadOnlyRepository<Account>()
+            .DynamicRepository<Account>()
             .FindByConditionAsync(
                 new GetAccountByIdWithoutIncludeSpecification(command.AccountId),
                 cancellationToken

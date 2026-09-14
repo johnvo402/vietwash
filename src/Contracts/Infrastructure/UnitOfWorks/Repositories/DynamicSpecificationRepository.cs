@@ -15,7 +15,8 @@ namespace Infrastructure.UnitOfWorks.Repositories;
 /// </summary>
 /// <typeparam name="T">must be BaseEntity or AggregateRoot</typeparam>
 /// <param name="dbContext">must be IDbcontext</param>
-public class DynamicSpecificationRepository<T>(IDbContext dbContext)
+/// <param name="asNoTracking">whether queries must be read-only</param>
+public class DynamicSpecificationRepository<T>(IDbContext dbContext, bool asNoTracking = false)
     : IDynamicSpecificationRepository<T>
     where T : class
 {
@@ -104,6 +105,12 @@ public class DynamicSpecificationRepository<T>(IDbContext dbContext)
                 )
             );
 
-    private IQueryable<T> ApplySpecification(ISpecification<T> spec) =>
-        SpecificationEvaluator.GetQuery(dbContext.Set<T>().AsQueryable(), spec);
+    private IQueryable<T> ApplySpecification(ISpecification<T> spec)
+    {
+        IQueryable<T> query = SpecificationEvaluator.GetQuery(
+            dbContext.Set<T>().AsQueryable(),
+            spec
+        );
+        return asNoTracking ? query.AsNoTracking() : query.AsTracking();
+    }
 }

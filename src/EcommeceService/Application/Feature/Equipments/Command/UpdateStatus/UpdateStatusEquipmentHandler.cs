@@ -34,7 +34,7 @@ namespace Application.Feature.Equipments.Command.UpdateStatus
             try
             {
                 Equipment? existingEquipment = await unitOfWork
-                    .DynamicReadOnlyRepository<Equipment>()
+                    .DynamicRepository<Equipment>()
                     .FindByConditionAsync(
                         new GetEquipmentWithIncludeByIdSpecification(command.EquipmentId),
                         cancellationToken

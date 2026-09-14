@@ -20,7 +20,7 @@ namespace Application.Feature.Feedbacks.Command.React
         {
             var customerId = (long)currentAccount.Id!;
             Feedback? existingFeedback = await unitOfWork
-                .DynamicReadOnlyRepository<Feedback>()
+                .DynamicRepository<Feedback>()
                 .FindByConditionAsync(
                     new GetFeedbackWithIncludeByIdSpecification(request.FeedbackId),
                     cancellationToken

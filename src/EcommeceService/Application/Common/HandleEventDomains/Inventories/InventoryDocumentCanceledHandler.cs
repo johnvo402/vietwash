@@ -43,7 +43,7 @@ public sealed class InventoryDocumentCanceledHandler
         if (codes.Any())
         {
             var equipments = await _unitOfWork
-                .DynamicReadOnlyRepository<Equipment>()
+                .DynamicRepository<Equipment>()
                 .ListAsync(
                     new ListEquipmentByCodeSpecification(codes),
                     new QueryParamRequest(),

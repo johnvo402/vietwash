@@ -220,7 +220,7 @@ public class PayOsAuthorityHandlerTests
             .Setup(work => work.BeginTransactionAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(transaction.Object);
         unitOfWork
-            .Setup(work => work.DynamicReadOnlyRepository<Order>(false))
+            .Setup(work => work.DynamicRepository<Order>())
             .Returns(orders.Object);
         unitOfWork
             .Setup(work => work.RollbackAsync(It.IsAny<CancellationToken>()))

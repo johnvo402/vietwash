@@ -21,7 +21,7 @@ namespace Application.Feature.BranchProducts.Command.Update
         )
         {
             BranchProduct? existingBranchProduct = await unitOfWork
-                .DynamicReadOnlyRepository<BranchProduct>()
+                .DynamicRepository<BranchProduct>()
                 .FindByConditionAsync(
                     new GetBranchProductWithIncludeByIdSpecification(request.BranchProductId),
                     cancellationToken

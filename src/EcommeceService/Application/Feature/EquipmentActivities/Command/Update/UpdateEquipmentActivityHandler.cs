@@ -21,7 +21,7 @@ namespace Application.Feature.EquipmentActivities.Command.Update
 			var staffId = (long)currentAccount.Id!;
 
 			EquipmentActivity? existingEquipmentActivity = await unitOfWork
-				.DynamicReadOnlyRepository<EquipmentActivity>()
+				.DynamicRepository<EquipmentActivity>()
 				.FindByConditionAsync(
 					new GetEquipmentActivityWithIncludeByIdSpecification(command.EquipmentActivityId),
 					cancellationToken
