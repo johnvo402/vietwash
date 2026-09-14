@@ -62,7 +62,7 @@ public class OrderPricingTests
             vatPercent: 0
         ).Value!;
 
-        Order order = command.ToEntity(7, 0, pricing, totals, voucher: null);
+        Order order = command.ToEntity(7, 0, pricing, totals, voucher: null, "OD123456");
 
         Assert.Null(typeof(OrderItemSelectionModel).GetProperty("Price"));
         Assert.Equal(125m, order.OrderItems.Single().Price);
@@ -328,7 +328,7 @@ public class OrderPricingTests
             0
         ).Value!;
 
-        Order order = command.ToEntity(7, 0, pricing, totals, voucher);
+        Order order = command.ToEntity(7, 0, pricing, totals, voucher, "OD123456");
 
         Assert.True(order.DiscountFixed);
         Assert.Equal(40m, order.DiscountValue);

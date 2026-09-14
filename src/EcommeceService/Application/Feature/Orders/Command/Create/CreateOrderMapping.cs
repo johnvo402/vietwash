@@ -13,7 +13,8 @@ namespace Application.Feature.Orders.Command.Create
             int vat,
             ResolvedOrderPricing pricing,
             OrderPriceSummary totals,
-            VoucherRedemption? voucher
+            VoucherRedemption? voucher,
+            string code
         )
         {
             var order = new Order(
@@ -23,7 +24,7 @@ namespace Application.Feature.Orders.Command.Create
                 voucherCode: voucher?.Code,
                 vat: vat,
                 vatAmount: totals.VatAmount,
-                code: Generator.GenerateCode("OD", 6),
+                code: code,
                 amount: totals.Amount,
                 total: totals.Total,
                 status: OrderStatus.Pending,

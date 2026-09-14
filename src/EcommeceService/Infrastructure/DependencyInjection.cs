@@ -3,6 +3,7 @@ using Application.Common.Interfaces.Registers;
 using Application.Common.Interfaces.Services;
 using Application.Common.Interfaces.Services.Identity;
 using Application.Common.Interfaces.UnitOfWorks;
+using Application.Feature.Orders.Command.Create;
 using Contracts.Infrastructure.Common;
 using Contracts.Infrastructure.PubSub;
 using Contracts.Infrastructure.Services.Cache.MemoryCache;
@@ -72,6 +73,7 @@ public static class DependencyInjection
         services
             .AddScoped<IDbContext>(sp => sp.GetRequiredService<TheDbContext>())
             .AddScoped<IUnitOfWork, UnitOfWork>()
+            .AddSingleton<IOrderCodeCollisionDetector, PostgresOrderCodeCollisionDetector>()
             .AddScoped<UpdateAuditableEntityInterceptor>()
             .AddSingleton<DispatchDomainEventInterceptor>();
 

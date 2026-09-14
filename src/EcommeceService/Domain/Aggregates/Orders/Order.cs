@@ -164,6 +164,16 @@ namespace Domain.Aggregates.Orders
             CodeConfirm = confirmationCode;
         }
 
+        public void ReplaceCodeAfterCreationCollision(string code)
+        {
+            if (!OrderLifecycle.CanEditDetails(Status))
+                throw new InvalidOperationException(
+                    "An order code can only be regenerated for a pending order."
+                );
+
+            Code = Guard.Against.NullOrWhiteSpace(code, nameof(code));
+        }
+
         public void AdvanceVersion() => Version = checked(Version + 1);
 
         public OrderTransitionResult EvaluateTransition(

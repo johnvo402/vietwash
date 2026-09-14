@@ -23,7 +23,9 @@ namespace Application.Feature.Orders.Command.Create
         ICurrentAccount currentAccount,
         OrgSetting orgSetting,
         IEncryptionService encryption,
-        IQrGenerator barcode
+        IQrGenerator barcode,
+        IOrderCodeGenerator? orderCodeGenerator = null,
+        IOrderCodeCollisionDetector? orderCodeCollisionDetector = null
     ) : IRequestHandler<CreateOrderCommand, Result<CreateOrderResponse>>
     {
         public async ValueTask<Result<CreateOrderResponse>> Handle(
@@ -60,7 +62,7 @@ namespace Application.Feature.Orders.Command.Create
 
             try
             {
-                _ = await unitOfWork.BeginTransactionAsync(cancellationToken);
+                var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
                 DateTimeOffset now = DateTimeOffset.UtcNow;
 
                 var selection = await OrderPricingReader.ReadAsync(
@@ -110,12 +112,15 @@ namespace Application.Feature.Orders.Command.Create
                     }
                 }
 
+                IOrderCodeGenerator codeGenerator =
+                    orderCodeGenerator ?? new OrderCodeGenerator();
                 Order order = request.ToEntity(
                     (long)currentAccount.Id!,
                     orgSetting.VatPercent,
                     pricing,
                     totals,
-                    voucher
+                    voucher,
+                    codeGenerator.Generate()
                 );
                 order.SetConfirmationCode(
                     barcode.GenerateQrBase64(encryption.Encrypt(order.Code))
@@ -124,7 +129,36 @@ namespace Application.Feature.Orders.Command.Create
                 Order orderResult = await unitOfWork
                     .Repository<Order>()
                     .AddAsync(order, cancellationToken);
-                await unitOfWork.SaveAsync(cancellationToken);
+
+                const string savepoint = "before_order_code_insert";
+                bool canRetryCodeCollision =
+                    transaction.SupportsSavepoints && orderCodeCollisionDetector is not null;
+                if (canRetryCodeCollision)
+                    await transaction.SaveAsync(savepoint, cancellationToken);
+
+                const int maxCodeAttempts = 3;
+                for (int attempt = 1; ; attempt++)
+                {
+                    try
+                    {
+                        await unitOfWork.SaveAsync(cancellationToken);
+                        break;
+                    }
+                    catch (DbUpdateException exception)
+                        when (canRetryCodeCollision
+                            && attempt < maxCodeAttempts
+                            && orderCodeCollisionDetector!.IsOrderCodeCollision(exception))
+                    {
+                        await transaction.RollbackAsync(savepoint, cancellationToken);
+                        order.ReplaceCodeAfterCreationCollision(codeGenerator.Generate());
+                        order.SetConfirmationCode(
+                            barcode.GenerateQrBase64(encryption.Encrypt(order.Code))
+                        );
+                    }
+                }
+
+                if (canRetryCodeCollision)
+                    await transaction.ReleaseAsync(savepoint, cancellationToken);
                 await unitOfWork.CommitAsync(cancellationToken);
 
                 CreateOrderResponse? response = await unitOfWork

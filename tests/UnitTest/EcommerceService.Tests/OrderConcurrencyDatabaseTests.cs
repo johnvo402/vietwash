@@ -65,6 +65,50 @@ public class OrderConcurrencyDatabaseTests
         );
     }
 
+    [Fact]
+    public void OrderCode_IsConfiguredWithUniqueDatabaseIndex()
+    {
+        using var context = new TheDbContext(
+            new DbContextOptionsBuilder<TheDbContext>()
+                .EnableServiceProviderCaching(false)
+                .UseNpgsql("Host=localhost;Database=model_only")
+                .Options
+        );
+
+        var codeIndex = Assert.Single(
+            context
+                .Model.FindEntityType(typeof(Order))!
+                .GetIndexes()
+                .Where(index => index.Properties.SingleOrDefault()?.Name == nameof(Order.Code))
+        );
+        Assert.True(codeIndex.IsUnique);
+    }
+
+    [DevelopmentSeedDatabaseFact]
+    public async Task ConcurrentOrders_WithSameCode_OnlyOneCanCommit()
+    {
+        await using TestDatabase database = await TestDatabase.CreateAsync();
+        await using TheDbContext first = database.CreateContext();
+        await using TheDbContext second = database.CreateContext();
+        first.Add(NewOrder(1002, "OD-COLLISION"));
+        second.Add(NewOrder(1003, "OD-COLLISION"));
+
+        Task firstSave = first.SaveChangesAsync();
+        Task secondSave = second.SaveChangesAsync();
+        try
+        {
+            await Task.WhenAll(firstSave, secondSave);
+        }
+        catch (DbUpdateException) { }
+
+        Assert.NotEqual(firstSave.IsCompletedSuccessfully, secondSave.IsCompletedSuccessfully);
+        Task failedSave = firstSave.IsFaulted ? firstSave : secondSave;
+        DbUpdateException error = Assert.IsType<DbUpdateException>(
+            failedSave.Exception!.GetBaseException()
+        );
+        Assert.True(new PostgresOrderCodeCollisionDetector().IsOrderCodeCollision(error));
+    }
+
     [DevelopmentSeedDatabaseFact]
     public async Task UpdateOrder_RacingUpdateStatus_ReturnsConflictWithoutRevertingStatus()
     {
@@ -174,6 +218,9 @@ public class OrderConcurrencyDatabaseTests
         Assert.True(result.IsFailure);
         Assert.Equal(409, result.Error!.Status);
     }
+
+    private static Order NewOrder(long id, string code) =>
+        new(2, 7, code, 100, 100, OrderStatus.Pending) { Id = id };
 
     private sealed class TestDatabase(NpgsqlDataSource dataSource) : IAsyncDisposable
     {

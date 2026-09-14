@@ -21,6 +21,7 @@ using Domain.Aggregates.Services;
 using Domain.Aggregates.Tariffs;
 using Domain.Aggregates.Users;
 using Domain.Aggregates.Vouchers;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Moq;
 using Shared.Kernel.Common.Specs.Interfaces;
@@ -183,6 +184,36 @@ public class CashierReliabilityTests
         Assert.Contains("already used", created.Error!.Title);
         Assert.Null(h.Persisted);
         h.Unit.Verify(x => x.RollbackAsync(default), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateOrder_CodeCollision_RollsBackSavepointAndRegeneratesCode()
+    {
+        var h = new Harness();
+        var generator = new Mock<IOrderCodeGenerator>(MockBehavior.Strict);
+        generator.SetupSequence(x => x.Generate()).Returns("OD111111").Returns("OD222222");
+        var detector = new Mock<IOrderCodeCollisionDetector>(MockBehavior.Strict);
+        detector.Setup(x => x.IsOrderCodeCollision(It.IsAny<DbUpdateException>())).Returns(true);
+        var transaction = new Mock<DbTransaction>(MockBehavior.Strict);
+        transaction.SetupGet(x => x.SupportsSavepoints).Returns(true);
+        transaction.Setup(x => x.SaveAsync("before_order_code_insert", default))
+            .Returns(Task.CompletedTask);
+        transaction.Setup(x => x.RollbackAsync("before_order_code_insert", default))
+            .Returns(Task.CompletedTask);
+        transaction.Setup(x => x.ReleaseAsync("before_order_code_insert", default))
+            .Returns(Task.CompletedTask);
+
+        var result = await h.Create(
+            generator.Object,
+            detector.Object,
+            transaction.Object,
+            new DbUpdateException("duplicate order code")
+        );
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("OD222222", h.Persisted!.Code);
+        h.Unit.Verify(x => x.SaveAsync(default), Times.Exactly(2));
+        transaction.Verify(x => x.RollbackAsync("before_order_code_insert", default), Times.Once);
     }
 
     [Theory]
@@ -411,11 +442,21 @@ public class CashierReliabilityTests
             );
         }
 
-        public ValueTask<Contracts.ApiWrapper.Result<CreateOrderResponse>> Create()
+        public ValueTask<Contracts.ApiWrapper.Result<CreateOrderResponse>> Create(
+            IOrderCodeGenerator? codeGenerator = null,
+            IOrderCodeCollisionDetector? collisionDetector = null,
+            DbTransaction? transaction = null,
+            Exception? firstSaveFailure = null
+        )
         {
             Unit.Setup(x => x.BeginTransactionAsync(default))
-                .ReturnsAsync(Mock.Of<DbTransaction>());
-            Unit.Setup(x => x.SaveAsync(default)).Returns(Task.CompletedTask);
+                .ReturnsAsync(transaction ?? Mock.Of<DbTransaction>());
+            if (firstSaveFailure is null)
+                Unit.Setup(x => x.SaveAsync(default)).Returns(Task.CompletedTask);
+            else
+                Unit.SetupSequence(x => x.SaveAsync(default))
+                    .ThrowsAsync(firstSaveFailure)
+                    .Returns(Task.CompletedTask);
             Unit.Setup(x => x.CommitAsync(default)).Returns(Task.CompletedTask);
             Unit.Setup(x => x.RollbackAsync(default)).Returns(Task.CompletedTask);
             ReadRepository(
@@ -461,7 +502,9 @@ public class CashierReliabilityTests
                 Actor(),
                 settings,
                 Mock.Of<IEncryptionService>(),
-                Mock.Of<IQrGenerator>()
+                Mock.Of<IQrGenerator>(),
+                codeGenerator,
+                collisionDetector
             ).Handle(
                 new CreateOrderCommand
                 {

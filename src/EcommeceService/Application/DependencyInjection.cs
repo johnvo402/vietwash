@@ -5,6 +5,7 @@ using Application.Common.HandleEventDomains;
 using Application.Common.HandleEventDomains.Inventories;
 using Application.Common.HandleEventDomains.Orders;
 using Application.Jobs;
+using Application.Feature.Orders.Command.Create;
 using FluentValidation;
 using Mediator;
 using Microsoft.AspNetCore.Authorization;
@@ -34,6 +35,7 @@ public static class DependencyInjection
             .AddScoped<InventoryDocumentCanceledHandler>()
             .AddScoped<EInvoiceEventHandler>()
             .AddSingleton(TimeProvider.System)
+            .AddSingleton<IOrderCodeGenerator, OrderCodeGenerator>()
             .AddValidatorsFromAssembly(currentAssembly)
             .AddSingleton<IAuthorizationPolicyProvider, AuthorizePolicyProvider>()
             .AddSingleton<IAuthorizationHandler, AuthorizeHandler>()
