@@ -1,3 +1,6 @@
+using Domain.Aggregates.Inventories;
+using Domain.Aggregates.Inventories.Enums;
+using Domain.Aggregates.Inventories.Events;
 using Domain.Aggregates.Orders;
 using Domain.Aggregates.Orders.Enums;
 using Domain.Aggregates.Orders.Events;
@@ -75,6 +78,46 @@ public class DomainEventQueueTests
         );
         EInvoiceEvent invoice = order.UncommittedEvents.OfType<EInvoiceEvent>().Single();
         Assert.Equal("Wash", Assert.Single(invoice.Items).ServiceName);
+    }
+
+    [Fact]
+    public void InventoryCancellationEvent_CapturesAnImmutableSnapshot()
+    {
+        var supplying = new EquipmentSupplying { Code = "EQ-1", Quantity = 2 };
+        var document = new InventoryDocument(
+            "INV-1",
+            100,
+            InventoryType.Import,
+            branchId: 2
+        );
+        document.EquipmentSupplyings.Add(supplying);
+
+        document.UpdateStatus(InventoryStatus.Canceled, "No longer needed");
+        InventoryDocumentCanceledEvent snapshot = Assert.IsType<InventoryDocumentCanceledEvent>(
+            Assert.Single(document.UncommittedEvents)
+        );
+        supplying.Code = "CHANGED";
+        document.Code = "CHANGED";
+        document.EquipmentSupplyings.Clear();
+
+        Assert.Equal("INV-1", snapshot.DocumentCode);
+        Assert.Equal(["EQ-1", "EQ-11"], snapshot.EquipmentCodes);
+    }
+
+    [Fact]
+    public void DomainEvents_DoNotExposeMutableAggregateReferences()
+    {
+        var aggregateReferences = typeof(Order)
+            .Assembly.GetTypes()
+            .Where(type => typeof(IDomainEvent).IsAssignableFrom(type) && !type.IsInterface)
+            .SelectMany(type =>
+                type.GetProperties().Select(property => (Event: type, Property: property))
+            )
+            .Where(candidate =>
+                typeof(AggregateRoot).IsAssignableFrom(candidate.Property.PropertyType)
+            );
+
+        Assert.Empty(aggregateReferences);
     }
 
     private sealed record TestEvent(int Sequence) : IDomainEvent;

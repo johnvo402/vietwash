@@ -96,7 +96,27 @@ public class Account : AggregateRoot
         Password = Guard.Against.NullOrWhiteSpace(password, nameof(password));
 
     public void CreateAccount() =>
-        RaiseDomainEvent(new AccountCreateEvent() { Account = this });
+        RaiseDomainEvent(
+            new AccountCreateEvent(
+                Id,
+                PublicId,
+                CreatedAt,
+                CreatedBy,
+                UpdatedAt,
+                UpdatedBy,
+                DisplayName,
+                Email,
+                Code,
+                PhoneNumber,
+                BirthDay,
+                Gender,
+                AvtUrl,
+                Role,
+                Disabled,
+                CustomerGroup,
+                Status
+            )
+        );
 
     public void VerifiedCustomer() => this.Verified = true;
 

@@ -48,7 +48,7 @@ public sealed class InventoryDocumentCompletedHandler
         var document = await _unitOfWork
             .DynamicReadOnlyRepository<InventoryDocument>()
             .FindByConditionAsync(
-                new GetInventoryDocumentByIdSpecification(notification.InventoryDocument.Id),
+                new GetInventoryDocumentByIdSpecification(notification.InventoryDocumentId),
                 cancellationToken
             );
         if (document == null)

@@ -27,9 +27,7 @@ namespace Domain.Aggregates.Inventories
                 Status = status;
             if (status == InventoryStatus.Completed)
             {
-                RaiseDomainEvent(
-                    new InventoryDocumentCompletedEvent { InventoryDocument = this }
-                );
+                RaiseDomainEvent(new InventoryDocumentCompletedEvent(Id));
             }
             if (
                 Type == InventoryType.Import
@@ -38,7 +36,21 @@ namespace Domain.Aggregates.Inventories
             )
             {
                 RaiseDomainEvent(
-                    new InventoryDocumentCanceledEvent { InventoryDocument = this }
+                    new InventoryDocumentCanceledEvent(
+                        Code,
+                        Array.AsReadOnly(
+                            EquipmentSupplyings
+                                .SelectMany(supplying =>
+                                    Enumerable.Range(0, supplying.Quantity)
+                                        .Select(index =>
+                                            index == 0
+                                                ? supplying.Code
+                                                : supplying.Code + index
+                                        )
+                                )
+                                .ToArray()
+                        )
+                    )
                 );
             }
             CancelReason = cancelReason;

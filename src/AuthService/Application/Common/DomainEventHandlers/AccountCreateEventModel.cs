@@ -1,5 +1,5 @@
-﻿using Domain.Aggregates.Accounts;
-using Domain.Aggregates.Accounts.Enums;
+﻿using Domain.Aggregates.Accounts.Enums;
+using Domain.Aggregates.Accounts.Events;
 using Shared.Kernel.Common;
 
 namespace Application.Common.DomainEventHandlers
@@ -19,9 +19,9 @@ namespace Application.Common.DomainEventHandlers
 
         public AccountStatus Status { get; set; }
 
-        public virtual void MappingFrom(Account account)
+        public virtual void MappingFrom(AccountCreateEvent account)
         {
-            Id = account.Id;
+            Id = account.AccountId;
             PublicId = account.PublicId;
             CreatedAt = account.CreatedAt;
             CreatedBy = account.CreatedBy;

@@ -89,6 +89,26 @@ public class CustomerOtpSynchronizationTests
     }
 
     [Fact]
+    public void AccountCreateEvent_IsAnImmutableSnapshot()
+    {
+        Account account = CustomerAccount();
+        string originalName = account.DisplayName;
+
+        account.CreateAccount();
+        AccountCreateEvent snapshot = Assert.IsType<AccountCreateEvent>(
+            Assert.Single(account.UncommittedEvents)
+        );
+        account.Update(displayName: "Changed after event");
+
+        Assert.Equal(account.Id, snapshot.AccountId);
+        Assert.Equal(originalName, snapshot.DisplayName);
+        Assert.DoesNotContain(
+            typeof(AccountCreateEvent).GetProperties(),
+            property => typeof(Account).IsAssignableFrom(property.PropertyType)
+        );
+    }
+
+    [Fact]
     public async Task AlreadyVerifiedCustomer_ValidOtp_LogsInWithoutDuplicateSynchronization()
     {
         Account account = CustomerAccount();

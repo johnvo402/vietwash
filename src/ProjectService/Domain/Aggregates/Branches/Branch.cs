@@ -114,7 +114,7 @@ namespace Domain.Aggregates.Branches
 
         public void CreateEvent()
         {
-            RaiseDomainEvent(new BranchCreateEvent() { BranchId = Id, Name = Name });
+            RaiseDomainEvent(new BranchCreateEvent(Id, Name));
         }
     }
 }

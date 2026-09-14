@@ -14,16 +14,16 @@ public class AccountCreateEventHandler(ILogger logger, IPubSubFactory queueFacto
         CancellationToken cancellationToken
     )
     {
-        logger.Information("AccountCreateEventHandler: {@Id}", notification.Account.Id);
+        logger.Information("AccountCreateEventHandler: {@Id}", notification.AccountId);
         CreateAccountEvent mappingUser = new CreateAccountEvent();
-        mappingUser.MappingFrom(notification.Account);
+        mappingUser.MappingFrom(notification);
 
         var check = await queueFactory
             .GetPubSub(PubSubType.Origin)
             .PublishAsync(mappingUser, "CreateAccountEvent");
         if (!check)
         {
-            logger.Error("UserCreateEventHandler: {@User} enqueue failed", notification.Account.Id);
+            logger.Error("UserCreateEventHandler: {@User} enqueue failed", notification.AccountId);
         }
 
         await Task.CompletedTask;

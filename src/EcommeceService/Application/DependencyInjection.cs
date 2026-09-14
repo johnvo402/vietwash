@@ -29,7 +29,6 @@ public static class DependencyInjection
             .AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>))
             .AddScoped(typeof(IPipelineBehavior<,>), typeof(PerformaceBehavior<,>))
             .AddScoped(typeof(IPipelineBehavior<,>), typeof(ProcessImagePathBehavior<,>))
-            .AddScoped<AcknowledgeMarkerEventsHandler>()
             .AddScoped<CreateFundEventHandler>()
             .AddScoped<InventoryDocumentCompletedHandler>()
             .AddScoped<InventoryDocumentCanceledHandler>()

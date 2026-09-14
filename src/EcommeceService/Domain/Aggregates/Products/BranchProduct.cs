@@ -1,7 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using Domain.Aggregates.Enums;
 using Domain.Aggregates.Inventories;
-using Domain.Aggregates.Products.Events;
 using Domain.Aggregates.Services;
 using Shared.Kernel.Common;
 
@@ -42,9 +41,6 @@ namespace Domain.Aggregates.Products
             CapitalPrice = Guard.Against.Negative(capitalPrice, nameof(capitalPrice));
             CategoryId = Guard.Against.Negative(categoryId, nameof(categoryId));
         }
-
-        public void BranchProductCreateEvent() =>
-            RaiseDomainEvent(new BranchProductCreateEvent() { BranchProduct = this });
 
         public void Update(
             long? branchId = null,

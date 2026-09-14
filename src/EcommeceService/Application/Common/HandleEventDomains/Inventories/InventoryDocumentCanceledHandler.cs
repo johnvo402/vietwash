@@ -25,27 +25,17 @@ public sealed class InventoryDocumentCanceledHandler
         CancellationToken cancellationToken
     )
     {
-        var document = notification.InventoryDocument;
-        logger.Information("InventoryDocumentCanceledHandler: {@Id}", document.Code);
-        List<string> codes = new List<string>();
-        foreach (var supplying in document.EquipmentSupplyings)
-        {
-            for (int i = 0; i < supplying.Quantity; i++)
-            {
-                var code = supplying.Code;
-                if (i > 0)
-                    code = supplying.Code + i;
+        logger.Information(
+            "InventoryDocumentCanceledHandler: {@Id}",
+            notification.DocumentCode
+        );
 
-                codes.Add(code);
-            }
-        }
-
-        if (codes.Any())
+        if (notification.EquipmentCodes.Count != 0)
         {
             var equipments = await _unitOfWork
                 .DynamicRepository<Equipment>()
                 .ListAsync(
-                    new ListEquipmentByCodeSpecification(codes),
+                    new ListEquipmentByCodeSpecification(notification.EquipmentCodes.ToList()),
                     new QueryParamRequest(),
                     cancellationToken
                 );
@@ -58,7 +48,10 @@ public sealed class InventoryDocumentCanceledHandler
             }
             catch (Exception)
             {
-                logger.Error("InventoryDocumentCanceledHandler: {@Id}", document.Code);
+                logger.Error(
+                    "InventoryDocumentCanceledHandler: {@Id}",
+                    notification.DocumentCode
+                );
                 await _unitOfWork.RollbackAsync(cancellationToken);
             }
         }
